@@ -96,10 +96,10 @@ static int cmd_x(char* args) {
     printf("wrong usage of x\n");
     return 0;
   }
-  // TODO: change expr to real
   vaddr_t p;
-  ret = sscanf(expr, "%d", &p);
+  ret = sscanf(expr, "%x", &p);
 
+  Log("got N == %d AND p == %x", N, p);
   for (int i = 0; i < N; i++) {
     printf("%02X ", vaddr_read(p + i * 4, 4));
   }
