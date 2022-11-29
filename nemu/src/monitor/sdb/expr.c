@@ -60,7 +60,7 @@ static struct rule {
      */
 
     {" +", TK_NOTYPE}, {"\\+", '+'},     {"-", '-'},
-    {"\\*", TK_MUL},     {"/", TK_DIV},    {"==", TK_EQ},
+    {"\\*", TK_MUL},   {"/", TK_DIV},    {"==", TK_EQ},
     {"\\(", TK_KUOL},  {"\\)", TK_KUOR}, {"[0-9]*", TK_OCTNUMBER}};
 
 #define NR_REGEX ARRLEN(rules)
@@ -155,7 +155,7 @@ static bool make_token(char* e) {
     }
   }
 
-  Log("Totlaly found %d tokens", i);
+  Log("Totally found %d tokens", i);
 
   return true;
 }
@@ -174,7 +174,7 @@ bool check_parentheses(int start, int end) {
   return true;
 }
 
-int eval(int start, int end, bool* success) {
+uint32_t eval(int start, int end, bool* success) {
   if (start >= end) {
     *success = false;
     return -1;
@@ -182,7 +182,7 @@ int eval(int start, int end, bool* success) {
   if (start == end - 1) {
     // must be a number
     int retvalue = 0;
-    sscanf(tokens[start].str, "%d", &retvalue);
+    sscanf(tokens[start].str, "%u", &retvalue);
     *success = true;
     return retvalue;
   }
@@ -224,7 +224,7 @@ int eval(int start, int end, bool* success) {
            tokens[i].type);
   }
   // found the index, evaling left part and right part
-  int leftval, rightval;
+  uint32_t leftval, rightval;
   bool singleOp = tokens[spindex].type == TK_POSITIVE ||
                   tokens[spindex].type == TK_NEGATIVE;
   // no left val
@@ -260,4 +260,32 @@ word_t expr(char* e, bool* success) {
   }
 
   return eval(0, nr_token, success);
+}
+
+void test_expr() {
+  char* tests;
+  FILE* fp = fopen("$$NEMU_HOME/tools/gen-expr/input", "r");
+  Assert(fp != NULL, "Error when opening input for expr test!");
+  int ret;
+  uint32_t expect;
+  int count = 0;
+  size_t size;
+  while ((ret = getline(&tests, &size, fp)) != EOF) {
+    count++;
+    char* pattern = strtok(tests, " ");
+    sscanf(pattern, "%u", &expect);
+    char* exprs = tests + strlen(pattern) + 1;
+    bool success;
+    uint32_t actual = expr(exprs, &success);
+    Assert(success,
+           "error when testing expr with %d-th testcase %s: expected %u, "
+           "actually failure\n",
+           count, exprs, expect);
+    Assert(actual == expect,
+           "error when testing expr with %d-th testcase %s: expected %u, "
+           "actually %u",
+           count, exprs, expect, actual);
+  }
+  Log("Test expr Done\n");
+  free(tests);
 }
