@@ -264,7 +264,7 @@ word_t expr(char* e, bool* success) {
 
 void test_expr() {
   char* tests;
-  FILE* fp = fopen("$$NEMU_HOME/tools/gen-expr/input", "r");
+  FILE* fp = fopen("$NEMU_HOME/tools/gen-expr/input", "r");
   Assert(fp != NULL, "Error when opening input for expr test!");
   int ret;
   uint32_t expect;
