@@ -263,18 +263,16 @@ word_t expr(char* e, bool* success) {
 }
 
 void test_expr() {
-  char* tests;
+  char tests[70000];
   char input_path[100];
   input_path[0] = '\0';
   strcat(input_path, getenv("NEMU_HOME"));
   strcat(input_path, "/tools/gen-expr/input");
   FILE* fp = fopen(input_path, "r");
   Assert(fp != NULL, "Error when opening input for expr test!");
-  int ret;
   uint32_t expect;
   int count = 0;
-  size_t size;
-  while ((ret = getline(&tests, &size, fp)) != EOF) {
+  while (fgets(tests, 70000, fp) != NULL) {
     count++;
     char* pattern = strtok(tests, " ");
     sscanf(pattern, "%u", &expect);
@@ -291,5 +289,4 @@ void test_expr() {
            count, exprs, expect, actual);
   }
   Log("Test expr Done\n");
-  free(tests);
 }
