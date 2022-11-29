@@ -49,6 +49,7 @@ static int cmd_c(char *args) {
 
 
 static int cmd_q(char *args) {
+  nemu_state.halt_ret = NEMU_END;
   return -1;
 }
 
