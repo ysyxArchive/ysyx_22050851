@@ -86,7 +86,7 @@ void init_regex() {
 
 typedef struct token {
   int type;
-  char str[32];
+  char str[10000];
 } Token;
 
 #define MAX_TOKENS 32
