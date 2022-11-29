@@ -101,7 +101,8 @@ static int cmd_x(char* args) {
 
   Log("got N == %d AND p == %x", N, p);
   for (int i = 0; i < N; i++) {
-    printf("%02X ", vaddr_read(p + i, 1));
+    printf("%02X %s%s", vaddr_read(p + i, 1), i % 4 == 3 ? " " : "",
+           i % 8 == 7 ? "\n" : "");
   }
   printf("\n");
   return 0;
