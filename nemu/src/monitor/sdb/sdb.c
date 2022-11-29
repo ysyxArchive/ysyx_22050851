@@ -104,7 +104,9 @@ static int cmd_x(char* args) {
     printf("%02X %s%s", vaddr_read(p + i, 1), i % 4 == 3 ? " " : "",
            i % 8 == 7 ? "\n" : "");
   }
-  printf("\n");
+  if (N % 8 != 0) {
+    printf("\n");
+  }
   return 0;
 }
 
