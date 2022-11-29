@@ -18,7 +18,7 @@
 #include <isa.h>
 #include <readline/history.h>
 #include <readline/readline.h>
-#include "memory/vaddr.h"
+#include "memory/paddr.h"
 static int is_batch_mode = false;
 
 void init_regex();
@@ -101,7 +101,7 @@ static int cmd_x(char* args) {
 
   Log("got N == %d AND p == %x", N, p);
   for (int i = 0; i < N; i++) {
-    printf("%02X %s%s", vaddr_read(p + i, 1), i % 4 == 3 ? " " : "",
+    printf("%02X %s%s", paddr_read(p + i, 1), i % 4 == 3 ? " " : "",
            i % 8 == 7 ? "\n" : "");
   }
   if (N % 8 != 0) {
