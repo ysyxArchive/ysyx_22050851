@@ -58,6 +58,7 @@ static int cmd_si(char* args) {
   char* arg = strtok(NULL, " ");
   uint32_t step = 1;
   if (arg != NULL) {
+    // BUG: 负数
     sscanf(arg, "%u", &step);
   }
   cpu_exec(step);
