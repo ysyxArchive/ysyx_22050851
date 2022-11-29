@@ -97,7 +97,7 @@ static int cmd_x(char* args) {
     return 0;
   }
   // TODO: change expr to real
-  paddr_t p;
+  vaddr_t p;
   ret = sscanf(expr, "%d", &p);
 
   for (int i = 0; i < N; i++) {
