@@ -86,10 +86,10 @@ void init_regex() {
 
 typedef struct token {
   int type;
-  char str[10000];
+  char str[32];
 } Token;
 
-#define MAX_TOKENS 32
+#define MAX_TOKENS 100
 static Token tokens[MAX_TOKENS] __attribute__((used)) = {};
 static int nr_token __attribute__((used)) = 0;
 
