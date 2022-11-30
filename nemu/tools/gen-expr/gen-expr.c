@@ -64,8 +64,8 @@ static void gen_rand_expr(int padding) {
   }
   switch (choose(5)) {
     case 0:
-      gen_num(padding + 1);
-      // gen('U');
+      gen_num(padding + 2);
+      gen('U');
       break;
     case 1:
       gen('(');
@@ -117,6 +117,14 @@ int main(int argc, char* argv[]) {
     assert(fscanf(fp, "%d", &result) != EOF);
     pclose(fp);
 
+    int len = strlen(buf);
+    int p = 0;
+    for (int i = 0; i < len; i++) {
+      buf[p++] = buf[i];
+      if (buf[i] == 'U')
+        p--;
+    }
+    buf[p] = 0;
     printf("%u %s\n", result, buf);
     i++;
   }
