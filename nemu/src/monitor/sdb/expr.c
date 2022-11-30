@@ -145,7 +145,7 @@ static bool make_token(char* e) {
         }
         nr_token++;
         printf("%d\n", nr_token);
-        Assert(nr_token >= MAX_TOKENS, "Too much token in expr");
+        Assert(nr_token < MAX_TOKENS, "Too much token in expr");
         break;
       }
     }
