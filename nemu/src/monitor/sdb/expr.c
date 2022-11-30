@@ -176,6 +176,7 @@ bool check_parentheses(int start, int end) {
 }
 
 uint32_t eval(int start, int end, bool* success) {
+  Log("evaling from %d to %d", start, end);
   if (start >= end) {
     *success = false;
     return -1;
