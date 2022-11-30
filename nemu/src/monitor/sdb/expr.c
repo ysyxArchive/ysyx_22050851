@@ -215,8 +215,8 @@ uint32_t eval(int start, int end, bool* success) {
           if (p >= sppriority) {
             sppriority = p;
             spindex = i;
-            found = true;
           }
+          found = true;
         }
       }
     }
