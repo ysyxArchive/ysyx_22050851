@@ -112,7 +112,7 @@ static bool make_token(char* e) {
             rules[i].regex, position, substr_len, substr_len, substr_start);
 
         tokens[nr_token].type = rules[i].token_type;
-        strcpy(tokens[nr_token].str, e + position);
+        strncpy(tokens[nr_token].str, substr_start, substr_len);
 
         position += substr_len;
 
