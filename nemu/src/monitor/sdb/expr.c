@@ -155,7 +155,7 @@ static bool make_token(char* e) {
     }
   }
 
-  Log("Totally found %d tokens", i);
+  Log("Totally found %d tokens", nr_token);
 
   return true;
 }
