@@ -144,7 +144,6 @@ static bool make_token(char* e) {
             break;
         }
         nr_token++;
-        printf("%d\n", nr_token);
         Assert(nr_token < MAX_TOKENS, "Too much token in expr");
         break;
       }
@@ -276,6 +275,7 @@ void test_expr() {
   while (fgets(tests, 70000, fp) != NULL) {
     count++;
     // remove "\n"
+    Log("Testing %d-th testcase\n", count);
     tests[strlen(tests) - 1] = 0;
     char* pattern = strtok(tests, " ");
     sscanf(pattern, "%u", &expect);
