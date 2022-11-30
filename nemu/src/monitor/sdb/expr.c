@@ -61,7 +61,7 @@ static struct rule {
 
     {" +", TK_NOTYPE}, {"\\+", '+'},     {"-", '-'},
     {"\\*", TK_MUL},   {"/", TK_DIV},    {"==", TK_EQ},
-    {"\\(", TK_KUOL},  {"\\)", TK_KUOR}, {"[0-9]*", TK_OCTNUMBER}};
+    {"\\(", TK_KUOL},  {"\\)", TK_KUOR}, {"[0-9]+", TK_OCTNUMBER}};
 
 #define NR_REGEX ARRLEN(rules)
 
