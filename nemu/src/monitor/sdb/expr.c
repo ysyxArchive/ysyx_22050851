@@ -124,7 +124,7 @@ static bool make_token(char* e) {
         switch (rules[i].token_type) {
           case TK_NOTYPE:
             // skip empty
-            i--;
+            nr_token--;
             break;
           case '+':
           case '-':
