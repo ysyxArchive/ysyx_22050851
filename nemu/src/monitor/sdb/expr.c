@@ -130,12 +130,12 @@ static bool make_token(char* e) {
           case '+':
           case '-':
             // change plus and minus to positive and negative
-            if (nr_token == 0 || tokens[nr_token].type == '+' ||
-                tokens[nr_token].type == '-' ||
-                tokens[nr_token].type == TK_MUL ||
-                tokens[nr_token].type == TK_DIV ||
-                tokens[nr_token].type == TK_KUOL ||
-                tokens[nr_token].type == TK_EQ) {
+            if (nr_token == 0 || tokens[nr_token - 1].type == TK_MINUS ||
+                tokens[nr_token - 1].type == TK_ADD ||
+                tokens[nr_token - 1].type == TK_MUL ||
+                tokens[nr_token - 1].type == TK_DIV ||
+                tokens[nr_token - 1].type == TK_KUOL ||
+                tokens[nr_token - 1].type == TK_EQ) {
               tokens[nr_token].type =
                   rules[i].token_type == '+' ? TK_POSITIVE : TK_NEGATIVE;
             } else {
