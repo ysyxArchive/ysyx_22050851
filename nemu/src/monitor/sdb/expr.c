@@ -191,7 +191,8 @@ uint32_t eval(int start, int end, bool* success) {
     *success = false;
     return -1;
   }
-  if (tokens[start].type == TK_KUOL && tokens[end - 1].type == TK_KUOR) {
+  if (tokens[start].type == TK_KUOL && tokens[end - 1].type == TK_KUOR &&
+      check_parentheses(start + 1, end - 1)) {
     return eval(start + 1, end - 1, success);
   }
   int spindex = -1;
