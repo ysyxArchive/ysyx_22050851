@@ -225,6 +225,7 @@ uint32_t eval(int start, int end, bool* success) {
     Assert(found, "token code %d not found priority when evaling\n",
            tokens[i].type);
   }
+  Log("split %s at token index %d", tokens[spindex].str, spindex);
   // found the index, evaling left part and right part
   uint32_t leftval, rightval;
   bool singleOp = tokens[spindex].type == TK_POSITIVE ||
