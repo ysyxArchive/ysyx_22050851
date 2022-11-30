@@ -275,6 +275,8 @@ void test_expr() {
   int count = 0;
   while (fgets(tests, 70000, fp) != NULL) {
     count++;
+    // remove "\n"
+    tests[strlen(tests) - 1] = 0;
     char* pattern = strtok(tests, " ");
     sscanf(pattern, "%u", &expect);
     char* exprs = tests + strlen(pattern) + 1;
