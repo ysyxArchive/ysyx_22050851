@@ -229,7 +229,7 @@ uint32_t eval(int start, int end, bool* success) {
                   tokens[spindex].type == TK_NEGATIVE;
   // no left val
   leftval = singleOp ? -1 : eval(start, spindex, success);
-  rightval = eval(spindex, end, success);
+  rightval = eval(spindex + 1, end, success);
   if (!*success)
     return -1;
   *success = true;
