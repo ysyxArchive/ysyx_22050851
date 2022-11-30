@@ -275,7 +275,7 @@ void test_expr() {
   while (fgets(tests, 70000, fp) != NULL) {
     count++;
     // remove "\n"
-    Log("Testing %d-th testcase\n", count);
+    Log("Testing %d-th testcase", count);
     tests[strlen(tests) - 1] = 0;
     char* pattern = strtok(tests, " ");
     sscanf(pattern, "%u", &expect);
@@ -284,7 +284,7 @@ void test_expr() {
     uint32_t actual = expr(exprs, &success);
     Assert(success,
            "error when testing expr with %d-th testcase %s: expected %u, "
-           "actually failure\n",
+           "actually failure",
            count, exprs, expect);
     Assert(actual == expect,
            "error when testing expr with %d-th testcase %s: expected %u, "
