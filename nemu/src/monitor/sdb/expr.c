@@ -236,19 +236,14 @@ uint32_t eval(int start, int end, bool* success) {
     case TK_NEGATIVE:
       return -rightval;
     case TK_MUL:
-      printf("%u * %u = %u\n", leftval, rightval, leftval * rightval);
       return leftval * rightval;
     case TK_DIV:
-      printf("%u / %u = %u\n", leftval, rightval, leftval / rightval);
       return leftval / rightval;
     case TK_ADD:
-      printf("%u + %u = %u\n", leftval, rightval, leftval + rightval);
       return leftval + rightval;
     case TK_MINUS:
-      printf("%u - %u = %u\n", leftval, rightval, leftval - rightval);
       return leftval - rightval;
     case TK_EQ:
-      printf("%u == %u = %u\n", leftval, rightval, leftval == rightval);
       return leftval == rightval;
     default:
       panic("op code %d not implemented\n", tokens[spindex].type);
