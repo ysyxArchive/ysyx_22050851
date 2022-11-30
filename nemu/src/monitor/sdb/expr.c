@@ -219,6 +219,8 @@ uint32_t eval(int start, int end, bool* success) {
             spindex = i;
           }
           found = true;
+          Log("found the token %s, code %d, prior number is %d", tokens[i].str,
+              tokens[i].type, p);
         }
       }
     }
