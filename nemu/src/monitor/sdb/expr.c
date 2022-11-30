@@ -108,9 +108,7 @@ static bool make_token(char* e) {
         char* substr_start = e + position;
         int substr_len = pmatch.rm_eo;
 
-        Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s", i,
-            rules[i].regex, position, substr_len, substr_len, substr_start);
-
+   
         tokens[nr_token].type = rules[i].token_type;
         strncpy(tokens[nr_token].str, substr_start, substr_len);
         tokens[nr_token].str[substr_len] = '\0';
@@ -155,9 +153,6 @@ static bool make_token(char* e) {
       return false;
     }
   }
-
-  Log("Totally found %d tokens", nr_token);
-
   return true;
 }
 
@@ -176,7 +171,6 @@ bool check_parentheses(int start, int end) {
 }
 
 uint32_t eval(int start, int end, bool* success) {
-  Log("evaling from %d to %d", start, end);
   if (start >= end) {
     *success = false;
     return -1;
@@ -220,15 +214,12 @@ uint32_t eval(int start, int end, bool* success) {
             spindex = i;
           }
           found = true;
-          Log("found the token %s, code %d, prior number is %d", tokens[i].str,
-              tokens[i].type, p);
         }
       }
     }
     Assert(found, "token code %d not found priority when evaling\n",
            tokens[i].type);
   }
-  Log("split %s at token index %d", tokens[spindex].str, spindex);
   // found the index, evaling left part and right part
   uint32_t leftval, rightval;
   bool singleOp = tokens[spindex].type == TK_POSITIVE ||
@@ -285,8 +276,6 @@ void test_expr() {
   int count = 0;
   while (fgets(tests, 70000, fp) != NULL) {
     count++;
-    // remove "\n"
-    Log("Testing %d-th testcase", count);
     tests[strlen(tests) - 1] = 0;
     char* pattern = strtok(tests, " ");
     sscanf(pattern, "%u", &expect);
