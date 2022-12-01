@@ -144,15 +144,15 @@ static bool make_token(char* e) {
             nr_token--;
             break;
           case '+':
-            tokens[nr_token].type == should_be_single() ? TK_POSITIVE : TK_ADD;
+            tokens[nr_token].type = should_be_single() ? TK_POSITIVE : TK_ADD;
             Log("%d", should_be_single());
             break;
           case '-':
-            tokens[nr_token].type == should_be_single() ? TK_NEGATIVE
+            tokens[nr_token].type = should_be_single() ? TK_NEGATIVE
                                                         : TK_MINUS;
             break;
           case '*':
-            tokens[nr_token].type == should_be_single() ? TK_DEREF : TK_MUL;
+            tokens[nr_token].type = should_be_single() ? TK_DEREF : TK_MUL;
             break;
         }
         Log("%d", tokens[nr_token].type);
