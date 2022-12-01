@@ -65,6 +65,21 @@ static int cmd_si(char* args) {
   return 0;
 }
 
+static int cmd_d(char* args) {
+  char* arg = strtok(NULL, " ");
+  int id;
+  if (arg == NULL) {
+    printf("wrong usage of d\n");
+    return 0;
+  };
+  sscanf(arg, "%u", &id);
+  bool res = free_wp(id);
+  if (!res) {
+    printf("error when deleting watchpoint %d\n", id);
+  }
+  return 0;
+}
+
 static int cmd_info(char* args) {
   char* arg = strtok(NULL, " ");
   if (arg == NULL) {
@@ -73,6 +88,8 @@ static int cmd_info(char* args) {
   }
   if (strcmp(arg, "r") == 0) {
     isa_reg_display();
+  } else if (strcmp(arg, "w") == 0) {
+    list_wp();
   } else {
     printf("error usage of info\n");
   }
@@ -85,21 +102,25 @@ static int cmd_x(char* args) {
     return 0;
   }
   int N;
-  char* expr;
+  char* exp;
   int ret = sscanf(strtok(args, " "), "%d", &N);
   if (ret == 0) {
     printf("wrong usage of x\n");
     return 0;
   }
-  expr = strtok(NULL, " ");
-  if (expr == NULL) {
+  exp = strtok(NULL, " ");
+  if (exp == NULL) {
     printf("wrong usage of x\n");
     return 0;
   }
   vaddr_t p;
-  ret = sscanf(expr, "%x", &p);
+  bool success;
+  p = expr(exp, &success);
+  if (!success) {
+    printf("expr error\n");
+    return 0;
+  }
 
-  Log("got N == %d AND p == %x", N, p);
   for (int i = 0; i < N; i++) {
     printf("%02X %s%s", paddr_read(p + i, 1), i % 4 == 3 ? " " : "",
            i % 8 == 7 ? "\n" : "");
@@ -107,6 +128,42 @@ static int cmd_x(char* args) {
   if (N % 8 != 0) {
     printf("\n");
   }
+  return 0;
+}
+
+static int cmd_p(char* args) {
+  if (args == NULL) {
+    printf("wrong usage of p\n");
+    return 0;
+  }
+  char* exp = args;
+  bool s;
+  uint32_t res = expr(exp, &s);
+
+  if (!s) {
+    printf("error when evaling expression\n");
+    return 0;
+  }
+
+  printf("%u", res);
+  return 0;
+}
+
+static int cmd_w(char* args) {
+  if (args == NULL) {
+    printf("wrong usage of w\n");
+    return 0;
+  }
+  char* exp = args;
+
+  int id = new_wp(exp);
+
+  if (id == -1) {
+    printf("error when creating watchpoint\n");
+    return 0;
+  }
+
+  printf("watchpoint created: %d %s\n", id, exp);
   return 0;
 }
 
@@ -121,11 +178,11 @@ static struct {
     {"c", "Continue the execution of the program", cmd_c},
     {"q", "Exit NEMU", cmd_q},
     {"si", "step N lines, default is 1", cmd_si},
-    {"info", "print register status", cmd_info},
+    {"info", "print register status or watchpoints", cmd_info},
     {"x", "scan N*4 Bytes starts from EXPR ", cmd_x},
-
-    /* TODO: Add more commands */
-
+    {"p", "print", cmd_p},
+    {"w", "set watchpoint", cmd_w},
+    {"d", "delete watchpoint", cmd_d},
 };
 
 #define NR_CMD ARRLEN(cmd_table)
