@@ -155,6 +155,7 @@ static bool make_token(char* e) {
             tokens[nr_token].type == should_be_single() ? TK_DEREF : TK_MUL;
             break;
         }
+        Log("%d", tokens[nr_token].type);
         nr_token++;
         Assert(nr_token < MAX_TOKENS, "Too much token in expr");
         break;
