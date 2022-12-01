@@ -143,7 +143,7 @@ static int cmd_p(char* args) {
     return 0;
   }
 
-  printf("%u", res);
+  printf("%u\n", res);
   return 0;
 }
 
