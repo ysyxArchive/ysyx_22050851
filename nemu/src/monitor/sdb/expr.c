@@ -138,7 +138,7 @@ static bool make_token(char* e) {
 
         position += substr_len;
 
-        switch (rules[i].token_type) {
+        switch (tokens[nr_token].type) {
           case TK_NOTYPE:
             // skip empty
             nr_token--;
