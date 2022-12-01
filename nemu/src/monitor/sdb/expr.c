@@ -145,6 +145,7 @@ static bool make_token(char* e) {
             break;
           case '+':
             tokens[nr_token].type == should_be_single() ? TK_POSITIVE : TK_ADD;
+            Log("%d", should_be_single());
             break;
           case '-':
             tokens[nr_token].type == should_be_single() ? TK_NEGATIVE
