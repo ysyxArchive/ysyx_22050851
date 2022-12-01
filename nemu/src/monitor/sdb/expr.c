@@ -19,6 +19,7 @@
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
+#include "memory/paddr.h"
 
 enum {
   TK_NOTYPE = 256,
@@ -113,14 +114,13 @@ static bool should_be_single() {
          tokens[nr_token - 1].type == TK_EQ ||
          tokens[nr_token - 1].type == TK_NEQ ||
          tokens[nr_token - 1].type == TK_AND ||
-         tokens[nr_token - 1].type == TK_DEREF
+         tokens[nr_token - 1].type == TK_DEREF;
 }
 
 static bool make_token(char* e) {
   int position = 0;
   int i;
   regmatch_t pmatch;
-
   nr_token = 0;
 
   while (e[position] != '\0') {
@@ -137,20 +137,20 @@ static bool make_token(char* e) {
 
         position += substr_len;
 
-        switch (rules[i].token_type) {
+        switch (tokens[nr_token].type) {
           case TK_NOTYPE:
             // skip empty
             nr_token--;
             break;
           case '+':
-            tokens[nr_token].type == should_be_single() ? TK_POSITIVE : TK_ADD;
+            tokens[nr_token].type = should_be_single() ? TK_POSITIVE : TK_ADD;
             break;
           case '-':
-            tokens[nr_token].type == should_be_single() ? TK_NEGATIVE
+            tokens[nr_token].type = should_be_single() ? TK_NEGATIVE
                                                         : TK_MINUS;
             break;
           case '*':
-            tokens[nr_token].type == should_be_single() ? TK_DEREF : TK_MUL;
+            tokens[nr_token].type = should_be_single() ? TK_DEREF : TK_MUL;
             break;
         }
         nr_token++;
@@ -208,7 +208,8 @@ uint32_t eval(int start, int end, bool* success) {
       default:
         printf(
             "eval error at token index %d, should be a number or a register "
-            "but actually not.\n");
+            "but actually not.\n",
+            start);
         *success = false;
         return -1;
     }
