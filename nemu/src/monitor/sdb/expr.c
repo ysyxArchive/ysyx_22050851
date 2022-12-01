@@ -19,12 +19,15 @@
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
+#include "memory/paddr.h"
 
 enum {
   TK_NOTYPE = 256,
   TK_KUOL,
   TK_KUOR,
+  TK_HEXNUMBER,
   TK_OCTNUMBER,
+  TK_REG,
   TK_POSITIVE,
   TK_NEGATIVE,
   TK_MUL,
@@ -32,6 +35,9 @@ enum {
   TK_ADD,
   TK_MINUS,
   TK_EQ,
+  TK_NEQ,
+  TK_AND,
+  TK_DEREF
 };
 
 // order reference: https://en.cppreference.com/w/c/language/operator_precedence
@@ -41,12 +47,12 @@ static struct {
 } priors[] = {
     {.length = 3, .TKS = {TK_NOTYPE, TK_KUOL, TK_KUOR}},
     // 以上不参与运算
-    {.length = 1, .TKS = {TK_OCTNUMBER}},
+    {.length = 3, .TKS = {TK_OCTNUMBER, TK_HEXNUMBER, TK_REG}},
     // 以上不参与分割
-    {.length = 2, .TKS = {TK_POSITIVE, TK_NEGATIVE}},
+    {.length = 3, .TKS = {TK_POSITIVE, TK_NEGATIVE, TK_DEREF}},
     {.length = 2, .TKS = {TK_MUL, TK_DIV}},
     {.length = 2, .TKS = {TK_ADD, TK_MINUS}},
-    {.length = 1, .TKS = {TK_EQ}},
+    {.length = 3, .TKS = {TK_EQ, TK_NEQ, TK_AND}},
 };
 const uint32_t priorlen = ARRLEN(priors);
 
@@ -54,14 +60,20 @@ static struct rule {
   const char* regex;
   int token_type;
 } rules[] = {
-
-    /* TODO: Add more rules.
-     * Pay attention to the precedence level of different rules.
-     */
-
-    {" +", TK_NOTYPE}, {"\\+", '+'},     {"-", '-'},
-    {"\\*", TK_MUL},   {"/", TK_DIV},    {"==", TK_EQ},
-    {"\\(", TK_KUOL},  {"\\)", TK_KUOR}, {"[0-9]+", TK_OCTNUMBER}};
+    {" +", TK_NOTYPE},
+    {"\\+", '+'},
+    {"-", '-'},
+    {"\\*", '*'},
+    {"/", TK_DIV},
+    {"==", TK_EQ},
+    {"!=", TK_NEQ},
+    {"&&", TK_AND},
+    {"\\(", TK_KUOL},
+    {"\\)", TK_KUOR},
+    {"\\$[a-z\\$0-9]{2,3}", TK_REG},
+    {"0x[0-9a-fA-F]+", TK_HEXNUMBER},
+    {"[0-9]+", TK_OCTNUMBER},
+};
 
 #define NR_REGEX ARRLEN(rules)
 
@@ -93,6 +105,18 @@ typedef struct token {
 static Token tokens[MAX_TOKENS] __attribute__((used)) = {};
 static int nr_token __attribute__((used)) = 0;
 
+static bool should_be_single() {
+  return nr_token == 0 || tokens[nr_token - 1].type == TK_MINUS ||
+         tokens[nr_token - 1].type == TK_ADD ||
+         tokens[nr_token - 1].type == TK_MUL ||
+         tokens[nr_token - 1].type == TK_DIV ||
+         tokens[nr_token - 1].type == TK_KUOL ||
+         tokens[nr_token - 1].type == TK_EQ ||
+         tokens[nr_token - 1].type == TK_NEQ ||
+         tokens[nr_token - 1].type == TK_AND ||
+         tokens[nr_token - 1].type == TK_DEREF;
+}
+
 static bool make_token(char* e) {
   int position = 0;
   int i;
@@ -108,17 +132,11 @@ static bool make_token(char* e) {
         char* substr_start = e + position;
         int substr_len = pmatch.rm_eo;
 
-   
         tokens[nr_token].type = rules[i].token_type;
         strncpy(tokens[nr_token].str, substr_start, substr_len);
         tokens[nr_token].str[substr_len] = '\0';
 
         position += substr_len;
-
-        /* TODO: Now a new token is recognized with rules[i]. Add codes
-         * to record the token in the array `tokens'. For certain types
-         * of tokens, some extra actions should be performed.
-         */
 
         switch (rules[i].token_type) {
           case TK_NOTYPE:
@@ -126,20 +144,14 @@ static bool make_token(char* e) {
             nr_token--;
             break;
           case '+':
+            tokens[nr_token].type == should_be_single() ? TK_POSITIVE : TK_ADD;
+            break;
           case '-':
-            // change plus and minus to positive and negative
-            if (nr_token == 0 || tokens[nr_token - 1].type == TK_MINUS ||
-                tokens[nr_token - 1].type == TK_ADD ||
-                tokens[nr_token - 1].type == TK_MUL ||
-                tokens[nr_token - 1].type == TK_DIV ||
-                tokens[nr_token - 1].type == TK_KUOL ||
-                tokens[nr_token - 1].type == TK_EQ) {
-              tokens[nr_token].type =
-                  rules[i].token_type == '+' ? TK_POSITIVE : TK_NEGATIVE;
-            } else {
-              tokens[nr_token].type =
-                  rules[i].token_type == '+' ? TK_ADD : TK_MINUS;
-            }
+            tokens[nr_token].type == should_be_single() ? TK_NEGATIVE
+                                                        : TK_MINUS;
+            break;
+          case '*':
+            tokens[nr_token].type == should_be_single() ? TK_DEREF : TK_MUL;
             break;
         }
         nr_token++;
@@ -178,7 +190,30 @@ uint32_t eval(int start, int end, bool* success) {
   if (start == end - 1) {
     // must be a number
     int retvalue = 0;
-    sscanf(tokens[start].str, "%u", &retvalue);
+    switch (tokens[start].type) {
+      case TK_OCTNUMBER:
+        sscanf(tokens[start].str, "%u", &retvalue);
+        break;
+      case TK_HEXNUMBER:
+        sscanf(tokens[start].str, "%x", &retvalue);
+        break;
+      case TK_REG:
+        bool s;
+        retvalue = isa_reg_str2val(tokens[start].str + 1, &s);
+        if (!s) {
+          printf("register %s is unknown\n", tokens[start].str + 1);
+          retvalue = -1;
+          *success = false;
+          return -1;
+        }
+      default:
+        printf(
+            "eval error at token index %d, should be a number or a register "
+            "but actually not.\n",
+            start);
+        *success = false;
+        return -1;
+    }
     *success = true;
     return retvalue;
   }
@@ -223,7 +258,8 @@ uint32_t eval(int start, int end, bool* success) {
   // found the index, evaling left part and right part
   uint32_t leftval, rightval;
   bool singleOp = tokens[spindex].type == TK_POSITIVE ||
-                  tokens[spindex].type == TK_NEGATIVE;
+                  tokens[spindex].type == TK_NEGATIVE ||
+                  tokens[spindex].type == TK_DEREF;
   // no left val
   leftval = singleOp ? -1 : eval(start, spindex, success);
   rightval = eval(spindex + 1, end, success);
@@ -235,6 +271,8 @@ uint32_t eval(int start, int end, bool* success) {
       return rightval;
     case TK_NEGATIVE:
       return -rightval;
+    case TK_DEREF:
+      return paddr_read(rightval, 1);
     case TK_MUL:
       return leftval * rightval;
     case TK_DIV:
@@ -245,6 +283,10 @@ uint32_t eval(int start, int end, bool* success) {
       return leftval - rightval;
     case TK_EQ:
       return leftval == rightval;
+    case TK_NEQ:
+      return leftval != rightval;
+    case TK_AND:
+      return leftval && rightval;
     default:
       panic("op code %d not implemented\n", tokens[spindex].type);
   }
