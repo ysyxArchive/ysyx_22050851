@@ -81,6 +81,7 @@ bool free_wp(int NO) {
       free_ = q;
       return true;
     }
+    p = p->next;
   }
   printf("Watchpoint %d not found!", NO);
   return false;
@@ -90,6 +91,7 @@ void list_wp() {
   WP* p = head;
   while (p != NULL) {
     printf("%d %s\n", p->NO, p->expr);
+    p = p->next;
   }
 }
 
@@ -99,6 +101,7 @@ char* get_wp_expr(int NO) {
     if (p->NO == NO) {
       return p->expr;
     }
+    p = p->next;
   }
   printf("Watchpoint %d not found!", NO);
   return NULL;
@@ -115,6 +118,7 @@ int check_watchpoint() {
     if (s && res) {
       return p->NO;
     }
+    p = p->next;
   }
   return -1;
 }
