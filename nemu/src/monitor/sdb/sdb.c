@@ -102,20 +102,18 @@ static int cmd_x(char* args) {
     return 0;
   }
   int N;
-  char* exp;
   int ret = sscanf(strtok(args, " "), "%d", &N);
   if (ret == 0) {
     printf("wrong usage of x\n");
     return 0;
   }
-  exp = strtok(NULL, " ");
+  char* exp = strtok(NULL, " ");
   if (exp == NULL) {
     printf("wrong usage of x\n");
     return 0;
   }
-  vaddr_t p;
   bool success;
-  p = expr(exp, &success);
+  paddr_t p = expr(exp, &success);
   if (!success) {
     printf("expr error\n");
     return 0;
