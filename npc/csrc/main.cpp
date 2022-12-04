@@ -21,8 +21,8 @@ int main(int argc, char** argv) {
   tfp->open("wave.vcd");
   printf("evaling\b\n");
   while (i++ <= 20) {
-    int a = rand() & 1;
-    int s = rand() & 1;
+    int a = getrand(4);
+    int s = getrand(1);
     top->a = a;
     top->s = s;
     top->eval();
