@@ -32,6 +32,7 @@ int main(int argc, char** argv) {
 
     tfp->dump(contextp->time());
     contextp->timeInc(1);
+    assert(y == (a >> (s * 2)) & 3);
   }
   tfp->close();
 
