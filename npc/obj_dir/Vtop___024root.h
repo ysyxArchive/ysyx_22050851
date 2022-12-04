@@ -13,7 +13,7 @@ class Vtop___024root final : public VerilatedModule {
   public:
 
     // DESIGN SPECIFIC STATE
-    VL_IN8(a,3,0);
+    VL_IN8(a,7,0);
     VL_IN8(s,1,0);
     VL_OUT8(y,0,0);
     CData/*0:0*/ __VactContinue;

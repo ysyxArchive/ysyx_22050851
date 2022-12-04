@@ -6,17 +6,17 @@
 
 #include "Vtop___024root.h"
 
-extern const VlUnpacked<CData/*0:0*/, 64> Vtop__ConstPool__TABLE_h0cf3a9ff_0;
+extern const VlUnpacked<CData/*0:0*/, 1024> Vtop__ConstPool__TABLE_ha66bbf9f_0;
 
 VL_INLINE_OPT void Vtop___024root___ico_sequent__TOP__0(Vtop___024root* vlSelf) {
     if (false && vlSelf) {}  // Prevent unused
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___ico_sequent__TOP__0\n"); );
     // Init
-    CData/*5:0*/ __Vtableidx1;
+    SData/*9:0*/ __Vtableidx1;
     // Body
     __Vtableidx1 = (((IData)(vlSelf->a) << 2U) | (IData)(vlSelf->s));
-    vlSelf->y = Vtop__ConstPool__TABLE_h0cf3a9ff_0[__Vtableidx1];
+    vlSelf->y = Vtop__ConstPool__TABLE_ha66bbf9f_0[__Vtableidx1];
 }
 
 void Vtop___024root___eval_ico(Vtop___024root* vlSelf) {
@@ -126,8 +126,6 @@ void Vtop___024root___eval_debug_assertions(Vtop___024root* vlSelf) {
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___eval_debug_assertions\n"); );
     // Body
-    if (VL_UNLIKELY((vlSelf->a & 0xf0U))) {
-        Verilated::overWidthError("a");}
     if (VL_UNLIKELY((vlSelf->s & 0xfcU))) {
         Verilated::overWidthError("s");}
 }
