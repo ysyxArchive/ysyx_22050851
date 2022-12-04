@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
     top->b = b;
     top->s = s;
     top->eval();
-    int f = top->y;
+    int y = top->y;
     printf("a = %d, b = %d,s = %d,y = %d\n", a, b, s, y);
 
     tfp->dump(contextp->time());
