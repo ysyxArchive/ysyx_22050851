@@ -1,4 +1,4 @@
-module top(
+module main(
   input a,
   input b,
   output c);
