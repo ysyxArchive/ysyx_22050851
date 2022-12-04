@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
   printf("evaling\b\n");
   while (i++ <= 20) {
     int a = getrand(4);
-    int s = getrand(1);
+    int s = getrand(2);
     top->a = a;
     top->s = s;
     top->eval();
