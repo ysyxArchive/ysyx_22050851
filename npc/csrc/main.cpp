@@ -10,7 +10,7 @@ int getrand(int max) {
 }
 
 int main(int argc, char** argv) {
-  srand(time(NULL));
+  srand(time(0));
   int i = 0;
   VerilatedContext* contextp = new VerilatedContext;
 
@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
   printf("evaling\b\n");
   while (i++ <= 20) {
     int a = getrand(256);
-    int s = getrand(3);
+    int s = getrand(4);
     top->a = a;
     top->s = s;
     top->eval();
