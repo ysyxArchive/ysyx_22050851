@@ -130,7 +130,7 @@ VL_ATTR_COLD void Vtop___024root___ctor_var_reset(Vtop___024root* vlSelf) {
     // Body
     vlSelf->a = VL_RAND_RESET_I(8);
     vlSelf->s = VL_RAND_RESET_I(2);
-    vlSelf->y = VL_RAND_RESET_I(1);
+    vlSelf->y = VL_RAND_RESET_I(2);
     vlSelf->__VstlIterCount = 0;
     vlSelf->__VicoIterCount = 0;
     vlSelf->__VactIterCount = 0;

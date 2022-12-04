@@ -13,11 +13,11 @@ VL_ATTR_COLD void Vtop___024root__trace_init_sub__TOP__0(Vtop___024root* vlSelf,
     // Body
     tracep->declBus(c+1,"a", false,-1, 7,0);
     tracep->declBus(c+2,"s", false,-1, 1,0);
-    tracep->declBit(c+3,"y", false,-1);
+    tracep->declBus(c+3,"y", false,-1, 1,0);
     tracep->pushNamePrefix("top ");
     tracep->declBus(c+1,"a", false,-1, 7,0);
     tracep->declBus(c+2,"s", false,-1, 1,0);
-    tracep->declBit(c+3,"y", false,-1);
+    tracep->declBus(c+3,"y", false,-1, 1,0);
     tracep->popNamePrefix(1);
 }
 
@@ -63,5 +63,5 @@ VL_ATTR_COLD void Vtop___024root__trace_full_sub_0(Vtop___024root* vlSelf, Veril
     // Body
     bufp->fullCData(oldp+1,(vlSelf->a),8);
     bufp->fullCData(oldp+2,(vlSelf->s),2);
-    bufp->fullBit(oldp+3,(vlSelf->y));
+    bufp->fullCData(oldp+3,(vlSelf->y),2);
 }
