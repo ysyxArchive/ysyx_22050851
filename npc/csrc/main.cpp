@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <verilated.h>
 #include <verilated_vcd_c.h>
-#include "Vmain.h"
+#include "Vtop.h"
 int main(int argc, char** argv) {
   int i = 0;
   VerilatedContext* contextp = new VerilatedContext;
@@ -11,23 +11,24 @@ int main(int argc, char** argv) {
   contextp->commandArgs(argc, argv);
   VerilatedVcdC* tfp = new VerilatedVcdC();
   contextp->traceEverOn(true);
-  Vmain* top = new Vmain{contextp};
+  Vtop* top = new Vtop{contextp};
   top->trace(tfp, 0);
   tfp->open("wave.vcd");
   printf("evaling\b\n");
   while (i++ <= 20) {
     int a = rand() & 1;
     int b = rand() & 1;
+    int s = rand() & 1;
     top->a = a;
     top->b = b;
+    top->s = s;
     top->eval();
-
-    printf("a = %d, b = %d, f = %d\n", a, b, top->c);
+    int f = top->y;
+    printf("a = %d, b = %d,s = %d,y = %d\n", a, b, s, y);
 
     tfp->dump(contextp->time());
     contextp->timeInc(1);
 
-    assert(top->c == (a ^ b));
   }
   tfp->close();
 
