@@ -10,6 +10,7 @@ int getrand(int max) {
 }
 
 int main(int argc, char** argv) {
+  srand(time(NULL));
   int i = 0;
   VerilatedContext* contextp = new VerilatedContext;
 
