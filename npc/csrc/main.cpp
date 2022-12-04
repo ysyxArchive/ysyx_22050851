@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
     top->s = s;
     top->eval();
     int y = top->y;
-    printf("a = %d, b = %d,s = %d,y = %d\n", a, b, s, y);
+    printf("a = %d, b = %d, s = %d, y = %d\n", a, b, s, y);
 
     tfp->dump(contextp->time());
     contextp->timeInc(1);
