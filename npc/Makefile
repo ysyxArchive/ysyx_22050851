@@ -10,7 +10,7 @@ test:
 
 sim:
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-	./obj_dir/V$1
+	./obj_dir/V$2
 
 clean:
 	rm -rf obj_dir
