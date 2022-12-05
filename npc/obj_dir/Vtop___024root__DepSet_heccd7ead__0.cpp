@@ -6,17 +6,38 @@
 
 #include "Vtop___024root.h"
 
-extern const VlUnpacked<CData/*1:0*/, 1024> Vtop__ConstPool__TABLE_hef4f59e7_0;
+extern const VlUnpacked<CData/*6:0*/, 16> Vtop__ConstPool__TABLE_h5af533c5_0;
 
 VL_INLINE_OPT void Vtop___024root___ico_sequent__TOP__0(Vtop___024root* vlSelf) {
     if (false && vlSelf) {}  // Prevent unused
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___ico_sequent__TOP__0\n"); );
     // Init
-    SData/*9:0*/ __Vtableidx1;
+    CData/*3:0*/ __Vtableidx1;
+    CData/*3:0*/ __Vtableidx2;
+    CData/*3:0*/ __Vtableidx3;
+    CData/*3:0*/ __Vtableidx4;
+    CData/*3:0*/ __Vtableidx5;
+    CData/*3:0*/ __Vtableidx6;
     // Body
-    __Vtableidx1 = (((IData)(vlSelf->a) << 2U) | (IData)(vlSelf->s));
-    vlSelf->y = Vtop__ConstPool__TABLE_hef4f59e7_0[__Vtableidx1];
+    __Vtableidx1 = (0xfU & (vlSelf->cpudbgdata >> 0x14U));
+    vlSelf->HEX5 = Vtop__ConstPool__TABLE_h5af533c5_0
+        [__Vtableidx1];
+    __Vtableidx2 = (0xfU & (vlSelf->cpudbgdata >> 0x10U));
+    vlSelf->HEX4 = Vtop__ConstPool__TABLE_h5af533c5_0
+        [__Vtableidx2];
+    __Vtableidx3 = (0xfU & (vlSelf->cpudbgdata >> 0xcU));
+    vlSelf->HEX3 = Vtop__ConstPool__TABLE_h5af533c5_0
+        [__Vtableidx3];
+    __Vtableidx4 = (0xfU & (vlSelf->cpudbgdata >> 8U));
+    vlSelf->HEX2 = Vtop__ConstPool__TABLE_h5af533c5_0
+        [__Vtableidx4];
+    __Vtableidx5 = (0xfU & (vlSelf->cpudbgdata >> 4U));
+    vlSelf->HEX1 = Vtop__ConstPool__TABLE_h5af533c5_0
+        [__Vtableidx5];
+    __Vtableidx6 = (0xfU & vlSelf->cpudbgdata);
+    vlSelf->HEX0 = Vtop__ConstPool__TABLE_h5af533c5_0
+        [__Vtableidx6];
 }
 
 void Vtop___024root___eval_ico(Vtop___024root* vlSelf) {
@@ -74,7 +95,7 @@ void Vtop___024root___eval(Vtop___024root* vlSelf) {
 #ifdef VL_DEBUG
                 Vtop___024root___dump_triggers__ico(vlSelf);
 #endif
-                VL_FATAL_MT("vsrc/top.v", 1, "", "Input combinational region did not converge.");
+                VL_FATAL_MT("vsrc/top.v", 2, "", "Input combinational region did not converge.");
             }
             vlSelf->__VicoIterCount = ((IData)(1U) 
                                        + vlSelf->__VicoIterCount);
@@ -97,7 +118,7 @@ void Vtop___024root___eval(Vtop___024root* vlSelf) {
 #ifdef VL_DEBUG
                     Vtop___024root___dump_triggers__act(vlSelf);
 #endif
-                    VL_FATAL_MT("vsrc/top.v", 1, "", "Active region did not converge.");
+                    VL_FATAL_MT("vsrc/top.v", 2, "", "Active region did not converge.");
                 }
                 vlSelf->__VactIterCount = ((IData)(1U) 
                                            + vlSelf->__VactIterCount);
@@ -112,7 +133,7 @@ void Vtop___024root___eval(Vtop___024root* vlSelf) {
 #ifdef VL_DEBUG
                 Vtop___024root___dump_triggers__nba(vlSelf);
 #endif
-                VL_FATAL_MT("vsrc/top.v", 1, "", "NBA region did not converge.");
+                VL_FATAL_MT("vsrc/top.v", 2, "", "NBA region did not converge.");
             }
             __VnbaIterCount = ((IData)(1U) + __VnbaIterCount);
             Vtop___024root___eval_nba(vlSelf);
@@ -126,7 +147,7 @@ void Vtop___024root___eval_debug_assertions(Vtop___024root* vlSelf) {
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___eval_debug_assertions\n"); );
     // Body
-    if (VL_UNLIKELY((vlSelf->s & 0xfcU))) {
-        Verilated::overWidthError("s");}
+    if (VL_UNLIKELY((vlSelf->cpudbgdata & 0xff000000U))) {
+        Verilated::overWidthError("cpudbgdata");}
 }
 #endif  // VL_DEBUG

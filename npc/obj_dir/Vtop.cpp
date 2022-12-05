@@ -11,9 +11,13 @@
 Vtop::Vtop(VerilatedContext* _vcontextp__, const char* _vcname__)
     : VerilatedModel{*_vcontextp__}
     , vlSymsp{new Vtop__Syms(contextp(), _vcname__, this)}
-    , a{vlSymsp->TOP.a}
-    , s{vlSymsp->TOP.s}
-    , y{vlSymsp->TOP.y}
+    , HEX5{vlSymsp->TOP.HEX5}
+    , HEX4{vlSymsp->TOP.HEX4}
+    , HEX3{vlSymsp->TOP.HEX3}
+    , HEX2{vlSymsp->TOP.HEX2}
+    , HEX1{vlSymsp->TOP.HEX1}
+    , HEX0{vlSymsp->TOP.HEX0}
+    , cpudbgdata{vlSymsp->TOP.cpudbgdata}
     , rootp{&(vlSymsp->TOP)}
 {
     // Register model with the context

@@ -1,5 +1,5 @@
 all:
-	verilator --cc --exe --build --trace -j 0 -Wall csrc/main.cpp vsrc/top.v 
+	verilator --cc --exe --build --trace -j 0 -Wall csrc/main.cpp vsrc/top.v vsrc/bcd7seg.v
 	
 
 sim:
