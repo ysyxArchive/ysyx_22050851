@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
     int out3 = top->HEX3;
     int out4 = top->HEX4;
     int out5 = top->HEX5;
-    printf("a = %d, o0 = %d, o1 = %d, o2 = %d, o3 = %d, o4 = %d, o5 = %d", in,
+    printf("a = %x, o0 = %d, o1 = %d, o2 = %d, o3 = %d, o4 = %d, o5 = %d\n", in,
            out0, out1, out2, out3, out4, out5);
 
     tfp->dump(contextp->time());

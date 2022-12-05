@@ -4,6 +4,7 @@ all:
 
 sim:
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
+	make all
 	./obj_dir/Vtop
 
 clean:
