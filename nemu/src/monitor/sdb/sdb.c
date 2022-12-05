@@ -19,7 +19,7 @@
 #include <readline/history.h>
 #include <readline/readline.h>
 #include "memory/paddr.h"
-static int is_batch_mode = false;
+static bool is_batch_mode = false;
 
 void init_regex();
 void init_wp_pool();
@@ -120,7 +120,7 @@ static int cmd_x(char* args) {
   }
 
   for (int i = 0; i < N; i++) {
-    printf("%02X %s%s", paddr_read(p + i, 1), i % 4 == 3 ? " " : "",
+    printf("%02lX %s%s", paddr_read(p + i, 1), i % 4 == 3 ? " " : "",
            i % 8 == 7 ? "\n" : "");
   }
   if (N % 8 != 0) {
