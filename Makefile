@@ -38,7 +38,15 @@ endef
 .clean_index:
 	rm -f $(WORK_INDEX)
 
+count:
+	git switch ysyx2204
+	LASTWC=$(grep -e '.' -c -r $(find -name *.[ch]) -h | paste -sd+ | bc)
+	git switch pa1
+	NOWWC=$(grep -e '.' -c -r $(find -name *.[ch]) -h | paste -sd+ | bc)
+	LINECHANGE=$[NOWWC-LASTWC]
+	echo added $(LINECHANGE) lines.
+
 _default:
 	@echo "Please run 'make' under subprojects."
 
-.PHONY: .git_commit .clean_index _default
+.PHONY: .git_commit .clean_index _default count
