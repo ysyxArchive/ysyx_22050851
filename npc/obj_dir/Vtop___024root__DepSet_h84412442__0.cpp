@@ -26,6 +26,22 @@ void Vtop___024root___eval_triggers__act(Vtop___024root* vlSelf) {
                                       & (~ (IData)(vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellout__mycounter2__out)));
     vlSelf->__VactTriggered.at(4U) = ((IData)(vlSelf->top__DOT____Vcellout__mycounter3__out) 
                                       & (~ (IData)(vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellout__mycounter3__out)));
+    vlSelf->__VactTriggered.at(5U) = (((IData)(vlSelf->rst) 
+                                       & (~ (IData)(vlSelf->__Vtrigrprev__TOP__rst))) 
+                                      | ((IData)(vlSelf->top__DOT____Vcellout__mycounter3__out) 
+                                         & (~ (IData)(vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellout__mycounter3__out))));
+    vlSelf->__VactTriggered.at(6U) = (((IData)(vlSelf->rst) 
+                                       & (~ (IData)(vlSelf->__Vtrigrprev__TOP__rst))) 
+                                      | ((IData)(vlSelf->top__DOT____Vcellout__mycounter2__out) 
+                                         & (~ (IData)(vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellout__mycounter2__out))));
+    vlSelf->__VactTriggered.at(7U) = (((IData)(vlSelf->rst) 
+                                       & (~ (IData)(vlSelf->__Vtrigrprev__TOP__rst))) 
+                                      | ((IData)(vlSelf->top__DOT____Vcellout__mycounter1__out) 
+                                         & (~ (IData)(vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellout__mycounter1__out))));
+    vlSelf->__VactTriggered.at(8U) = (((IData)(vlSelf->clk) 
+                                       & (~ (IData)(vlSelf->__Vtrigrprev__TOP__clk))) 
+                                      | ((IData)(vlSelf->rst) 
+                                         & (~ (IData)(vlSelf->__Vtrigrprev__TOP__rst))));
     vlSelf->__Vtrigrprev__TOP__rst = vlSelf->rst;
     vlSelf->__Vtrigrprev__TOP__clk = vlSelf->clk;
     vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellout__mycounter1__out 

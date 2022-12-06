@@ -7,10 +7,8 @@ module counter(
         out <= 0;
     end
 
-    always @(posedge rst)
-        out <= 0;
 
 
     always @(posedge clk)
-        out <= out + 1;
+        out <=rst? 0 : out + 1;
 endmodule
