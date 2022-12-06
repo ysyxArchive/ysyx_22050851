@@ -26,8 +26,8 @@ int main(int argc, char** argv) {
     clk = !clk;
     top->clk = clk;
     top->rst = 0;
-    
-    printf("out = %d\n", top->out);
+
+    printf("clk = %d, out = %d\n", top->clk, top->out);
     tfp->dump(contextp->time());
     contextp->timeInc(1);
   }
