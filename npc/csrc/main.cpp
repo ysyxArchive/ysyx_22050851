@@ -22,7 +22,8 @@ int main(int argc, char** argv) {
   tfp->open("wave.vcd");
   printf("evaling\b\n");
   bool clk = 0;
-  while (i++ <= 20) {
+  to
+  while (i++ <= 100) {
     clk = !clk;
     top->clk = 1-clk;
     top->rst = 0;
