@@ -4,7 +4,7 @@ module counter(
     output reg out);
 
     initial begin
-        out <= 0;
+        out = 0;
     end
 
 

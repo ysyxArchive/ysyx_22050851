@@ -20,7 +20,6 @@ VL_ATTR_COLD void Vtop___024root___eval_initial(Vtop___024root* vlSelf) {
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___eval_initial\n"); );
     // Body
     Vtop___024root___eval_initial__TOP(vlSelf);
-    vlSelf->__Vtrigrprev__TOP__rst = vlSelf->rst;
     vlSelf->__Vtrigrprev__TOP__clk = vlSelf->clk;
     vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellout__mycounter1__out = 0U;
     vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellout__mycounter2__out = 0U;
@@ -114,31 +113,16 @@ VL_ATTR_COLD void Vtop___024root___dump_triggers__act(Vtop___024root* vlSelf) {
         VL_DBG_MSGF("         No triggers active\n");
     }
     if (vlSelf->__VactTriggered.at(0U)) {
-        VL_DBG_MSGF("         'act' region trigger index 0 is active: @(posedge rst)\n");
+        VL_DBG_MSGF("         'act' region trigger index 0 is active: @(posedge clk)\n");
     }
     if (vlSelf->__VactTriggered.at(1U)) {
-        VL_DBG_MSGF("         'act' region trigger index 1 is active: @(posedge clk)\n");
+        VL_DBG_MSGF("         'act' region trigger index 1 is active: @(posedge top.__Vcellout__mycounter1__out)\n");
     }
     if (vlSelf->__VactTriggered.at(2U)) {
-        VL_DBG_MSGF("         'act' region trigger index 2 is active: @(posedge top.__Vcellout__mycounter1__out)\n");
+        VL_DBG_MSGF("         'act' region trigger index 2 is active: @(posedge top.__Vcellout__mycounter2__out)\n");
     }
     if (vlSelf->__VactTriggered.at(3U)) {
-        VL_DBG_MSGF("         'act' region trigger index 3 is active: @(posedge top.__Vcellout__mycounter2__out)\n");
-    }
-    if (vlSelf->__VactTriggered.at(4U)) {
-        VL_DBG_MSGF("         'act' region trigger index 4 is active: @(posedge top.__Vcellout__mycounter3__out)\n");
-    }
-    if (vlSelf->__VactTriggered.at(5U)) {
-        VL_DBG_MSGF("         'act' region trigger index 5 is active: @(posedge rst or posedge top.__Vcellout__mycounter3__out)\n");
-    }
-    if (vlSelf->__VactTriggered.at(6U)) {
-        VL_DBG_MSGF("         'act' region trigger index 6 is active: @(posedge rst or posedge top.__Vcellout__mycounter2__out)\n");
-    }
-    if (vlSelf->__VactTriggered.at(7U)) {
-        VL_DBG_MSGF("         'act' region trigger index 7 is active: @(posedge rst or posedge top.__Vcellout__mycounter1__out)\n");
-    }
-    if (vlSelf->__VactTriggered.at(8U)) {
-        VL_DBG_MSGF("         'act' region trigger index 8 is active: @(posedge clk or posedge rst)\n");
+        VL_DBG_MSGF("         'act' region trigger index 3 is active: @(posedge top.__Vcellout__mycounter3__out)\n");
     }
 }
 #endif  // VL_DEBUG
@@ -153,31 +137,16 @@ VL_ATTR_COLD void Vtop___024root___dump_triggers__nba(Vtop___024root* vlSelf) {
         VL_DBG_MSGF("         No triggers active\n");
     }
     if (vlSelf->__VnbaTriggered.at(0U)) {
-        VL_DBG_MSGF("         'nba' region trigger index 0 is active: @(posedge rst)\n");
+        VL_DBG_MSGF("         'nba' region trigger index 0 is active: @(posedge clk)\n");
     }
     if (vlSelf->__VnbaTriggered.at(1U)) {
-        VL_DBG_MSGF("         'nba' region trigger index 1 is active: @(posedge clk)\n");
+        VL_DBG_MSGF("         'nba' region trigger index 1 is active: @(posedge top.__Vcellout__mycounter1__out)\n");
     }
     if (vlSelf->__VnbaTriggered.at(2U)) {
-        VL_DBG_MSGF("         'nba' region trigger index 2 is active: @(posedge top.__Vcellout__mycounter1__out)\n");
+        VL_DBG_MSGF("         'nba' region trigger index 2 is active: @(posedge top.__Vcellout__mycounter2__out)\n");
     }
     if (vlSelf->__VnbaTriggered.at(3U)) {
-        VL_DBG_MSGF("         'nba' region trigger index 3 is active: @(posedge top.__Vcellout__mycounter2__out)\n");
-    }
-    if (vlSelf->__VnbaTriggered.at(4U)) {
-        VL_DBG_MSGF("         'nba' region trigger index 4 is active: @(posedge top.__Vcellout__mycounter3__out)\n");
-    }
-    if (vlSelf->__VnbaTriggered.at(5U)) {
-        VL_DBG_MSGF("         'nba' region trigger index 5 is active: @(posedge rst or posedge top.__Vcellout__mycounter3__out)\n");
-    }
-    if (vlSelf->__VnbaTriggered.at(6U)) {
-        VL_DBG_MSGF("         'nba' region trigger index 6 is active: @(posedge rst or posedge top.__Vcellout__mycounter2__out)\n");
-    }
-    if (vlSelf->__VnbaTriggered.at(7U)) {
-        VL_DBG_MSGF("         'nba' region trigger index 7 is active: @(posedge rst or posedge top.__Vcellout__mycounter1__out)\n");
-    }
-    if (vlSelf->__VnbaTriggered.at(8U)) {
-        VL_DBG_MSGF("         'nba' region trigger index 8 is active: @(posedge clk or posedge rst)\n");
+        VL_DBG_MSGF("         'nba' region trigger index 3 is active: @(posedge top.__Vcellout__mycounter3__out)\n");
     }
 }
 #endif  // VL_DEBUG
@@ -194,12 +163,7 @@ VL_ATTR_COLD void Vtop___024root___ctor_var_reset(Vtop___024root* vlSelf) {
     vlSelf->top__DOT____Vcellout__mycounter2__out = VL_RAND_RESET_I(1);
     vlSelf->top__DOT____Vcellout__mycounter3__out = VL_RAND_RESET_I(1);
     vlSelf->top__DOT____Vcellout__mycounter4__out = VL_RAND_RESET_I(1);
-    vlSelf->__Vdly__top__DOT____Vcellout__mycounter1__out = VL_RAND_RESET_I(1);
-    vlSelf->__Vdly__top__DOT____Vcellout__mycounter2__out = VL_RAND_RESET_I(1);
-    vlSelf->__Vdly__top__DOT____Vcellout__mycounter3__out = VL_RAND_RESET_I(1);
-    vlSelf->__Vdly__top__DOT____Vcellout__mycounter4__out = VL_RAND_RESET_I(1);
     vlSelf->__VstlIterCount = 0;
-    vlSelf->__Vtrigrprev__TOP__rst = VL_RAND_RESET_I(1);
     vlSelf->__Vtrigrprev__TOP__clk = VL_RAND_RESET_I(1);
     vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellout__mycounter1__out = VL_RAND_RESET_I(1);
     vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellout__mycounter2__out = VL_RAND_RESET_I(1);
