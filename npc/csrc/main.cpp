@@ -25,6 +25,7 @@ int main(int argc, char** argv) {
   while (i++ <= 20) {
     clk = !clk;
     top->clk = clk;
+    top->in = 1;
     top->rst = 0;
 
     printf("clk = %d, out = %d\n", top->clk, top->out);
