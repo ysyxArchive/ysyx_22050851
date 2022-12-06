@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
   while (i++ <= 20) {
     clk = !clk;
     top->clk = 1-clk;
-    top->rst = 0;
+    top->rst = 1;
 
     printf("clk = %d, out = %d\n", top->clk, top->out);
     tfp->dump(contextp->time());
