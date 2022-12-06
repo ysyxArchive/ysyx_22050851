@@ -12,5 +12,5 @@ module counter(
 
 
     always @(posedge clk)
-        out = out + 1;
+        out <= out + 1;
 endmodule
