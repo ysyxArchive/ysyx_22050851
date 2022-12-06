@@ -24,8 +24,7 @@ VL_INLINE_OPT void Vtop___024root___nba_sequent__TOP__0(Vtop___024root* vlSelf) 
         vlSelf->top__DOT____Vcellout__mycounter3__out = 0U;
     } else {
         vlSelf->top__DOT____Vcellout__mycounter1__out 
-            = (1U & ((IData)(vlSelf->top__DOT____Vcellout__mycounter1__out) 
-                     + (IData)(vlSelf->clk)));
+            = (1U & ((IData)(1U) + (IData)(vlSelf->top__DOT____Vcellout__mycounter1__out)));
         vlSelf->top__DOT____Vcellout__mycounter4__out 
             = (1U & ((IData)(vlSelf->top__DOT____Vcellout__mycounter4__out) 
                      + (IData)(vlSelf->top__DOT____Vcellout__mycounter3__out)));

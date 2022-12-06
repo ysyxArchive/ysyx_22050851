@@ -19,7 +19,7 @@ VL_ATTR_COLD void Vtop___024root__trace_init_sub__TOP__0(Vtop___024root* vlSelf,
     tracep->declBit(c+6,"rst", false,-1);
     tracep->declBus(c+7,"out", false,-1, 3,0);
     tracep->pushNamePrefix("mycounter1 ");
-    tracep->declBit(c+5,"in", false,-1);
+    tracep->declBit(c+8,"in", false,-1);
     tracep->declBit(c+5,"clk", false,-1);
     tracep->declBit(c+6,"rst", false,-1);
     tracep->declBit(c+1,"out", false,-1);
@@ -91,4 +91,5 @@ VL_ATTR_COLD void Vtop___024root__trace_full_sub_0(Vtop___024root* vlSelf, Veril
     bufp->fullBit(oldp+5,(vlSelf->clk));
     bufp->fullBit(oldp+6,(vlSelf->rst));
     bufp->fullCData(oldp+7,(vlSelf->out),4);
+    bufp->fullBit(oldp+8,(1U));
 }
