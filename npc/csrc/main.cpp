@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
   top->trace(tfp, 0);
   tfp->open("wave.vcd");
   printf("evaling\b\n");
-  int clk = 0;
+  bool clk = 0;
   while (i++ <= 20) {
     clk = !clk;
     top->clk = clk;
