@@ -1,5 +1,4 @@
 module counter(
-    input in,
     input clk,
     input rst,
     output reg out);
@@ -9,9 +8,9 @@ module counter(
     end
 
     always @(posedge rst)
-        out <= 0;
+        out = 0;
 
 
     always @(posedge clk)
-        out <= out + 1;
+        out = out + 1;
 endmodule
