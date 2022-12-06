@@ -17,9 +17,9 @@ VL_INLINE_OPT void Vtop___024root___nba_sequent__TOP__0(Vtop___024root* vlSelf) 
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___nba_sequent__TOP__0\n"); );
     // Body
-    vlSelf->top__DOT____Vcellout__mycounter1__out = 
+    vlSelf->top__DOT____Vcellout__mycounter4__out = 
         ((IData)(vlSelf->rst) ? 0U : (1U & ((IData)(1U) 
-                                            + (IData)(vlSelf->top__DOT____Vcellout__mycounter1__out))));
+                                            + (IData)(vlSelf->top__DOT____Vcellout__mycounter4__out))));
 }
 
 VL_INLINE_OPT void Vtop___024root___nba_sequent__TOP__1(Vtop___024root* vlSelf) {
@@ -27,9 +27,11 @@ VL_INLINE_OPT void Vtop___024root___nba_sequent__TOP__1(Vtop___024root* vlSelf) 
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___nba_sequent__TOP__1\n"); );
     // Body
-    vlSelf->top__DOT____Vcellout__mycounter2__out = 
+    vlSelf->top__DOT____Vcellout__mycounter1__out = 
         ((IData)(vlSelf->rst) ? 0U : (1U & ((IData)(1U) 
-                                            + (IData)(vlSelf->top__DOT____Vcellout__mycounter2__out))));
+                                            + (IData)(vlSelf->top__DOT____Vcellout__mycounter1__out))));
+    vlSelf->top__DOT____Vcellinp__mycounter2__clk = 
+        (1U & (~ (IData)(vlSelf->top__DOT____Vcellout__mycounter1__out)));
 }
 
 VL_INLINE_OPT void Vtop___024root___nba_sequent__TOP__2(Vtop___024root* vlSelf) {
@@ -37,9 +39,11 @@ VL_INLINE_OPT void Vtop___024root___nba_sequent__TOP__2(Vtop___024root* vlSelf) 
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___nba_sequent__TOP__2\n"); );
     // Body
-    vlSelf->top__DOT____Vcellout__mycounter3__out = 
+    vlSelf->top__DOT____Vcellout__mycounter2__out = 
         ((IData)(vlSelf->rst) ? 0U : (1U & ((IData)(1U) 
-                                            + (IData)(vlSelf->top__DOT____Vcellout__mycounter3__out))));
+                                            + (IData)(vlSelf->top__DOT____Vcellout__mycounter2__out))));
+    vlSelf->top__DOT____Vcellinp__mycounter3__clk = 
+        (1U & (~ (IData)(vlSelf->top__DOT____Vcellout__mycounter2__out)));
 }
 
 VL_INLINE_OPT void Vtop___024root___nba_sequent__TOP__3(Vtop___024root* vlSelf) {
@@ -47,9 +51,11 @@ VL_INLINE_OPT void Vtop___024root___nba_sequent__TOP__3(Vtop___024root* vlSelf) 
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___nba_sequent__TOP__3\n"); );
     // Body
-    vlSelf->top__DOT____Vcellout__mycounter4__out = 
+    vlSelf->top__DOT____Vcellout__mycounter3__out = 
         ((IData)(vlSelf->rst) ? 0U : (1U & ((IData)(1U) 
-                                            + (IData)(vlSelf->top__DOT____Vcellout__mycounter4__out))));
+                                            + (IData)(vlSelf->top__DOT____Vcellout__mycounter3__out))));
+    vlSelf->top__DOT____Vcellinp__mycounter4__clk = 
+        (1U & (~ (IData)(vlSelf->top__DOT____Vcellout__mycounter3__out)));
 }
 
 VL_INLINE_OPT void Vtop___024root___nba_comb__TOP__0(Vtop___024root* vlSelf) {
@@ -68,16 +74,16 @@ void Vtop___024root___eval_nba(Vtop___024root* vlSelf) {
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___eval_nba\n"); );
     // Body
-    if (vlSelf->__VnbaTriggered.at(0U)) {
+    if (vlSelf->__VnbaTriggered.at(3U)) {
         Vtop___024root___nba_sequent__TOP__0(vlSelf);
     }
-    if (vlSelf->__VnbaTriggered.at(1U)) {
+    if (vlSelf->__VnbaTriggered.at(0U)) {
         Vtop___024root___nba_sequent__TOP__1(vlSelf);
     }
-    if (vlSelf->__VnbaTriggered.at(2U)) {
+    if (vlSelf->__VnbaTriggered.at(1U)) {
         Vtop___024root___nba_sequent__TOP__2(vlSelf);
     }
-    if (vlSelf->__VnbaTriggered.at(3U)) {
+    if (vlSelf->__VnbaTriggered.at(2U)) {
         Vtop___024root___nba_sequent__TOP__3(vlSelf);
     }
     if ((((vlSelf->__VnbaTriggered.at(0U) | vlSelf->__VnbaTriggered.at(1U)) 

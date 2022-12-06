@@ -14,16 +14,19 @@ class Vtop___024root final : public VerilatedModule {
 
     // DESIGN SPECIFIC STATE
     VL_IN8(clk,0,0);
+    CData/*0:0*/ top__DOT____Vcellinp__mycounter2__clk;
+    CData/*0:0*/ top__DOT____Vcellinp__mycounter3__clk;
+    CData/*0:0*/ top__DOT____Vcellinp__mycounter4__clk;
+    VL_IN8(rst,0,0);
+    VL_OUT8(out,3,0);
     CData/*0:0*/ top__DOT____Vcellout__mycounter1__out;
     CData/*0:0*/ top__DOT____Vcellout__mycounter2__out;
     CData/*0:0*/ top__DOT____Vcellout__mycounter3__out;
-    VL_IN8(rst,0,0);
-    VL_OUT8(out,3,0);
     CData/*0:0*/ top__DOT____Vcellout__mycounter4__out;
     CData/*0:0*/ __Vtrigrprev__TOP__clk;
-    CData/*0:0*/ __Vtrigrprev__TOP__top__DOT____Vcellout__mycounter1__out;
-    CData/*0:0*/ __Vtrigrprev__TOP__top__DOT____Vcellout__mycounter2__out;
-    CData/*0:0*/ __Vtrigrprev__TOP__top__DOT____Vcellout__mycounter3__out;
+    CData/*0:0*/ __Vtrigrprev__TOP__top__DOT____Vcellinp__mycounter2__clk;
+    CData/*0:0*/ __Vtrigrprev__TOP__top__DOT____Vcellinp__mycounter3__clk;
+    CData/*0:0*/ __Vtrigrprev__TOP__top__DOT____Vcellinp__mycounter4__clk;
     CData/*0:0*/ __VactContinue;
     IData/*31:0*/ __VstlIterCount;
     IData/*31:0*/ __VactIterCount;

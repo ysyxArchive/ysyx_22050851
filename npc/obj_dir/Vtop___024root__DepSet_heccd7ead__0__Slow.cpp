@@ -21,9 +21,12 @@ VL_ATTR_COLD void Vtop___024root___eval_initial(Vtop___024root* vlSelf) {
     // Body
     Vtop___024root___eval_initial__TOP(vlSelf);
     vlSelf->__Vtrigrprev__TOP__clk = vlSelf->clk;
-    vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellout__mycounter1__out = 0U;
-    vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellout__mycounter2__out = 0U;
-    vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellout__mycounter3__out = 0U;
+    vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellinp__mycounter2__clk 
+        = vlSelf->top__DOT____Vcellinp__mycounter2__clk;
+    vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellinp__mycounter3__clk 
+        = vlSelf->top__DOT____Vcellinp__mycounter3__clk;
+    vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellinp__mycounter4__clk 
+        = vlSelf->top__DOT____Vcellinp__mycounter4__clk;
 }
 
 VL_ATTR_COLD void Vtop___024root___eval_initial__TOP(Vtop___024root* vlSelf) {
@@ -91,7 +94,22 @@ VL_ATTR_COLD void Vtop___024root___dump_triggers__stl(Vtop___024root* vlSelf) {
 }
 #endif  // VL_DEBUG
 
-void Vtop___024root___nba_comb__TOP__0(Vtop___024root* vlSelf);
+VL_ATTR_COLD void Vtop___024root___stl_sequent__TOP__0(Vtop___024root* vlSelf) {
+    if (false && vlSelf) {}  // Prevent unused
+    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___stl_sequent__TOP__0\n"); );
+    // Body
+    vlSelf->top__DOT____Vcellinp__mycounter2__clk = 
+        (1U & (~ (IData)(vlSelf->top__DOT____Vcellout__mycounter1__out)));
+    vlSelf->top__DOT____Vcellinp__mycounter3__clk = 
+        (1U & (~ (IData)(vlSelf->top__DOT____Vcellout__mycounter2__out)));
+    vlSelf->top__DOT____Vcellinp__mycounter4__clk = 
+        (1U & (~ (IData)(vlSelf->top__DOT____Vcellout__mycounter3__out)));
+    vlSelf->out = (((IData)(vlSelf->top__DOT____Vcellout__mycounter1__out) 
+                    << 3U) | (((IData)(vlSelf->top__DOT____Vcellout__mycounter2__out) 
+                               << 2U) | (((IData)(vlSelf->top__DOT____Vcellout__mycounter3__out) 
+                                          << 1U) | (IData)(vlSelf->top__DOT____Vcellout__mycounter4__out))));
+}
 
 VL_ATTR_COLD void Vtop___024root___eval_stl(Vtop___024root* vlSelf) {
     if (false && vlSelf) {}  // Prevent unused
@@ -99,7 +117,7 @@ VL_ATTR_COLD void Vtop___024root___eval_stl(Vtop___024root* vlSelf) {
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___eval_stl\n"); );
     // Body
     if (vlSelf->__VstlTriggered.at(0U)) {
-        Vtop___024root___nba_comb__TOP__0(vlSelf);
+        Vtop___024root___stl_sequent__TOP__0(vlSelf);
     }
 }
 
@@ -116,13 +134,13 @@ VL_ATTR_COLD void Vtop___024root___dump_triggers__act(Vtop___024root* vlSelf) {
         VL_DBG_MSGF("         'act' region trigger index 0 is active: @(posedge clk)\n");
     }
     if (vlSelf->__VactTriggered.at(1U)) {
-        VL_DBG_MSGF("         'act' region trigger index 1 is active: @(posedge top.__Vcellout__mycounter1__out)\n");
+        VL_DBG_MSGF("         'act' region trigger index 1 is active: @(posedge top.__Vcellinp__mycounter2__clk)\n");
     }
     if (vlSelf->__VactTriggered.at(2U)) {
-        VL_DBG_MSGF("         'act' region trigger index 2 is active: @(posedge top.__Vcellout__mycounter2__out)\n");
+        VL_DBG_MSGF("         'act' region trigger index 2 is active: @(posedge top.__Vcellinp__mycounter3__clk)\n");
     }
     if (vlSelf->__VactTriggered.at(3U)) {
-        VL_DBG_MSGF("         'act' region trigger index 3 is active: @(posedge top.__Vcellout__mycounter3__out)\n");
+        VL_DBG_MSGF("         'act' region trigger index 3 is active: @(posedge top.__Vcellinp__mycounter4__clk)\n");
     }
 }
 #endif  // VL_DEBUG
@@ -140,13 +158,13 @@ VL_ATTR_COLD void Vtop___024root___dump_triggers__nba(Vtop___024root* vlSelf) {
         VL_DBG_MSGF("         'nba' region trigger index 0 is active: @(posedge clk)\n");
     }
     if (vlSelf->__VnbaTriggered.at(1U)) {
-        VL_DBG_MSGF("         'nba' region trigger index 1 is active: @(posedge top.__Vcellout__mycounter1__out)\n");
+        VL_DBG_MSGF("         'nba' region trigger index 1 is active: @(posedge top.__Vcellinp__mycounter2__clk)\n");
     }
     if (vlSelf->__VnbaTriggered.at(2U)) {
-        VL_DBG_MSGF("         'nba' region trigger index 2 is active: @(posedge top.__Vcellout__mycounter2__out)\n");
+        VL_DBG_MSGF("         'nba' region trigger index 2 is active: @(posedge top.__Vcellinp__mycounter3__clk)\n");
     }
     if (vlSelf->__VnbaTriggered.at(3U)) {
-        VL_DBG_MSGF("         'nba' region trigger index 3 is active: @(posedge top.__Vcellout__mycounter3__out)\n");
+        VL_DBG_MSGF("         'nba' region trigger index 3 is active: @(posedge top.__Vcellinp__mycounter4__clk)\n");
     }
 }
 #endif  // VL_DEBUG
@@ -161,13 +179,16 @@ VL_ATTR_COLD void Vtop___024root___ctor_var_reset(Vtop___024root* vlSelf) {
     vlSelf->out = VL_RAND_RESET_I(4);
     vlSelf->top__DOT____Vcellout__mycounter1__out = VL_RAND_RESET_I(1);
     vlSelf->top__DOT____Vcellout__mycounter2__out = VL_RAND_RESET_I(1);
+    vlSelf->top__DOT____Vcellinp__mycounter2__clk = VL_RAND_RESET_I(1);
     vlSelf->top__DOT____Vcellout__mycounter3__out = VL_RAND_RESET_I(1);
+    vlSelf->top__DOT____Vcellinp__mycounter3__clk = VL_RAND_RESET_I(1);
     vlSelf->top__DOT____Vcellout__mycounter4__out = VL_RAND_RESET_I(1);
+    vlSelf->top__DOT____Vcellinp__mycounter4__clk = VL_RAND_RESET_I(1);
     vlSelf->__VstlIterCount = 0;
     vlSelf->__Vtrigrprev__TOP__clk = VL_RAND_RESET_I(1);
-    vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellout__mycounter1__out = VL_RAND_RESET_I(1);
-    vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellout__mycounter2__out = VL_RAND_RESET_I(1);
-    vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellout__mycounter3__out = VL_RAND_RESET_I(1);
+    vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellinp__mycounter2__clk = VL_RAND_RESET_I(1);
+    vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellinp__mycounter3__clk = VL_RAND_RESET_I(1);
+    vlSelf->__Vtrigrprev__TOP__top__DOT____Vcellinp__mycounter4__clk = VL_RAND_RESET_I(1);
     vlSelf->__VactIterCount = 0;
     vlSelf->__VactContinue = 0;
 }

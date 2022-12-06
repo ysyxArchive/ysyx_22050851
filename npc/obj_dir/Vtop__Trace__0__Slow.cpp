@@ -24,19 +24,19 @@ VL_ATTR_COLD void Vtop___024root__trace_init_sub__TOP__0(Vtop___024root* vlSelf,
     tracep->declBit(c+4,"out", false,-1);
     tracep->popNamePrefix(1);
     tracep->pushNamePrefix("mycounter2 ");
-    tracep->declBit(c+4,"clk", false,-1);
-    tracep->declBit(c+2,"rst", false,-1);
-    tracep->declBit(c+5,"out", false,-1);
-    tracep->popNamePrefix(1);
-    tracep->pushNamePrefix("mycounter3 ");
     tracep->declBit(c+5,"clk", false,-1);
     tracep->declBit(c+2,"rst", false,-1);
     tracep->declBit(c+6,"out", false,-1);
     tracep->popNamePrefix(1);
-    tracep->pushNamePrefix("mycounter4 ");
-    tracep->declBit(c+6,"clk", false,-1);
+    tracep->pushNamePrefix("mycounter3 ");
+    tracep->declBit(c+7,"clk", false,-1);
     tracep->declBit(c+2,"rst", false,-1);
-    tracep->declBit(c+7,"out", false,-1);
+    tracep->declBit(c+8,"out", false,-1);
+    tracep->popNamePrefix(1);
+    tracep->pushNamePrefix("mycounter4 ");
+    tracep->declBit(c+9,"clk", false,-1);
+    tracep->declBit(c+2,"rst", false,-1);
+    tracep->declBit(c+10,"out", false,-1);
     tracep->popNamePrefix(2);
 }
 
@@ -84,7 +84,10 @@ VL_ATTR_COLD void Vtop___024root__trace_full_sub_0(Vtop___024root* vlSelf, Veril
     bufp->fullBit(oldp+2,(vlSelf->rst));
     bufp->fullCData(oldp+3,(vlSelf->out),4);
     bufp->fullBit(oldp+4,(vlSelf->top__DOT____Vcellout__mycounter1__out));
-    bufp->fullBit(oldp+5,(vlSelf->top__DOT____Vcellout__mycounter2__out));
-    bufp->fullBit(oldp+6,(vlSelf->top__DOT____Vcellout__mycounter3__out));
-    bufp->fullBit(oldp+7,(vlSelf->top__DOT____Vcellout__mycounter4__out));
+    bufp->fullBit(oldp+5,(vlSelf->top__DOT____Vcellinp__mycounter2__clk));
+    bufp->fullBit(oldp+6,(vlSelf->top__DOT____Vcellout__mycounter2__out));
+    bufp->fullBit(oldp+7,(vlSelf->top__DOT____Vcellinp__mycounter3__clk));
+    bufp->fullBit(oldp+8,(vlSelf->top__DOT____Vcellout__mycounter3__out));
+    bufp->fullBit(oldp+9,(vlSelf->top__DOT____Vcellinp__mycounter4__clk));
+    bufp->fullBit(oldp+10,(vlSelf->top__DOT____Vcellout__mycounter4__out));
 }
