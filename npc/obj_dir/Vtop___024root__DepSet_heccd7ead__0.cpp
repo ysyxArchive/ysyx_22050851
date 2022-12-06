@@ -16,25 +16,29 @@ VL_INLINE_OPT void Vtop___024root___nba_sequent__TOP__0(Vtop___024root* vlSelf) 
     if (false && vlSelf) {}  // Prevent unused
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___nba_sequent__TOP__0\n"); );
+    // Init
+    CData/*0:0*/ __Vdly__top__DOT____Vcellout__mycounter1__out;
     // Body
+    __Vdly__top__DOT____Vcellout__mycounter1__out = vlSelf->top__DOT____Vcellout__mycounter1__out;
     if (vlSelf->rst) {
-        vlSelf->top__DOT____Vcellout__mycounter1__out = 0U;
+        __Vdly__top__DOT____Vcellout__mycounter1__out = 0U;
         vlSelf->top__DOT____Vcellout__mycounter4__out = 0U;
-        vlSelf->top__DOT____Vcellout__mycounter2__out = 0U;
         vlSelf->top__DOT____Vcellout__mycounter3__out = 0U;
+        vlSelf->top__DOT____Vcellout__mycounter2__out = 0U;
     } else {
-        vlSelf->top__DOT____Vcellout__mycounter1__out 
+        __Vdly__top__DOT____Vcellout__mycounter1__out 
             = (1U & ((IData)(1U) + (IData)(vlSelf->top__DOT____Vcellout__mycounter1__out)));
         vlSelf->top__DOT____Vcellout__mycounter4__out 
             = (1U & ((IData)(vlSelf->top__DOT____Vcellout__mycounter4__out) 
                      + (IData)(vlSelf->top__DOT____Vcellout__mycounter3__out)));
-        vlSelf->top__DOT____Vcellout__mycounter2__out 
-            = (1U & ((IData)(vlSelf->top__DOT____Vcellout__mycounter2__out) 
-                     + (IData)(vlSelf->top__DOT____Vcellout__mycounter1__out)));
         vlSelf->top__DOT____Vcellout__mycounter3__out 
             = (1U & ((IData)(vlSelf->top__DOT____Vcellout__mycounter3__out) 
                      + (IData)(vlSelf->top__DOT____Vcellout__mycounter2__out)));
+        vlSelf->top__DOT____Vcellout__mycounter2__out 
+            = (1U & ((IData)(vlSelf->top__DOT____Vcellout__mycounter2__out) 
+                     + (IData)(vlSelf->top__DOT____Vcellout__mycounter1__out)));
     }
+    vlSelf->top__DOT____Vcellout__mycounter1__out = __Vdly__top__DOT____Vcellout__mycounter1__out;
     vlSelf->out = (((IData)(vlSelf->top__DOT____Vcellout__mycounter1__out) 
                     << 3U) | (((IData)(vlSelf->top__DOT____Vcellout__mycounter2__out) 
                                << 2U) | (((IData)(vlSelf->top__DOT____Vcellout__mycounter3__out) 

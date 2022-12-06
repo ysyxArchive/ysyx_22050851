@@ -4,11 +4,14 @@ module counter(
     input rst,
     output reg out);
 
+    reg cnt;
 
     initial begin
+        cnt = 0;
         out = 0;
     end
 
     always @(posedge clk)
-        out  <= rst ? 0 : out + in;
+        cnt <= rst? 0 : cnt + in;
+        out  <= in && cnt;
 endmodule
