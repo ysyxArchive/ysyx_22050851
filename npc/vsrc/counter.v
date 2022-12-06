@@ -10,5 +10,5 @@ module counter(
     end
 
     always @(posedge clk)
-        out  = rst ? 0 : out + in;
+        out  <= rst ? 0 : out + in;
 endmodule
