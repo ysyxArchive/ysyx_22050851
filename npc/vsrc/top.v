@@ -1,18 +1,12 @@
 
 module top(
-  input [23:0] cpudbgdata,
-  output [6:0] HEX5,
-  output [6:0] HEX4,
-  output [6:0] HEX3,
-  output [6:0] HEX2,
-  output [6:0] HEX1,
-  output [6:0] HEX0);
+  input clk,
+  input rst,
+  output [3:0] out);
 
-  bcd7seg seg5(cpudbgdata[23:20],HEX5);
-  bcd7seg seg4(cpudbgdata[19:16],HEX4);
-  bcd7seg seg3(cpudbgdata[15:12],HEX3);
-  bcd7seg seg2(cpudbgdata[11:8],HEX2);
-  bcd7seg seg1(cpudbgdata[7:4],HEX1);
-  bcd7seg seg0(cpudbgdata[3:0],HEX0);
+counter mycounter1(.rst(rst), .in(clk), .clk(clk), .out(out[3]));
+counter mycounter2(.rst(rst), .in(out[3]), .clk(clk), .out(out[2]));
+counter mycounter3(.rst(rst), .in(out[2]), .clk(clk), .out(out[1]));
+counter mycounter4(.rst(rst), .in(out[1]), .clk(clk), .out(out[0]));
 endmodule
 
