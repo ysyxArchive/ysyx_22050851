@@ -4,30 +4,32 @@
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 #include "Vtop.h"
+
+int getrand(int max) {
+  return rand() % max;
+}
+
 int main(int argc, char** argv) {
+  srand(time(0));
   int i = 0;
   VerilatedContext* contextp = new VerilatedContext;
 
   contextp->commandArgs(argc, argv);
   VerilatedVcdC* tfp = new VerilatedVcdC();
   contextp->traceEverOn(true);
-  Vtop* top = new Vtop{contextp};
+  Vtop* top = new Vtop{contextp, "123"};
   top->trace(tfp, 0);
   tfp->open("wave.vcd");
   printf("evaling\b\n");
-  while (i++ <= 20) {
-    int a = rand() & 1;
-    int b = rand() & 1;
-    top->a = a;
-    top->b = b;
+  bool clk = 0;
+  while (i++ <= 100) {
+    clk = !clk;
+    top->clk = 1-clk;
+    top->rst = 0;
     top->eval();
-
-    printf("a = %d, b = %d, f = %d\n", a, b, top->c);
-
+    printf("clk = %d, out = %d\n", top->clk, top->out);
     tfp->dump(contextp->time());
     contextp->timeInc(1);
-
-    assert(top->c == (a ^ b));
   }
   tfp->close();
 
