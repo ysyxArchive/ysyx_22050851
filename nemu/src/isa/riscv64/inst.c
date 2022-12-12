@@ -59,7 +59,7 @@ static int decode_exec(Decode *s) {
   decode_operand(s, &dest, &src1, &src2, &imm, concat(TYPE_, type)); \
   __VA_ARGS__ ; \
 }
-//   Log("pc= %lx, dnpc= %lx, snpc= %lx\n", s->pc, s->dnpc, s->snpc);
+  Log("pc= %lx, dnpc= %lx, snpc= %lx\n", s->pc, s->dnpc, s->snpc);
 
   INSTPAT_START();
   INSTPAT("??????? ????? ????? ??? ????? 00101 11", auipc  , U, R(dest) = s->pc + imm);
