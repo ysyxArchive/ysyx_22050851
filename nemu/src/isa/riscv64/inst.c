@@ -46,7 +46,7 @@ static void decode_operand(Decode *s, int *dest, word_t *src1, word_t *src2, wor
     case TYPE_J:                   immJ(); break;
     case TYPE_S: src1R(); src2R(); immS(); break;
   }
-//   printf("src1=%d, dst=%d, imm=%ld", rs1, *dest, *imm);
+  printf("i=%x, src1=%d, dst=%d, imm=%ld", i, rs1, *dest, *imm);
 }
 
 static int decode_exec(Decode *s) {
