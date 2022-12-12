@@ -61,7 +61,7 @@ static int decode_exec(Decode *s) {
 }
   Log("pc= %lx, dnpc= %lx, snpc= %lx\n", s->pc, s->dnpc, s->snpc);
 
-  uint32_t i = 0xffffffff;
+  uint32_t i = 0x00c000ef;
   printf(" %x %x %x %x %llx\n", (uint32_t)SEXT(BITS(i, 31, 31), 1) << 19, (uint32_t)(BITS(i, 19, 12) << 11) , (uint32_t)(BITS(i, 20, 20) << 10) ,(uint32_t) BITS(i, 30, 21),(uint32_t) (SEXT(BITS(i, 31, 31), 1) << 19) | (BITS(i, 19, 12) << 11) | (BITS(i, 20, 20) << 10) | BITS(i, 30, 21));
 
 
