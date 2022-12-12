@@ -46,7 +46,7 @@ static void decode_operand(Decode *s, int *dest, word_t *src1, word_t *src2, wor
     case TYPE_J:                   immJ(); break;
     case TYPE_S: src1R(); src2R(); immS(); break;
   }
-  printf("i=%x, src1=%d, dst=%d, imm=%ld", i, rs1, *dest, *imm);
+  printf("i=%x, src1=%d, dst=%d, imm=%ld\n", i, rs1, *dest, *imm);
 }
 
 static int decode_exec(Decode *s) {
@@ -60,6 +60,10 @@ static int decode_exec(Decode *s) {
   __VA_ARGS__ ; \
 }
   Log("pc= %lx, dnpc= %lx, snpc= %lx\n", s->pc, s->dnpc, s->snpc);
+
+  uint32_t i = 0xffff;
+  printf("%llx\n", (SEXT(BITS(i, 31, 31), 1) << 19) | (BITS(i, 19, 12) << 11) | (BITS(i, 20, 20) << 10) | BITS(i, 30, 21) ); 
+
 
   INSTPAT_START();
   INSTPAT("??????? ????? ????? ??? ????? 00101 11", auipc  , U, R(dest) = s->pc + imm);
