@@ -27,6 +27,7 @@ typedef struct Decode {
 } Decode;
 
 // --- pattern matching mechanism ---
+// 把匹配字符串抽出来为匹配串和模板和位移之类的
 __attribute__((always_inline))
 static inline void pattern_decode(const char *str, int len,
     uint64_t *key, uint64_t *mask, uint64_t *shift) {
