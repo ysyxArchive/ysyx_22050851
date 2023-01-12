@@ -48,7 +48,7 @@ class InstructionDecodeUnit extends Module {
   val io = IO(new Bundle {
     val enable = Input(Bool())
     val inst = Input(UInt(32.W))
-    val out = Decoupled(new Instruction())
+    val out = Decoupled(new Instruction)
   })
 
   val rs1 = io.inst(19, 15)
