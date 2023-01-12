@@ -21,7 +21,7 @@ object Operation {
 class Operation(val src1: Source, val src2: Source, val dst: Source, val opType: UInt) extends Bundle {}
 
 object Instruction {
-  val further :: noMatch :: ok :: other = Enum(1)
+  val further :: noMatch :: ok :: other = Enum(2)
   val rType :: iType :: sType :: uType = Enum(2)
 
 }
