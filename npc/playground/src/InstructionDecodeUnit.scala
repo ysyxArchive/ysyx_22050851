@@ -29,7 +29,7 @@ object Instruction {
 class Instruction(val status: UInt, val instructionType: UInt, val ops: Seq[Operation]) extends Bundle {
   /** no match Instruction */
   def this(isFurther: Bool = false.B) {
-    this(Mux(isFurther, Instruction.further, Instruction.noMatch), 0.U, Array())
+    this(Mux(isFurther, Instruction.further, Instruction.noMatch), 0.U, Seq())
   }
 
   def this(instType: UInt, ops: Seq[Operation]) {
@@ -59,9 +59,9 @@ class InstructionDecodeUnit extends Module {
   val immI = io.inst(31, 20)
   val immS = Cat(io.inst(31, 25), io.inst(11, 7))
 
-  val result: Instruction = MuxLookup(opcode, new Instruction(), Array("b0010011".U -> new Instruction(true.B)))
+  val result: Instruction = MuxLookup(opcode, new Instruction(), Seq("b0010011".U -> new Instruction(true.B)))
   //    when(result.status === Instruction.further) {
-  val result2 = MuxLookup(Cat(funct3, opcode), new Instruction(), Array(
+  val result2 = MuxLookup(Cat(funct3, opcode), new Instruction(), Seq(
     "b0000010011".U -> new Instruction(
       Instruction.iType, Array(
         new Operation(
