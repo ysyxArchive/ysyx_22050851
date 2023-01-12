@@ -24,17 +24,14 @@ object Instruction {
   val further :: noMatch :: ok :: other = Enum(4)
   val rType :: iType :: sType :: uType = Enum(4)
 
+  def apply(isFurther: Bool = false.B) = new Instruction(Mux(isFurther, Instruction.further, Instruction.noMatch), 0.U, Seq())
+
+  def apply(instType: UInt, ops: Seq[Operation]) = new Instruction(Instruction.ok, instType, ops)
 }
 
 class Instruction(val status: UInt, val instructionType: UInt, val ops: Seq[Operation]) extends Bundle {
   /** no match Instruction */
-  def this(isFurther: Bool = false.B) {
-    this(Mux(isFurther, Instruction.further, Instruction.noMatch), 0.U, Seq())
-  }
 
-  def this(instType: UInt, ops: Seq[Operation]) {
-    this(Instruction.ok, instType, ops)
-  }
 }
 
 object Utils {
@@ -50,7 +47,7 @@ class InstructionDecodeUnit extends Module {
     val inst = Input(UInt(32.W))
 
   })
-  val output = IO(Decoupled(new Instruction()))
+  val output = IO(Decoupled(Instruction()))
   val rs1 = io.inst(19, 15)
   val rs2 = io.inst(24, 20)
   val rd = io.inst(11, 7)
@@ -59,10 +56,10 @@ class InstructionDecodeUnit extends Module {
   val immI = io.inst(31, 20)
   val immS = Cat(io.inst(31, 25), io.inst(11, 7))
 
-  val result: Instruction = MuxLookup(opcode, new Instruction(), Seq("b0010011".U -> new Instruction(true.B)))
+  val result: Instruction = MuxLookup(opcode, Instruction(), Seq("b0010011".U -> Instruction(true.B)))
   //    when(result.status === Instruction.further) {
-  val result2 = MuxLookup(Cat(funct3, opcode), new Instruction(), Seq(
-    "b0000010011".U -> new Instruction(
+  val result2 = MuxLookup(Cat(funct3, opcode), Instruction(), Seq(
+    "b0000010011".U -> Instruction(
       Instruction.iType, Array(
         new Operation(
           new Source(rs1, true.B),
