@@ -22,7 +22,7 @@ class Operation(val src1: Source, val src2: Source, val dst: Source, val opType:
 
 object Instruction {
   val further :: noMatch :: ok :: other = Enum(4)
-  val rType :: iType :: sType :: uType :: noType :: Nil = Enum(4)
+  val rType :: iType :: sType :: uType :: noType :: Nil = Enum(6)
 
   def apply(isFurther: Bool = false.B) = new Instruction(Mux(isFurther, Instruction.further, Instruction.noMatch), Instruction.noType, Seq())
 
