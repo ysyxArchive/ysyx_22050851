@@ -2,7 +2,7 @@ import chisel3.experimental._
 import chisel3._
 import chisel3.util._
 
-class InstructionExecuteUnit {
+class InstructionExecuteUnit extends Module {
   val in = Flipped(Decoupled(Operation()))
   val regIO = Flipped(new RegisterFileIO())
 
