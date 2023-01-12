@@ -17,7 +17,7 @@ class CPU extends Module {
   val regs = Module(new RegisterFile);
   val pc = RegInit("h80000000".asUInt(64.W))
 
-  val state_fetch :: state_decode :: state_execute :: state_idle = Enum(2)
+  val state_fetch :: state_decode :: state_execute :: state_idle = Enum()
   val cpuState = RegInit(state_fetch)
 
   val decoder = new InstructionDecodeUnit()
