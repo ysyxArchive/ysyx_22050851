@@ -50,7 +50,7 @@ class InstructionDecodeUnit extends Module {
     val inst = Input(UInt(32.W))
 
   })
-  val out = IO(Decoupled(new Instruction))
+  val output = IO(Decoupled(new Instruction()))
   val rs1 = io.inst(19, 15)
   val rs2 = io.inst(24, 20)
   val rd = io.inst(11, 7)
@@ -82,8 +82,8 @@ class InstructionDecodeUnit extends Module {
   ))
 
   when(io.enable) {
-    out.bits := finalresult
-    out.valid := true.B
+    output.bits := finalresult
+    output.valid := true.B
   }
 
 }
