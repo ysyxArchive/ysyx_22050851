@@ -13,7 +13,7 @@ object Source {
 class Source(val value: UInt, val isReg: Bool) {}
 
 object Operation {
-  val add :: noMatch :: Nil = Enum(1)
+  val add :: noMatch :: Nil = Enum(3)
 
   def apply() = new Operation(Source(), Source(), Source(), noMatch)
 }
@@ -22,9 +22,9 @@ class Operation(val src1: Source, val src2: Source, val dst: Source, val opType:
 
 object Instruction {
   val further :: noMatch :: ok :: other = Enum(4)
-  val rType :: iType :: sType :: uType = Enum(4)
+  val rType :: iType :: sType :: uType :: noType :: Nil = Enum(4)
 
-  def apply(isFurther: Bool = false.B) = new Instruction(Mux(isFurther, Instruction.further, Instruction.noMatch), 0.U, Seq())
+  def apply(isFurther: Bool = false.B) = new Instruction(Mux(isFurther, Instruction.further, Instruction.noMatch), Instruction.noType, Seq())
 
   def apply(instType: UInt, ops: Seq[Operation]) = new Instruction(Instruction.ok, instType, ops)
 }
