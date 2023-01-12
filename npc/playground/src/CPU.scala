@@ -20,8 +20,8 @@ class CPU extends Module {
   val state_fetch :: state_decode :: state_execute :: state_idle = Enum(3)
   val cpuState = RegInit(state_fetch)
 
-  val decoder = new InstructionDecodeUnit()
-  val exe = new InstructionExecuteUnit()
+  val decoder = Module(new InstructionDecodeUnit)
+  val exe = Module(new InstructionExecuteUnit)
 
 
 }
