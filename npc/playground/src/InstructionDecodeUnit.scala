@@ -12,13 +12,15 @@ object Source {
 
 class Source(val value: UInt, val isReg: Bool) {}
 
-object Operation {
-  val add :: noMatch :: Nil = Enum(3)
-
-  def apply() = new Operation(Source(), Source(), Source(), noMatch)
+object OperationType extends ChiselEnum {
+  val add, noMatch = Value
 }
 
-class Operation(val src1: Source, val src2: Source, val dst: Source, val opType: UInt) extends Bundle {}
+object Operation {
+  def apply() = new Operation(Source(), Source(), Source(), OperationType.noMatch)
+}
+
+class Operation(val src1: Source, val src2: Source, val dst: Source, val opType: OperationType.Type) extends Bundle {}
 
 object Instruction {
   val further :: noMatch :: ok :: other = Enum(4)
@@ -65,7 +67,7 @@ class InstructionDecodeUnit extends Module {
           new Source(rs1, true.B),
           new Source(Utils.signalExtend(immI, 12), false.B),
           new Source(rd, true.B),
-          Operation.add
+          OperationType.add
         )
       )
     )
