@@ -62,7 +62,7 @@ class InstructionDecodeUnit extends Module {
   //    when(result.status === Instruction.further) {
   val result2 = MuxLookup(Cat(funct3, opcode), Instruction(), Seq(
     "b0000010011".U -> Instruction(
-      Instruction.iType, Array(
+      Instruction.iType, Seq(
         new Operation(
           new Source(rs1, true.B),
           new Source(Utils.signalExtend(immI, 12), false.B),
@@ -73,9 +73,9 @@ class InstructionDecodeUnit extends Module {
     )
   ))
 
-  val finalresult = MuxLookup(result.status, result, Array(
+  val finalresult = MuxLookup(result.status, result, Seq(
     Instruction.ok -> result,
-    Instruction.further -> MuxLookup(result2.status, result2, Array(
+    Instruction.further -> MuxLookup(result2.status, result2, Seq(
       Instruction.ok -> result2,
     ))
   ))
