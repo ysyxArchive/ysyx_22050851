@@ -14,7 +14,7 @@ class CPU extends Module {
     val fetok = Input(Bool())
   })
 
-  val regs = new RegisterFile();
+  val regs = Module(new RegisterFile);
   val pc = RegInit("h80000000".asUInt(64.W))
 
   val state_fetch :: state_decode :: state_execute :: state_idle = Enum(2)
