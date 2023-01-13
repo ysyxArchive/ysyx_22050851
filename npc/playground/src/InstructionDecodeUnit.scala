@@ -24,7 +24,7 @@ object Operation {
 
   def apply(s1: Source, s2: Source, dst: Source, opType: OperationType.Type) = new Operation(s1, s2, dst, opType.asUInt)
 
-//  def apply() = new Operation(Source(), Source(), Source())
+  def apply() = new Operation(Source(), Source(), Source())
 
 }
 
