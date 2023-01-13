@@ -37,7 +37,7 @@ object Instruction {
   def apply(instType: InstructionType.Type, ops: Seq[Operation]) = new Instruction(InstructionResType.ok.asUInt, instType.asUInt, ops)
 }
 
-class Instruction(val status: UInt, val instructionType: UInt, val ops: Seq[Operation]) extends Bundle {
+class Instruction(val status: UInt, val instructionType: UInt,  ops: Seq[Operation]) extends Bundle {
   /** no match Instruction */
 
 }
