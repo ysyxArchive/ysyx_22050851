@@ -7,12 +7,21 @@ import chisel3.util.Enum
 import scala.language.postfixOps
 
 object Source {
-  val default = new Source(0.U, false.B)
+  val default = apply()
 
-  def apply() = new Source()
+
+  def apply(value: UInt = 0.U, isReg: Bool = false.B) = {
+    val f = new Source()
+    f.value := value
+    f.isReg := isReg
+    f
+  }
 }
 
-class Source(val value: UInt = UInt(64.W), val isReg: Bool = Bool()) extends Bundle {}
+class Source() extends Bundle {
+  val value = UInt(64.W)
+  val isReg = Bool()
+}
 
 object OperationType extends ChiselEnum {
   val add, noMatch = Value
@@ -82,9 +91,9 @@ class InstructionDecodeUnit extends Module {
   val result2 = MuxLookup(Cat(funct3, opcode), Instruction(), Seq(
     "b0000010011".U -> Instruction(
       InstructionType.iType, Operation(
-        new Source(rs1, true.B),
-        new Source(Utils.signalExtend(immI, 12), false.B),
-        new Source(rd, true.B),
+        Source(rs1, true.B),
+        Source(Utils.signalExtend(immI, 12), false.B),
+        Source(rd, true.B),
         OperationType.add
       )
 
