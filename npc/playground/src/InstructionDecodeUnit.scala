@@ -12,7 +12,7 @@ object Source {
   def apply() = new Source()
 }
 
-class Source(val value: UInt = UInt(64.W), val isReg: Bool = Bool()) {}
+class Source(val value: UInt = UInt(64.W), val isReg: Bool = Bool()) extends Bundle {}
 
 object OperationType extends ChiselEnum {
   val add, noMatch = Value
