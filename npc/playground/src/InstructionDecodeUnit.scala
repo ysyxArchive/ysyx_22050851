@@ -23,7 +23,7 @@ object Operation {
 class Operation(val src1: Source, val src2: Source, val dst: Source, val opType: OperationType.Type) extends Bundle {}
 
 object InstructionType extends ChiselEnum {
-  val rType, iType, sType, noType = Value
+  val rType, iType, sType, uType, noType = Value
 }
 
 object InstructionResType extends ChiselEnum {
@@ -32,12 +32,12 @@ object InstructionResType extends ChiselEnum {
 
 object Instruction {
 
-  def apply(isFurther: Bool = false.B) = new Instruction(Mux(isFurther, InstructionResType.further, InstructionResType.noMatch), InstructionType.noType, Seq())
+  def apply(isFurther: Bool = false.B) = new Instruction(Mux(isFurther, InstructionResType.further.asUInt, InstructionResType.noMatch.asUInt), InstructionType.noType.asUInt, Seq())
 
-  def apply(instType: InstructionType.Type, ops: Seq[Operation]) = new Instruction(InstructionResType.ok, instType, ops)
+  def apply(instType: InstructionType.Type, ops: Seq[Operation]) = new Instruction(InstructionResType.ok.asUInt, instType.asUInt, ops)
 }
 
-class Instruction(val status: InstructionResType.Type, val instructionType: InstructionType.Type, val ops: Seq[Operation]) extends Bundle {
+class Instruction(val status: UInt, val instructionType: UInt, val ops: Seq[Operation]) extends Bundle {
   /** no match Instruction */
 
 }
