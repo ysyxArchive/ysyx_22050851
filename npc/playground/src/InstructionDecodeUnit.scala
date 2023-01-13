@@ -23,7 +23,7 @@ object Operation {
 class Operation(val src1: Source, val src2: Source, val dst: Source, val opType: OperationType.Type) extends Bundle {}
 
 object InstructionType extends ChiselEnum {
-  val rType, iType, sType, uType, noType = Value
+  val rType, iType, sType, noType = Value
 }
 
 object InstructionResType extends ChiselEnum {
