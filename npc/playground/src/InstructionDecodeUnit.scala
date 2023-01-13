@@ -17,7 +17,7 @@ object OperationType extends ChiselEnum {
 }
 
 object Operation {
-  def apply() = new Operation(Source(), Source(), Source(), OperationType.noMatch.asUInt)
+  def apply() = new Operation(Source(), Source(), Source())
 }
 
 class Operation(val src1: Source, val src2: Source, val dst: Source, val opType: UInt = UInt(2.W)) extends Bundle {}
