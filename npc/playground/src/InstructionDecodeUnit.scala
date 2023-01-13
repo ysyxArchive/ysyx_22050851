@@ -66,7 +66,6 @@ class InstructionDecodeUnit extends Module {
   val immI = io.inst(31, 20)
   val immS = Cat(io.inst(31, 25), io.inst(11, 7))
 
-  val result: Instruction = MuxLookup(opcode, Instruction(), Seq("b0010011".U -> Instruction(true.B)))
   //    when(result.status === Instruction.further) {
   val result2 = MuxLookup(Cat(funct3, opcode), Instruction(), Seq(
     "b0000010011".U -> Instruction(
