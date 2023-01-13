@@ -79,10 +79,10 @@ class InstructionDecodeUnit extends Module {
     )
   ))
 
-  val finalresult = MuxLookup(result.status, result, Seq(
-    InstructionResType.ok -> result,
-    InstructionResType.further -> MuxLookup(result2.status, result2, Seq(
-      InstructionResType.ok -> result2,
+  val finalresult = MuxLookup(result.status.asUInt, result, Seq(
+    InstructionResType.ok.asUInt -> result,
+    InstructionResType.further.asUInt -> MuxLookup(result2.status.asUInt, result2, Seq(
+      InstructionResType.ok.asUInt -> result2,
     ))
   ))
 
