@@ -19,7 +19,9 @@ object OperationType extends ChiselEnum {
 }
 
 object Operation {
+
   val default = new Operation(Source.default, Source.default, Source.default)
+
 
   def apply() = new Operation(Source(), Source(), Source())
 
@@ -38,7 +40,9 @@ object InstructionResType extends ChiselEnum {
 
 object Instruction {
 
+
   val further = new Instruction(InstructionResType.further.asUInt, InstructionType.noType.asUInt, Operation.default)
+  val noMatch = new Instruction(InstructionResType.noMatch.asUInt, InstructionType.noType.asUInt, Operation.default)
 
   def apply() = new Instruction()
 
@@ -73,7 +77,7 @@ class InstructionDecodeUnit extends Module {
   val immI = io.inst(31, 20)
   val immS = Cat(io.inst(31, 25), io.inst(11, 7))
 
-  val result: Instruction = MuxLookup(opcode, Instruction(), Seq("b0010011".U -> Instruction.further))
+  val result: Instruction = MuxLookup(opcode, Instruction.noMatch, Seq("b0010011".U -> Instruction.further))
   //    when(result.status === Instruction.further) {
   val result2 = MuxLookup(Cat(funct3, opcode), Instruction(), Seq(
     "b0000010011".U -> Instruction(
