@@ -22,16 +22,22 @@ object Operation {
 
 class Operation(val src1: Source, val src2: Source, val dst: Source, val opType: OperationType.Type) extends Bundle {}
 
-object Instruction {
-  val further :: noMatch :: ok :: other = Enum(4)
-  val rType :: iType :: sType :: uType :: noType :: Nil = Enum(5)
-
-  def apply(isFurther: Bool = false.B) = new Instruction(Mux(isFurther, Instruction.further, Instruction.noMatch), Instruction.noType, Seq())
-
-  def apply(instType: UInt, ops: Seq[Operation]) = new Instruction(Instruction.ok, instType, ops)
+object InstructionType extends ChiselEnum {
+  val rType, iType, sType, uType, noType = Value
 }
 
-class Instruction(val status: UInt, val instructionType: UInt, val ops: Seq[Operation]) extends Bundle {
+object InstructionResType extends ChiselEnum {
+  val further, noMatch, ok, other = Value
+}
+
+object Instruction {
+
+  def apply(isFurther: Bool = false.B) = new Instruction(Mux(isFurther, InstructionResType.further, InstructionResType.noMatch), InstructionType.noType, Seq())
+
+  def apply(instType: InstructionType.Type, ops: Seq[Operation]) = new Instruction(InstructionResType.ok, instType, ops)
+}
+
+class Instruction(val status: InstructionResType.Type, val instructionType: InstructionType.Type, val ops: Seq[Operation]) extends Bundle {
   /** no match Instruction */
 
 }
@@ -62,7 +68,7 @@ class InstructionDecodeUnit extends Module {
   //    when(result.status === Instruction.further) {
   val result2 = MuxLookup(Cat(funct3, opcode), Instruction(), Seq(
     "b0000010011".U -> Instruction(
-      Instruction.iType, Seq(
+      InstructionType.iType, Seq(
         new Operation(
           new Source(rs1, true.B),
           new Source(Utils.signalExtend(immI, 12), false.B),
@@ -74,9 +80,9 @@ class InstructionDecodeUnit extends Module {
   ))
 
   val finalresult = MuxLookup(result.status, result, Seq(
-    Instruction.ok -> result,
-    Instruction.further -> MuxLookup(result2.status, result2, Seq(
-      Instruction.ok -> result2,
+    InstructionResType.ok -> result,
+    InstructionResType.further -> MuxLookup(result2.status, result2, Seq(
+      InstructionResType.ok -> result2,
     ))
   ))
 
