@@ -34,9 +34,9 @@ object Instruction {
 
   def apply() = new Instruction()
 
-  def apply(isFurther: Bool) = new Instruction(Mux(isFurther, InstructionResType.further.asUInt, InstructionResType.noMatch.asUInt), InstructionType.noType.asUInt, Seq())
+  def apply(isFurther: Bool) = new Instruction(Mux(isFurther, InstructionResType.further.asUInt, InstructionResType.noMatch.asUInt), InstructionType.noType.asUInt, Operation())
 
-  def apply(instType: InstructionType.Type, ops: Seq[Operation]) = new Instruction(InstructionResType.ok.asUInt, instType.asUInt, ops)
+  def apply(instType: InstructionType.Type, ops: Seq[Operation]) = new Instruction(InstructionResType.ok.asUInt, instType.asUInt, Operation())
 }
 
 class Instruction(val status: UInt = UInt(3.W), val instructionType: UInt = UInt(3.W), val op: Operation = Operation()) extends Bundle {
