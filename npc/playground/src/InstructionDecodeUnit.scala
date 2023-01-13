@@ -7,10 +7,10 @@ import chisel3.util.Enum
 import scala.language.postfixOps
 
 object Source {
-  def apply() = new Source(0.U, false.B)
+  def apply() = new Source()
 }
 
-class Source(val value: UInt, val isReg: Bool) {}
+class Source(val value: UInt = UInt(64.W), val isReg: Bool = Bool()) {}
 
 object OperationType extends ChiselEnum {
   val add, noMatch = Value
@@ -39,7 +39,7 @@ object Instruction {
   def apply(instType: InstructionType.Type, ops: Seq[Operation]) = new Instruction(InstructionResType.ok.asUInt, instType.asUInt, ops)
 }
 
-class Instruction(val status: UInt = UInt(3.W), val instructionType: UInt = UInt(3.W), val ops: Seq[Operation]) extends Bundle {
+class Instruction(val status: UInt = UInt(3.W), val instructionType: UInt = UInt(3.W), val op: Operation = Operation()) extends Bundle {
   /** no match Instruction */
 
 }
