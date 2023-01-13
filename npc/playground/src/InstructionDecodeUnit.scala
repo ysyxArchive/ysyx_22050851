@@ -22,10 +22,10 @@ object Operation {
 
   val default = new Operation(Source.default, Source.default, Source.default, OperationType.noMatch.asUInt)
 
-
-  def apply() = new Operation(Source(), Source(), Source())
-
   def apply(s1: Source, s2: Source, dst: Source, opType: OperationType.Type) = new Operation(s1, s2, dst, opType.asUInt)
+
+//  def apply() = new Operation(Source(), Source(), Source())
+
 }
 
 class Operation(val src1: Source, val src2: Source, val dst: Source, val opType: UInt = UInt(2.W)) extends Bundle {}
@@ -47,7 +47,7 @@ object Instruction {
   def apply() = new Instruction()
 
 
-  def apply(instType: InstructionType.Type, ops: Seq[Operation]) = new Instruction(InstructionResType.ok.asUInt, instType.asUInt, Operation())
+  def apply(instType: InstructionType.Type, op: Operation) = new Instruction(InstructionResType.ok.asUInt, instType.asUInt, op)
 }
 
 class Instruction(val status: UInt = UInt(3.W), val instructionType: UInt = UInt(3.W), val op: Operation = Operation()) extends Bundle {
@@ -76,19 +76,18 @@ class InstructionDecodeUnit extends Module {
   val funct3 = io.inst(14, 12)
   val immI = io.inst(31, 20)
   val immS = Cat(io.inst(31, 25), io.inst(11, 7))
-
+  val test = MuxLookup(opcode, Source.default, Seq())
   val result = MuxLookup(opcode, Instruction.further, Seq("b0010011".U -> Instruction.further))
   //    when(result.status === Instruction.further) {
   val result2 = MuxLookup(Cat(funct3, opcode), Instruction(), Seq(
     "b0000010011".U -> Instruction(
-      InstructionType.iType, Seq(
-        new Operation(
-          new Source(rs1, true.B),
-          new Source(Utils.signalExtend(immI, 12), false.B),
-          new Source(rd, true.B),
-          OperationType.add.asUInt
-        )
+      InstructionType.iType, Operation(
+        new Source(rs1, true.B),
+        new Source(Utils.signalExtend(immI, 12), false.B),
+        new Source(rd, true.B),
+        OperationType.add.asUInt
       )
+
     )
   ))
 
