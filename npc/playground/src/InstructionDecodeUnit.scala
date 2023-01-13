@@ -17,10 +17,10 @@ object OperationType extends ChiselEnum {
 }
 
 object Operation {
-  def apply() = new Operation(Source(), Source(), Source(), OperationType.noMatch)
+  def apply() = new Operation(Source(), Source(), Source(), OperationType.noMatch.asUInt)
 }
 
-class Operation(val src1: Source, val src2: Source, val dst: Source, val opType: OperationType.Type) extends Bundle {}
+class Operation(val src1: Source, val src2: Source, val dst: Source, val opType: UInt = UInt(2.W)) extends Bundle {}
 
 object InstructionType extends ChiselEnum {
   val rType, iType, sType, uType, noType = Value
@@ -75,7 +75,7 @@ class InstructionDecodeUnit extends Module {
           new Source(rs1, true.B),
           new Source(Utils.signalExtend(immI, 12), false.B),
           new Source(rd, true.B),
-          OperationType.add
+          OperationType.add.asUInt
         )
       )
     )
