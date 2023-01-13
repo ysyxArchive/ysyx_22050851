@@ -7,6 +7,8 @@ import chisel3.util.Enum
 import scala.language.postfixOps
 
 object Source {
+  val default = new Source(0.U, false.B)
+
   def apply() = new Source()
 }
 
@@ -17,7 +19,11 @@ object OperationType extends ChiselEnum {
 }
 
 object Operation {
+  val default = new Operation(Source.default, Source.default, Source.default)
+
   def apply() = new Operation(Source(), Source(), Source())
+
+  def apply(s1: Source, s2: Source, dst: Source, opType: OperationType.Type) = new Operation(s1, s2, dst, opType.asUInt)
 }
 
 class Operation(val src1: Source, val src2: Source, val dst: Source, val opType: UInt = UInt(2.W)) extends Bundle {}
@@ -32,9 +38,10 @@ object InstructionResType extends ChiselEnum {
 
 object Instruction {
 
+  val further = new Instruction(InstructionResType.further.asUInt, InstructionType.noType.asUInt, Operation.default)
+
   def apply() = new Instruction()
 
-  def apply(isFurther: Bool) = new Instruction(Mux(isFurther, InstructionResType.further.asUInt, InstructionResType.noMatch.asUInt), InstructionType.noType.asUInt, Operation())
 
   def apply(instType: InstructionType.Type, ops: Seq[Operation]) = new Instruction(InstructionResType.ok.asUInt, instType.asUInt, Operation())
 }
@@ -66,6 +73,7 @@ class InstructionDecodeUnit extends Module {
   val immI = io.inst(31, 20)
   val immS = Cat(io.inst(31, 25), io.inst(11, 7))
 
+  val result: Instruction = MuxLookup(opcode, Instruction(), Seq("b0010011".U -> Instruction.further))
   //    when(result.status === Instruction.further) {
   val result2 = MuxLookup(Cat(funct3, opcode), Instruction(), Seq(
     "b0000010011".U -> Instruction(
