@@ -85,7 +85,7 @@ class InstructionDecodeUnit extends Module {
         new Source(rs1, true.B),
         new Source(Utils.signalExtend(immI, 12), false.B),
         new Source(rd, true.B),
-        OperationType.add.asUInt
+        OperationType.add
       )
 
     )
