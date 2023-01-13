@@ -32,12 +32,14 @@ object InstructionResType extends ChiselEnum {
 
 object Instruction {
 
-  def apply(isFurther: Bool = false.B) = new Instruction(Mux(isFurther, InstructionResType.further.asUInt, InstructionResType.noMatch.asUInt), InstructionType.noType.asUInt, Seq())
+  def apply() = new Instruction()
+
+  def apply(isFurther: Bool) = new Instruction(Mux(isFurther, InstructionResType.further.asUInt, InstructionResType.noMatch.asUInt), InstructionType.noType.asUInt, Seq())
 
   def apply(instType: InstructionType.Type, ops: Seq[Operation]) = new Instruction(InstructionResType.ok.asUInt, instType.asUInt, ops)
 }
 
-class Instruction(val status: UInt, val instructionType: UInt,  ops: Seq[Operation]) extends Bundle {
+class Instruction(val status: UInt = UInt(3.W), val instructionType: UInt = UInt(3.W), val ops: Seq[Operation]) extends Bundle {
   /** no match Instruction */
 
 }
