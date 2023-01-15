@@ -44,9 +44,9 @@ object Operation {
 }
 
 class Operation() extends Bundle {
-  val src1   = Source
-  val src2   = Source
-  val dst    = Source
+  val src1   = Source()
+  val src2   = Source()
+  val dst    = Source()
   val opType = UInt(2.W)
 }
 
