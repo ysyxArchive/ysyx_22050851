@@ -37,7 +37,7 @@ object Operation {
     op.src2   := s2
     op.dst    := dst
     op.opType := opType
-
+    op
   }
 
   def apply() = new Operation()
