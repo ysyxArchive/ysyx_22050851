@@ -75,6 +75,7 @@ object Instruction {
   val noMatch = {
     val inst = Wire(new Instruction())
     inst.status := InstructionResType.noMatch.asUInt
+    inst
   }
 
   def apply(instType: InstructionType.Type, op: Operation) = {
