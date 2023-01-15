@@ -73,7 +73,7 @@ object Instruction {
   }
 
   val noMatch = {
-    val inst = new Instruction()
+    val inst = Wire(new Instruction())
     inst.status := InstructionResType.noMatch.asUInt
   }
 
