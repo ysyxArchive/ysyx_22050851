@@ -30,7 +30,7 @@ object OperationType extends ChiselEnum {
 
 object Operation {
 
-  val default = Operation(Source.default, Source.default, Source.default, OperationType.noMatch.asUInt)
+  val default = Operation(Source.default, Source.default, Source.default, OperationType.noMatch)
 
   def apply(s1: Source, s2: Source, dst: Source, opType: OperationType.Type) = {
     val op = new Operation()
