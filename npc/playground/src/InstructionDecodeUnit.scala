@@ -36,7 +36,7 @@ object Operation {
     op.src1   := s1
     op.src2   := s2
     op.dst    := dst
-    op.opType := opType
+    op.opType := opType.asUInt
     op
   }
 
