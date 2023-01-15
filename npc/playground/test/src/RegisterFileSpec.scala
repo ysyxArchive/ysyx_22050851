@@ -1,40 +1,47 @@
 import chisel3._
 import chiseltest._
-import org.scalatest.flatspec.AnyFlatSpec
-
 import utest._
 
-class ABasicTest extends AnyFlatSpec with ChiselScalatestTester {
-  behavior.of("MyModule")
-  it should "do something" in {
-    test(new RegisterFile(32, 64)) { c =>
-      c.io.wdata.poke(1.U)
-      c.io.waddr.poke(1.U)
-      c.io.wen.poke(true.B)
-      c.io.raddr.poke(1.U)
-      c.io.ren.poke(true.B)
-      c.clock.step()
-      c.io.rdata.expect(2.U)
-
+/**
+ * This is a trivial example of how to run this Specification
+ * From within sbt use:
+ * {{{
+ * testOnly gcd.GcdDecoupledTester
+ * }}}
+ * From a terminal shell use:
+ * {{{
+ * sbt 'testOnly gcd.GcdDecoupledTester'
+ * }}}
+ */
+object RegisterFileSpec extends ChiselUtestTester {
+  val tests = Tests {
+    test("RegisterFile") {
+      testCircuit(new RegisterFile()) {
+        dut =>
+          dut.io.waddr.poke(1.U)
+          dut.io.raddr1.poke(1.U)
+          dut.io.wdata.poke(2.U)
+          dut.io.wen.poke(true.B)
+          dut.io.rdata1.expect(2.U)
+          dut.clock.step()
+          dut.io.waddr.poke(2.U)
+          dut.io.raddr1.poke(1.U)
+          dut.io.wdata.poke(3.U)
+          dut.io.wen.poke(true.B)
+          dut.io.rdata1.expect(2.U)
+          dut.clock.step()
+          dut.io.waddr.poke(1.U)
+          dut.io.raddr1.poke(1.U)
+          dut.io.wdata.poke(3.U)
+          dut.io.wen.poke(false.B)
+          dut.io.rdata1.expect(2.U)
+          dut.clock.step()
+          dut.io.waddr.poke(0.U)
+          dut.io.raddr1.poke(0.U)
+          dut.io.wdata.poke(3.U)
+          dut.io.wen.poke(true.B)
+          dut.io.rdata1.expect(0.U)
+      }
     }
-    // test body here
   }
 }
-
-// class RegisterFileSpec extends ChiselUtestTester {
-//   val tests = Tests {
-//     // test("RegisterFile") {
-//     //   testCircuit(new RegisterFile(32, 64)) { c =>
-//     test(new RegisterFile(32, 64)) { c =>
-//       c.io.wdata.poke(1.U)
-//       c.io.waddr.poke(1.U)
-//       c.io.wen.poke(true.B)
-//       c.io.raddr.poke(1.U)
-//       c.io.ren.poke(true.B)
-//       c.clock.step()
-//       c.io.rdata.expect(2.U)
-
-//     }
-//   }
-
-// }
