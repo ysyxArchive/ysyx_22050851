@@ -114,7 +114,7 @@ class InstructionDecodeUnit extends Module {
   //    when(result.status === Instruction.further) {
   val result2 = MuxLookup(
     Cat(funct3, opcode),
-    Instruction(),
+    Instruction.noMatch,
     Seq(
       "b0000010011".U -> Instruction(
         InstructionType.iType,
