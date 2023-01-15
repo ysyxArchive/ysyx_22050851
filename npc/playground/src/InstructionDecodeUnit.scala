@@ -32,7 +32,7 @@ object Operation {
   val default = Operation(Source.default, Source.default, Source.default, OperationType.noMatch)
 
   def apply(s1: Source, s2: Source, dst: Source, opType: OperationType.Type) = {
-    val op = Wire(Operation())
+    val op = Wire(new Operation())
     op.src1   := s1
     op.src2   := s2
     op.dst    := dst
