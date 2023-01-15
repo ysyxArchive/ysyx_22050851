@@ -67,7 +67,7 @@ class Instruction() extends Bundle {
 object Instruction {
 
   def further = {
-    val inst = new Instruction()
+    val inst = Wire(new Instruction())
     inst.status := InstructionResType.further.asUInt
     inst
   }
