@@ -1,5 +1,4 @@
 import Chisel.{switch, Cat, Decoupled, DecoupledIO, Fill, Mux1H, MuxCase, MuxLookup}
-import chisel3.DontCare.:=
 import chisel3._
 import chisel3.experimental.ChiselEnum
 import chisel3.util.Enum
@@ -68,14 +67,22 @@ class Instruction() extends Bundle {
 object Instruction {
 
   def further = {
-    var inst = new Instruction()
+    val inst = new Instruction()
     inst.status := InstructionResType.further.asUInt
     inst
   }
 
   val noMatch = {
-    var inst = new Instruction()
+    val inst = new Instruction()
     inst.status := InstructionResType.noMatch.asUInt
+  }
+
+  def apply(instType: InstructionType, op: Operation) = {
+    val inst = new Instruction()
+    inst.status          := InstructionResType.ok
+    inst.op              := op
+    inst.instructionType := instType
+    inst
   }
 
   def apply() = new Instruction
