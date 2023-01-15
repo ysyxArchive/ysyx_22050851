@@ -77,7 +77,7 @@ object Instruction {
     inst.status := InstructionResType.noMatch.asUInt
   }
 
-  def apply(instType: InstructionType, op: Operation) = {
+  def apply(instType: InstructionType.Type, op: Operation) = {
     val inst = new Instruction()
     inst.status          := InstructionResType.ok
     inst.op              := op
