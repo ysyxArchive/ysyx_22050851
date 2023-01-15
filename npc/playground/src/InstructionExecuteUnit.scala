@@ -6,7 +6,7 @@ class InstructionExecuteUnit extends Module {
   val in    = Flipped(Decoupled(Operation()))
   val regIO = Flipped(new RegisterFileIO())
 
-  val op = Wire(Operation)
+  val op = Wire(Operation())
   op := in.bits
 
   regIO.raddr1 := Mux(op.src1.isReg === true.B, src1.value, 0.U(64.W))
