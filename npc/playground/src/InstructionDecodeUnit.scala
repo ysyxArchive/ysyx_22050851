@@ -12,7 +12,7 @@ class Source() extends Bundle {
 }
 
 object Source {
-  val default = RegInit(apply())
+  val default = Reg(Source())
 
   def apply(value: UInt, isReg: Bool) = {
     val f = new Source()
