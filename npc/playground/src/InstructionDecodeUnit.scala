@@ -14,7 +14,7 @@ object Source {
   val default = Reg(Source(0.U, false.B))
 
   def apply(value: UInt, isReg: Bool) = {
-    val f = new Source()
+    val f = Wire(new Source())
     f.value := value
     f.isReg := isReg
     f
