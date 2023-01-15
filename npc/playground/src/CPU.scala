@@ -22,6 +22,6 @@ class CPU extends Module {
   val decoder = Module(new InstructionDecodeUnit)
   val exe     = Module(new InstructionExecuteUnit)
 
-  exe.in <> decoder.output
+  exe.in := decoder.output
 
 }
