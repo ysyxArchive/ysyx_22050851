@@ -5,7 +5,7 @@ import chisel3.util._
 class InstructionExecuteUnit extends Module {
   val in = Flipped(Decoupled(Operation()))
   val regIO = Flipped(new RegisterFileIO())
-
+  val operation = RegInit(operation)
   regIO.raddr1 := Mux(in.bits.src1.isReg === true.B, in.bits.src1.value, 0.U(64.W))
   regIO.raddr2 := Mux(in.bits.src2.isReg === true.B, in.bits.src2.value, 0.U(64.W))
 
