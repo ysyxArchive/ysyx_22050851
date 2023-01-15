@@ -20,6 +20,8 @@ object Source {
     f.isReg := isReg
     f
   }
+
+  def apply() = new Source()
 }
 
 object OperationType extends ChiselEnum {
