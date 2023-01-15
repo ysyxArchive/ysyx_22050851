@@ -78,7 +78,7 @@ object Instruction {
   }
 
   def apply(instType: InstructionType.Type, op: Operation) = {
-    val inst = new Instruction()
+    val inst = Wire(new Instruction())
     inst.status          := InstructionResType.ok.asUInt
     inst.op              := op
     inst.instructionType := instType
