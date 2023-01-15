@@ -5,7 +5,7 @@ import chisel3.util._
 class InstructionExecuteUnit extends Module {
   val in        = Flipped(Decoupled(Operation()))
   val regIO     = Flipped(new RegisterFileIO())
-  val operation = RegInit(Operation)
+  val operation = RegInit(Operation, in.bits)
   val src1      = operation.src1
   val src2      = operation.src2
 
