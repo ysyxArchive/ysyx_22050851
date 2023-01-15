@@ -27,7 +27,7 @@ object OperationType extends ChiselEnum {
   val add, noMatch = Value
 }
 
-object Operation  {
+object Operation extends Bundle {
 
   val default = Operation(Source.default, Source.default, Source.default, OperationType.noMatch)
 
@@ -101,7 +101,7 @@ class InstructionDecodeUnit extends Module {
     val enable = Input(Bool())
     val inst   = Input(UInt(32.W))
   })
-  val output = IO(Decoupled(Instruction()))
+  val output = IO(Decoupled(Operation()))
   val rs1    = io.inst(19, 15)
   val rs2    = io.inst(24, 20)
   val rd     = io.inst(11, 7)
@@ -144,7 +144,7 @@ class InstructionDecodeUnit extends Module {
   )
 
   when(io.enable) {
-    output.bits  := finalresult
+    output.bits  := finalresult.op
     output.valid := true.B
   }
 
