@@ -12,14 +12,14 @@ class InstructionExecuteUnit extends Module {
   regIO.raddr1 := Mux(src1.isReg === true.B, src1.value, 0.U(64.W))
   regIO.raddr2 := Mux(src2.isReg === true.B, in.bits.src2.value, 0.U(64.W))
 
-  val src1 = Mux(in.bits.src1.isReg, regIO.rdata1, in.bits.src1.value)
-  val src2 = Mux(in.bits.src1.isReg, regIO.rdata2, in.bits.src2.value)
+  val src1val = Mux(in.bits.src1.isReg, regIO.rdata1, in.bits.src1.value)
+  val src2val = Mux(in.bits.src1.isReg, regIO.rdata2, in.bits.src2.value)
 
   val ans = MuxLookup(
     in.bits.opType.asUInt,
     0.U,
     Seq(
-      OperationType.add.asUInt -> (src1 + src2)
+      OperationType.add.asUInt -> (src1val + src2val)
     )
   )
   regIO.waddr := regIO.wen
