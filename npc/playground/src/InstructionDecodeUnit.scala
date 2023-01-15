@@ -69,7 +69,8 @@ object Instruction {
 
   def further = {
     var inst = new Instruction()
-    inst.instructionType := InstructionType.further.asUInt
+    inst.instructionType := InstructionResType.further.asUInt
+    inst
   }
 
   val noMatch = new Instruction(InstructionResType.noMatch.asUInt, InstructionType.noType.asUInt, Operation.default)
