@@ -17,7 +17,7 @@ object Source {
   def apply(value: UInt, isReg: Bool) = {
     val f = new Source()
     f.value := value
-    f.isReg := isRegs
+    f.isReg := isReg
     f
   }
 }
