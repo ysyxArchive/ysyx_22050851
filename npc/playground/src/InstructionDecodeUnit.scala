@@ -27,7 +27,7 @@ object OperationType extends ChiselEnum {
   val add, noMatch = Value
 }
 
-object Operation {
+object Operation extends Bundle {
 
   val default = Operation(Source.default, Source.default, Source.default, OperationType.noMatch)
 
