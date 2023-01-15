@@ -81,7 +81,7 @@ object Instruction {
     val inst = Wire(new Instruction())
     inst.status          := InstructionResType.ok.asUInt
     inst.op              := op
-    inst.instructionType := instType
+    inst.instructionType := instType.asUInt
     inst
   }
 
