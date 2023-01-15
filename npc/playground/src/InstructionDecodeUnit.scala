@@ -65,11 +65,11 @@ class Instruction() extends Bundle {
   val instructionType = UInt(3.W)
   val op              = Operation()
 }
-object Instructin {
+object Instruction {
 
   def further = {
-    var inst = new Instruction
-//    inst. InstructionResType.further.asUInt, InstructionType.noType.asUInt, Operation.default
+    var inst = new Instruction()
+    inst.instructionType := InstructionType.further.asUInt
   }
 
   val noMatch = new Instruction(InstructionResType.noMatch.asUInt, InstructionType.noType.asUInt, Operation.default)
