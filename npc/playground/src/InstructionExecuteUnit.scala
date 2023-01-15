@@ -9,7 +9,7 @@ class InstructionExecuteUnit extends Module {
   val op = Wire(Operation())
   op := in.bits
 
-  regIO.raddr1 := Mux(op.src1.isReg === true.B, src1.value, 0.U(64.W))
+  regIO.raddr1 := Mux(op.src1.isReg === true.B, in.bits.src1.value, 0.U(64.W))
   regIO.raddr2 := Mux(op.src1.isReg === true.B, in.bits.src2.value, 0.U(64.W))
 
   val src1val = Mux(in.bits.src1.isReg, regIO.rdata1, in.bits.src1.value)
