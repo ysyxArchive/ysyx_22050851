@@ -11,7 +11,7 @@ class Source() extends Bundle {
 }
 
 object Source {
-  val default = Reg(Source(0.U, false.B))
+  val default = RegInit(Source(0.U, false.B))
 
   def apply(value: UInt, isReg: Bool) = {
     val f = Wire(new Source())
