@@ -5,6 +5,7 @@ object Elaborate extends App {
 //  def top = new GCD()
   val useMFC = true // use MLIR-based firrtl compiler
   val generator = Seq(chisel3.stage.ChiselGeneratorAnnotation(() => top))
+  println(args)
   if (useMFC) {
     (new ChiselStage).execute(args, generator :+ CIRCTTargetAnnotation(CIRCTTarget.Verilog))
   } else {
