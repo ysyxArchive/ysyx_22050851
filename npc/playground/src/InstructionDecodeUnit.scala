@@ -67,13 +67,17 @@ object Instruction {
 
   def further = {
     val inst = Wire(new Instruction())
-    inst.status := InstructionResType.further.asUInt
+    inst.status          := InstructionResType.further.asUInt
+    inst.instructionType := DontCare
+    inst.op              := DontCare
     inst
   }
 
   val noMatch = {
     val inst = Wire(new Instruction())
-    inst.status := InstructionResType.noMatch.asUInt
+    inst.status          := InstructionResType.noMatch.asUInt
+    inst.instructionType := DontCare
+    inst.op              := DontCare
     inst
   }
 
@@ -102,7 +106,7 @@ class InstructionDecodeUnit extends Module {
   })
   val output = IO(Decoupled(Operation()))
 
-  val resultValid: Bool = RegInit(false.B)
+  val resultValid = RegInit(false.B)
   output.valid := !output.ready && resultValid
   output.bits  := DontCare
 
