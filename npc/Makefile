@@ -20,7 +20,7 @@ export PATH := $(PATH):$(abspath ./utils)
 
 default: $(BIN)
 
-$(BIN): $(VSRCS) $(CSRCS)
+$(BIN): $(VSRCS) $(CSRCS) verilog
 	@rm -rf $(OBJ_DIR)
 	$(VERILATOR) $(VERILATOR_CFLAGS) \
 		--top-module $(TOPNAME) $^ \
@@ -34,7 +34,7 @@ test:
 verilog:
 	$(call git_commit, "generate verilog")
 	mkdir -p $(BUILD_DIR)
-	mill -i __.test.runMain Elaborate -t $(BUILD_DIR)
+	mill -i __.test.runMain Elaborate -td $(BUILD_DIR)
 
 help:
 	mill -i __.test.runMain Elaborate --help
@@ -62,6 +62,6 @@ build:
 sim: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 	$(BIN)
-	
+
 .PHONY: test verilog help compile bsp reformat checkformat clean sim build
 include ../Makefile
