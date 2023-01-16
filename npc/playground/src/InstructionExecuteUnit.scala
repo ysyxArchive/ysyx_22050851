@@ -7,7 +7,7 @@ class InstructionExecuteUnit extends Module {
   val regIO = IO(Flipped(new RegisterFileIO()))
 
   val inReady   = RegInit(true.B)
-  val readyNext = Wire(Bool())
+  val readyNext = IO(Bool())
   inReady  := Mux(inReady, readyNext, true.B)
   in.ready := inReady
 
