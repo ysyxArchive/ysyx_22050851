@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
   top->trace(tfp, 0);
   tfp->open("wave.vcd");  // 打开vcd
   int time = 0;
-  while (top->pcio_pc <= 0x80000000 + 6 * 4) {
+  while (time < 100 && top->pcio_pc <= 0x80000000 + 6 * 4) {
     top->pcio_inst = (top->pcio_pc - 0x80000000) / 4;
     uint64_t pc = top->pcio_pc;
 
