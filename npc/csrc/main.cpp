@@ -13,6 +13,7 @@ int main(int argc, char** argv) {
   top->trace(tfp, 0);
   tfp->open("wave.vcd");  // 打开vcd
   int time = 0;
+  printf("1\n");
   while (sc_time_stamp() < 20 && !contextp->gotFinish()) {
     top->pcio_inst = 0;
     uint64_t pc = top->pcio_pc;
