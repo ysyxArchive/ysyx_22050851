@@ -10,9 +10,9 @@ import chisel3.util.Decoupled
 
 class CPU extends Module {
   val io = IO(new Bundle {
-    val out   = IO(Decoupled(Operation()))
     val fetok = Input(Bool())
   })
+  val out = IO(Decoupled(Operation()))
 
   val regs = Module(new RegisterFile);
   val pc   = RegInit("h80000000".asUInt(64.W))
@@ -23,6 +23,6 @@ class CPU extends Module {
   val decoder = Module(new InstructionDecodeUnit)
 //   val exe     = Module(new InstructionExecuteUnit)
 
-  io.out <> decoder.output
+  out <> decoder.output
 
 }
