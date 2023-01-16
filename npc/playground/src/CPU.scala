@@ -22,6 +22,7 @@ class CPU extends Module {
   val cpuState                                                   = RegInit(state_fetch)
 
   val decoder = Module(new InstructionDecodeUnit)
+  decoder.io := DontCare
 //   val exe     = Module(new InstructionExecuteUnit)
 
   out <> decoder.output
