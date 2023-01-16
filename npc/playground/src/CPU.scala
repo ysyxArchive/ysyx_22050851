@@ -9,14 +9,14 @@ import chisel3.util.Decoupled
   */
 
 class CPU extends Module {
-  val PCio = IO(new Bundle {
+  val pcio = IO(new Bundle {
     val inst = Input(UInt(32.W))
     val pc   = Output(UInt(64.W))
   })
   val out = IO(Decoupled(Operation()))
 
   val regs = Module(new RegisterFile);
-  regs.io.
+  pcio.pc      := regs.io.pc
   regs.io := DontCare
   val pc = RegInit("h80000000".asUInt(64.W))
 

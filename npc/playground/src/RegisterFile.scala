@@ -24,7 +24,6 @@ class RegisterFile extends Module {
   val io   = IO(new RegisterFileIO())
   val regs = RegInit(VecInit(Seq.fill(32)(0.U(64.W))))
   val pc   = RegInit("h80000000".asUInt(64.W))
-  val a    = regs.concat(VecInit(Seq.fill(32)(pc)))
 
   io.pc := pc
  
