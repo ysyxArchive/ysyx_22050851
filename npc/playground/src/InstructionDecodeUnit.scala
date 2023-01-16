@@ -102,7 +102,7 @@ class InstructionDecodeUnit extends Module {
   })
   val output = IO(Decoupled(Operation()))
 
-  val resultValid: Bool = RegNext(~(output.ready & resultValid), false.B)
+  val resultValid: Bool = RegInit(false.B)
   output.valid := !output.ready && resultValid
   output.bits  := DontCare
 
