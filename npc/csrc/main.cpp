@@ -37,7 +37,6 @@ int main(int argc, char** argv) {
   }
   top->reset = false;
   while (time < 100 && top->pcio_pc <= 0x80000000 + 6 * 4) {
-    printf("%lx %lx\n", top->pcio_pc, 0x80000000 / 4);
     top->pcio_inst = mem[(top->pcio_pc - 0x80000000) / 4];
     uint64_t pc = top->pcio_pc;
 

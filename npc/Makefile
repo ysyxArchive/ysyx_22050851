@@ -56,10 +56,12 @@ clean:
 
 build:
 	@rm -rf $(OBJ_DIR)
+	
 
 
 sim: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-
+	$(BIN)
+	
 .PHONY: test verilog help compile bsp reformat checkformat clean sim build
 include ../Makefile
