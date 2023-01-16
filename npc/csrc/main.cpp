@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
   while (time < 20) {
     top->pcio_inst = 0;
     uint64_t pc = top->pcio_pc;
-    printf("%lu %lu\n", top->pcio_inst, pc);
+    printf("%lu %lx\n", top->pcio_inst, pc);
 
     // 记录波形
     top->eval();
