@@ -7,7 +7,7 @@ int main(int argc, char** argv) {
 
   Verilated::traceEverOn(true);  // 导出vcd波形需要加此语句
   VerilatedVcdC* tfp = new VerilatedVcdC();  // 导出vcd波形需要加此语句
-
+  
   VCPU* top = new VCPU{contextp};
   top->trace(tfp, 0);
   tfp->open("wave.vcd");  // 打开vcd
