@@ -11,6 +11,8 @@ static void single_cycle(VCPU* top) {
 }
 
 int main(int argc, char** argv) {
+  Verilated::commandArgs(argc, argv);
+  Verilated::traceEverOn(true);  // 导出vcd波形需要加此语句
   VerilatedContext* contextp = new VerilatedContext;
   contextp->commandArgs(argc, argv);
 
