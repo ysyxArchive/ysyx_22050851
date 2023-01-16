@@ -16,5 +16,5 @@ class InstructionFetchUnit {
   val out = Decoupled(new Bundle {
     val inst = UInt(32.W)
   })
-  in.ready := true.B
+//   in.ready := true.B
 }
