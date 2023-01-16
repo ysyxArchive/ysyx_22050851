@@ -16,15 +16,15 @@ class CPU extends Module {
   val out = IO(Decoupled(Operation()))
 
   val regs = Module(new RegisterFile);
-  pcio.pc      := regs.io.pc
+
+  pcio.pc := regs.io.pc
   regs.io := DontCare
+
   val pc = RegInit("h80000000".asUInt(64.W))
 
-  val state_fetch :: state_decode :: state_execute :: state_idle = Enum(3)
-  val cpuState                                                   = RegInit(state_fetch)
-
   val decoder = Module(new InstructionDecodeUnit)
-  decoder.io := DontCare
+  decoder.io.inst   := pcio.inst
+  decoder.io.enable := true.B
 //   val exe     = Module(new InstructionExecuteUnit)
 
   out <> decoder.output
