@@ -25,8 +25,10 @@ class CPU extends Module {
   val decoder = Module(new InstructionDecodeUnit)
   decoder.io.inst   := pcio.inst
   decoder.io.enable := true.B
-//   val exe     = Module(new InstructionExecuteUnit)
+  val exe = Module(new InstructionExecuteUnit)
 
-  out <> decoder.output
+//   out <> decoder.output
+  exe.in <> decoder.output
+  exe.regIO <> regs.io
 
 }
