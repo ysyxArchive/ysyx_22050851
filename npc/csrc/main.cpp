@@ -2,6 +2,14 @@
 #include "stdio.h"
 #include "verilated.h"
 #include "verilated_vcd_c.h"
+
+static void single_cycle(VCPU* top) {
+  top->clock = 0;
+  top->eval();
+  top->clock = 1;
+  top->eval();
+}
+
 int main(int argc, char** argv) {
   VerilatedContext* contextp = new VerilatedContext;
   contextp->commandArgs(argc, argv);
@@ -14,14 +22,15 @@ int main(int argc, char** argv) {
   tfp->open("wave.vcd");  // 打开vcd
   int time = 0;
   while (time < 20) {
-    printf("1\n");
     top->pcio_inst = 0;
     uint64_t pc = top->pcio_pc;
     printf("%lu %lu\n", top->pcio_inst, pc);
+
     // 记录波形
+    top->eval();
     tfp->dump(time++);
     // 推动
-    top->eval();
+    single_cycle(top);
   }
   delete top;
   delete contextp;
