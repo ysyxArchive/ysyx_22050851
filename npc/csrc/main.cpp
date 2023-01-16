@@ -32,6 +32,7 @@ int main(int argc, char** argv) {
   tfp->open("wave.vcd");  // 打开vcd
   int time = 0;
   while (time < 100 && top->pcio_pc <= 0x80000000 + 6 * 4) {
+    printf("%x\n", (top->pcio_pc - 0x80000000) / 4);
     top->pcio_inst = mem[(top->pcio_pc - 0x80000000) / 4];
     uint64_t pc = top->pcio_pc;
 
