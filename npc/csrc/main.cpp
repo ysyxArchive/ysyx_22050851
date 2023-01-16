@@ -31,6 +31,11 @@ int main(int argc, char** argv) {
   top->trace(tfp, 0);
   tfp->open("wave.vcd");  // 打开vcd
   int time = 0;
+  for (int i = 0; i < 10; i++) {
+    top->reset = true;
+    top->eval();
+  }
+  top->reset = false;
   while (time < 100 && top->pcio_pc <= 0x80000000 + 6 * 4) {
     printf("%lx %lx\n", top->pcio_pc, 0x80000000 / 4);
     top->pcio_inst = mem[(top->pcio_pc - 0x80000000) / 4];
