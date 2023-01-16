@@ -29,6 +29,10 @@ int main(int argc, char** argv) {
     printf("%lu %lx\n", top->pcio_inst, pc);
 
     // 记录波形
+    top->clock = 0;
+    top->eval();
+    tfp->dump(time++);
+    top->clock = 1;
     top->eval();
     tfp->dump(time++);
     // 推动
