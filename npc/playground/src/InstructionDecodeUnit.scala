@@ -102,6 +102,11 @@ class InstructionDecodeUnit extends Module {
     val inst   = Input(UInt(32.W))
   })
   val output = IO(Decoupled(Operation()))
+
+  val resultValid: Bool = RegNext(!(output.ready && resultValid), false.B)
+  output.valid := !output.ready && resultValid
+  output.bits  := DontCare
+
   val rs1    = io.inst(19, 15)
   val rs2    = io.inst(24, 20)
   val rd     = io.inst(11, 7)
@@ -109,8 +114,8 @@ class InstructionDecodeUnit extends Module {
   val funct3 = io.inst(14, 12)
   val immI   = io.inst(31, 20)
   val immS   = Cat(io.inst(31, 25), io.inst(11, 7))
+
   val result = MuxLookup(opcode, Instruction.further, Seq("b0010011".U -> Instruction.further))
-  //    when(result.status === Instruction.further) {
   val result2 = MuxLookup(
     Cat(funct3, opcode),
     Instruction.noMatch,
