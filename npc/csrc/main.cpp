@@ -1,9 +1,9 @@
-#include "Vour.h"
+#include "VCPU.h"
 #include "verilated.h"
 int main(int argc, char** argv) {
   VerilatedContext* contextp = new VerilatedContext;
   contextp->commandArgs(argc, argv);
-  Vour* top = new Vour{contextp};
+  VCPU* top = new VCPU{contextp};
   while (!contextp->gotFinish()) {
     top->eval();
   }
