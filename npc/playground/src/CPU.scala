@@ -1,5 +1,6 @@
 import chisel3._
 import chisel3.util.Enum
+import chisel3.util.Decoupled
 
 /**
   * Compute GCD using subtraction method.
@@ -9,7 +10,7 @@ import chisel3.util.Enum
 
 class CPU extends Module {
   val io = IO(new Bundle {
-
+    val out   = IO(Decoupled(Operation()))
     val fetok = Input(Bool())
   })
 
@@ -20,8 +21,8 @@ class CPU extends Module {
   val cpuState                                                   = RegInit(state_fetch)
 
   val decoder = Module(new InstructionDecodeUnit)
-  val exe     = Module(new InstructionExecuteUnit)
+//   val exe     = Module(new InstructionExecuteUnit)
 
-  exe.in <> decoder.output
+  io.out <> decoder.output
 
 }
