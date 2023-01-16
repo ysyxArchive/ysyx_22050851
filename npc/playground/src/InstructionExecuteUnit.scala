@@ -6,25 +6,39 @@ class InstructionExecuteUnit extends Module {
   val in    = IO(Flipped(Decoupled(Operation())))
   val regIO = IO(Flipped(new RegisterFileIO()))
 
-  when(in.valid) {
-    val op = in.bits
+  val inReady   = RegInit(true.B)
+  val readyNext = Wire(Bool())
+  inReady  := Mux(inReady, readyNext, true.B)
+  in.ready := inReady
 
-    regIO.raddr1 := Mux(op.src1.isReg === true.B, in.bits.src1.value, 0.U(64.W))
-    regIO.raddr2 := Mux(op.src1.isReg === true.B, in.bits.src2.value, 0.U(64.W))
+  val writeEnable = RegInit(false.B)
+  val writeNext   = Wire(Bool())
+  val writeAddr   = RegInit(0.U(5.W))
+  val writeData   = RegInit(0.U(64.W))
+  regIO.wen   := writeEnable
+  regIO.waddr := writeAddr
+  regIO.wdata := writeData
+  writeEnable := Mux(writeEnable, false.B, writeNext)
 
-    val src1val = Mux(in.bits.src1.isReg, regIO.out1, in.bits.src1.value)
-    val src2val = Mux(in.bits.src1.isReg, regIO.out2, in.bits.src2.value)
+  val op = in.bits
+  regIO.raddr1 := Mux(op.src1.isReg === true.B, in.bits.src1.value, 0.U(64.W))
+  regIO.raddr2 := Mux(op.src1.isReg === true.B, in.bits.src2.value, 0.U(64.W))
 
-    val ans = MuxLookup(
-      in.bits.opType.asUInt,
-      0.U,
-      Seq(
-        OperationType.add.asUInt -> (src1val + src2val)
-      )
+  val src1val = Mux(in.bits.src1.isReg, regIO.out1, in.bits.src1.value)
+  val src2val = Mux(in.bits.src1.isReg, regIO.out2, in.bits.src2.value)
+
+  val ans = MuxLookup(
+    in.bits.opType.asUInt,
+    0.U,
+    Seq(
+      OperationType.add.asUInt -> (src1val + src2val)
     )
-    regIO.waddr := regIO.wen
-    regIO.wdata := ans
-    regIO.wen   := RegNext(false.B, true.B)
+  )
+  when(in.valid) {
+    inReady   := false.B
+    writeAddr := regIO.wen
+    writeData := ans
+    writeNext := true.B
   }
 
 }
