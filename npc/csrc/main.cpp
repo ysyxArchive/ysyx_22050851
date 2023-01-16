@@ -10,6 +10,14 @@ static void single_cycle(VCPU* top) {
   top->eval();
 }
 
+uint32_t mem[] = {
+    0x2008113,  // 0000001 00000 00000 000 00010 00100 11 : reg 2 = reg0(0) +  1
+    0x2010093,  // 0000001 00000 00010 000 00001 00100 11 : reg 1 = reg2 +  1
+    0x2010093,  // 0000001 00000 00010 000 00001 00100 11 : reg 1 = reg2 +  1
+    0x2010093,  // 0000001 00000 00010 000 00001 00100 11 : reg 1 = reg2 +  1
+    0x2010093,  // 0000001 00000 00010 000 00001 00100 11 : reg 1 = reg2 +  1
+    0x2010093,  // 0000001 00000 00010 000 00001 00100 11 : reg 1 = reg2 +  1
+};
 int main(int argc, char** argv) {
   Verilated::commandArgs(argc, argv);
   Verilated::traceEverOn(true);  // 导出vcd波形需要加此语句
@@ -23,10 +31,9 @@ int main(int argc, char** argv) {
   top->trace(tfp, 0);
   tfp->open("wave.vcd");  // 打开vcd
   int time = 0;
-  while (time < 20) {
-    top->pcio_inst = 0;
+  while (top->pcio_pc <= 0x80000000 + 6 * 4) {
+    top->pcio_inst = (top->pcio_pc - 0x80000000) / 4;
     uint64_t pc = top->pcio_pc;
-    printf("%lu %lx\n", top->pcio_inst, pc);
 
     // 记录波形
     top->clock = 0;
