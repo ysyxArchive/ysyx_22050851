@@ -147,7 +147,7 @@ class InstructionDecodeUnit extends Module {
     )
   )
   val result3 = MuxLookup(
-    opcode,
+    io.inst,
     Instruction.noMatch,
     Seq(
       "b00000000000100000000000001110011".U -> Instruction(
