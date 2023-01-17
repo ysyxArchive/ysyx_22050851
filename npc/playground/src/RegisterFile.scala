@@ -33,7 +33,8 @@ class RegisterFile extends Module {
   val regs = RegInit(VecInit(Seq.fill(32)(0.U(64.W))))
   debugout.regs := regs
 
-  val pc: UInt = RegNext(Mux(io.pcWrite, io.wdata, pc + 4.U), "h80000000".asUInt(64.W))
+  val pc = Wire(UInt(64.W))
+  pc := RegNext(Mux(io.pcWrite, io.wdata, pc + 4.U), "h80000000".asUInt(64.W))
 
   for (i <- 0 to 32) {
     regs(i) := Mux(io.regWrite && io.waddr === i.U, io.wdata, regs(i))
