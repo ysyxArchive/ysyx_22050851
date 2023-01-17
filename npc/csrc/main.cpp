@@ -3,12 +3,6 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
-static void single_cycle(VCPU* top) {
-  top->clock = 0;
-  top->eval();
-  top->clock = 1;
-  top->eval();
-}
 
 uint32_t mem[] = {
     0x108113,  // 0000000 00001 00000 000 00010 00100 11 : reg 2 = reg0(0) +  1
@@ -54,7 +48,6 @@ int main(int argc, char** argv) {
     top->eval();
     tfp->dump(time++);
     // 推动
-    single_cycle(top);
   }
   delete top;
   delete contextp;
