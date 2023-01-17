@@ -20,6 +20,7 @@ uint32_t mem[] = {
     0x110113,  // 0000000 00001 00010 000 00010 00100 11 : reg 2 = reg2 +  1
     0x110113,  // 0000000 00001 00010 000 00010 00100 11 : reg 2 = reg2 +  1
     0x110113,  // 0000000 00001 00010 000 00010 00100 11 : reg 2 = reg2 +  1
+    0x100073   // 0000000 00001 00000 000 00000 11100 11 : halt
 
 };
 int main(int argc, char** argv) {
@@ -46,7 +47,7 @@ int main(int argc, char** argv) {
   top->reset = false;
 
   tfp->dump(time++);
-  while (time < 100) {
+  while (top->pcio_pc != 0) {
     uint64_t pc = top->pcio_pc;
     printf("now the pc is %lx %d\n", top->pcio_pc, (pc - 0x80000000) / 4);
 
