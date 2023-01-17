@@ -31,7 +31,7 @@ class CPU extends Module {
 
   val exe = Module(new InstructionExecuteUnit)
 
-//   out <> decoder.output
+  out <> decoder.output
   exe.in <> decoder.output
   exe.regIO <> regs.io
 
