@@ -34,11 +34,10 @@ int main(int argc, char** argv) {
   }
   top->reset = false;
 
-  while (time < 100) {
-    printf("now the pc is %lx\n",
-           top->pcio_pc && top->pcio_pc <= 0x80000000 + 6 * 4);
-    top->pcio_inst = mem[(top->pcio_pc - 0x80000000) / 4];
+  while (time < 100 && top->pcio_pc <= 0x80000000 + 6 * 4) {
+    printf("now the pc is %lx\n", top->pcio_pc);
     uint64_t pc = top->pcio_pc;
+    top->pcio_inst = mem[(pc - 0x80000000) / 4];
 
     // 记录波形
     top->clock = 0;
