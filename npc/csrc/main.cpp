@@ -34,6 +34,7 @@ int main(int argc, char** argv) {
   }
   top->reset = false;
 
+  tfp->dump(time++);
   while (time < 100 && top->pcio_pc <= 0x80000000 + 6 * 4) {
     uint64_t pc = top->pcio_pc;
     printf("now the pc is %lx %d\n", top->pcio_pc, (pc - 0x80000000) / 4);
