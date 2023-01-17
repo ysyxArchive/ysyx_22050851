@@ -26,8 +26,8 @@ class RegisterFileIO extends Bundle {
 class RegisterFile extends Module {
   val io   = IO(new RegisterFileIO())
   val regs = RegInit(VecInit(Seq.fill(32)(0.U(64.W))))
-  val pc   = "h80000000".asUInt(64.W)
-  pc := RegNext(pc + 4.U)
+  val pc   = RegInit("h80000000".asUInt(64.W))
+//   pc := RegNext(pc + 4.U)
 
   when(io.wen && io.waddr =/= 0.U) {
     regs(io.waddr) := io.wdata
