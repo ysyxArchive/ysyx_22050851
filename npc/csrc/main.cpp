@@ -20,7 +20,7 @@ uint32_t mem[] = {
     // 0x110113,  // 0000000 00001 00010 000 00010 00100 11 : reg 2 = reg2 +  1
     // 0x110113,  // 0000000 00001 00010 000 00010 00100 11 : reg 2 = reg2 +  1
     // 0x110113,  // 0000000 00001 00010 000 00010 00100 11 : reg 2 = reg2 +  1
-    0x100073   // 0000000 00001 00000 000 00000 11100 11 : halt
+    0x100073  // 0000000 00001 00000 000 00000 11100 11 : halt
 
 };
 int main(int argc, char** argv) {
@@ -65,5 +65,6 @@ int main(int argc, char** argv) {
   delete top;
   delete contextp;
   delete tfp;
+  assert(top->pcio_pc == 0);
   return 0;
 }
