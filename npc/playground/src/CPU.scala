@@ -13,7 +13,7 @@ class CPU extends Module {
     val inst = Input(UInt(32.W))
     val pc   = Output(UInt(64.W))
   })
-  val out = IO(Decoupled(Operation()))
+//   val out = IO(Decoupled(Operation()))
 
   val regs = Module(new RegisterFile);
 
