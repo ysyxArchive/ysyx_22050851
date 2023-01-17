@@ -38,7 +38,7 @@ class InstructionExecuteUnit extends Module {
     inReady   := false.B
     writeAddr := regIO.wen
     writeData := ans
-    writeNext := true.B
+    // writeNext := true.B
   }
 
 }
