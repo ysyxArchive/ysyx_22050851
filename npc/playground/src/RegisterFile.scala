@@ -20,13 +20,18 @@ class RegisterFileIO extends Bundle {
   val out2   = Output(UInt(64.W))
   val raddr2 = Input(UInt(5.W))
 
-  val pc     = Output(UInt(64.W))
+  val pc = Output(UInt(64.W))
 }
 
 class RegisterFile extends Module {
-  val io   = IO(new RegisterFileIO())
+  val io = IO(new RegisterFileIO())
+  val debugout = IO(new Bundle {
+    val regs = Output(Vec(32, UInt(64.W)))
+  })
+
   val regs = RegInit(VecInit(Seq.fill(32)(0.U(64.W))))
-  val pc   = Wire(UInt(64.W))
+  debugout.regs := regs
+  val pc = Wire(UInt(64.W))
   pc := RegNext(pc + 4.U, "h80000000".asUInt(64.W))
 
   when(io.wen && io.waddr =/= 0.U) {
