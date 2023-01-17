@@ -63,8 +63,8 @@ object InstructionResType extends ChiselEnum {
 }
 
 class Instruction() extends Bundle {
-  val status          = UInt(3.W)
-  val instructionType = UInt(3.W)
+  val status          = UInt(InstructionResType.getWidth.W)
+  val instructionType = UInt(InstructionType.getWidth.W)
   val op              = Operation()
 }
 object Instruction {
