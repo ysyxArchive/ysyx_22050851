@@ -13,7 +13,7 @@ class InstructionExecuteUnit extends Module {
   val writeEnable = RegInit(true.B)
   val writeAddr   = RegInit(0.U(5.W))
   regIO.wen   := writeEnable
-  regIO.waddr := op.dst.value
+  regIO.waddr := op.dst.value(4,0)
 
   regIO.raddr1 := Mux(op.src1.isReg, op.src1.value(4, 0), 0.U(5.W))
   regIO.raddr2 := Mux(op.src2.isReg, op.src2.value(4, 0), 0.U(5.W))
