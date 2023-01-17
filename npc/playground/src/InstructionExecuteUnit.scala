@@ -18,11 +18,11 @@ class InstructionExecuteUnit extends Module {
   writeAddr   := regIO.wen
 
   val op = in.bits
-  regIO.raddr1 := Mux(op.src1.isReg, op.src1.value, 0.U(64.W))
-  regIO.raddr2 := Mux(op.src1.isReg, op.src2.value, 0.U(64.W))
+  regIO.raddr1 := Mux(op.src1.isReg, op.src1.value(4, 0), 0.U(5.W))
+  regIO.raddr2 := Mux(op.src2.isReg, op.src2.value(4, 0), 0.U(5.W))
 
   val src1val = Mux(op.src1.isReg, regIO.out1, op.src1.value)
-  val src2val = Mux(op.src1.isReg, regIO.out2, op.src2.value)
+  val src2val = Mux(op.src2.isReg, regIO.out2, op.src2.value)
 
   val ans = MuxLookup(
     in.bits.opType.asUInt,
