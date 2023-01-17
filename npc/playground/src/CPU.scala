@@ -18,7 +18,7 @@ class CPU extends Module {
   val regs = Module(new RegisterFile);
 
   pcio.pc := regs.io.pc
-  regs.io := DontCare
+//   regs.io := DontCare
 
 //   val pc = RegInit("h80000000".asUInt(64.W))
 
