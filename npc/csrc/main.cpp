@@ -32,6 +32,10 @@ int main(int argc, char** argv) {
   tfp->open("wave.vcd");  // 打开vcd
   int time = 0;
   for (int i = 0; i < 10; i++) {
+    top->clock = 0;
+    top->eval();
+    top->clock = 1;
+    top->eval();
     top->reset = true;
     top->eval();
   }
