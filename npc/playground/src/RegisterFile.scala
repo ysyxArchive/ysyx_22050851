@@ -39,6 +39,7 @@ class RegisterFile extends Module {
   }
 
   io.pc := pc
+  // bug: 可能造成环
 //   io.out1 := Mux(io.raddr1 === 0.U, 0.U, Mux(io.raddr1 === io.waddr && io.wen, io.wdata, regs(io.raddr1)))
 //   io.out2 := Mux(io.raddr2 === 0.U, 0.U, Mux(io.raddr2 === io.waddr && io.wen, io.wdata, regs(io.raddr2)))
   io.out1 := regs(io.raddr1)
