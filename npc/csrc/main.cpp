@@ -41,10 +41,10 @@ int main(int argc, char** argv) {
     top->pcio_inst = mem[(pc - 0x80000000) / 4];
     top->eval();
     // 记录波形
-    top->clock = 0;
+    top->clock = 1;
     top->eval();
     tfp->dump(time++);
-    top->clock = 1;
+    top->clock = 0;
     top->eval();
     tfp->dump(time++);
     // 推动
