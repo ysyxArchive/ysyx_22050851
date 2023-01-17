@@ -23,10 +23,10 @@ class RegisterFileIO extends Bundle {
 class RegisterFile extends Module {
   val io   = IO(new RegisterFileIO())
   val regs = RegInit(VecInit(Seq.fill(32)(0.U(64.W))))
-  val pc   = RegInit("h80000000".asUInt(64.W))
+  val pc: UInt = RegNext(pc + 4.U, "h80000000".asUInt(64.W))
 
   io.pc := pc
- 
+
   when(io.wen && io.waddr =/= 0.U) {
     regs(io.waddr) := io.wdata
   }
