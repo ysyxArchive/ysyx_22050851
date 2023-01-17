@@ -38,8 +38,10 @@ class RegisterFile extends Module {
     regs(io.waddr) := io.wdata
   }
 
-  io.pc   := pc
-  io.out1 := Mux(io.raddr1 === 0.U, 0.U, Mux(io.raddr1 === io.waddr && io.wen, io.wdata, regs(io.raddr1)))
-  io.out2 := Mux(io.raddr2 === 0.U, 0.U, Mux(io.raddr2 === io.waddr && io.wen, io.wdata, regs(io.raddr2)))
+  io.pc := pc
+//   io.out1 := Mux(io.raddr1 === 0.U, 0.U, Mux(io.raddr1 === io.waddr && io.wen, io.wdata, regs(io.raddr1)))
+//   io.out2 := Mux(io.raddr2 === 0.U, 0.U, Mux(io.raddr2 === io.waddr && io.wen, io.wdata, regs(io.raddr2)))
+  io.out1 := regs(io.raddr1)
+  io.out2 := regs(io.raddr2)
 
 }
