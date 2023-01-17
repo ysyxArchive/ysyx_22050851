@@ -152,7 +152,6 @@ class InstructionDecodeUnit extends Module {
 
   when(io.enable) {
     output.enq(finalresult.op)
-    output.valid := true.B
   }
 
 }

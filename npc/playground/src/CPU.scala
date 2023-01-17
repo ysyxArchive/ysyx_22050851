@@ -13,7 +13,7 @@ class CPU extends Module {
     val inst = Input(UInt(32.W))
     val pc   = Output(UInt(64.W))
   })
-//   val out = IO(Decoupled(Operation()))
+  val out = IO(Decoupled(Operation()))
 
   val regs = Module(new RegisterFile);
 
@@ -27,7 +27,7 @@ class CPU extends Module {
   decoder.io.enable := true.B
   val exe = Module(new InstructionExecuteUnit)
 
-//   out <> decoder.output
+  out <> decoder.output
   exe.in <> decoder.output
   exe.regIO <> regs.io
 
