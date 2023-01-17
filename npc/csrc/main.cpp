@@ -3,7 +3,6 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
-
 uint32_t mem[] = {
     0x108113,  // 0000000 00001 00000 000 00010 00100 11 : reg 2 = reg0(0) +  1
     0x110093,  // 0000000 00001 00010 000 00001 00100 11 : reg 1 = reg2 +  1
@@ -35,10 +34,11 @@ int main(int argc, char** argv) {
   }
   top->reset = false;
 
-  while (time < 100 ) {
-    printf("now the pc is %lx\n", top->pcio_pc);
-    // top->pcio_inst = mem[(top->pcio_pc - 0x80000000) / 4];
-    // uint64_t pc = top->pcio_pc;
+  while (time < 100) {
+    printf("now the pc is %lx\n",
+           top->pcio_pc && top->pcio_pc <= 0x80000000 + 6 * 4);
+    top->pcio_inst = mem[(top->pcio_pc - 0x80000000) / 4];
+    uint64_t pc = top->pcio_pc;
 
     // 记录波形
     top->clock = 0;
