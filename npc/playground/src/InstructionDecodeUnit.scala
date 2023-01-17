@@ -183,7 +183,7 @@ class InstructionDecodeUnit extends Module {
       )
     )
   )
-  debugp := Cat(result1.status, result2.status, result3.status)
+  debugp := Cat(result.status, result2.status, result3.status)
   when(io.enable) {
     output.enq(finalresult.op)
   }
