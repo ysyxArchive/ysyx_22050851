@@ -15,7 +15,9 @@ class CPU extends Module {
   })
   val out = IO(Decoupled(Operation()))
   val debugout = IO(new Bundle {
-    val regs = Output(Vec(32, UInt(64.W)))
+    val regs   = Output(Vec(32, UInt(64.W)))
+    val debugp = Output(UInt(3.W))
+
   })
 
   val regs = Module(new RegisterFile);
@@ -28,7 +30,7 @@ class CPU extends Module {
   val decoder = Module(new InstructionDecodeUnit)
   decoder.io.inst   := pcio.inst
   decoder.io.enable := true.B
-
+  debugout          := decoder.debugp
   val exe = Module(new InstructionExecuteUnit)
 
   out <> decoder.output

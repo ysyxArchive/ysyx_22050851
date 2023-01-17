@@ -3,6 +3,7 @@ import chisel3.experimental.ChiselEnum
 import chisel3.util._
 
 import scala.language.postfixOps
+import org.apache.commons.lang3.ObjectUtils
 
 object SourceType extends ChiselEnum {
   val reg, imm, pc = Value
@@ -110,6 +111,8 @@ class InstructionDecodeUnit extends Module {
   })
   val output = IO(Decoupled(Operation()))
 
+  val debugp = IO(Output(UInt(3.W)))
+
   val resultValid = RegInit(false.B)
   output.valid := !output.ready && resultValid
   output.bits  := DontCare
@@ -180,7 +183,7 @@ class InstructionDecodeUnit extends Module {
       )
     )
   )
-
+  debugp := result3.status
   when(io.enable) {
     output.enq(finalresult.op)
   }
