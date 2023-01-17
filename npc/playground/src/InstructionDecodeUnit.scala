@@ -111,7 +111,7 @@ class InstructionDecodeUnit extends Module {
   })
   val output = IO(Decoupled(Operation()))
 
-  val debugp = IO(Output(UInt(3.W)))
+  val debugp = IO(Output(UInt(32.W)))
 
   val resultValid = RegInit(false.B)
   output.valid := !output.ready && resultValid
@@ -183,7 +183,7 @@ class InstructionDecodeUnit extends Module {
       )
     )
   )
-  debugp := result3.status
+  debugp := Cat(result1.status, result2.status, result3.status)
   when(io.enable) {
     output.enq(finalresult.op)
   }

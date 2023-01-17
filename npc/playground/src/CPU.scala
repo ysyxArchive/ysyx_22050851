@@ -16,7 +16,7 @@ class CPU extends Module {
   val out = IO(Decoupled(Operation()))
   val debugout = IO(new Bundle {
     val regs   = Output(Vec(32, UInt(64.W)))
-    val debugp = Output(UInt(3.W))
+    val debugp = Output(UInt(32.W))
 
   })
 
