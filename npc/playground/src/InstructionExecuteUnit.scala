@@ -10,24 +10,43 @@ class InstructionExecuteUnit extends Module {
   val inReady = RegInit(true.B)
   in.ready := inReady
 
-  val writeEnable = RegInit(true.B)
-  val writeAddr   = RegInit(0.U(5.W))
-  regIO.wen   := writeEnable
-  regIO.waddr := op.dst.value(4,0)
+  regIO.waddr := op.dst.value(4, 0)
 
-  regIO.raddr1 := Mux(op.src1.isReg, op.src1.value(4, 0), 0.U(5.W))
-  regIO.raddr2 := Mux(op.src2.isReg, op.src2.value(4, 0), 0.U(5.W))
+  regIO.raddr1 := Mux(op.src1.stype === SourceType.reg.asUInt, op.src1.value(4, 0), 0.U(5.W))
+  regIO.raddr2 := Mux(op.src2.stype === SourceType.reg.asUInt, op.src2.value(4, 0), 0.U(5.W))
 
-  val src1val = Mux(op.src1.isReg, regIO.out1, op.src1.value)
-  val src2val = Mux(op.src2.isReg, regIO.out2, op.src2.value)
+  val src1val =
+    MuxLookup(
+      op.src1.stype,
+      0.U,
+      Seq(
+        (SourceType.imm.asUInt) -> op.src1.value,
+        (SourceType.reg.asUInt) -> regIO.out1,
+        (SourceType.pc.asUInt) -> regIO.pc
+      )
+    )
+  val src2val =
+    MuxLookup(
+      op.src2.stype,
+      0.U,
+      Seq(
+        (SourceType.imm.asUInt) -> op.src2.value,
+        (SourceType.reg.asUInt) -> regIO.out2,
+        (SourceType.pc.asUInt) -> regIO.pc
+      )
+    )
 
   val ans = MuxLookup(
     in.bits.opType.asUInt,
     0.U,
     Seq(
-      OperationType.add.asUInt -> (src1val + src2val)
+      OperationType.add.asUInt -> (src1val + src2val),
+      OperationType.move.asUInt -> src1val
     )
   )
-  regIO.wdata := ans
+
+  regIO.wdata    := ans
+  regIO.regWrite := op.dst.stype === SourceType.reg.asUInt
+  regIO.pcWrite  := op.dst.stype === SourceType.pc.asUInt
 
 }

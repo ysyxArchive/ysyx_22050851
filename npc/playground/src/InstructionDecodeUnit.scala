@@ -4,18 +4,22 @@ import chisel3.util._
 
 import scala.language.postfixOps
 
+object SourceType extends ChiselEnum {
+  val reg, imm, pc = Value
+}
+
 class Source() extends Bundle {
   val value = UInt(64.W)
-  val isReg = Bool()
+  val stype = UInt(SourceType.getWidth.W)
 }
 
 object Source {
-  val default = RegInit(Source(0.U, false.B))
+  val default = RegInit(Source(0.U, SourceType.imm))
 
-  def apply(value: UInt, isReg: Bool) = {
+  def apply(value: UInt, isReg: SourceType.Type) = {
     val f = Wire(new Source())
     f.value := value
-    f.isReg := isReg
+    f.stype := isReg.asUInt
     f
   }
 
@@ -23,7 +27,7 @@ object Source {
 }
 
 object OperationType extends ChiselEnum {
-  val add, noMatch = Value
+  val add, move, noMatch = Value
 }
 
 object Operation {
@@ -47,7 +51,7 @@ class Operation() extends Bundle {
   val src1   = Source()
   val src2   = Source()
   val dst    = Source()
-  val opType = UInt(2.W)
+  val opType = UInt(OperationType.getWidth.W)
 }
 
 object InstructionType extends ChiselEnum {
@@ -118,18 +122,38 @@ class InstructionDecodeUnit extends Module {
   val immI   = io.inst(31, 20)
   val immS   = Cat(io.inst(31, 25), io.inst(11, 7))
 
-  val result = MuxLookup(opcode, Instruction.further, Seq("b0010011".U -> Instruction.further))
+  val result = MuxLookup(
+    opcode,
+    Instruction.further,
+    Seq("b0010011".U -> Instruction.further, "b1110011".U -> Instruction.further)
+  )
   val result2 = MuxLookup(
     Cat(funct3, opcode),
     Instruction.noMatch,
     Seq(
+      "b0001110011".U -> Instruction.further,
       "b0000010011".U -> Instruction(
         InstructionType.iType,
         Operation(
-          Source(rs1, true.B),
-          Source(Utils.signalExtend(immI, 12), false.B),
-          Source(rd, true.B),
+          Source(rs1, SourceType.reg),
+          Source(Utils.signalExtend(immI, 12), SourceType.imm),
+          Source(rd, SourceType.reg),
           OperationType.add
+        )
+      )
+    )
+  )
+  val result3 = MuxLookup(
+    opcode,
+    Instruction.noMatch,
+    Seq(
+      "b00000000000100000000000001110011".U -> Instruction(
+        InstructionType.iType,
+        Operation(
+          Source(0.U, SourceType.imm),
+          Source.default,
+          Source(0.U, SourceType.pc),
+          OperationType.move
         )
       )
     )
