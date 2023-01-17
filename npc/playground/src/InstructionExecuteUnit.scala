@@ -15,6 +15,7 @@ class InstructionExecuteUnit extends Module {
   regIO.wen   := writeEnable
   regIO.waddr := writeAddr
   regIO.wdata := writeData
+  writeAddr   := regIO.wen
 
   val op = in.bits
   regIO.raddr1 := Mux(op.src1.isReg, op.src1.value, 0.U(64.W))
@@ -30,9 +31,6 @@ class InstructionExecuteUnit extends Module {
       OperationType.add.asUInt -> (src1val + src2val)
     )
   )
-  when(in.valid) {
-    writeAddr := regIO.wen
-    writeData := ans
-  }
+  writeData := ans
 
 }
