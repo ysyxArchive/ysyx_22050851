@@ -151,7 +151,7 @@ class InstructionDecodeUnit extends Module {
         InstructionType.iType,
         Operation(
           Source(0.U, SourceType.imm),
-          Source.default,
+          Source(0.U, SourceType.imm),
           Source(0.U, SourceType.pc),
           OperationType.move
         )
