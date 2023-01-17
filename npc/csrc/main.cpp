@@ -66,5 +66,6 @@ int main(int argc, char** argv) {
   delete contextp;
   delete tfp;
   assert(top->pcio_pc == 0);
+  printf("hit good trap!\n");
   return 0;
 }
