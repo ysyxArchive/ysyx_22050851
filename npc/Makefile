@@ -20,7 +20,7 @@ export PATH := $(PATH):$(abspath ./utils)
 
 default: $(BIN)
 
-$(BIN): $(VSRCS) $(CSRCS) verilog
+$(BIN): $(VSRCS) $(CSRCS)
 	@rm -rf $(OBJ_DIR)
 	$(VERILATOR) $(VERILATOR_CFLAGS) \
 		--top-module $(TOPNAME) $^ \
