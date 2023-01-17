@@ -9,7 +9,7 @@ class InstructionExecuteUnit extends Module {
   val inReady = RegInit(true.B)
   in.ready := inReady
 
-  val writeEnable = RegInit(false.B)
+  val writeEnable = RegInit(true.B)
   val writeAddr   = RegInit(0.U(5.W))
   val writeData   = RegInit(0.U(64.W))
   regIO.wen   := writeEnable
@@ -31,7 +31,6 @@ class InstructionExecuteUnit extends Module {
     )
   )
   when(in.valid) {
-    inReady   := false.B
     writeAddr := regIO.wen
     writeData := ans
   }
