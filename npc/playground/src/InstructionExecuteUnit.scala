@@ -6,19 +6,15 @@ class InstructionExecuteUnit extends Module {
   val in    = IO(Flipped(Decoupled(Operation())))
   val regIO = IO(Flipped(new RegisterFileIO()))
 
-  val inReady   = RegInit(true.B)
-  val readyNext = IO(Bool())
-  inReady  := Mux(inReady, readyNext, true.B)
+  val inReady = RegInit(true.B)
   in.ready := inReady
 
   val writeEnable = RegInit(false.B)
-  val writeNext   = IO(Bool())
   val writeAddr   = RegInit(0.U(5.W))
   val writeData   = RegInit(0.U(64.W))
   regIO.wen   := writeEnable
   regIO.waddr := writeAddr
   regIO.wdata := writeData
-  writeEnable := Mux(writeEnable, false.B, writeNext)
 
   val op = in.bits
   regIO.raddr1 := Mux(op.src1.isReg, op.src1.value, 0.U(64.W))
@@ -38,7 +34,6 @@ class InstructionExecuteUnit extends Module {
     inReady   := false.B
     writeAddr := regIO.wen
     writeData := ans
-    // writeNext := true.B
   }
 
 }
