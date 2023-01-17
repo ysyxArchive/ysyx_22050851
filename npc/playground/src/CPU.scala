@@ -20,7 +20,7 @@ class CPU extends Module {
   pcio.pc := regs.io.pc
   regs.io := DontCare
 
-  val pc = RegInit("h80000000".asUInt(64.W))
+//   val pc = RegInit("h80000000".asUInt(64.W))
 
   val decoder = Module(new InstructionDecodeUnit)
   decoder.io.inst   := pcio.inst

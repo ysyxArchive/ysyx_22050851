@@ -49,7 +49,6 @@ int main(int argc, char** argv) {
     tfp->dump(time++);
     // 推动
     single_cycle(top);
-    time++;
   }
   delete top;
   delete contextp;
