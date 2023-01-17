@@ -168,7 +168,14 @@ class InstructionDecodeUnit extends Module {
         result2.status.asUInt,
         result2,
         Seq(
-          InstructionResType.ok.asUInt -> result2
+          InstructionResType.ok.asUInt -> result2,
+          InstructionResType.further.asUInt -> MuxLookup(
+            result3.status.asUInt,
+            result3,
+            Seq(
+              InstructionResType.ok.asUInt -> result3
+            )
+          )
         )
       )
     )
