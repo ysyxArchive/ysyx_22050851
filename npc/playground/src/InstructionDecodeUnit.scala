@@ -150,8 +150,8 @@ class InstructionDecodeUnit extends Module {
       "b00000000000100000000000001110011".U -> Instruction(
         InstructionType.iType,
         Operation(
-          Source.default,
-          Source.default,
+          Source(0.U, SourceType.imm),
+          Source(0.U, SourceType.imm),
           Source(0.U, SourceType.pc),
           OperationType.move
         )
