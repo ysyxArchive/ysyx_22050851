@@ -26,12 +26,12 @@ $(BINARY): compile_git
 
 override ARGS ?= --log=$(BUILD_DIR)/nemu-log.txt
 override ARGS += $(ARGS_DIFF)
+ARGS += -b
 
-ifeq ($(MAKECMDGOALS), batch)
-$(info  $(MAKECMDGOALS))
-	ARGS+="-b"
-$(info  $(ARGS))
-endif
+# ifeq ($(MAKECMDGOALS), batch)
+# $(info  $(MAKECMDGOALS))
+# $(info  $(ARGS))
+# endif
 # ifeq ($@, $@)
 # @echo $@
 # endif
