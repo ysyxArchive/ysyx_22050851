@@ -29,7 +29,7 @@ override ARGS += $(ARGS_DIFF)
 
 ifeq ($(MAKECMDGOALS), batch)
 $(info  $(MAKECMDGOALS))
-ARGS += "-b"
+ARGS+="-b"
 $(info  $(ARGS))
 endif
 # ifeq ($@, $@)
