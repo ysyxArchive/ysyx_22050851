@@ -28,7 +28,7 @@ override ARGS ?= --log=$(BUILD_DIR)/nemu-log.txt
 override ARGS += $(ARGS_DIFF)
 
 # ifeq ($@, batch)
-$(info $@)
+$(info  $(MAKECMDGOALS))
 # 	ARGS += -b
 # endif
 # ifeq ($@, $@)
