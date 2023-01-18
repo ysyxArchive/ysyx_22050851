@@ -31,6 +31,7 @@ $(info  $(MAKECMDGOALS))
 ifeq ($(MAKECMDGOALS), batch)
 $(info  $(MAKECMDGOALS))
 ARGS += -b
+$(info  $(ARGS))
 endif
 # ifeq ($@, $@)
 # @echo $@
