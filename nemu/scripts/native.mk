@@ -28,7 +28,7 @@ override ARGS ?= --log=$(BUILD_DIR)/nemu-log.txt
 override ARGS += $(ARGS_DIFF)
 
 # ifeq ($@, batch)
-A = $(bash echo 123)
+A = $(shell echo 123)
 # 	ARGS += -b
 # endif
 # ifeq ($@, $@)
