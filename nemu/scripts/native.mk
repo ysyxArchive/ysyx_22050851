@@ -27,6 +27,9 @@ $(BINARY): compile_git
 override ARGS ?= --log=$(BUILD_DIR)/nemu-log.txt
 override ARGS += $(ARGS_DIFF)
 
+ifeq ($(MAKECMDGOALS), batch)
+override ARGS += -b
+endif
 # Command to execute NEMU
 IMG ?=
 NEMU_EXEC := $(BINARY) $(ARGS) $(IMG)
@@ -35,6 +38,10 @@ run-env: $(BINARY) $(DIFF_REF_SO)
 
 run: run-env
 	$(call git_commit, "run NEMU")
+	$(NEMU_EXEC)
+	
+batch: run-env
+	$(call git_commit, "batch NEMU")
 	$(NEMU_EXEC)
 
 gdb: run-env
