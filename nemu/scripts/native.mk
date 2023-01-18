@@ -41,6 +41,7 @@ run: run-env
 	$(NEMU_EXEC)
 	
 batch: run-env
+	$(call git_commit, "batch NEMU")
 	$(NEMU_EXEC)
 
 gdb: run-env
