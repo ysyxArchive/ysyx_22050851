@@ -30,6 +30,8 @@ override ARGS += $(ARGS_DIFF)
 ifeq ($@, batch)
 	$(shell echo 123)
 	ARGS += "-b"
+else
+    $(shell echo $@)
 endif
 
 
