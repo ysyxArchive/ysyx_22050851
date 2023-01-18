@@ -5,26 +5,48 @@ import chisel3.util._
 class InstructionExecuteUnit extends Module {
   val in    = IO(Flipped(Decoupled(Operation())))
   val regIO = IO(Flipped(new RegisterFileIO()))
+  val op    = in.bits
 
-  when(in.valid) {
-    val op = in.bits
+  val inReady = RegInit(true.B)
+  in.ready := inReady
 
-    regIO.raddr1 := Mux(op.src1.isReg === true.B, in.bits.src1.value, 0.U(64.W))
-    regIO.raddr2 := Mux(op.src1.isReg === true.B, in.bits.src2.value, 0.U(64.W))
+  regIO.waddr := op.dst.value(4, 0)
 
-    val src1val = Mux(in.bits.src1.isReg, regIO.out1, in.bits.src1.value)
-    val src2val = Mux(in.bits.src1.isReg, regIO.out2, in.bits.src2.value)
+  regIO.raddr1 := Mux(op.src1.stype === SourceType.reg.asUInt, op.src1.value(4, 0), 0.U(5.W))
+  regIO.raddr2 := Mux(op.src2.stype === SourceType.reg.asUInt, op.src2.value(4, 0), 0.U(5.W))
 
-    val ans = MuxLookup(
-      in.bits.opType.asUInt,
+  val src1val =
+    MuxLookup(
+      op.src1.stype,
       0.U,
       Seq(
-        OperationType.add.asUInt -> (src1val + src2val)
+        (SourceType.imm.asUInt) -> op.src1.value,
+        (SourceType.reg.asUInt) -> regIO.out1,
+        (SourceType.pc.asUInt) -> regIO.pc
       )
     )
-    regIO.waddr := regIO.wen
-    regIO.wdata := ans
-    regIO.wen   := RegNext(false.B, true.B)
-  }
+  val src2val =
+    MuxLookup(
+      op.src2.stype,
+      0.U,
+      Seq(
+        (SourceType.imm.asUInt) -> op.src2.value,
+        (SourceType.reg.asUInt) -> regIO.out2,
+        (SourceType.pc.asUInt) -> regIO.pc
+      )
+    )
+
+  val ans = MuxLookup(
+    in.bits.opType.asUInt,
+    0.U,
+    Seq(
+      OperationType.add.asUInt -> (src1val + src2val),
+      OperationType.move.asUInt -> src1val
+    )
+  )
+
+  regIO.wdata    := ans
+  regIO.regWrite := op.dst.stype === SourceType.reg.asUInt
+  regIO.pcWrite  := op.dst.stype === SourceType.pc.asUInt
 
 }
