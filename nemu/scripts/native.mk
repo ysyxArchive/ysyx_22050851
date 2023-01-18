@@ -27,8 +27,8 @@ $(BINARY): compile_git
 override ARGS ?= --log=$(BUILD_DIR)/nemu-log.txt
 override ARGS += $(ARGS_DIFF)
 
-ifeq ($@, "batch")
-	ARGS += -b
+ifeq ($@, batch)
+	ARGS += "-b"
 endif
 
 
