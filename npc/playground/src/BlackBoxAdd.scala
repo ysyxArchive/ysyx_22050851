@@ -6,13 +6,7 @@ class BlackBoxAdd extends BlackBox with HasBlackBoxInline {
   })
   setInline(
     "BlackBoxAdd.v",
-    """module BlackBoxAdd(
-      |    input  halt,
-      |);
-      |always @* begin
-      |  out <= $realtobits($bitstoreal(in1) + $bitstoreal(in2));
-      |end
-      |endmodule
+    """import "DPI-C" function int add (input int a, input int b);
     """.stripMargin
   )
 }
