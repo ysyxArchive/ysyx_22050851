@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
   //   while (time < 100 && top->pcio_pc != 0) {
   while (!is_halt) {
     uint64_t pc = top->pcio_pc;
-    printf("now the pc is %lx %d\n", top->pcio_pc, (pc - 0x80000000) / 4);
+    printf("now the pc is %lx %lu\n", top->pcio_pc, (pc - 0x80000000) / 4);
 
     top->pcio_inst = mem[(pc - 0x80000000) / 4];
     top->eval();
