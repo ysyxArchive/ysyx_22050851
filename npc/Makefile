@@ -20,7 +20,7 @@ export PATH := $(PATH):$(abspath ./utils)
 
 default: $(BIN)
 
-$(BIN): $(VSRCS) $(CSRCS)
+$(BIN): $(CSRCS) $(VSRCS) 
 	@rm -rf $(OBJ_DIR)
 	$(VERILATOR) $(VERILATOR_CFLAGS) \
 		--top-module $(TOPNAME) $^ \
@@ -33,6 +33,7 @@ test:
 
 verilog:
 	$(call git_commit, "generate verilog")
+	rm -rf $(BUILD_DIR)
 	mkdir -p $(BUILD_DIR)
 	mill -i __.test.runMain Elaborate -td $(BUILD_DIR)
 

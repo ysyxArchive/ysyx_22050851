@@ -28,7 +28,7 @@ object Source {
 }
 
 object OperationType extends ChiselEnum {
-  val add, move, noMatch = Value
+  val add, move, halt, noMatch = Value
 }
 
 object Operation {
@@ -156,7 +156,7 @@ class InstructionDecodeUnit extends Module {
           Source(0.U, SourceType.imm),
           Source(3.U, SourceType.imm),
           Source(3.U, SourceType.pc),
-          OperationType.move
+          OperationType.halt
         )
       )
     )

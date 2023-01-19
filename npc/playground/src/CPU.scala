@@ -32,7 +32,6 @@ class CPU extends Module {
   decoder.io.enable := true.B
   debugout.debugp   := decoder.debugp
   val exe = Module(new InstructionExecuteUnit)
-
   out <> decoder.output
   exe.in <> decoder.output
   exe.regIO <> regs.io
