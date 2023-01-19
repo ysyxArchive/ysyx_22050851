@@ -33,8 +33,7 @@ class CPU extends Module {
   debugout.debugp   := decoder.debugp
   val exe      = Module(new InstructionExecuteUnit)
   val blackbox = Module(new BlackBoxAdd)
-  blackbox.io.in1 := decoder.debugp
-  blackbox.io.in2 := decoder.debugp
+  blackbox.io.halt := decoder.debugp
   out <> decoder.output
   exe.in <> decoder.output
   exe.regIO <> regs.io
