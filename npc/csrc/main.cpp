@@ -2,7 +2,7 @@
 #include "stdio.h"
 #include "verilated.h"
 #include "verilated_vcd_c.h"
-
+#include "VCPU__Dpi.h"
 uint32_t mem[] = {
     0x100113,  // 0000000 00001 00000 000 00010 00100 11 : reg 2 = reg0(0) +  1
     0x110113,  // 0000000 00001 00010 000 00010 00100 11 : reg 2 = reg2 +  1
