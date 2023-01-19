@@ -21,6 +21,7 @@
 static inline int check_reg_idx(int idx) {
   IFDEF(
       CONFIG_RT_CHECK,
+      printf("%d", idx);
       Assert(idx >= 0 && idx < 32,
              "Assertion failed for checking reg index %d is between 0 and 32\n",
              idx));
