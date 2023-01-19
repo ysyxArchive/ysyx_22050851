@@ -7,8 +7,8 @@ class BlackBoxAdd extends BlackBox with HasBlackBoxInline {
     val out = Output(UInt(64.W))
   })
   setInline(
-    "BlackBoxRealAdd.v",
-    """module BlackBoxRealAdd(
+    "BlackBoxAdd.v",
+    """module BlackBoxAdd(
       |    input  [15:0] in1,
       |    input  [15:0] in2,
       |    output [15:0] out
