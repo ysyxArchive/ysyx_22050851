@@ -20,9 +20,13 @@ uint32_t mem[] = {
     0x110113,  // 0000000 00001 00010 000 00010 00100 11 : reg 2 = reg2 +  1
     0x110113,  // 0000000 00001 00010 000 00010 00100 11 : reg 2 = reg2 +  1
     0x110113,  // 0000000 00001 00010 000 00010 00100 11 : reg 2 = reg2 +  1
-    0x100073  // 0000000 00001 00000 000 00000 11100 11 : halt
+    0x100073   // 0000000 00001 00000 000 00000 11100 11 : halt
 
 };
+bool is_halt = false;
+void halt() {
+  is_halt = true;
+}
 int main(int argc, char** argv) {
   Verilated::commandArgs(argc, argv);
   Verilated::traceEverOn(true);  // 导出vcd波形需要加此语句
@@ -47,7 +51,8 @@ int main(int argc, char** argv) {
   top->reset = false;
 
   tfp->dump(time++);
-  while (time < 100 && top->pcio_pc != 0) {
+  //   while (time < 100 && top->pcio_pc != 0) {
+  while (!is_halt) {
     uint64_t pc = top->pcio_pc;
     printf("now the pc is %lx %d\n", top->pcio_pc, (pc - 0x80000000) / 4);
 

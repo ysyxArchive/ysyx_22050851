@@ -48,5 +48,4 @@ class InstructionExecuteUnit extends Module {
   regIO.wdata    := ans
   regIO.regWrite := op.dst.stype === SourceType.reg.asUInt
   regIO.pcWrite  := op.dst.stype === SourceType.pc.asUInt
-
 }

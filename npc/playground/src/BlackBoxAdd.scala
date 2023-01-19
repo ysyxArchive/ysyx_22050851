@@ -6,7 +6,13 @@ class BlackBoxAdd extends BlackBox with HasBlackBoxInline {
   })
   setInline(
     "BlackBoxAdd.v",
-    """import "DPI-C" function int add (input int a, input int b);
-    """.stripMargin
+    """import "DPI-C" function void halt();
+      |module BlackBoxAdd(
+      |    input  halt
+      |);
+      |    always @* begin
+      |        if(halt)  halt();
+      |    end
+      |endmodule""".stripMargin
   )
 }
