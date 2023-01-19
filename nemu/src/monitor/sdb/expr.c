@@ -188,7 +188,6 @@ uint32_t eval(int start, int end, bool* success) {
   if (start == end - 1) {
     // must be a number
     int retvalue = 0;
-    printf("%d\n", tokens[start].type);
     switch (tokens[start].type) {
       case TK_OCTNUMBER:
         sscanf(tokens[start].str, "%u", &retvalue);
@@ -205,6 +204,7 @@ uint32_t eval(int start, int end, bool* success) {
           *success = false;
           return -1;
         }
+        break;
       default:
         printf(
             "eval error at token index %d, should be a number or a register "
