@@ -24,7 +24,7 @@ uint32_t mem[] = {
 
 };
 bool is_halt = false;
-void halt() {
+void haltop() {
   is_halt = true;
 }
 int main(int argc, char** argv) {
