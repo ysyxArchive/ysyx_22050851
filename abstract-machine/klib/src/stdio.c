@@ -44,27 +44,28 @@ int sprintf(char* out, const char* fmt, ...) {
   int fmtp = 0;
   int offset = 0;
   while (fmt[fmtp]) {
-    while (fmt[fmtp] != '%') {
+    if (fmt[fmtp] != '%') {
       out[outp++] = fmt[fmtp++];
+    } else {
+      fmtp++;
+      switch (fmt[fmtp]) {
+        case 'd':
+          int d = va_arg(ap, int);
+          offset = num2str(out + outp, d);
+          outp += offset;
+          break;
+        case 's':
+          char* s = va_arg(ap, char*);
+          strcpy(out + outp, s);
+          outp += strlen(out + outp);
+          break;
+        default:
+      }
+      fmtp++;
     }
-    fmtp++;
-    switch (fmt[fmtp]) {
-      case 'd':
-        int d = va_arg(ap, int);
-        offset = num2str(out + outp, d);
-        outp += offset;
-        break;
-      case 's':
-        char* s = va_arg(ap, char*);
-        strcpy(out + outp, s);
-        outp += strlen(out + outp);
-        break;
-      default:
-        panic("not implemented");
-    }
-    fmtp++;
   }
   va_end(ap);
+  out[outp] = 0;
   return outp;
 }
 
