@@ -70,6 +70,7 @@ int memcmp(const void* s1, const void* s2, size_t n) {
   int i = 0;
   while (i < n && ret == 0) {
     ret = p1[i] - p2[i];
+    i++;
   }
   return ret;
 }
