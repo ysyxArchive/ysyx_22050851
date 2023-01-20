@@ -23,11 +23,23 @@ const char* regs[] = {"$0", "ra", "sp",  "gp",  "tp", "t0", "t1", "t2",
 
 void isa_reg_display() {
   for (int i = 0; i < 32; i++) {
-    printf("%s: %lx\t%s", regs[i], cpu.gpr[i], i % 4 == 3 ? "\n" : "");
+    printf("%s: %16lX\t%s", regs[i], cpu.gpr[i], i % 4 == 3 ? "\n" : "");
   }
-  printf("pc: %lx\n", cpu.pc);
+  printf("pc: %lX\n", cpu.pc);
 }
 
 word_t isa_reg_str2val(const char* s, bool* success) {
-  return 0;
+  *success = false;
+  word_t ret = 0;
+  if (strcmp(s, "pc") == 0) {
+    *success = true;
+    ret = cpu.pc;
+  }
+  for (int i = 0; !*success && i < 32; i++) {
+    if (strcmp(s, regs[i]) == 0) {
+      *success = true;
+      ret = cpu.gpr[i];
+    }
+  }
+  return ret;
 }

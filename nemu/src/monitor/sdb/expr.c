@@ -146,8 +146,7 @@ static bool make_token(char* e) {
             tokens[nr_token].type = should_be_single() ? TK_POSITIVE : TK_ADD;
             break;
           case '-':
-            tokens[nr_token].type = should_be_single() ? TK_NEGATIVE
-                                                        : TK_MINUS;
+            tokens[nr_token].type = should_be_single() ? TK_NEGATIVE : TK_MINUS;
             break;
           case '*':
             tokens[nr_token].type = should_be_single() ? TK_DEREF : TK_MUL;
@@ -205,6 +204,7 @@ uint32_t eval(int start, int end, bool* success) {
           *success = false;
           return -1;
         }
+        break;
       default:
         printf(
             "eval error at token index %d, should be a number or a register "
