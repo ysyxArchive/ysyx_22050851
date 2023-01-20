@@ -23,7 +23,7 @@ const char* regs[] = {"$0", "ra", "sp",  "gp",  "tp", "t0", "t1", "t2",
 
 void isa_reg_display() {
   for (int i = 0; i < 32; i++) {
-    printf("%s: %lx\t%s", regs[i], cpu.gpr[i], i % 4 == 3 ? "\n" : "");
+    printf("%s: %016lx\t%s", regs[i], cpu.gpr[i], i % 4 == 3 ? "\n" : "");
   }
   printf("pc: %lx\n", cpu.pc);
 }
