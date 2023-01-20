@@ -56,8 +56,8 @@ int sprintf(char* out, const char* fmt, ...) {
         break;
       case 's':
         char* s = va_arg(ap, char*);
-        offset = strcmp(out + outp, s);
-        outp += offset;
+        strcpy(out + outp, s);
+        outp += strlen(out + outp);
         break;
       default:
         panic("not implemented");
