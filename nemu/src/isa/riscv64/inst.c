@@ -120,7 +120,7 @@ static int decode_exec(Decode *s) {
 
   Reg(0) = 0; // reset $zero to 0
 
-  Log("pc= %lx, dnpc= %lx, snpc= %lx\n", s->pc, s->dnpc, s->snpc);
+  Log("pc= %lx, dnpc= %lx, snpc= %lx", s->pc, s->dnpc, s->snpc);
 
   return 0;
 }
