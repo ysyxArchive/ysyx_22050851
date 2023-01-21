@@ -24,8 +24,10 @@ void print_ring_buf() {
 
 //  mtrace -------------------------------------------------
 void mtrace(bool is_read, paddr_t addr, int len, word_t data) {
-  Log("detected memory %s at 0x%08x, the data is \t",
-         is_read ? "read" : "write", addr);
+  char buf[100];
+  sprintf(buf, "detected memory %s at 0x%08x, the data is \t",
+          is_read ? "read" : "write", addr);
+  Log(ANSI_FMT("%s", ANSI_FG_YELLOW), buf);
   for (int i = 7; i >= 0; i--) {
     if (i >= len) {
       printf("   ");
