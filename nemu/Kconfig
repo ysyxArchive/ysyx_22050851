@@ -147,6 +147,27 @@ config ITRACE_COND
   string "Only trace instructions when the condition is true"
   default "true"
 
+config MTRACE
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "Enable memory trace"
+  default y
+
+config MTRACE_RANGE
+  depends on MTRACE
+  bool "Only trace mamory r/w when addr is in specified range"
+  default y
+
+config MTRACE_START
+  depends on MTRACE_RANGE
+  hex "specified range start"
+  default MBASE
+
+  
+config MTRACE_OFFSET
+  depends on MTRACE_RANGE
+  hex "specified range offset"
+  default MSIZE
+
 
 config DIFFTEST
   depends on TARGET_NATIVE_ELF

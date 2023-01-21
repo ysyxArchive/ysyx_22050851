@@ -24,9 +24,16 @@ void print_ring_buf() {
 
 //  mtrace -------------------------------------------------
 void mtrace(bool is_read, paddr_t addr, int len, word_t data) {
+#ifdef CONFIG_MTRACE
+#ifdef CONFIG_MTRACE_RANGE
+  if (addr < CONFIG_MTRACE_START ||
+      addr >= CONFIG_MTRACE_START + CONFIG_MTRACE_OFFSET) {
+    return
+  }
+#endif
   char buf[100];
-  int p = sprintf(buf, "detected memory %s at 0x%08x, the data is \t",
-                  is_read ? "read" : "write", addr);
+  int p = sprintf(buf, "detected memory %s at 0x%08x, the data is ",
+                  is_read ? "read " : "write", addr);
   for (int i = 7; i >= 0; i--) {
     if (i >= len) {
       sprintf(buf + p, "   ");
@@ -36,5 +43,6 @@ void mtrace(bool is_read, paddr_t addr, int len, word_t data) {
     p += 3;
   }
   Log(ANSI_FMT("%s", ANSI_FG_YELLOW), buf);
+#endif
   return;
 }
