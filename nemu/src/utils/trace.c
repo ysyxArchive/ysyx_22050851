@@ -27,7 +27,7 @@ void mtrace(bool is_read, paddr_t addr, int len, word_t data) {
   printf("mtrace: detected memory %s at 0x%08x, the data is \t",
          is_read ? "read" : "write", addr);
   for (int i = 7; i >= 0; i--) {
-    if (i > len) {
+    if (i >= len) {
       printf("   ");
     } else {
       printf("%02x ", (char)BITS(data, 8 * i + 7, 8 * i) & 0xFF);
