@@ -25,16 +25,16 @@ void print_ring_buf() {
 //  mtrace -------------------------------------------------
 void mtrace(bool is_read, paddr_t addr, int len, word_t data) {
   char buf[100];
-  sprintf(buf, "detected memory %s at 0x%08x, the data is \t",
-          is_read ? "read" : "write", addr);
-  Log(ANSI_FMT("%s", ANSI_FG_YELLOW), buf);
+  int p = sprintf(buf, "detected memory %s at 0x%08x, the data is \t",
+                  is_read ? "read" : "write", addr);
   for (int i = 7; i >= 0; i--) {
     if (i >= len) {
-      printf("   ");
+      sprintf(buf + p, "   ");
     } else {
-      printf("%02x ", (char)BITS(data, 8 * i + 7, 8 * i) & 0xFF);
+      sprintf(buf + p, "%02x ", (char)BITS(data, 8 * i + 7, 8 * i) & 0xFF);
     }
+    p += 3;
   }
-  printf("\n");
+  Log(ANSI_FMT("%s", ANSI_BG_BLUE), buf);
   return;
 }
