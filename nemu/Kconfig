@@ -155,7 +155,7 @@ config MTRACE
 config MTRACE_RANGE
   depends on MTRACE
   bool "Only trace mamory r/w when addr is in specified range"
-  default y
+  default n
 
 config MTRACE_START
   depends on MTRACE_RANGE
