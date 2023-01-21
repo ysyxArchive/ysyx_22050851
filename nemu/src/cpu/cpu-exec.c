@@ -77,6 +77,7 @@ static void exec_once(Decode* s, vaddr_t pc) {
   disassemble(p, s->logbuf - p + sizeof(s->logbuf),
               MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc),
               (uint8_t*)&s->isa.inst.val, ilen);
+  add_inst_to_ring(s->logbuf);
 #endif
 }
 
@@ -144,7 +145,7 @@ void cpu_exec(uint64_t n) {
                       ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN)
                       : ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
           nemu_state.halt_pc);
-      if(nemu_state.halt_ret != 0){
+      if (nemu_state.halt_ret != 0) {
         print_ring_buf();
       }
       // fall through
