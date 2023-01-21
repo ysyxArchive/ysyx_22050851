@@ -13,7 +13,7 @@ typedef struct FuncNode {
 
 FuncNode headFuncNode = {.next = NULL};
 
-void ftrace_init(const char* elflocation) {
+void init_ftrace(const char* elflocation) {
   if (!elflocation) {
     Log("ftrace is %s, set elf file input for ftrace",
         ANSI_FMT("OFF", ANSI_FG_RED));

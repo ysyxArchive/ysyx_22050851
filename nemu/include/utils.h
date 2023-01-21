@@ -82,3 +82,4 @@ void add_inst_to_ring(char* source);
 void print_ring_buf();
 
 void mtrace(bool is_read, paddr_t addr, int len, word_t data);
+void init_ftrace(const char* elflocation);
