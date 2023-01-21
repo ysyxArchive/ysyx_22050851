@@ -1,6 +1,6 @@
 #include <common.h>
 #include <string.h>
-
+#include <elf.h>
 //  iringbuf -------------------------------------------------
 #define RING_SIZE 16
 
@@ -45,4 +45,9 @@ void mtrace(bool is_read, paddr_t addr, int len, word_t data) {
   Log(ANSI_FMT("%s", ANSI_FG_YELLOW), buf);
 #endif
   return;
+}
+
+// ftrace ----------------------------------------------------
+void ftrace(){
+    
 }
