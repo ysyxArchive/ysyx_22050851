@@ -15,7 +15,7 @@ FuncNode headFuncNode = {.next = NULL};
 
 void init_ftrace(const char* elflocation) {
   if (!elflocation) {
-    Log("ftrace is %s, set elf file input for ftrace",
+    Log("ftrace is %s",
         ANSI_FMT("OFF", ANSI_FG_RED));
     return;
   }
