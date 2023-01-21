@@ -35,6 +35,6 @@ void mtrace(bool is_read, paddr_t addr, int len, word_t data) {
     }
     p += 3;
   }
-  Log(ANSI_FMT("%s", ANSI_BG_BLUE), buf);
+  Log(ANSI_FMT("%s", ANSI_FG_YELLOW), buf);
   return;
 }
