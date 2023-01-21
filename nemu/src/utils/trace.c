@@ -14,9 +14,9 @@ void add_inst_to_ring(char* source) {
 
 void print_ring_buf() {
   int p = (iringp + 1) % RING_SIZE;
-  Log("Recently executed instrucitons:\n");
+  printf("Recently executed instrucitons:\n");
   while (p != iringp) {
-    Log("%s\n", iringbuf[p]);
+    printf("%s\n", iringbuf[p]);
     p = (p + 1) % RING_SIZE;
   }
 }
