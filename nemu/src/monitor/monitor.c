@@ -16,6 +16,7 @@
 #include <isa.h>
 #include <memory/paddr.h>
 #include <sdb.h>
+#include <common.h>
 void init_rand();
 void init_log(const char* log_file);
 void init_mem();
@@ -142,7 +143,7 @@ void init_monitor(int argc, char* argv[]) {
 
   /* test expr method*/
   test_expr();
-
+  
   IFDEF(CONFIG_ITRACE,
         init_disasm(MUXDEF(CONFIG_ISA_x86, "i686",
                            MUXDEF(CONFIG_ISA_mips32, "mipsel",
