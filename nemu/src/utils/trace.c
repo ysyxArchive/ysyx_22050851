@@ -9,7 +9,7 @@ unsigned char iringp = 0;
 
 // copy the source to the ringbuf
 void add_inst_to_ring(char* source) {
-  strncpy(iringbuf[iringp], source, 50);
+  strncpy(iringbuf[iringp], source, 49);
   iringp = (iringp + 1) % RING_SIZE;
 }
 
