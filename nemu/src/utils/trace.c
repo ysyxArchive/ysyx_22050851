@@ -1,6 +1,6 @@
 #include <common.h>
-#include <string.h>
 #include <elf.h>
+#include <string.h>
 //  iringbuf -------------------------------------------------
 #define RING_SIZE 16
 
@@ -9,7 +9,7 @@ unsigned char iringp = 0;
 
 // copy the source to the ringbuf
 void add_inst_to_ring(char* source) {
-  strcpy(iringbuf[iringp], source);
+  strncpy(iringbuf[iringp], source, 50);
   iringp = (iringp + 1) % RING_SIZE;
 }
 
@@ -48,6 +48,4 @@ void mtrace(bool is_read, paddr_t addr, int len, word_t data) {
 }
 
 // ftrace ----------------------------------------------------
-void ftrace(){
-    
-}
+void ftrace() {}
