@@ -129,6 +129,7 @@ void check_jump(Decode* s) {
   if (strcmp("jalr", s->isa.inst.instname) == 0) {
     getout(s);
   }
+  printf("%s", s->isa.inst.instname);
 }
 
 void show_position() {
