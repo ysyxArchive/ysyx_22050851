@@ -101,8 +101,8 @@ void getin(Decode* s) {
   strcpy(target->funcName, node ? node->name : "???");
   target->next = NULL;
   positionTail->next = target;
-  positionTail = positionTail->next;
   printf("123\n");
+  positionTail = positionTail->next;
   positionLength++;
 }
 
