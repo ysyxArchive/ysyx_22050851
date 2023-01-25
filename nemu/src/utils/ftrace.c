@@ -90,8 +90,7 @@ void getin(Decode* s) {
   uint64_t dnpc = s->dnpc;
   FuncNode* node = headFuncNode.next;
   PositionNode* target = (PositionNode*)malloc(sizeof(PositionNode));
-  while (node && node->start> dnpc &&
-         node->start + node->length <= dnpc) {
+  while (node && node->start > dnpc && node->start + node->length <= dnpc) {
     node = node->next;
   }
   target->position = s->pc;
@@ -103,22 +102,20 @@ void getin(Decode* s) {
   positionLength++;
 }
 
-
 void getout(Decode* s) {
-//   uint64_t dnpc = s->dnpc;
-//   FuncNode* node = headFuncNode;
-//   PositionNode* target = (PositionNode*)malloc(sizeof(PositionNode));
-//   while (node && node->position > dnpc &&
-//          node->position + node->length <= dnpc) {
-//     node = node.next;
-//   }
-//   target->position = s->pc;
-//   target->nextPosition = s->dnpc;
-//   target->isret = false;
-//   strcpy(target->funcName, node ? node->name : "???");
-//   target->next = positionNode->next;
-//   positionNode->next = target;
-//   positionLength++;
+  uint64_t pc = s->pc;
+  FuncNode* node = headFuncNode.next;
+  PositionNode* target = (PositionNode*)malloc(sizeof(PositionNode));
+  while (node && node->start > pc && node->start + node->length <= pc) {
+    node = node->next;
+  }
+  target->position = s->pc;
+  target->nextPosition = s->dnpc;
+  target->isret = true;
+  strcpy(target->funcName, node ? node->name : "???");
+  target->next = positionNode.next;
+  positionNode.next = target;
+  positionLength++;
 }
 
 void check_jump(Decode* s) {

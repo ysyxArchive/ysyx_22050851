@@ -17,7 +17,6 @@
 #define __UTILS_H__
 
 #include <common.h>
-
 // ----------- state -----------
 
 enum { NEMU_RUNNING, NEMU_STOP, NEMU_END, NEMU_ABORT, NEMU_QUIT };
@@ -83,3 +82,5 @@ void print_ring_buf();
 
 void mtrace(bool is_read, paddr_t addr, int len, word_t data);
 void init_ftrace(const char* elflocation);
+
+// void check_jump(Decode* s);
