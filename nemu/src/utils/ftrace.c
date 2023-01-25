@@ -95,6 +95,7 @@ void getin(Decode* s) {
   while (node && node->start > dnpc && node->start + node->length <= dnpc) {
     node = node->next;
   }
+  printf("123\n");
   target->position = s->pc;
   target->nextPosition = s->dnpc;
   target->isret = false;
