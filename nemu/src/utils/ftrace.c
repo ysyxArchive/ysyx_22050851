@@ -120,10 +120,10 @@ void getout(Decode* s) {
 }
 
 void check_jump(Decode* s) {
-  if (strcmp("jal", s->isa.inst.instname) == 0) {
-    getin(s);
-  }
-  if (strcmp("jalr", s->isa.inst.instname) == 0) {
-    getout(s);
-  }
+//   if (strcmp("jal", s->isa.inst.instname) == 0) {
+//     getin(s);
+//   }
+//   if (strcmp("jalr", s->isa.inst.instname) == 0) {
+//     getout(s);
+//   }
 }
