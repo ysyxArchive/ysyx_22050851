@@ -95,12 +95,12 @@ void getin(Decode* s) {
   while (node && node->start > dnpc && node->start + node->length <= dnpc) {
     node = node->next;
   }
-  printf("123\n");
   target->position = s->pc;
   target->nextPosition = s->dnpc;
   target->isret = false;
   strcpy(target->funcName, node ? node->name : "???");
   target->next = NULL;
+  printf("123\n");
   positionTail->next = target;
   positionTail = positionTail->next;
   positionLength++;
