@@ -99,10 +99,10 @@ void getin(Decode* s) {
   target->position = s->pc;
   target->nextPosition = s->dnpc;
   target->isret = false;
-  strncpy(target->funcName, node ? node->name : "???", 28);
+  strcpy(target->funcName, node ? node->name : "???");
   target->next = NULL;
   positionTail->next = target;
-  positionTail->next = positionTail;
+  positionTail = positionTail->next;
   positionLength++;
 }
 
