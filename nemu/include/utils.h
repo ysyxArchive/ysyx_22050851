@@ -84,3 +84,4 @@ void mtrace(bool is_read, paddr_t addr, int len, word_t data);
 void init_ftrace(const char* elflocation);
 struct Decode;
 void check_jump(struct Decode* s);
+void show_position();

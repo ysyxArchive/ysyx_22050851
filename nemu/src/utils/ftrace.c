@@ -43,7 +43,7 @@ void init_ftrace(const char* elflocation) {
   Elf64_Shdr section_header_symtab = {.sh_type = SHT_NULL},
              section_header_strtab = {.sh_type = SHT_NULL};
 
-    printf("%d", elfHeader.e_shnum);
+  printf("%d", elfHeader.e_shnum);
   for (int i = 0; i < elfHeader.e_shnum; i++) {
     ret = fread(&section_header_buf, sizeof(section_header_buf), 1, fp);
     Assert(ret > 0, "error when reading");
@@ -131,6 +131,11 @@ void check_jump(Decode* s) {
   }
 }
 
-void show_position(){
-
+void show_position() {
+  PositionNode* p = positionNode.next;
+  while (p) {
+    printf("%lx: %s [%s@0x%lx]\n", p->position, p->isret ? "ret" : "call",
+           p->funcName, p->nextPosition);
+        p = p->next;
+  }
 }

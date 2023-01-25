@@ -152,6 +152,7 @@ void cpu_exec(uint64_t n) {
           nemu_state.halt_pc);
       if (nemu_state.halt_ret != 0) {
         print_ring_buf();
+        show_position();
       }
       // fall through
     case NEMU_QUIT:

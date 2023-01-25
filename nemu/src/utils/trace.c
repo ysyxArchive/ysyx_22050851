@@ -46,6 +46,3 @@ void mtrace(bool is_read, paddr_t addr, int len, word_t data) {
 #endif
   return;
 }
-
-// ftrace ----------------------------------------------------
-void ftrace() {}
