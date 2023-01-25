@@ -102,8 +102,8 @@ void getin(Decode* s) {
   target->next = NULL;
   positionTail->next = target;
   positionTail = positionTail->next;
-  positionLength++;
   printf("123\n");
+  positionLength++;
 }
 
 void getout(Decode* s) {
