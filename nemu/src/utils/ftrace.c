@@ -20,6 +20,7 @@ typedef struct PositionNode {
 } PositionNode;
 
 PositionNode positionNode = {.next = NULL};
+PositionNode* positionTail = NULL;
 int positionLength = 0;
 FuncNode headFuncNode = {.next = NULL};
 
@@ -98,8 +99,9 @@ void getin(Decode* s) {
   target->nextPosition = s->dnpc;
   target->isret = false;
   strcpy(target->funcName, node ? node->name : "???");
-  target->next = positionNode.next;
-  positionNode.next = target;
+  target->next = NULL;
+  positionTail->next = target;
+  positionTail->next = positionTail;
   positionLength++;
 }
 
@@ -114,8 +116,9 @@ void getout(Decode* s) {
   target->nextPosition = s->dnpc;
   target->isret = true;
   strcpy(target->funcName, node ? node->name : "???");
-  target->next = positionNode.next;
-  positionNode.next = target;
+  target->next = NULL;
+  positionTail->next = target;
+  positionTail->next = positionTail;
   positionLength++;
 }
 
@@ -126,4 +129,8 @@ void check_jump(Decode* s) {
   if (strcmp("jalr", s->isa.inst.instname) == 0) {
     getout(s);
   }
+}
+
+void show_position(){
+
 }
