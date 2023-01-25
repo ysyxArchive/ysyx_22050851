@@ -28,7 +28,7 @@ void init_ftrace(const char* elflocation) {
     Log("ftrace is %s", ANSI_FMT("OFF", ANSI_FG_RED));
     return;
   }
-  int ret;
+  size_t ret;
   FILE* fp = fopen(elflocation, "r");
   FILE* fp2 = fopen(elflocation, "r");
   Assert(fp && fp2, "Cannot open elf file at %s", elflocation);
