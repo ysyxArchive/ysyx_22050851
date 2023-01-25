@@ -44,6 +44,7 @@ void init_ftrace(const char* elflocation) {
 
   for (int i = 0; i < elfHeader.e_shnum; i++) {
     ret = fread(&section_header_buf, sizeof(section_header_buf), 1, fp);
+    printf("reading");
     Assert(ret > 0, "error when reading");
     if (section_header_buf.sh_type == SHT_SYMTAB) {
       section_header_symtab = section_header_buf;
