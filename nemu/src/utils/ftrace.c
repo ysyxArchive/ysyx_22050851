@@ -3,6 +3,7 @@
 #include <malloc.h>
 #include <stdio.h>
 #include <string.h>
+#include <cpu/decode.h>
 typedef struct FuncNode {
   uint64_t name_index;
   char name[30];
@@ -72,4 +73,7 @@ void init_ftrace(const char* elflocation) {
   fclose(fp);
   fclose(fp2);
   return;
+}
+void check_jump(Decode* s){
+    
 }
