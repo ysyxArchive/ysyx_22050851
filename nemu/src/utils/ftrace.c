@@ -135,7 +135,7 @@ void show_position() {
   PositionNode* p = positionNode.next;
   int depth = 0;
   while (p) {
-    if (!p->isret)
+    if (p->isret)
       depth--;
     printf("0x%lx: ", p->position);
     for (int i = 0; i < depth; i++) {
@@ -143,7 +143,7 @@ void show_position() {
     }
     printf("%s [%s@0x%lx]\n", p->isret ? "ret " : "call", p->funcName,
            p->nextPosition);
-    if (p->isret)
+    if (!p->isret)
       depth++;
     p = p->next;
   }
