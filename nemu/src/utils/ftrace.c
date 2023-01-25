@@ -100,10 +100,10 @@ void getin(Decode* s) {
   target->isret = false;
   strcpy(target->funcName, node ? node->name : "???");
   target->next = NULL;
-  printf("123\n");
   positionTail->next = target;
   positionTail = positionTail->next;
   positionLength++;
+  printf("123\n");
 }
 
 void getout(Decode* s) {
