@@ -98,7 +98,7 @@ void getin(Decode* s) {
   target->position = s->pc;
   target->nextPosition = s->dnpc;
   target->isret = false;
-  strcpy(target->funcName, node ? node->name : "???");
+  strncpy(target->funcName, node ? node->name : "???", 28);
   target->next = NULL;
   positionTail->next = target;
   positionTail->next = positionTail;
@@ -129,7 +129,6 @@ void check_jump(Decode* s) {
   if (strcmp("jalr", s->isa.inst.instname) == 0) {
     getout(s);
   }
-  printf("%s", s->isa.inst.instname);
 }
 
 void show_position() {
