@@ -20,7 +20,7 @@ typedef struct PositionNode {
 } PositionNode;
 
 PositionNode positionNode = {.next = NULL};
-PositionNode* positionTail = NULL;
+PositionNode* positionTail = &positionNode;
 int positionLength = 0;
 FuncNode headFuncNode = {.next = NULL};
 
