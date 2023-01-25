@@ -1,9 +1,9 @@
 #include <common.h>
+#include <cpu/decode.h>
 #include <elf.h>
 #include <malloc.h>
 #include <stdio.h>
 #include <string.h>
-#include <cpu/decode.h>
 typedef struct FuncNode {
   uint64_t name_index;
   char name[30];
@@ -11,13 +11,21 @@ typedef struct FuncNode {
   uint64_t length;
   struct FuncNode* next;
 } FuncNode;
+typedef struct PositionNode {
+  char funcName[30];
+  uint64_t position;
+  uint64_t nextPosition;
+  bool isret;
+  struct PositionNode* next;
+} PositionNode;
 
+PositionNode positionNode = {.next = NULL};
+int positionLength = 0;
 FuncNode headFuncNode = {.next = NULL};
 
 void init_ftrace(const char* elflocation) {
   if (!elflocation) {
-    Log("ftrace is %s",
-        ANSI_FMT("OFF", ANSI_FG_RED));
+    Log("ftrace is %s", ANSI_FMT("OFF", ANSI_FG_RED));
     return;
   }
   int ret;
@@ -31,7 +39,8 @@ void init_ftrace(const char* elflocation) {
   fseek(fp, elfHeader.e_shoff, SEEK_SET);
   Elf64_Shdr section_header_buf;
 
-  Elf64_Shdr section_header_symtab = {.sh_type = SHT_NULL}, section_header_strtab ={.sh_type = SHT_NULL};
+  Elf64_Shdr section_header_symtab = {.sh_type = SHT_NULL},
+             section_header_strtab = {.sh_type = SHT_NULL};
 
   for (int i = 0; i < elfHeader.e_shnum; i++) {
     ret = fread(&section_header_buf, sizeof(section_header_buf), 1, fp);
@@ -43,8 +52,10 @@ void init_ftrace(const char* elflocation) {
       section_header_strtab = section_header_buf;
     }
   }
-  Assert(section_header_symtab.sh_type != SHT_NULL, "error not found symbol table");
-  Assert(section_header_strtab.sh_type != SHT_NULL, "error not found string table");
+  Assert(section_header_symtab.sh_type != SHT_NULL,
+         "error not found symbol table");
+  Assert(section_header_strtab.sh_type != SHT_NULL,
+         "error not found string table");
   fseek(fp, section_header_symtab.sh_offset, SEEK_SET);
   Elf64_Sym symbuf;
   for (int i = 0;
@@ -74,6 +85,47 @@ void init_ftrace(const char* elflocation) {
   fclose(fp2);
   return;
 }
-void check_jump(Decode* s){
-    
+
+void getin(Decode* s) {
+  uint64_t dnpc = s->dnpc;
+  FuncNode* node = headFuncNode.next;
+  PositionNode* target = (PositionNode*)malloc(sizeof(PositionNode));
+  while (node && node->start> dnpc &&
+         node->start + node->length <= dnpc) {
+    node = node->next;
+  }
+  target->position = s->pc;
+  target->nextPosition = s->dnpc;
+  target->isret = false;
+  strcpy(target->funcName, node ? node->name : "???");
+  target->next = positionNode.next;
+  positionNode.next = target;
+  positionLength++;
+}
+
+
+void getout(Decode* s) {
+//   uint64_t dnpc = s->dnpc;
+//   FuncNode* node = headFuncNode;
+//   PositionNode* target = (PositionNode*)malloc(sizeof(PositionNode));
+//   while (node && node->position > dnpc &&
+//          node->position + node->length <= dnpc) {
+//     node = node.next;
+//   }
+//   target->position = s->pc;
+//   target->nextPosition = s->dnpc;
+//   target->isret = false;
+//   strcpy(target->funcName, node ? node->name : "???");
+//   target->next = positionNode->next;
+//   positionNode->next = target;
+//   positionLength++;
+}
+
+void check_jump(Decode* s) {
+  if (strcmp("jal", s->isa.inst.instname) == 0) {
+    getin(s);
+  }
+  if (strcmp("jalr", s->isa.inst.instname) == 0) {
+    getout(s);
+  }
 }
