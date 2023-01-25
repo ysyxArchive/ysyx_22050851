@@ -133,9 +133,14 @@ void check_jump(Decode* s) {
 
 void show_position() {
   PositionNode* p = positionNode.next;
+  int depth = 0;
   while (p) {
-    printf("0x%lx: %s [%s@0x%lx]\n", p->position, p->isret ? "ret" : "call",
-           p->funcName, p->nextPosition);
-        p = p->next;
+    printf("0x%lx: ", p->position);
+    for(int i = 0; i < depth;i++){
+        printf("  ");
+    }
+    printf("%s [%s@0x%lx]\n", p->isret ? "ret " : "call", p->funcName,
+           p->nextPosition);
+    p = p->next;
   }
 }
