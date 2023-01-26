@@ -13,11 +13,13 @@
  * See the Mulan PSL v2 for more details.
  ***************************************************************************************/
 
+#include <common.h>
 #include <isa.h>
 #include <memory/paddr.h>
 #include <sdb.h>
 void init_rand();
 void init_log(const char* log_file);
+void init_ftrace(const char* elf_file);
 void init_mem();
 void init_difftest(char* ref_so_file, long img_size, int port);
 void init_device();
@@ -43,6 +45,7 @@ static void welcome() {
 void sdb_set_batch_mode();
 
 static char* log_file = NULL;
+static char* elf_file = NULL;
 static char* diff_so_file = NULL;
 static char* img_file = NULL;
 static int difftest_port = 1234;
@@ -73,13 +76,14 @@ static int parse_args(int argc, char* argv[]) {
   const struct option table[] = {
       {"batch", no_argument, NULL, 'b'},
       {"log", required_argument, NULL, 'l'},
+      {"elf", required_argument, NULL, 'e'},
       {"diff", required_argument, NULL, 'd'},
       {"port", required_argument, NULL, 'p'},
       {"help", no_argument, NULL, 'h'},
       {0, 0, NULL, 0},
   };
   int o;
-  while ((o = getopt_long(argc, argv, "-bhl:d:p:", table, NULL)) != -1) {
+  while ((o = getopt_long(argc, argv, "-bhl:d:p:e:", table, NULL)) != -1) {
     switch (o) {
       case 'b':
         sdb_set_batch_mode();
@@ -93,6 +97,9 @@ static int parse_args(int argc, char* argv[]) {
       case 'd':
         diff_so_file = optarg;
         break;
+      case 'e':
+        elf_file = optarg;
+        break;
       case 1:
         img_file = optarg;
         return 0;
@@ -100,6 +107,7 @@ static int parse_args(int argc, char* argv[]) {
         printf("Usage: %s [OPTION...] IMAGE [args]\n\n", argv[0]);
         printf("\t-b,--batch              run with batch mode\n");
         printf("\t-l,--log=FILE           output log to FILE\n");
+        printf("\t-e,--elf=FILE           .elf file to input\n");
         printf(
             "\t-d,--diff=REF_SO        run DiffTest with reference REF_SO\n");
         printf("\t-p,--port=PORT          run DiffTest with port PORT\n");
@@ -121,6 +129,9 @@ void init_monitor(int argc, char* argv[]) {
 
   /* Open the log file. */
   init_log(log_file);
+
+  /* init ftrace. */
+  init_ftrace(elf_file);
 
   /* Initialize memory. */
   init_mem();

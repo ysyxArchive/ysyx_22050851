@@ -49,8 +49,6 @@ static int cmd_c(char* args) {
 }
 
 static int cmd_q(char* args) {
-  // 直接改为END会不会出现问题？
-  nemu_state.state = NEMU_END;
   return -1;
 }
 
