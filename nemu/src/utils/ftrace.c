@@ -127,7 +127,7 @@ void check_jump(Decode* s) {
   if ((s->isa.inst.val | 0xFFFFF000) == 0xFFFFF0EF ||
       (s->isa.inst.val | 0xFFFF8000) == 0xFFFF80E7) {
     getin(s);
-  } else if (s->isa.inst.val == 0x00008067) {
+  } else if (s->isa.inst.val == 0x00008067) { // is ret
     getout(s);
   }
 }
