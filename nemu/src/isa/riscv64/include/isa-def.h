@@ -25,9 +25,8 @@ typedef struct {
 
 // decode
 typedef struct {
-  struct {
+  union {
     uint32_t val;
-    char instname[10];
   } inst;
 } riscv64_ISADecodeInfo;
 
