@@ -123,10 +123,11 @@ void getout(Decode* s) {
 }
 
 void check_jump(Decode* s) {
-  if (strcmp("jal", s->isa.inst.instname) == 0) {
+  // is call
+  if ((s->isa.inst.val | 0xFFFFF000) == 0xFFFFF0EF ||
+      (s->isa.inst.val | 0xFFFF8000) == 0xFFFF80E7) {
     getin(s);
-  }
-  if (strcmp("jalr", s->isa.inst.instname) == 0) {
+  } else if (s->isa.inst.val == 0x00008067) {
     getout(s);
   }
 }
