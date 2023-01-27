@@ -37,7 +37,7 @@ int printf(const char* fmt, ...) {
   char bufs[30];
   while (fmt[fmtp]) {
     if (fmt[fmtp] != '%') {
-      putch(fmt[fmtp]);
+      putch(fmt[fmtp++]);
     } else {
       fmtp++;
       switch (fmt[fmtp]) {
