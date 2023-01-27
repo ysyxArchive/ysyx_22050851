@@ -13,7 +13,7 @@ size_t strlen(const char* s) {
 }
 
 char* strcpy(char* dst, const char* src) {
-  int i = 0;
+  size_t i = 0;
   while (src[i]) {
     dst[i] = src[i];
     i++;
@@ -23,14 +23,18 @@ char* strcpy(char* dst, const char* src) {
 }
 
 char* strncpy(char* dst, const char* src, size_t n) {
-  panic("Not implemented");
+  size_t len = strlen(src);
+  for (size_t i = 0; i < n; i++) {
+    strcpy(dst + i * len, src);
+  }
+  return dst;
 }
 
 char* strcat(char* dst, const char* src) {
-  int i = 0;
+  size_t i = 0;
   while (dst[i])
     i++;
-  int j = 0;
+  size_t j = 0;
   while (src[j]) {
     dst[i + j] = src[j];
     j++;
@@ -40,7 +44,7 @@ char* strcat(char* dst, const char* src) {
 }
 
 int strcmp(const char* s1, const char* s2) {
-  int i = 0;
+  size_t i = 0;
   while (s1[i] && s2[i] && s1[i] == s2[i]) {
     i++;
   }
@@ -48,30 +52,47 @@ int strcmp(const char* s1, const char* s2) {
 }
 
 int strncmp(const char* s1, const char* s2, size_t n) {
-  panic("Not implemented");
+  size_t i = 0;
+  while (i < n && s1[i] && s2[i] && s1[i] == s2[i]) {
+    i++;
+  }
+  if (i == n) {
+    return 0;
+  } else {
+    return s1[i] - s2[i];
+  }
 }
 
 void* memset(void* s, int c, size_t n) {
-  char* p = s;
-  for (int i = 0; i < n; i++) {
-    p[i] = (char)c;
+  uint8_t* p = s;
+  for (size_t i = 0; i < n; i++) {
+    p[i] = (uint8_t)c;
   }
   return s;
 }
 
 void* memmove(void* dst, const void* src, size_t n) {
-  panic("Not implemented");
+  uint8_t* temp = (uint8_t*)malloc(n);
+  memcpy(temp, src, n);
+  memcpy(dst, temp, n);
+  free(temp);
+  return dst;
 }
 
 void* memcpy(void* out, const void* in, size_t n) {
-  panic("Not implemented");
+  uint8_t* outp = out;
+  const uint8_t* inp = in;
+  for (size_t i = 0; i < n; i++) {
+    outp[i] = inp[i];
+  }
+  return out;
 }
 
 int memcmp(const void* s1, const void* s2, size_t n) {
-  const char* p1 = s1;
-  const char* p2 = s2;
-  char ret = 0;
-  int i = 0;
+  const uint8_t* p1 = s1;
+  const uint8_t* p2 = s2;
+  uint8_t ret = 0;
+  size_t i = 0;
   while (i < n && ret == 0) {
     ret = p1[i] - p2[i];
     i++;
