@@ -25,10 +25,15 @@ char* strcpy(char* dst, const char* src) {
 
 char* strncpy(char* dst, const char* src, size_t n) {
   size_t len = strlen(src);
-  for (size_t i = 0; i < n; i++) {
-    strcpy(dst + i * len, src);
+  size_t dstlen = strlen(dst);
+  if (len > n)
+    len = n;
+  for (size_t i = 0; i < len; i++) {
+    dst[i] = src[i];
   }
-  dst[n * len] = 0;
+  if (dstlen < len) {
+    dst[len] = 0;
+  }
   return dst;
 }
 
