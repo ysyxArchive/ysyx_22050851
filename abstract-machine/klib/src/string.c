@@ -14,11 +14,12 @@ size_t strlen(const char* s) {
 
 char* strcpy(char* dst, const char* src) {
   size_t i = 0;
-  while (src[i]) {
+  size_t len = strlen(src);
+  while (i < len) {
     dst[i] = src[i];
     i++;
   }
-  dst[i] = src[i];
+  dst[i] = 0;
   return dst;
 }
 
@@ -27,19 +28,15 @@ char* strncpy(char* dst, const char* src, size_t n) {
   for (size_t i = 0; i < n; i++) {
     strcpy(dst + i * len, src);
   }
+  dst[n * len] = 0;
   return dst;
 }
 
 char* strcat(char* dst, const char* src) {
-  size_t i = 0;
-  while (dst[i])
-    i++;
-  size_t j = 0;
-  while (src[j]) {
-    dst[i + j] = src[j];
-    j++;
-  }
-  dst[i + j] = 0;
+  size_t dstlen = strlen(dst);
+  size_t srclen = strlen(src);
+  strcpy(dst + dstlen, src);
+  dst[dstlen + srclen] = 0;
   return dst;
 }
 
