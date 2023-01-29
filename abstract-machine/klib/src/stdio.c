@@ -55,8 +55,8 @@ int printf(const char* fmt, ...) {
           }
           break;
         case 'c':
-          char* c = va_arg(ap, char*);
-          putch(*c);
+          char c = va_arg(ap, int);
+          putch(c);
           break;
         default:
           panic("unsupported format ");
