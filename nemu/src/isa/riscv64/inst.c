@@ -94,6 +94,7 @@ static int decode_exec(Decode *s) {
   INSTPAT("0100000 ????? ????? 000 ????? 01110 11", subw   , R, Reg(dest) = SEXT(BITS(src1, 31, 0) - BITS(src2, 31, 0), 32));
   INSTPAT("0000001 ????? ????? 000 ????? 01100 11", mul    , R, Reg(dest) = src1 * src2);
   INSTPAT("0000001 ????? ????? 000 ????? 01110 11", mulw   , R, Reg(dest) = SEXT(BITS(src1, 31, 0) * BITS(src2, 31, 0), 32));
+  INSTPAT("0000001 ????? ????? 101 ????? 01100 11", divu   , R, Reg(dest) = src1 / src2);
   INSTPAT("0000001 ????? ????? 110 ????? 01110 11", remw   , R, Reg(dest) = SEXT(BITS(src1, 31, 0) % BITS(src2, 31, 0), 32));
   INSTPAT("0000001 ????? ????? 100 ????? 01110 11", divw   , R, Reg(dest) = SEXT(BITS(src1, 31, 0) / BITS(src2, 31, 0), 32));
   INSTPAT("0000000 ????? ????? 001 ????? 01110 11", sllw   , R, Reg(dest) = SEXT(BITS(src1, 31, 0) << src2, 32));
@@ -119,9 +120,9 @@ static int decode_exec(Decode *s) {
   INSTPAT_END();
 
   Reg(0) = 0; // reset $zero to 0
-#ifdef CONFIG_ITRACE
+
   Log("pc= %lx, dnpc= %lx, snpc= %lx", s->pc, s->dnpc, s->snpc);
-#endif
+
   return 0;
 }
 
