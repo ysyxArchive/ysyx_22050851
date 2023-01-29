@@ -30,42 +30,7 @@ int num2str(char* out, int num) {
 }
 
 int printf(const char* fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  size_t fmtp = 0;
-  size_t cnt = 0;
-  char bufs[30];
-  while (fmt[fmtp]) {
-    if (fmt[fmtp] != '%') {
-      putch(fmt[fmtp++]);
-    } else {
-      fmtp++;
-      switch (fmt[fmtp]) {
-        case 'd':
-          int d = va_arg(ap, int);
-          num2str(bufs, d);
-          for (size_t p = 0; bufs[p]; p++) {
-            putch(bufs[p]);
-          }
-          break;
-        case 's':
-          char* s = va_arg(ap, char*);
-          for (size_t p = 0; s[p]; p++) {
-            putch(s[p]);
-          }
-          break;
-        case 'c':
-          char c = va_arg(ap, int);
-          putch(c);
-          break;
-        default:
-          panic("unsupported format ");
-      }
-      fmtp++;
-    }
-  }
-  va_end(ap);
-  return cnt;
+  panic("Not implemented");
 }
 
 int vsprintf(char* out, const char* fmt, va_list ap) {
@@ -94,12 +59,7 @@ int sprintf(char* out, const char* fmt, ...) {
           strcpy(out + outp, s);
           outp += strlen(out + outp);
           break;
-        case 'c':
-          char* c = va_arg(ap, char*);
-          out[outp++] = (*c);
-          break;
         default:
-          panic("unsupported format");
       }
       fmtp++;
     }
