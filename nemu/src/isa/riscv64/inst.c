@@ -119,9 +119,9 @@ static int decode_exec(Decode *s) {
   INSTPAT_END();
 
   Reg(0) = 0; // reset $zero to 0
-// #ifdef CONFIG_TRACE
+#ifdef CONFIG_ITRACE
   Log("pc= %lx, dnpc= %lx, snpc= %lx", s->pc, s->dnpc, s->snpc);
-// #endif
+#endif
   return 0;
 }
 
