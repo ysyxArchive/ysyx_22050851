@@ -54,7 +54,12 @@ int printf(const char* fmt, ...) {
             putch(s[p]);
           }
           break;
+        case 'c':
+          char* c = va_arg(ap, char*);
+          putch(*c);
+          break;
         default:
+          panic("unsupported format ");
       }
       fmtp++;
     }
@@ -89,7 +94,12 @@ int sprintf(char* out, const char* fmt, ...) {
           strcpy(out + outp, s);
           outp += strlen(out + outp);
           break;
+        case 'c':
+          char* c = va_arg(ap, char*);
+          out[outp++] = (*c);
+          break;
         default:
+          panic("unsupported format");
       }
       fmtp++;
     }
