@@ -169,6 +169,12 @@ config MTRACE_OFFSET
   default MSIZE
 
 
+config DTRACE
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "Enable device trace"
+  default y
+
+
 config DIFFTEST
   depends on TARGET_NATIVE_ELF
   bool "Enable differential testing"

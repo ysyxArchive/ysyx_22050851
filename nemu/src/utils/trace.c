@@ -1,6 +1,7 @@
 #include <common.h>
 #include <elf.h>
 #include <string.h>
+#include "device/map.h"
 //  iringbuf -------------------------------------------------
 #define RING_SIZE 16
 
@@ -43,6 +44,32 @@ void mtrace(bool is_read, paddr_t addr, int len, word_t data) {
     p += 3;
   }
   Log(ANSI_FMT("%s", ANSI_FG_YELLOW), buf);
+#endif
+  return;
+}
+// dtrace -----------------------------------------------------
+void dtrace(bool is_read,
+            paddr_t addr,
+            int len,
+            word_t data,
+            const IOMap* map) {
+#ifdef CONFIG_DTRACE
+  char buf[200];
+  int p =
+      sprintf(buf,
+              "detected %s operation on %s at 0x%08x, addr offset is "
+              "0x%08x, the data is ",
+              is_read ? "read " : "write", map->name, addr, addr - map->low);
+
+  for (int i = 7; i >= 0; i--) {
+    if (i >= len) {
+      sprintf(buf + p, "   ");
+    } else {
+      sprintf(buf + p, "%02x ", (char)BITS(data, 8 * i + 7, 8 * i) & 0xFF);
+    }
+    p += 3;
+  }
+  Log(ANSI_FMT("%s", ANSI_FG_MAGENTA), buf);
 #endif
   return;
 }

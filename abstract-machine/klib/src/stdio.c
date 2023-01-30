@@ -5,28 +5,81 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-int num2str(char* out, int num) {
+char buffer_string[1000];
+
+int num2str(char* out, int num, bool zero_padding, uint8_t width, int round) {
   char bufs[30];
   int outp = 0;
   int bufp = 0;
+  bool isneg = false;
   if (num == 0) {
-    out[outp++] = '0';
-  } else {
-    if (num < 0) {
-      out[outp++] = '-';
-      num = -num;
+    bufs[bufp++] = '0';
+  }
+  if (num < 0) {
+    isneg = true;
+    num = -num;
+  }
+  while (num != 0) {
+    bufs[bufp++] = '0' + num % round;
+    if (bufs[bufp - 1] > '9') {
+      bufs[bufp - 1] += 'a' - '9' + 1;
     }
-    while (num != 0) {
-      bufs[bufp++] = '0' + num % 10;
-      num = num / 10;
+    num = num / round;
+  }
+  if (bufp < width) {
+    while (bufp < width - 1) {
+      bufs[bufp++] = zero_padding ? '0' : ' ';
     }
+    bufs[bufp++] = isneg ? '-' : zero_padding ? '0' : ' ';
+  } else if (isneg) {
+    bufs[bufp++] = '-';
+  }
+  while (bufp > 0) {
     bufp--;
-    while (bufp >= 0) {
-      out[outp++] = bufs[bufp--];
-    }
+    out[outp++] = bufs[bufp];
   }
   out[outp] = 0;
   return outp;
+}
+
+int str2num(const char* str, int length) {
+  int ret = 0;
+  for (int i = 0; i < length; i++) {
+    ret = ret * 10 + str[i] - '0';
+  }
+  return ret;
+}
+
+int check_indent(const char* str, uint64_t data, char** ret) {
+  int p = 0;
+  while (1) {
+    switch (str[p]) {
+      case 'd':
+      case 'x':
+        int d = (int)data;
+        bool zero_padding = str[0] == '0';
+        uint8_t width = str2num(str, p);
+        num2str(buffer_string, d, zero_padding, width, str[p] == 'd' ? 10 : 16);
+        *ret = buffer_string;
+        return p + 1;
+      case 'f':
+        // todo: makeit
+        return 1;
+      case 's':
+        *ret = (char*)data;
+        return p + 1;
+      case 'c':
+        buffer_string[0] = (char)data;
+        buffer_string[1] = 0;
+        *ret = buffer_string;
+        return p + 1;
+      default:
+        if (p > 10) {
+          panic("print indent not found or not supported!");
+        }
+    }
+    p++;
+  }
 }
 
 int printf(const char* fmt, ...) {
@@ -34,34 +87,16 @@ int printf(const char* fmt, ...) {
   va_start(ap, fmt);
   size_t fmtp = 0;
   size_t cnt = 0;
-  char bufs[30];
   while (fmt[fmtp]) {
     if (fmt[fmtp] != '%') {
       putch(fmt[fmtp++]);
     } else {
       fmtp++;
-      switch (fmt[fmtp]) {
-        case 'd':
-          int d = va_arg(ap, int);
-          num2str(bufs, d);
-          for (size_t p = 0; bufs[p]; p++) {
-            putch(bufs[p]);
-          }
-          break;
-        case 's':
-          char* s = va_arg(ap, char*);
-          for (size_t p = 0; s[p]; p++) {
-            putch(s[p]);
-          }
-          break;
-        case 'c':
-          char c = va_arg(ap, int);
-          putch(c);
-          break;
-        default:
-          panic("unsupported format ");
+      char* rets;
+      fmtp += check_indent(fmt + fmtp, va_arg(ap, uint64_t), &rets);
+      for (int i = 0; rets[i]; i++) {
+        putch(rets[i]);
       }
-      fmtp++;
     }
   }
   va_end(ap);
@@ -77,31 +112,16 @@ int sprintf(char* out, const char* fmt, ...) {
   va_start(ap, fmt);
   int outp = 0;
   int fmtp = 0;
-  int offset = 0;
   while (fmt[fmtp]) {
     if (fmt[fmtp] != '%') {
       out[outp++] = fmt[fmtp++];
     } else {
       fmtp++;
-      switch (fmt[fmtp]) {
-        case 'd':
-          int d = va_arg(ap, int);
-          offset = num2str(out + outp, d);
-          outp += offset;
-          break;
-        case 's':
-          char* s = va_arg(ap, char*);
-          strcpy(out + outp, s);
-          outp += strlen(out + outp);
-          break;
-        case 'c':
-          char* c = va_arg(ap, char*);
-          out[outp++] = (*c);
-          break;
-        default:
-          panic("unsupported format");
+      char* rets;
+      fmtp += check_indent(fmt + fmtp, va_arg(ap, uint64_t), &rets);
+      for (int i = 0; rets[i]; i++) {
+        out[outp++] = rets[i];
       }
-      fmtp++;
     }
   }
   va_end(ap);

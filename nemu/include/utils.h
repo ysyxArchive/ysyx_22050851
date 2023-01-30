@@ -73,15 +73,3 @@ uint64_t get_time();
   } while (0)
 
 #endif
-
-// copy the source to the ringbuf
-void add_inst_to_ring(char* source);
-
-// print ringbuf
-void print_ring_buf();
-
-void mtrace(bool is_read, paddr_t addr, int len, word_t data);
-void init_ftrace(const char* elflocation);
-struct Decode;
-void check_jump(struct Decode* s);
-void show_position();
