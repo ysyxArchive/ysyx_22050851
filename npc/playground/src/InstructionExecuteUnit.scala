@@ -1,20 +1,31 @@
 import chisel3.experimental._
 import chisel3._
 import chisel3.util._
+import decode._
+import os.read
 
 class InstructionExecuteUnit extends Module {
-  val in    = IO(Flipped(Decoupled(Operation())))
-  val regIO = IO(Flipped(new RegisterFileIO()))
-  val op    = in.bits
+  val in       = IO(Flipped(Decoupled(Vec(2, Operation()))))
+  val regIO    = IO(Flipped(new RegisterFileIO()))
+  val blackBox = Module(new BlackBoxHalt);
 
-  val inReady = RegInit(true.B)
-  in.ready := inReady
+  val ops       = RegInit(in.bits)
+  val opPointer = RegInit(0.U(1.W))
+  val bubbling  = RegInit(false.B)
 
-  val blackBox = Module(new BlackBoxAdd);
-  blackBox.io.halt := false.B
+  val isDoubleOps = ops(1).opType =/= OperationType.nothing.asUInt
+  val bubbleNext  = ops(opPointer).dst.stype === SourceType.pc.asUInt && !bubbling;
+  val ready       = (!isDoubleOps || isDoubleOps === opPointer) && ~bubbleNext;
 
-  regIO.waddr := op.dst.value(4, 0)
+  ops       := Mux(in.valid && in.ready, in.bits, ops)
+  opPointer := Mux(bubbleNext, opPointer, Mux(opPointer === 0.U, Mux(isDoubleOps, 1.U, 0.U), 0.U));
+  bubbling  := ~bubbling && bubbleNext;
 
+  in.ready := ready
+
+  val op = ops(opPointer)
+
+  regIO.waddr  := Mux(bubbling, 0.U, op.dst.value(4, 0))
   regIO.raddr1 := Mux(op.src1.stype === SourceType.reg.asUInt, op.src1.value(4, 0), 0.U(5.W))
   regIO.raddr2 := Mux(op.src2.stype === SourceType.reg.asUInt, op.src2.value(4, 0), 0.U(5.W))
 
@@ -25,6 +36,7 @@ class InstructionExecuteUnit extends Module {
       Seq(
         (SourceType.imm.asUInt) -> op.src1.value,
         (SourceType.reg.asUInt) -> regIO.out1,
+        (SourceType.npc.asUInt) -> regIO.npc,
         (SourceType.pc.asUInt) -> regIO.pc
       )
     )
@@ -35,12 +47,13 @@ class InstructionExecuteUnit extends Module {
       Seq(
         (SourceType.imm.asUInt) -> op.src2.value,
         (SourceType.reg.asUInt) -> regIO.out2,
+        (SourceType.npc.asUInt) -> regIO.npc,
         (SourceType.pc.asUInt) -> regIO.pc
       )
     )
 
   val ans = MuxLookup(
-    in.bits.opType.asUInt,
+    op.opType.asUInt,
     0.U,
     Seq(
       OperationType.add.asUInt -> (src1val + src2val),
@@ -48,8 +61,9 @@ class InstructionExecuteUnit extends Module {
     )
   )
 
-  blackBox.io.halt := in.bits.opType === OperationType.halt.asUInt
-  regIO.wdata      := ans
-  regIO.regWrite   := op.dst.stype === SourceType.reg.asUInt
-  regIO.pcWrite    := op.dst.stype === SourceType.pc.asUInt
+  blackBox.io.halt     := op.opType === OperationType.halt.asUInt
+  blackBox.io.bad_halt := op.opType === OperationType.noMatch.asUInt;
+  regIO.wdata          := ans
+  regIO.regWrite       := Mux(bubbling, true.B, op.dst.stype === SourceType.reg.asUInt)
+  regIO.pcWrite        := Mux(bubbling, false.B, op.dst.stype === SourceType.pc.asUInt)
 }

@@ -11,27 +11,29 @@ BIN = $(BUILD_DIR)/$(TOPNAME)
 
 VSRCS = $(shell find $(abspath ./build) -name "*.v")
 CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
-
+INCLUDES = $(shell find $(abspath ./include) -name "*.h")
+SCALAS = $(shell find $(abspath ./playground/src) -name "*.scala")
+INC_PATH = $(abspath ./include)
 INCFLAGS = $(addprefix -I, $(INC_PATH))
-CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
+CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" 
 LDFLAGS += -lSDL2 -lSDL2_image
 
 export PATH := $(PATH):$(abspath ./utils)
 
 default: $(BIN)
 
-$(BIN): $(CSRCS) $(VSRCS) 
-	@rm -rf $(OBJ_DIR)
+$(BIN): $(INCLUDES) $(CSRCS) $(VSRCS) verilog
 	$(VERILATOR) $(VERILATOR_CFLAGS) \
-		--top-module $(TOPNAME) $^ \
-		$(addprefix -CFLAGS , $(CFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) \
+		--top-module $(TOPNAME) $(CSRCS) $(VSRCS) \
+		$(addprefix -CFLAGS , $(CFLAGS))   \
+		$(addprefix -LDFLAGS , $(LDFLAGS)) \
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
 
 test:
 	mill -i __.test
 
-verilog:
+verilog: 
 	$(call git_commit, "generate verilog")
 	rm -rf $(BUILD_DIR)
 	mkdir -p $(BUILD_DIR)
@@ -55,14 +57,17 @@ checkformat:
 clean:
 	-rm -rf $(BUILD_DIR)
 
-build:
+build: $(BIN)
 	@rm -rf $(OBJ_DIR)
 	
 
 
 sim: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-	$(BIN)
+	$(BIN) $(IMG) $(ARGS) 
+
+run:
+	make sim
 
 .PHONY: test verilog help compile bsp reformat checkformat clean sim build
 include ../Makefile

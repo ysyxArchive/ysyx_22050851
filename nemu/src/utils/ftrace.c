@@ -4,6 +4,8 @@
 #include <malloc.h>
 #include <stdio.h>
 #include <string.h>
+#define FRACE_MAX_TRACE 20
+
 typedef struct FuncNode {
   uint64_t name_index;
   char name[30];
@@ -78,14 +80,26 @@ void init_ftrace(const char* elflocation) {
       headFuncNode.next = node;
     }
   }
-  FuncNode* p = headFuncNode.next;
-  while (p) {
-    printf("%s %lx %lx\n", p->name, p->start, p->length);
-    p = p->next;
-  }
   fclose(fp);
   fclose(fp2);
   return;
+}
+
+void prune() {
+  if (positionLength > FRACE_MAX_TRACE) {
+    PositionNode* p = positionNode.next;
+    while (p && p->next && p->next->next && p->next->next->next) {
+      if (!p->next->isret && p->next->next->isret) {
+        PositionNode* q = p->next;
+        p->next = p->next->next->next;
+        free(q->next);
+        free(q);
+        positionLength -= 2;
+        break;
+      }
+      p = p->next;
+    }
+  }
 }
 
 void getin(Decode* s) {
@@ -103,6 +117,7 @@ void getin(Decode* s) {
   positionTail->next = target;
   positionTail = positionTail->next;
   positionLength++;
+  prune();
 }
 
 void getout(Decode* s) {
@@ -120,6 +135,7 @@ void getout(Decode* s) {
   positionTail->next = target;
   positionTail = positionTail->next;
   positionLength++;
+  prune();
 }
 
 void check_jump(Decode* s) {
@@ -127,7 +143,7 @@ void check_jump(Decode* s) {
   if ((s->isa.inst.val | 0xFFFFF000) == 0xFFFFF0EF ||
       (s->isa.inst.val | 0xFFFF8000) == 0xFFFF80E7) {
     getin(s);
-  } else if (s->isa.inst.val == 0x00008067) { // is ret
+  } else if (s->isa.inst.val == 0x00008067) {  // is ret
     getout(s);
   }
 }

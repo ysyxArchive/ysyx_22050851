@@ -15,12 +15,14 @@ void add_inst_to_ring(char* source) {
 }
 
 void print_ring_buf() {
+#ifdef CONFIG_ITRACE
   int p = (iringp + 1) % RING_SIZE;
   printf("\nRecently executed instrucitons:\n");
   while (p != iringp) {
     printf("%s\n", iringbuf[p]);
     p = (p + 1) % RING_SIZE;
   }
+#endif
 }
 
 //  mtrace -------------------------------------------------
