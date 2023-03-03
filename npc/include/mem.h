@@ -10,4 +10,8 @@
 void init_memory(char* bin_path);
 uint64_t read_mem(uint64_t addr, size_t length);
 
+extern uint8_t mem[];
+extern size_t bin_file_size;
+
+
 #endif

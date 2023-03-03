@@ -4,7 +4,7 @@ BUILD_DIR = ./build
 # verilator build files
 OBJ_DIR = $(BUILD_DIR)/obj_dir
 
-VERILATOR = verilator
+override VERILATOR =  verilator 
 VERILATOR_CFLAGS += -MMD --build -cc  \
 				-O3 --x-assign fast --x-initial fast --noassert --trace
 BIN = $(BUILD_DIR)/$(TOPNAME)
@@ -16,8 +16,8 @@ SCALAS = $(shell find $(abspath ./playground/src) -name "*.scala")
 INC_PATH = $(abspath ./include)
 INCFLAGS = $(addprefix -I, $(INC_PATH))
 CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" 
-LDFLAGS += -lSDL2 -lSDL2_image
-
+LDFLAGS += -lSDL2 -lSDL2_image -ldl
+override ARGS += --diff=${NEMU_HOME}/build/riscv64-nemu-interpreter-so
 export PATH := $(PATH):$(abspath ./utils)
 
 default: $(BIN)
@@ -33,7 +33,7 @@ $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS) verilog
 test:
 	mill -i __.test
 
-verilog: 
+verilog: $(SCALAS)
 	$(call git_commit, "generate verilog")
 	rm -rf $(BUILD_DIR)
 	mkdir -p $(BUILD_DIR)

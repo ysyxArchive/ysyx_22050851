@@ -18,12 +18,45 @@
 #include <isa.h>
 #include <memory/paddr.h>
 
+#define TO_REF 1
+#define FROM_REF 0
+
+typedef struct CPU_host {
+  uint64_t gpr[32];
+  uint64_t pc;
+} CPU_host;
+
 void difftest_memcpy(paddr_t addr, void* buf, size_t n, bool direction) {
-  assert(0);
+  if (direction == TO_REF) {
+    int i = 0;
+    for (; i < n - 8; i += 8)
+      paddr_write(addr + i, 8, ((uint64_t*)buf)[i / 8]);
+    for (; i < n; i++) {
+      paddr_write(addr + i, 1, ((uint8_t*)buf)[i]);
+    }
+  } else {
+    int i = 0;
+    for (; i < n - 8; i += 8)
+      ((uint64_t*)buf)[i / 8] = paddr_read(addr + i, 8);
+    for (; i < n; i++) {
+      ((uint8_t*)buf)[i] = paddr_read(addr + i, 1);
+    }
+  }
 }
 
 void difftest_regcpy(void* dut, bool direction) {
-  assert(0);
+  CPU_host* cpu_host = dut;
+  if (direction == TO_REF) {
+    for (int i = 0; i < 32; i++) {
+      cpu.gpr[i] = cpu_host->gpr[i];
+    }
+    cpu.pc = cpu_host->pc;
+  } else {
+    for (int i = 0; i < 32; i++) {
+      cpu_host->gpr[i] = cpu.gpr[i];
+    }
+    cpu_host->pc = cpu.pc;
+  }
 }
 
 void difftest_exec(uint64_t n) {
@@ -31,7 +64,7 @@ void difftest_exec(uint64_t n) {
 }
 
 void difftest_raise_intr(word_t NO) {
-  assert(0);
+  // TODO
 }
 
 void difftest_init(int port) {

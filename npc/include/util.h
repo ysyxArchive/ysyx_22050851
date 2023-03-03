@@ -13,8 +13,8 @@
  * See the Mulan PSL v2 for more details.
  ***************************************************************************************/
 
-#ifndef __UTILS_H__
-#define __UTILS_H__
+#ifndef __UTIL_H__
+#define __UTIL_H__
 
 #define ANSI_FG_BLACK "\33[1;30m"
 #define ANSI_FG_RED "\33[1;31m"
@@ -50,7 +50,10 @@
 #define _Log(...)           \
   do {                      \
     printf(__VA_ARGS__);    \
-    log_write(__VA_ARGS__); \
   } while (0)
+    // log_write(__VA_ARGS__); \
+
+int parse_args(int argc, char* argv[]);
+void load_files();
 
 #endif

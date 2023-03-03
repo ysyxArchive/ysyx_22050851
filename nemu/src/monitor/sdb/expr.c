@@ -189,6 +189,7 @@ uint32_t eval(int start, int end, bool* success) {
     // must be a number
     int retvalue = 0;
     switch (tokens[start].type) {
+      bool s;
       case TK_OCTNUMBER:
         sscanf(tokens[start].str, "%u", &retvalue);
         break;
@@ -196,7 +197,6 @@ uint32_t eval(int start, int end, bool* success) {
         sscanf(tokens[start].str, "%x", &retvalue);
         break;
       case TK_REG:
-        bool s;
         retvalue = isa_reg_str2val(tokens[start].str + 1, &s);
         if (!s) {
           printf("register %s is unknown\n", tokens[start].str + 1);

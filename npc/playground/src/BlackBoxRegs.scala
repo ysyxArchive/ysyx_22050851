@@ -45,7 +45,7 @@ class BlackBoxRegs extends BlackBox with HasBlackBoxInline {
       |  input [63:0] pc  
       |);
       |  wire [63:0] regs [0:31];
-      |  assign regs[0] = 0'h64;
+      |  assign regs[0] = 64'h0;
       |  assign regs[1] = regs_1;
       |  assign regs[2] = regs_2;
       |  assign regs[3] = regs_3;
