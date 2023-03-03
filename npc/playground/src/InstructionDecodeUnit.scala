@@ -50,14 +50,14 @@ class InstructionDecodeUnit extends Module {
       "b1101111".U -> Instruction( // jal
         InstructionType.jType,
         Operation(
-          Source(0.U, SourceType.npc),
+          Source.npc,
           Source.default,
-          Source(rd, SourceType.reg),
+          Source.reg(rd),
           OperationType.move
         ),
         Operation(
           Source.pc,
-          Source(immJ, SourceType.imm),
+          Source.imm(immJ),
           Source.pc,
           OperationType.add
         )
@@ -65,9 +65,9 @@ class InstructionDecodeUnit extends Module {
       "b0010111".U -> Instruction( // auipc
         InstructionType.uType,
         Operation(
-          Source(0.U, SourceType.pc),
-          Source(immU, SourceType.imm),
-          Source(rd, SourceType.reg),
+          Source.pc,
+          Source.imm(immU),
+          Source.reg(rd),
           OperationType.add
         )
       )
@@ -81,14 +81,14 @@ class InstructionDecodeUnit extends Module {
       "b0001100111".U -> Instruction( //jalr
         InstructionType.iType,
         Operation(
-          Source(0.U, SourceType.npc),
+          Source.npc,
           Source.default,
-          Source(rd, SourceType.reg),
+          Source.reg(rd),
           OperationType.move
         ),
         Operation(
-          Source(rs1, SourceType.reg),
-          Source(immI, SourceType.imm),
+          Source.reg(rs1),
+          Source.imm(immI),
           Source.pc,
           OperationType.add
         )
@@ -96,18 +96,18 @@ class InstructionDecodeUnit extends Module {
       "b0110100011".U -> Instruction(
         InstructionType.iType, //fixfixfixfixfixfixfixfixfixfix
         Operation( //fixfixfixfixfixfixfixfixfixfix
-          Source(rs1, SourceType.reg), //fixfixfixfixfixfixfixfixfixfix
-          Source(Utils.signalExtend(immI, 12), SourceType.imm), //fixfixfixfixfixfixfixfixfixfix
-          Source(rd, SourceType.reg), //fixfixfixfixfixfixfixfixfixfix
+          Source.reg(rs1), //fixfixfixfixfixfixfixfixfixfix
+          Source.imm(Utils.signalExtend(immI, 12)), //fixfixfixfixfixfixfixfixfixfix
+          Source.reg(rd), //fixfixfixfixfixfixfixfixfixfix
           OperationType.add //fixfixfixfixfixfixfixfixfixfix
         )
       ),
       "b0000010011".U -> Instruction( // addi
         InstructionType.iType,
         Operation(
-          Source(rs1, SourceType.reg),
-          Source(Utils.signalExtend(immI, 12), SourceType.imm),
-          Source(rd, SourceType.reg),
+          Source.reg(rs1),
+          Source.imm(Utils.signalExtend(immI, 12)),
+          Source.reg(rd),
           OperationType.add
         )
       )
@@ -120,9 +120,9 @@ class InstructionDecodeUnit extends Module {
       "b00000000000100000000000001110011".U -> Instruction(
         InstructionType.iType,
         Operation(
-          Source(0.U, SourceType.imm),
-          Source(3.U, SourceType.imm),
-          Source(3.U, SourceType.pc),
+          Source.imm(0.U),
+          Source.imm(3.U),
+          Source.pc,
           OperationType.halt
         )
       )

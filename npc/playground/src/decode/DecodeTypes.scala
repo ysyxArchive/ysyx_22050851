@@ -20,10 +20,13 @@ object Source {
   val npc     = Source(0.U, SourceType.npc)
   val pc      = Source(0.U, SourceType.pc)
 
-  def apply(value: UInt, isReg: SourceType.Type) = {
+  def reg(index: UInt) = Source(index, SourceType.reg)
+  def imm(num:   UInt) = Source(num, SourceType.imm)
+
+  def apply(value: UInt, stype: SourceType.Type) = {
     val f = Wire(new Source())
     f.value := value
-    f.stype := isReg.asUInt
+    f.stype := stype.asUInt
     f
   }
 
