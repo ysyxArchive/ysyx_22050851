@@ -21,8 +21,6 @@ class InstructionDecodeUnit extends Module {
   })
   val output = IO(Decoupled(Vec(2, Operation())))
 
-  val debugp = IO(Output(UInt(32.W)))
-
   val resultValid = RegInit(false.B)
 
   io.ready     := output.ready
@@ -37,7 +35,10 @@ class InstructionDecodeUnit extends Module {
   val immI   = io.inst(31, 20)
   val immS   = Cat(io.inst(31, 25), io.inst(11, 7))
   val immU   = Cat(io.inst(31, 12), 0.U(12.W))
-  val immJ   = Utils.signalExtend(Cat(io.inst(31), io.inst(19, 12), io.inst(20), io.inst(30, 21), 0.U(1.W)), 20);
+  val immJ = Utils.signalExtend(
+    Cat(io.inst(31), io.inst(19, 12), io.inst(20), io.inst(30, 21), 0.U(1.W)),
+    20
+  );
 
   val result = MuxLookup(
     opcode,
@@ -78,7 +79,7 @@ class InstructionDecodeUnit extends Module {
     Instruction.noMatch,
     Seq(
       "b0001110011".U -> Instruction.further,
-      "b0001100111".U -> Instruction( //jalr
+      "b0001100111".U -> Instruction( // jalr
         InstructionType.iType,
         Operation(
           Source.npc,
@@ -94,12 +95,14 @@ class InstructionDecodeUnit extends Module {
         )
       ),
       "b0110100011".U -> Instruction(
-        InstructionType.iType, //fixfixfixfixfixfixfixfixfixfix
-        Operation( //fixfixfixfixfixfixfixfixfixfix
-          Source.reg(rs1), //fixfixfixfixfixfixfixfixfixfix
-          Source.imm(Utils.signalExtend(immI, 12)), //fixfixfixfixfixfixfixfixfixfix
-          Source.reg(rd), //fixfixfixfixfixfixfixfixfixfix
-          OperationType.add //fixfixfixfixfixfixfixfixfixfix
+        InstructionType.iType, // fixfixfixfixfixfixfixfixfixfix
+        Operation( // fixfixfixfixfixfixfixfixfixfix
+          Source.reg(rs1), // fixfixfixfixfixfixfixfixfixfix
+          Source.imm(
+            Utils.signalExtend(immI, 12)
+          ), // fixfixfixfixfixfixfixfixfixfix
+          Source.reg(rd), // fixfixfixfixfixfixfixfixfixfix
+          OperationType.add // fixfixfixfixfixfixfixfixfixfix
         )
       ),
       "b0000010011".U -> Instruction( // addi
@@ -150,7 +153,6 @@ class InstructionDecodeUnit extends Module {
       )
     )
   )
-  debugp := Cat(result.status, result2.status, result3.status)
   when(io.enable) {
     output.enq(finalresult.op)
   }

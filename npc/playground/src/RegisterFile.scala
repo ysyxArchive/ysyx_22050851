@@ -10,16 +10,17 @@ import scala.language.postfixOps
   */
 
 class RegisterFileIO extends Bundle {
-  val wdata    = Input(UInt(64.W))
-  val waddr    = Input(UInt(5.W))
-  val pcWrite  = Input(Bool())
-  val regWrite = Input(Bool())
+  val wdata = Input(UInt(64.W))
+  val waddr = Input(UInt(5.W))
+
+  val dnpc    = Input(UInt(64.W))
+  val pcWrite = Input(Bool())
+
+  val out0   = Output(UInt(64.W))
+  val raddr0 = Input(UInt(5.W))
 
   val out1   = Output(UInt(64.W))
   val raddr1 = Input(UInt(5.W))
-
-  val out2   = Output(UInt(64.W))
-  val raddr2 = Input(UInt(5.W))
 
   val pc  = Output(UInt(64.W))
   val npc = Output(UInt(64.W))
@@ -38,16 +39,16 @@ class RegisterFile extends Module {
   blackBoxOut.io.pc   := pcLast;
   blackBoxOut.io.regs := regs;
 
-  pc := RegNext(Mux(io.pcWrite, io.wdata, Mux(next.next, pc + 4.U, pc)), "h80000000".asUInt(64.W))
+  pc := RegNext(Mux(io.pcWrite, io.dnpc, pc + 4.U), "h80000000".asUInt(64.W))
 
   pcLast := Mux(next.next, pc, pcLast);
 
   for (i <- 0 to 31) {
-    regs(i) := Mux(io.regWrite && io.waddr === i.U, io.wdata, regs(i))
+    regs(i) := Mux(io.waddr === i.U, io.wdata, regs(i))
   }
 
+  io.out0 := Mux(io.raddr0 === 0.U, 0.U, regs(io.raddr0))
   io.out1 := Mux(io.raddr1 === 0.U, 0.U, regs(io.raddr1))
-  io.out2 := Mux(io.raddr1 === 0.U, 0.U, regs(io.raddr2))
   io.pc   := pcLast
   io.npc  := pc
 
