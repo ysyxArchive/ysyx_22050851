@@ -5,7 +5,7 @@ BUILD_DIR = ./build
 OBJ_DIR = $(BUILD_DIR)/obj_dir
 
 override VERILATOR =  verilator 
-VERILATOR_CFLAGS += -MMD --build -cc  \
+VERILATOR_CFLAGS += -MMD --build -cc \
 				-O3 --x-assign fast --x-initial fast --noassert --trace
 BIN = $(BUILD_DIR)/$(TOPNAME)
 
@@ -22,7 +22,7 @@ export PATH := $(PATH):$(abspath ./utils)
 
 default: $(BIN)
 
-$(BIN): $(INCLUDES) $(CSRCS) $(VSRCS) verilog
+$(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 	$(VERILATOR) $(VERILATOR_CFLAGS) \
 		--top-module $(TOPNAME) $(CSRCS) $(VSRCS) \
 		$(addprefix -CFLAGS , $(CFLAGS))   \
@@ -33,11 +33,12 @@ $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS) verilog
 test:
 	mill -i __.test
 
+$(VSRCS): $(SCALAS)
+	make verilog
+
 verilog: $(SCALAS)
 	$(call git_commit, "generate verilog")
-	rm -rf $(BUILD_DIR)
-	mkdir -p $(BUILD_DIR)
-	mill -i __.test.runMain Elaborate -td $(BUILD_DIR)
+	mill -i __.test.runMain Elaborate -td $(BUILD_DIR) -e verilog --emission-options=disableMemRandomization,disableRegisterRandomization
 
 help:
 	mill -i __.test.runMain Elaborate --help

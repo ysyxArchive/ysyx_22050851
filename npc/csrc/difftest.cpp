@@ -53,22 +53,19 @@ void load_difftest_so(char* diff_so_file) {
          difftest_exec != NULL, difftest_raise_intr != NULL,
          difftest_init != NULL);
 }
-CPU lastcpu = {.pc = 0};
+
 void difftest_check(CPU* cpu) {
-  if (lastcpu.pc != 0 && lastcpu.pc != cpu->pc) {
-    CPU refcpu;
-    difftest_regcpy(&refcpu, FROM_REF);
-    Assert(lastcpu.pc == refcpu.pc,
-           "Difftest Failed\n Expected pc: %llx, Actual pc: %llx ", refcpu.pc,
-           lastcpu.pc);
-    for (int i = 0; i < 32; i++) {
-      Assert(lastcpu.gpr[i] == refcpu.gpr[i],
-             "Difftest Failed\ncheck reg[%d] failed when pc:%llx\nExpected: "
-             "%llx, Actual: %llx ",
-             i, lastcpu.pc, refcpu.gpr[i], lastcpu.gpr[i]);
-    }
-    difftest_exec(1);
-    memcpy(&lastcpu, cpu, sizeof(CPU));
+  CPU refcpu;
+  difftest_exec(1);
+  difftest_regcpy(&refcpu, FROM_REF);
+  Assert(cpu->pc == refcpu.pc,
+         "Difftest Failed\n Expected pc: %llx, Actual pc: %llx ", refcpu.pc,
+         cpu->pc);
+  for (int i = 0; i < 32; i++) {
+    Assert(cpu->gpr[i] == refcpu.gpr[i],
+           "Difftest Failed\ncheck reg[%d] failed before pc:%llx\nExpected: "
+           "%llx, Actual: %llx ",
+           i, cpu->pc, refcpu.gpr[i], cpu->gpr[i]);
   }
   return;
 }

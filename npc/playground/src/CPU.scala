@@ -12,20 +12,21 @@ import decode._
 class CPU extends Module {
   val pcio = IO(new Bundle {
     val inst = Input(UInt(32.W))
-    val npc  = Output(UInt(64.W))
+    val pc   = Output(UInt(64.W))
   })
 
   val regs    = Module(new RegisterFile);
   val decoder = Module(new InstructionDecodeUnit)
   val exe     = Module(new InstructionExecuteUnit)
+  val mem     = Module(new BlackBoxMem)
 
-  pcio.npc       := regs.io.npc
-  regs.next.next := decoder.io.ready
+  pcio.pc := regs.io.pc
 
   decoder.io.inst   := pcio.inst
   decoder.io.enable := true.B
 
   exe.in <> decoder.output
   exe.regIO <> regs.io
+  exe.memIO <> mem.io
 
 }

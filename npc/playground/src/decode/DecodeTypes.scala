@@ -5,9 +5,11 @@ import chisel3.experimental.ChiselEnum
 import chisel3.util._
 import scala.language.postfixOps
 import org.apache.commons.lang3.ObjectUtils
+import execute.ALUUtils
+import execute.ALUType
 
 object SourceType extends ChiselEnum {
-  val reg, imm, pc, npc = Value
+  val reg, regLow, imm, pc, npc, mem, none, alu, temp = Value
 }
 
 class Source() extends Bundle {
@@ -18,10 +20,18 @@ class Source() extends Bundle {
 object Source {
   val default = Source(0.U, SourceType.imm)
   val npc     = Source(0.U, SourceType.npc)
-  val pc      = Source(0.U, SourceType.pc)
+  val pc      = Source(ALUUtils.none, SourceType.pc)
+  val none    = Source(0.U, SourceType.none)
+  val alu     = Source(0.U, SourceType.alu)
+  val mem     = Source(0.U, SourceType.mem)
+  val temp    = Source(0.U, SourceType.temp)
 
-  def reg(index: UInt) = Source(index, SourceType.reg)
-  def imm(num:   UInt) = Source(num, SourceType.imm)
+  def alu(aluType:  ALUType.Type) = Source(aluType.asUInt, SourceType.alu)
+  def pc(check:     UInt)         = Source(check, SourceType.pc)
+  def reg(index:    UInt)         = Source(index, SourceType.reg)
+  def regLow(index: UInt)         = Source(index, SourceType.regLow)
+  def imm(num:      UInt)         = Source(num, SourceType.imm)
+  def mem(num:      UInt)         = Source(num, SourceType.imm)
 
   def apply(value: UInt, stype: SourceType.Type) = {
     val f = Wire(new Source())
@@ -34,7 +44,7 @@ object Source {
 }
 
 object OperationType extends ChiselEnum {
-  val add, move, halt, noMatch, nothing = Value
+  val add, sub, move, savemem, loadmemU, loadmemS, halt, noMatch, moveBranch, nothing = Value
 }
 
 object Operation {
@@ -73,7 +83,7 @@ class Operation() extends Bundle {
 class OeprationGroup() extends Bundle {}
 
 object InstructionType extends ChiselEnum {
-  val rType, iType, sType, uType, jType, noType = Value
+  val rType, iType, sType, uType, jType, bType, noType = Value
 }
 
 object InstructionResType extends ChiselEnum {
