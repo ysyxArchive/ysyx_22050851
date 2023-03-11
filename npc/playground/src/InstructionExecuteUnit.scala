@@ -64,7 +64,12 @@ class InstructionExecuteUnit extends Module {
         (SourceType.npc.asUInt) -> regIO.npc,
         (SourceType.pc.asUInt) -> regIO.pc,
         (SourceType.alu.asUInt) -> alu.io.out,
-        (SourceType.temp.asUInt) -> temp
+        (SourceType.temp.asUInt) -> temp,
+        (SourceType.aluSign.asUInt) -> MuxLookup(
+          op1.src1.value,
+          0.U,
+          Seq(ALUSignalType.isZero.asUInt -> ALUUtils.test(alu.io.signals, ALUUtils.isZero))
+        )
       )
     );
   val op1src2val =
@@ -82,14 +87,17 @@ class InstructionExecuteUnit extends Module {
         (SourceType.temp.asUInt) -> temp
       )
     );
-
   val ans0 = MuxLookup(
     op0.opType.asUInt,
     0.U,
     Seq(
-      OperationType.add.asUInt -> alu.io.out,
-      OperationType.sub.asUInt -> alu.io.out,
-      OperationType.move.asUInt -> op0src1val
+      OperationType.alu.asUInt -> alu.io.out,
+      OperationType.move.asUInt -> op0src1val,
+      OperationType.mul.asUInt -> op0src1val * op0src2val,
+      OperationType.divS.asUInt -> (op0src1val.asSInt / op0src2val.asSInt).asUInt, // TODO: wtf
+      OperationType.div.asUInt -> op0src1val / op0src2val,
+      OperationType.remS.asUInt -> (op0src1val.asSInt % op0src2val.asSInt).asUInt,
+      OperationType.rem.asUInt -> (op0src1val % op0src2val)
     )
   )
   val ans1 = MuxLookup(
@@ -100,7 +108,7 @@ class InstructionExecuteUnit extends Module {
       OperationType.loadmemU.asUInt -> memIO.rdata,
       OperationType.loadmemS.asUInt -> Utils.signalExtend(memIO.rdata, op1.dst.value),
       OperationType.savemem.asUInt -> op1src2val,
-      OperationType.moveBranch.asUInt -> op1src1val
+      OperationType.updatePC.asUInt -> op1src1val
     )
   )
   // blackbox config
@@ -114,14 +122,16 @@ class InstructionExecuteUnit extends Module {
       op1.opType === OperationType.loadmemU.asUInt ||
       op1.opType === OperationType.savemem.asUInt
   val memTargetOp = Mux(memTargetIndex, op1, op0)
+  val isRead      = memTargetOp.opType =/= OperationType.savemem.asUInt
   memIO.addr := Mux(memTargetIndex, op1src1val, op0src1val)
-  memIO.len  := Mux(memTargetIndex, op1.dst.value, op0.dst.value)
+  memIO.len  := Mux(isRead, memTargetOp.src2.value, memTargetOp.dst.value)
   memIO.enable :=
     memTargetOp.opType === OperationType.loadmemS.asUInt ||
       memTargetOp.opType === OperationType.loadmemU.asUInt ||
       memTargetOp.opType === OperationType.savemem.asUInt
   memIO.isRead := memTargetOp.opType =/= OperationType.savemem.asUInt
   memIO.wdata  := Mux(memTargetIndex, ans1, ans0)
+  memIO.clock  := clock
   // register config
   val srcPorts   = Seq(op0.src1, op0.src2, op1.src1, op1.src2)
   val regValidOH = VecInit(srcPorts.map(src => Utils.isRegType(src))).asUInt;
@@ -152,7 +162,7 @@ class InstructionExecuteUnit extends Module {
     )
   )
   regIO.dnpc := MuxLookup(
-    OperationType.moveBranch.asUInt,
+    OperationType.updatePC.asUInt,
     Mux(op0.dst.stype === SourceType.pc.asUInt, ans0, ans1),
     Seq(
       op0.opType -> pcAdder.io.out,
@@ -164,30 +174,24 @@ class InstructionExecuteUnit extends Module {
     false.B,
     Seq(
       (op0.dst.stype) ->
-        ((op0.opType === OperationType.moveBranch.asUInt) ^ !ALUUtils.test(
+        ((op0.opType === OperationType.updatePC.asUInt) ^ !ALUUtils.test(
           alu.io.signals,
           op0.dst.value
         )),
       (op1.dst.stype) ->
-        (op1.opType === (OperationType.moveBranch.asUInt) ^ ALUUtils.test(
+        (op1.opType === (OperationType.updatePC.asUInt) ^ !ALUUtils.test(
           alu.io.signals,
           op1.dst.value
         ))
     )
   )
   // alu config
-  alu.io.inA := op0src1val;
-  alu.io.inB := op0src2val;
-  alu.io.opType := MuxLookup(
-    op0.opType.asUInt,
-    ALUType.add,
-    Seq(
-      OperationType.add.asUInt -> ALUType.add,
-      OperationType.sub.asUInt -> ALUType.sub
-    )
-  )
+  alu.io.inA    := op0src1val;
+  alu.io.inB    := op0src2val;
+  alu.io.opType := ALUType(op0.dst.value(ALUType.getWidth - 1, 0));
   // pcAdder config
-  pcAdder.io.inA := regIO.pc
-  pcAdder.io.inB := Mux(op0.opType === OperationType.moveBranch.asUInt, op0, op1).src1.value
+
+  pcAdder.io.inA := Mux(op0.opType === OperationType.updatePC.asUInt, op0src1val, op1src1val)
+  pcAdder.io.inB := Mux(op0.opType === OperationType.updatePC.asUInt, op0src2val, op1src2val)
   pcAdder.io.inC := 0.U
 }

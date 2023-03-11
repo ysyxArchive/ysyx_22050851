@@ -18,35 +18,37 @@ VCPU* top;
 VerilatedVcdC* tfp;
 CPU cpu;
 
+uint64_t* cpu_gpr = NULL;
+uint64_t* cpu_pc = NULL;
+int npc_clock = 0;
+
 void init_npc() {
   top->trace(tfp, 0);
   tfp->open("wave.vcd");        // 打开vcd
   top->pcio_inst = 0x00000013;  // 默认为 addi e0, 0;
   for (int i = 0; i < 10; i++) {
+    top->reset = true;
     top->clock = 1;
     top->eval();
     top->clock = 0;
-    top->eval();
-    top->reset = true;
     top->eval();
   }
   top->reset = false;
 }
 
-uint64_t* cpu_gpr = NULL;
-uint64_t* cpu_pc = NULL;
-int npc_clock = 0;
-
 extern "C" void mem_read(const svLogicVecVal* addr,
                          const svLogicVecVal* len,
                          svLogicVecVal* ret) {
-  *(uint64_t*)ret = read_mem(*(uint64_t*)addr, *(uint8_t*)len);
+  uint64_t data = read_mem(*(uint64_t*)addr, *(uint8_t*)len);
+  ret[0].aval = data;
+  ret[1].aval = data >> 32;
 }
 
 extern "C" void mem_write(const svLogicVecVal* addr,
                           const svLogicVecVal* len,
                           const svLogicVecVal* data) {
-  write_mem(*(uint64_t*)addr, *(uint8_t*)len, *(uint64_t*)data);
+  uint64_t dataVal = (uint64_t)(data[1].aval) << 32 | data[0].aval;
+  write_mem(*(uint64_t*)addr, *(uint8_t*)len, dataVal);
 }
 
 extern "C" void set_gpr_ptr(const svOpenArrayHandle r) {
@@ -65,9 +67,9 @@ void one_step() {
   top->eval();
   tfp->dump(npc_clock++);
   uint64_t npc = top->pcio_pc;
-  top->pcio_inst = read_mem(npc, 4);
-  update_cpu();
+  top->pcio_inst = read_mem_nolog(npc, 4);
   tfp->flush();
+  update_cpu();
   difftest_check(&cpu);
   top->clock = 0;
   top->eval();
@@ -83,6 +85,7 @@ int main(int argc, char* argv[]) {
   // Verilated::commandArgs(argc, argv);
   VerilatedContext* contextp = new VerilatedContext;
   // TODO: 传参不对
+
   // contextp->commandArgs(argc, argv);
   Verilated::traceEverOn(true);  // 导出vcd波形需要加此语句
   tfp = new VerilatedVcdC();     // 导出vcd波形需要加此语句

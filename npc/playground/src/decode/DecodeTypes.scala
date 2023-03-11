@@ -5,11 +5,10 @@ import chisel3.experimental.ChiselEnum
 import chisel3.util._
 import scala.language.postfixOps
 import org.apache.commons.lang3.ObjectUtils
-import execute.ALUUtils
-import execute.ALUType
+import execute._
 
 object SourceType extends ChiselEnum {
-  val reg, regLow, imm, pc, npc, mem, none, alu, temp = Value
+  val reg, regLow, imm, pc, npc, mem, alu, aluSign, temp = Value
 }
 
 class Source() extends Bundle {
@@ -21,17 +20,17 @@ object Source {
   val default = Source(0.U, SourceType.imm)
   val npc     = Source(0.U, SourceType.npc)
   val pc      = Source(ALUUtils.none, SourceType.pc)
-  val none    = Source(0.U, SourceType.none)
   val alu     = Source(0.U, SourceType.alu)
   val mem     = Source(0.U, SourceType.mem)
   val temp    = Source(0.U, SourceType.temp)
 
-  def alu(aluType:  ALUType.Type) = Source(aluType.asUInt, SourceType.alu)
-  def pc(check:     UInt)         = Source(check, SourceType.pc)
-  def reg(index:    UInt)         = Source(index, SourceType.reg)
-  def regLow(index: UInt)         = Source(index, SourceType.regLow)
-  def imm(num:      UInt)         = Source(num, SourceType.imm)
-  def mem(num:      UInt)         = Source(num, SourceType.imm)
+  def aluSign(aluSignalType: ALUSignalType.Type) = Source(aluSignalType.asUInt, SourceType.aluSign)
+  def alu(aluType:           ALUType.Type)       = Source(aluType.asUInt, SourceType.alu)
+  def pc(check:              UInt)               = Source(check, SourceType.pc)
+  def reg(index:             UInt)               = Source(index, SourceType.reg)
+  def regLow(index:          UInt)               = Source(index, SourceType.regLow)
+  def imm(num:               UInt)               = Source(num, SourceType.imm)
+  def mem(num:               UInt)               = Source(num, SourceType.imm)
 
   def apply(value: UInt, stype: SourceType.Type) = {
     val f = Wire(new Source())
@@ -44,7 +43,7 @@ object Source {
 }
 
 object OperationType extends ChiselEnum {
-  val add, sub, move, savemem, loadmemU, loadmemS, halt, noMatch, moveBranch, nothing = Value
+  val mul, divS, div, remS, rem, alu, move, savemem, loadmemU, loadmemS, halt, noMatch, updatePC, nothing = Value
 }
 
 object Operation {

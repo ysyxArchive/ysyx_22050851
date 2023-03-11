@@ -8,6 +8,7 @@ class MemIO extends Bundle {
   val len    = Input(UInt(4.W))
   val rdata  = Output(UInt(64.W))
   val wdata  = Input(UInt(64.W))
+  val clock  = Input(Clock())
 }
 
 class BlackBoxMem extends BlackBox with HasBlackBoxInline {
@@ -22,11 +23,18 @@ class BlackBoxMem extends BlackBox with HasBlackBoxInline {
       |  input [63:0] addr,
       |  input [3:0] len,
       |  input [63:0] wdata,
-      |  output [63:0] rdata
+      |  output [63:0] rdata,
+      |  input clock
       |);
-      |  always @(posedge enable) begin
-      |     if(enable && !isRead) mem_write(addr, len, wdata);
-      |     if(enable && isRead) mem_read(addr, len, rdata);
+      |  wire read = enable & isRead;
+      |/* verilator lint_off LATCH */
+      |  always @(*) begin
+      |    if(read&& !clock) mem_read(addr, len, rdata);
+      |  end
+      |  wire write = enable & !isRead;
+      |/* verilator lint_off LATCH */
+      |  always @(*) begin
+      |    if(write&& !clock) mem_write(addr, len, wdata);  
       |  end
       |endmodule""".stripMargin
   )

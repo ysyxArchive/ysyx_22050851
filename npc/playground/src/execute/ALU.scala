@@ -5,15 +5,16 @@ import chisel3.util.MuxLookup
 import decode.OperationType
 import chisel3.util.Cat
 import chisel3.util.Reverse
+import chisel3.util.Fill
 
 object ALUUtils {
   val width = 2
   // 顺序：isZero, isNegative
-  def ALUSignals(isZero: UInt, isNegative: UInt): UInt = VecInit(Seq(isZero, isNegative)).asUInt
+  def ALUSignals(isZero: UInt, isNegative: UInt): UInt = VecInit(Seq(isZero, isNegative).reverse).asUInt
   def test(aluSignal: UInt, checker: UInt): Bool = {
     val posChecker = checker(width * 2 - 1, width)
     val negChecker = checker(width - 1, 0)
-    ((aluSignal & ~negChecker) & (~aluSignal & ~posChecker)).andR
+    ((aluSignal & ~negChecker) | (~aluSignal & ~posChecker)).andR
   }
   val isZero      = "b1000".U
   val notZero     = "b0010".U
@@ -82,14 +83,23 @@ class ALU extends Module {
   simpleAdder.io.inB := Mux(io.opType === ALUType.sub, ~io.inB, io.inB)
   simpleAdder.io.inC := io.opType === ALUType.sub
 
+  val inANotZero = io.inA.orR;
+  val inBNotZero = io.inB.orR;
+
   out := MuxLookup(
     io.opType.asUInt,
     0.U,
     Seq(
       ALUType.add.asUInt -> simpleAdder.io.out,
-      ALUType.sub.asUInt -> simpleAdder.io.out
+      ALUType.sub.asUInt -> simpleAdder.io.out,
+      ALUType.and.asUInt -> (io.inA & io.inB),
+      ALUType.or.asUInt -> (io.inA | io.inB),
+      ALUType.xor.asUInt -> (io.inA ^ io.inB),
+      ALUType.shiftLeft.asUInt -> (io.inA << io.inB(5, 0)),
+      ALUType.shiftRightLogic.asUInt -> (io.inA >> io.inB(5, 0)),
+      ALUType.shiftRightArth.asUInt -> (io.inA.asSInt >> io.inB(5, 0)).asUInt
     )
   )
   io.out     := out
-  io.signals := ALUUtils.ALUSignals(out.orR, out(63))
+  io.signals := ALUUtils.ALUSignals(!out.orR, out(63))
 }

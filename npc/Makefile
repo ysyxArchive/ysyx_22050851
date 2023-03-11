@@ -6,7 +6,8 @@ OBJ_DIR = $(BUILD_DIR)/obj_dir
 
 override VERILATOR =  verilator 
 VERILATOR_CFLAGS += -MMD --build -cc \
-				-O3 --x-assign fast --x-initial fast --noassert --trace
+				-O3 --x-assign fast --x-initial fast --noassert --trace 
+VERILATOR_CFLAGS += -Wno-WIDTH  # 记得删掉
 BIN = $(BUILD_DIR)/$(TOPNAME)
 
 VSRCS = $(shell find $(abspath ./build) -name "*.v")
@@ -38,7 +39,7 @@ $(VSRCS): $(SCALAS)
 
 verilog: $(SCALAS)
 	$(call git_commit, "generate verilog")
-	mill -i __.test.runMain Elaborate -td $(BUILD_DIR) -e verilog --emission-options=disableMemRandomization,disableRegisterRandomization
+	mill -i __.test.runMain Elaborate -td $(BUILD_DIR) -e verilog --emission-options=disableMemRandomization,disableRegisterRandomization --no-dce --no-cse
 
 help:
 	mill -i __.test.runMain Elaborate --help

@@ -16,7 +16,7 @@
 #include <cpu/cpu.h>
 #include <difftest-def.h>
 #include <isa.h>
-#include <memory/paddr.h>
+#include <memory/vaddr.h>
 
 #define TO_REF 1
 #define FROM_REF 0
@@ -30,16 +30,16 @@ void difftest_memcpy(paddr_t addr, void* buf, size_t n, bool direction) {
   if (direction == TO_REF) {
     int i = 0;
     for (; i < n - 8; i += 8)
-      paddr_write(addr + i, 8, ((uint64_t*)buf)[i / 8]);
+      vaddr_write(addr + i, 8, ((uint64_t*)buf)[i / 8]);
     for (; i < n; i++) {
-      paddr_write(addr + i, 1, ((uint8_t*)buf)[i]);
+      vaddr_write(addr + i, 1, ((uint8_t*)buf)[i]);
     }
   } else {
     int i = 0;
     for (; i < n - 8; i += 8)
-      ((uint64_t*)buf)[i / 8] = paddr_read(addr + i, 8);
+      ((uint64_t*)buf)[i / 8] = vaddr_read(addr + i, 8);
     for (; i < n; i++) {
-      ((uint8_t*)buf)[i] = paddr_read(addr + i, 1);
+      ((uint8_t*)buf)[i] = vaddr_read(addr + i, 1);
     }
   }
 }

@@ -5,6 +5,8 @@
 
 void difftest_check(CPU* cpu);
 
+void difftest_checkmem();
+
 void difftest_initial(CPU* cpu);
 
 void load_difftest_so(char* diff_so_file);
