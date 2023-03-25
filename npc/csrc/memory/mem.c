@@ -17,9 +17,9 @@ void init_memory(char* bin_path) {
 uint64_t read_mem(uint64_t addr, size_t length) {
   uint64_t ret = read_mem_nolog(addr, length);
 
-  printf(ANSI_FMT("Reading %d bytes, starts with %lx, data is %lx\n",
-                  ANSI_FG_YELLOW),
-         length, addr, ret);
+  Log(ANSI_FMT("Reading %d bytes, starts with %lx, data is %lx\n",
+               ANSI_FG_YELLOW),
+      length, addr, ret);
   return ret;
 }
 uint64_t read_mem_nolog(uint64_t addr, size_t length) {
@@ -49,8 +49,8 @@ void write_mem(uint64_t addr, size_t length, uint64_t data) {
          "addr 0x%lx + 0x%lx > MEM_END 0x%x", addr, length,
          MEM_START + MEM_LEN);
 
-  printf(ANSI_FMT("writing %lx to %lx, len is %lx\n", ANSI_FG_YELLOW), data,
-         addr, length);
+  Log(ANSI_FMT("writing %lx to %lx, len is %lx\n", ANSI_FG_YELLOW), data, addr,
+      length);
   if (length == 1) {
     *((uint8_t*)(mem + (addr - MEM_START))) = (uint8_t)data;
   } else if (length == 2) {

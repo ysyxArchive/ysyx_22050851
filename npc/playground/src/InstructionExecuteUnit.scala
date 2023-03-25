@@ -68,7 +68,10 @@ class InstructionExecuteUnit extends Module {
         (SourceType.aluSign.asUInt) -> MuxLookup(
           op1.src1.value,
           0.U,
-          Seq(ALUSignalType.isZero.asUInt -> ALUUtils.test(alu.io.signals, ALUUtils.isZero))
+          Seq(
+            ALUSignalType.isZero.asUInt -> ALUUtils.test(alu.io.signals, ALUUtils.isZero),
+            ALUSignalType.isNegative.asUInt -> ALUUtils.test(alu.io.signals, ALUUtils.isNegative)
+          )
         )
       )
     );

@@ -79,12 +79,15 @@ void difftest_checkmem() {
     difftest_memcpy(addr, &from_ref, 8, FROM_REF);
     local = read_mem_nolog(addr, 0x8);
     Assert(from_ref == local,
-           "mem check error at %016lx! \n expected: %016lx actual: %016lx", addr,
-           from_ref, local);
+           "mem check error at %016lx! \n expected: %016lx actual: %016lx",
+           addr, from_ref, local);
   }
 }
 
 void difftest_initial(CPU* cpu) {
+  Log("difftest_init");
   difftest_regcpy(cpu, TO_REF);
+  Log("difftest_memcpy, %d", difftest_memcpy);
   difftest_memcpy(MEM_START, mem, MEM_LEN, TO_REF);
+  Log("difftest_init done");
 }

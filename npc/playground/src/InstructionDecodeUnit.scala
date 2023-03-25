@@ -194,7 +194,7 @@ class InstructionDecodeUnit extends Module {
       "b0110010011".U -> Instruction( // sltiu
         InstructionType.iType,
         Operation(Source.reg(rs1), Source.imm(immI), Source.alu(ALUType.sub), OperationType.alu),
-        Operation(Source.aluSign(ALUSignalType.isZero), Source.default, Source.reg(rd), OperationType.move)
+        Operation(Source.aluSign(ALUSignalType.isNegative), Source.default, Source.reg(rd), OperationType.move)
       )
     )
   )
