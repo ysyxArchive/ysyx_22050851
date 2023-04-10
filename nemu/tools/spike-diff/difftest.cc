@@ -37,7 +37,7 @@ static debug_module_config_t difftest_dm_config = {
   .support_abstract_csr_access = true,
   .support_abstract_fpr_access = true,
   .support_haltgroups = true,
-  .support_impebreak = true
+  .support_impebreak = true,
 };
 
 struct diff_context_t {
