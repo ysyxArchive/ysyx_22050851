@@ -22,7 +22,6 @@ int mm_brk(uintptr_t brk) {
 }
 
 void init_mm() {
-  Log("free physical pages starting from %p", heap.start);
   pf = (void *)ROUNDUP(heap.start, PGSIZE);
   Log("free physical pages starting from %p", pf);
 
