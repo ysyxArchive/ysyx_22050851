@@ -20,7 +20,7 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
    * Then return the address of the interrupt/exception vector.
    */
   csrs("mepc") = cpu.pc;
-  csrs("mstatus") = 0xa00001801;
+  csrs("mstatus") = 0xa00001800;
   csrs("mcause") = NO;
   return epc;
 }
