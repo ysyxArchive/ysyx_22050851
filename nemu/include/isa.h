@@ -18,7 +18,9 @@
 
 // Located at src/isa/$(GUEST_ISA)/include/isa-def.h
 #include <isa-def.h>
-
+#ifndef __GUEST_ISA__
+#define __GUEST_ISA__ riscv64
+#endif
 // The macro `__GUEST_ISA__` is defined in $(CFLAGS).
 // It will be expanded as "x86" or "mips32" ...
 typedef concat(__GUEST_ISA__, _CPU_state) CPU_state;
@@ -32,7 +34,8 @@ void init_isa();
 extern CPU_state cpu;
 void isa_reg_display();
 word_t isa_reg_str2val(const char *name, bool *success);
-
+int isa_reg_str2index(const char* s);
+#define csrs(namestr) (cpu.csr[isa_reg_str2index(namestr)])
 // exec
 struct Decode;
 int isa_exec_once(struct Decode *s);
