@@ -36,5 +36,5 @@ bool log_enable()
 }
 bool reach_max_log()
 {
-  return MUXDEF(CONFIG_TRACE, (g_nr_guest_inst > CONFIG_TRACE_END), false);
+  return MUXDEF(CONFIG_TRACE, (g_nr_guest_inst == CONFIG_TRACE_END), false);
 }
