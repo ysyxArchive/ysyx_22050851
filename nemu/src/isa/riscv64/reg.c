@@ -69,5 +69,5 @@ int isa_reg_str2index(const char* s) {
       return i;
     }
   }
-  return -1;
+  panic("no match reg with %s", s);
 }
