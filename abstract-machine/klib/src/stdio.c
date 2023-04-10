@@ -22,7 +22,7 @@ int num2str(char* out, int64_t num, bool zero_padding, uint8_t width, int round)
   while (num != 0) {
     bufs[bufp++] = '0' + num % round;
     if (bufs[bufp - 1] > '9') {
-      bufs[bufp - 1] += 'a' - '9' + 1;
+      bufs[bufp - 1] += 'a' - '0';
     }
     num = num / round;
   }
