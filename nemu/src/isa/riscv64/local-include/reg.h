@@ -37,8 +37,8 @@ static inline const char *csr_name(int idx)
 {
   switch (idx)
   {
-  case 0x305:
-    return "mtvec";
+  case 0x305: return "mtvec";
+  case 0x342: return "mcause";
   default:
     panic("csr index %x not implemented", idx);
   }
