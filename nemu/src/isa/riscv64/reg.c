@@ -64,7 +64,7 @@ int isa_reg_str2index(const char* s) {
       return i;
     }
   }
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 4; i++) {
     if (strcmp(s, csrregs[i]) == 0) {
       return i;
     }
