@@ -22,7 +22,6 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   csrs("mepc") = cpu.pc;
   csrs("mstatus") = 1; // TODO: change
   csrs("mcause") = NO; // TODO: wtf
-  cpu.pc = epc;
   return 0;
 }
 
