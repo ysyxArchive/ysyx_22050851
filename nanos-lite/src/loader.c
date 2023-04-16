@@ -13,9 +13,8 @@
 static uintptr_t loader(PCB *pcb, const char *filename) {
   Elf_Ehdr elfHeader;
   ramdisk_read(&elfHeader, 0, sizeof(elfHeader));
-  assert(elfHeader.e_ident[0] == ELFMAG0);
   Assert(elfHeader.e_ident[0] == ELFMAG0 && elfHeader.e_ident[1] == ELFMAG1 &&
-             elfHeader.e_ident[2] == ELFMAG1 && elfHeader.e_ident[3] == ELFMAG3,
+             elfHeader.e_ident[2] == ELFMAG2 && elfHeader.e_ident[3] == ELFMAG3,
          "error file not elf");
 
   Elf_Phdr prog_header_buf;
