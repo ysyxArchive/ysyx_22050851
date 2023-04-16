@@ -8,7 +8,7 @@ static Context *do_event(Event e, Context *c)
     Log("Triggered EVENT_YIELD\n");
     break;
   default:
-    panic("Unhandled event ID = %d", e.event);
+    Panic("Unhandled event ID = %d", e.event);
   }
 
   return c;
