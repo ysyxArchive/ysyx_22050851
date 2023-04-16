@@ -16,7 +16,7 @@ int num2str(char *out, uint64_t num, bool zero_padding, uint8_t width,
   if (num == 0) {
     bufs[bufp++] = '0';
   }
-  if (!unsign && (int64_t)num < 0) {
+  if ((int64_t)num < 0) {
     isneg = true;
     num = -(int64_t)num;
   }
