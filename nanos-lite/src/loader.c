@@ -27,6 +27,9 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     }
     Log("i= %d, addr, %x, %x", i, prog_header_buf.p_offset, prog_header_buf.p_filesz);
 
+    Log("i= %d", ((char *)pf)[0]);
+    Log("i= %d", ((char *)pf)[0x468]);
+
     ramdisk_read((uint8_t *)pf + prog_header_buf.p_offset,
                  prog_header_buf.p_offset, prog_header_buf.p_filesz);
 
