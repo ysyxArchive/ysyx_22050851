@@ -16,7 +16,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   Assert(elfHeader.e_ident[0] == ELFMAG0 && elfHeader.e_ident[1] == ELFMAG1 &&
              elfHeader.e_ident[2] == ELFMAG2 && elfHeader.e_ident[3] == ELFMAG3,
          "error file not elf");
-  Assert(elfHeader.e_machine == EM_RISCV, "exec not support riscv");
+  // Assert(elfHeader.e_machine == EM_RISCV, "exec not support riscv");
   Elf_Phdr prog_header_buf;
   for (int i = 0; i < elfHeader.e_phnum; i++) {
     ramdisk_read(&prog_header_buf,
