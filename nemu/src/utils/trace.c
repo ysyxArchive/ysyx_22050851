@@ -75,3 +75,13 @@ void dtrace(bool is_read,
 #endif
   return;
 }
+// dtrace -----------------------------------------------------
+void etrace(bool is_call, paddr_t source, word_t NO, paddr_t target) {
+#ifdef CONFIG_ETRACE
+  char buf[200];
+  sprintf(buf, "detected exception %s, from 0x%08x to 0x%08x, exception number is %ld",
+              is_call ? "call" : "ret ", source, target, NO);
+  Log(ANSI_FMT("%s", ANSI_FG_WHITE), buf);
+#endif
+  return;
+}
