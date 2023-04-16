@@ -11,6 +11,7 @@
 #endif
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
+  printf("%x\n", (uint32_t)(uint64_t)pf);
   Elf_Ehdr elfHeader;
   ramdisk_read(&elfHeader, 0, sizeof(elfHeader));
   Assert(elfHeader.e_ident[0] == ELFMAG0 && elfHeader.e_ident[1] == ELFMAG1 &&
