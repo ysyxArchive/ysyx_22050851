@@ -16,7 +16,7 @@ int num2str(char *out, uint64_t num, bool zero_padding, uint8_t width,
   if (num == 0) {
     bufs[bufp++] = '0';
   }
-  if ((int64_t)num < 0) {
+  if (!unsign && (int64_t)num < 0) {
     isneg = true;
     num = -(int64_t)num;
   }
@@ -61,7 +61,8 @@ int check_indent(const char *str, uint64_t data, char **ret) {
     case 'x':
       zero_padding = str[0] == '0';
       width = str2num(str, p);
-      num2str(buffer_string, data, zero_padding, width, str[p] == 'd' ? 10 : 16, false);
+      num2str(buffer_string, data, zero_padding, width, str[p] == 'd' ? 10 : 16,
+              false);
       *ret = buffer_string;
       return p + 1;
     case 'p':
@@ -99,7 +100,9 @@ int printf(const char *fmt, ...) {
     } else {
       fmtp++;
       char *rets;
-      fmtp += check_indent(fmt + fmtp, va_arg(ap, uint64_t), &rets);
+      int64_t data = (int64_t)va_arg(ap, uint64_t);
+      assert(data >= 0);
+      fmtp += check_indent(fmt + fmtp, data, &rets);
       for (int i = 0; rets[i]; i++) {
         putch(rets[i]);
       }
