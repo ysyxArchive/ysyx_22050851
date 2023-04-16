@@ -24,10 +24,10 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     if (prog_header_buf.p_type != PT_LOAD) {
       continue;
     }
-    ramdisk_read((uint8_t *)pf + prog_header_buf.p_offset - (uint64_t)pf,
+    ramdisk_read((uint8_t *)pf + (prog_header_buf.p_offset - (uint64_t)pf),
                  prog_header_buf.p_offset, prog_header_buf.p_filesz);
-    memset((uint8_t *)pf + prog_header_buf.p_offset + prog_header_buf.p_filesz -
-               (uint64_t)pf,
+    memset((uint8_t *)pf + (prog_header_buf.p_offset +
+                            prog_header_buf.p_filesz - (uint64_t)pf),
            0, prog_header_buf.p_memsz - prog_header_buf.p_filesz);
   }
   return elfHeader.e_entry;
