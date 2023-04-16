@@ -28,7 +28,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     memset((uint8_t *)pf + prog_header_buf.p_offset + prog_header_buf.p_filesz,
            0, prog_header_buf.p_memsz - prog_header_buf.p_filesz);
   }
-  return 0;
+  return (uintptr_t)pf;
 }
 
 void naive_uload(PCB *pcb, const char *filename) {
