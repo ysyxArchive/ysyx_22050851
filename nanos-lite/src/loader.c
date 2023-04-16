@@ -19,12 +19,14 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
 
   Elf_Phdr prog_header_buf;
   for (int i = 0; i < elfHeader.e_phnum; i++) {
-    ramdisk_read(&prog_header_buf, elfHeader.e_phoff, sizeof(prog_header_buf));
+    ramdisk_read(&prog_header_buf,
+                 elfHeader.e_phoff + sizeof(prog_header_buf) * i,
+                 sizeof(prog_header_buf));
     if (prog_header_buf.p_type != PT_LOAD) {
       continue;
     }
-  Log("addr, %x", prog_header_buf.p_offset);
-    
+    Log("addr, %x", prog_header_buf.p_offset);
+
     ramdisk_read((uint8_t *)pf + (prog_header_buf.p_offset - (uint64_t)pf),
                  prog_header_buf.p_offset, prog_header_buf.p_filesz);
     memset((uint8_t *)pf + (prog_header_buf.p_offset +
