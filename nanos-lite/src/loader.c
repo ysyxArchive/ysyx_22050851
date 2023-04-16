@@ -30,7 +30,8 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     ramdisk_read((uint8_t *)pf + prog_header_buf.p_offset,
                  prog_header_buf.p_offset, prog_header_buf.p_filesz);
 
-    // Log("i= %d", ((char *)pf)[0]);
+    Log("i= %d", ((char *)pf)[0]);
+    Log("i= %d", ((char *)pf)[468]);
 
     // memset((uint8_t *)pf +
     //            (prog_header_buf.p_offset + prog_header_buf.p_filesz),
