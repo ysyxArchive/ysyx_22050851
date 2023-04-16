@@ -7,7 +7,7 @@
 
 char buffer_string[1000];
 
-int num2str(char* out, int num, bool zero_padding, uint8_t width, int round) {
+int num2str(char* out, int64_t num, bool zero_padding, uint8_t width, int round) {
   char bufs[30];
   int outp = 0;
   int bufp = 0;
@@ -22,7 +22,7 @@ int num2str(char* out, int num, bool zero_padding, uint8_t width, int round) {
   while (num != 0) {
     bufs[bufp++] = '0' + num % round;
     if (bufs[bufp - 1] > '9') {
-      bufs[bufp - 1] += 'a' - '9' + 1;
+      bufs[bufp - 1] += 'a' - '9' - 1;
     }
     num = num / round;
   }
@@ -59,10 +59,15 @@ int check_indent(const char* str, uint64_t data, char** ret) {
     switch (str[p]) {
       case 'd':
       case 'x':
-        d = (int)data;
+        d = (int64_t)data;
         zero_padding = str[0] == '0';
         width = str2num(str, p);
         num2str(buffer_string, d, zero_padding, width, str[p] == 'd' ? 10 : 16);
+        *ret = buffer_string;
+        return p + 1;
+      case 'p':
+        d = (int64_t)data;
+        num2str(buffer_string, d, true, 16, 16);
         *ret = buffer_string;
         return p + 1;
       case 'f':

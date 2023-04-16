@@ -6,7 +6,7 @@ void add_inst_to_ring(char* source);
 
 // print ringbuf
 void print_ring_buf();
-
+void etrace(bool is_call, paddr_t source, word_t NO, paddr_t target);
 void mtrace(bool is_read, paddr_t addr, int len, word_t data);
 void init_ftrace(const char* elflocation);
 struct Decode;

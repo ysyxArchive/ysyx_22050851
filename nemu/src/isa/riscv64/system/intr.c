@@ -14,13 +14,16 @@
 ***************************************************************************************/
 
 #include <isa.h>
-
+#include <tracers.h>
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   /* TODO: Trigger an interrupt/exception with ``NO''.
    * Then return the address of the interrupt/exception vector.
    */
-
-  return 0;
+  etrace(true, cpu.pc, NO, epc);
+  csrs("mepc") = cpu.pc;
+  csrs("mstatus") = 0xa00001800;
+  csrs("mcause") = NO;
+  return epc;
 }
 
 word_t isa_query_intr() {
