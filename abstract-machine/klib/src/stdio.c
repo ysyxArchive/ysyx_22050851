@@ -53,19 +53,21 @@ int str2num(const char *str, int length) {
 
 int check_indent(const char *str, uint64_t data, char **ret) {
   int p = 0;
-  int d = 0;
+  uint64_t d = 0;
   bool zero_padding;
   uint8_t width;
   while (1) {
     switch (str[p]) {
     case 'd':
     case 'x':
+      d  = data;
       zero_padding = str[0] == '0';
       width = str2num(str, p);
       num2str(buffer_string, d, zero_padding, width, str[p] == 'd' ? 10 : 16, false);
       *ret = buffer_string;
       return p + 1;
     case 'p':
+      d = data;
       num2str(buffer_string, d, true, 16, 16, true);
       *ret = buffer_string;
       return p + 1;
