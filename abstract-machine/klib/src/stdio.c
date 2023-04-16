@@ -68,7 +68,7 @@ int check_indent(const char *str, uint64_t data, char **ret) {
       return p + 1;
     case 'p':
       d = (int64_t)data;
-      num2str(buffer_string, d, true, 8, 16, true);
+      num2str(buffer_string, d, true, 16, 16, true);
       *ret = buffer_string;
       return p + 1;
     case 'f':
