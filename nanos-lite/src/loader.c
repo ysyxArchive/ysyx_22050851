@@ -25,13 +25,13 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     if (prog_header_buf.p_type != PT_LOAD) {
       continue;
     }
-    Log("i= %d, addr, %x",i, prog_header_buf.p_offset);
+    Log("i= %d, addr, %x", i, prog_header_buf.p_offset);
 
     ramdisk_read((uint8_t *)pf + prog_header_buf.p_offset,
                  prog_header_buf.p_offset, prog_header_buf.p_filesz);
-    memset((uint8_t *)pf + (prog_header_buf.p_offset +
-                            prog_header_buf.p_filesz),
-           0, prog_header_buf.p_memsz - prog_header_buf.p_filesz);
+    // memset((uint8_t *)pf +
+    //            (prog_header_buf.p_offset + prog_header_buf.p_filesz),
+    //        0, prog_header_buf.p_memsz - prog_header_buf.p_filesz);
   }
   return elfHeader.e_entry;
 }
