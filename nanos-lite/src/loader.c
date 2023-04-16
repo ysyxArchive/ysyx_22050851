@@ -18,6 +18,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
          "error file not elf");
 
   Elf_Phdr prog_header_buf;
+  Log("num, %d", elfHeader.e_phnum);
   for (int i = 0; i < elfHeader.e_phnum; i++) {
     ramdisk_read(&prog_header_buf, elfHeader.e_phoff, sizeof(prog_header_buf));
     if (prog_header_buf.p_type != PT_LOAD) {
