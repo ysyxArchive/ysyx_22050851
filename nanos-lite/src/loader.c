@@ -25,12 +25,14 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     if (prog_header_buf.p_type != PT_LOAD) {
       continue;
     }
-    Log("i= %d, addr, %x, %x", i, prog_header_buf.p_offset, prog_header_buf.p_filesz);
+    Log("i= %d, addr, %x, %x", i, prog_header_buf.p_offset,
+        prog_header_buf.p_filesz);
 
     Log("i= %d", ((char *)pf)[0]);
     Log("i= %d", ((char *)pf)[0x468]);
 
-    ramdisk_read((uint8_t *)pf + prog_header_buf.p_offset,
+    ramdisk_read((uint8_t *)pf + (prog_header_buf.p_offset + elfHeader.e_entry -
+                                  (uint64_t)pf),
                  prog_header_buf.p_offset, prog_header_buf.p_filesz);
 
     Log("i= %d", ((char *)pf)[0]);
