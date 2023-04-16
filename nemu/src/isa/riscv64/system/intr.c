@@ -14,15 +14,21 @@
 ***************************************************************************************/
 
 #include <isa.h>
-
+bool raised = false; // TODO: should saved in mstatus
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   /* TODO: Trigger an interrupt/exception with ``NO''.
    * Then return the address of the interrupt/exception vector.
    */
-  csrs("mepc") = cpu.pc;
-  csrs("mstatus") = 0xa00001800;
-  csrs("mcause") = NO;
-  return epc;
+  if(raised){
+    raised = false;
+    return cpu.pc + 4;
+  }else {
+    raised = true;
+    csrs("mepc") = cpu.pc;
+    csrs("mstatus") = 0xa00001800;
+    csrs("mcause") = NO;
+    return epc;
+  }
 }
 
 word_t isa_query_intr() {
