@@ -18,14 +18,10 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
          "error file not elf");
 
   Elf_Phdr prog_header_buf;
-  uint64_t entryAddr = 0;
   for (int i = 0; i < elfHeader.e_phnum; i++) {
     ramdisk_read(&prog_header_buf, elfHeader.e_phoff, sizeof(prog_header_buf));
     if (prog_header_buf.p_type != PT_LOAD) {
       continue;
-    }
-    if (i == 0) {
-      entryAddr = prog_header_buf.p_offset;
     }
     ramdisk_read((uint8_t *)pf + prog_header_buf.p_offset - (uint64_t)pf,
                  prog_header_buf.p_offset, prog_header_buf.p_filesz);
@@ -33,7 +29,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
                (uint64_t)pf,
            0, prog_header_buf.p_memsz - prog_header_buf.p_filesz);
   }
-  return entryAddr;
+  return elfHeader.e_entry;
 }
 
 void naive_uload(PCB *pcb, const char *filename) {
