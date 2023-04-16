@@ -60,14 +60,12 @@ int check_indent(const char *str, uint64_t data, char **ret) {
     switch (str[p]) {
     case 'd':
     case 'x':
-      d = (uint64_t)data;
       zero_padding = str[0] == '0';
       width = str2num(str, p);
       num2str(buffer_string, d, zero_padding, width, str[p] == 'd' ? 10 : 16, false);
       *ret = buffer_string;
       return p + 1;
     case 'p':
-      d = (uint64_t)data;
       num2str(buffer_string, d, true, 16, 16, true);
       *ret = buffer_string;
       return p + 1;
