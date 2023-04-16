@@ -29,9 +29,12 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
 
     ramdisk_read((uint8_t *)pf + prog_header_buf.p_offset,
                  prog_header_buf.p_offset, prog_header_buf.p_filesz);
-    // memset((uint8_t *)pf +
-    //            (prog_header_buf.p_offset + prog_header_buf.p_filesz),
-    //        0, prog_header_buf.p_memsz - prog_header_buf.p_filesz);
+
+    Log("i= %d", ((char *)pf)[0]);
+
+    memset((uint8_t *)pf +
+               (prog_header_buf.p_offset + prog_header_buf.p_filesz),
+           0, prog_header_buf.p_memsz - prog_header_buf.p_filesz);
   }
   return elfHeader.e_entry;
 }
