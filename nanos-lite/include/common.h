@@ -3,13 +3,14 @@
 
 /* Uncomment these macros to enable corresponding functionality. */
 #define HAS_CTE
-//#define HAS_VME
-//#define MULTIPROGRAM
-//#define TIME_SHARING
-
+// #define HAS_VME
+// #define MULTIPROGRAM
+// #define TIME_SHARING
 #include <am.h>
 #include <klib.h>
 #include <klib-macros.h>
 #include <debug.h>
+
+typedef struct Context Context;
 
 #endif

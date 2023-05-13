@@ -7,7 +7,8 @@
 
 char buffer_string[1000];
 
-int num2str(char* out, int64_t num, bool zero_padding, uint8_t width, int round) {
+int num2str(char *out, uint64_t num, bool zero_padding, uint8_t width,
+            int round, bool unsign) {
   char bufs[30];
   int outp = 0;
   int bufp = 0;
@@ -15,9 +16,9 @@ int num2str(char* out, int64_t num, bool zero_padding, uint8_t width, int round)
   if (num == 0) {
     bufs[bufp++] = '0';
   }
-  if (num < 0) {
+  if (!unsign && (int64_t)num < 0) {
     isneg = true;
-    num = -num;
+    num = -(int64_t)num;
   }
   while (num != 0) {
     bufs[bufp++] = '0' + num % round;
@@ -42,7 +43,7 @@ int num2str(char* out, int64_t num, bool zero_padding, uint8_t width, int round)
   return outp;
 }
 
-int str2num(const char* str, int length) {
+int str2num(const char *str, int length) {
   int ret = 0;
   for (int i = 0; i < length; i++) {
     ret = ret * 10 + str[i] - '0';
@@ -50,47 +51,44 @@ int str2num(const char* str, int length) {
   return ret;
 }
 
-int check_indent(const char* str, uint64_t data, char** ret) {
+int check_indent(const char *str, uint64_t data, char **ret) {
   int p = 0;
-  int d = 0;
   bool zero_padding;
   uint8_t width;
   while (1) {
     switch (str[p]) {
-      case 'd':
-      case 'x':
-        d = (int64_t)data;
-        zero_padding = str[0] == '0';
-        width = str2num(str, p);
-        num2str(buffer_string, d, zero_padding, width, str[p] == 'd' ? 10 : 16);
-        *ret = buffer_string;
-        return p + 1;
-      case 'p':
-        d = (int64_t)data;
-        num2str(buffer_string, d, true, 16, 16);
-        *ret = buffer_string;
-        return p + 1;
-      case 'f':
-        // todo: makeit
-        return 1;
-      case 's':
-        *ret = (char*)data;
-        return p + 1;
-      case 'c':
-        buffer_string[0] = (char)data;
-        buffer_string[1] = 0;
-        *ret = buffer_string;
-        return p + 1;
-      default:
-        if (p > 10) {
-          panic("print indent not found or not supported!");
-        }
+    case 'd':
+    case 'x':
+      zero_padding = str[0] == '0';
+      width = str2num(str, p);
+      num2str(buffer_string, data, zero_padding, width, str[p] == 'd' ? 10 : 16, false);
+      *ret = buffer_string;
+      return p + 1;
+    case 'p':
+      num2str(buffer_string, data, true, 16, 16, true);
+      *ret = buffer_string;
+      return p + 1;
+    case 'f':
+      // todo: makeit
+      return 1;
+    case 's':
+      *ret = (char *)data;
+      return p + 1;
+    case 'c':
+      buffer_string[0] = (char)data;
+      buffer_string[1] = 0;
+      *ret = buffer_string;
+      return p + 1;
+    default:
+      if (p > 10) {
+        panic("print indent not found or not supported!");
+      }
     }
     p++;
   }
 }
 
-int printf(const char* fmt, ...) {
+int printf(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   size_t fmtp = 0;
@@ -100,7 +98,7 @@ int printf(const char* fmt, ...) {
       putch(fmt[fmtp++]);
     } else {
       fmtp++;
-      char* rets;
+      char *rets;
       fmtp += check_indent(fmt + fmtp, va_arg(ap, uint64_t), &rets);
       for (int i = 0; rets[i]; i++) {
         putch(rets[i]);
@@ -111,11 +109,11 @@ int printf(const char* fmt, ...) {
   return cnt;
 }
 
-int vsprintf(char* out, const char* fmt, va_list ap) {
+int vsprintf(char *out, const char *fmt, va_list ap) {
   panic("Not implemented");
 }
 
-int sprintf(char* out, const char* fmt, ...) {
+int sprintf(char *out, const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   int outp = 0;
@@ -125,7 +123,7 @@ int sprintf(char* out, const char* fmt, ...) {
       out[outp++] = fmt[fmtp++];
     } else {
       fmtp++;
-      char* rets;
+      char *rets;
       fmtp += check_indent(fmt + fmtp, va_arg(ap, uint64_t), &rets);
       for (int i = 0; rets[i]; i++) {
         out[outp++] = rets[i];
@@ -137,11 +135,11 @@ int sprintf(char* out, const char* fmt, ...) {
   return outp;
 }
 
-int snprintf(char* out, size_t n, const char* fmt, ...) {
+int snprintf(char *out, size_t n, const char *fmt, ...) {
   panic("Not implemented");
 }
 
-int vsnprintf(char* out, size_t n, const char* fmt, va_list ap) {
+int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
   panic("Not implemented");
 }
 

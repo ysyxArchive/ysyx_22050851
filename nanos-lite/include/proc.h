@@ -1,8 +1,8 @@
 #ifndef __PROC_H__
 #define __PROC_H__
 
-#include <common.h>
-#include <memory.h>
+#include "common.h"
+#include "memory.h"
 
 #define STACK_SIZE (8 * PGSIZE)
 

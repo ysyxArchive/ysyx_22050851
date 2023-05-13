@@ -75,7 +75,7 @@ void dtrace(bool is_read,
 #endif
   return;
 }
-// dtrace -----------------------------------------------------
+// etrace -----------------------------------------------------
 void etrace(bool is_call, paddr_t source, word_t NO, paddr_t target) {
 #ifdef CONFIG_ETRACE
   char buf[200];
