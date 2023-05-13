@@ -6,6 +6,7 @@ static Context *do_event(Event e, Context *c) {
     switch (c->GPR1) {
     case EVENT_YIELD:
       Log("Triggered YIELD");
+      yield();
       break;
     case EVENT_SYSCALL:
       Log("Triggered SYSTEMCALL");
