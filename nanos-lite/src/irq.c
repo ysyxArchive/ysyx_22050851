@@ -28,8 +28,10 @@ static Context *do_event(Event e, Context *c) {
   case EVENT_YIELD:
     Log("Triggered, id = %d", c->GPR1);
     switch (c->GPR1) {
+    case SYS_exit:
+      halt(0);
+      break;
     case SYS_yield:
-      Log("Triggered YIELD");
       yield();
       break;
     case -1:
