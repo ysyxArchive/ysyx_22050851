@@ -9,7 +9,7 @@
 #define Elf_Ehdr Elf32_Ehdr
 #define Elf_Phdr Elf32_Phdr
 #endif
-
+#define ADDR_BEGIN 0x83000000
 static uintptr_t loader(PCB *pcb, const char *filename) {
   Elf_Ehdr elfHeader;
   ramdisk_read(&elfHeader, 0, sizeof(elfHeader));
@@ -30,10 +30,10 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
                                   prog_header_buf.p_vaddr - (uint64_t)pf),
                  prog_header_buf.p_offset, prog_header_buf.p_filesz);
 
-    memset((uint8_t *)pf +
-               (prog_header_buf.p_offset + prog_header_buf.p_filesz +
-                prog_header_buf.p_vaddr - (uint64_t)pf),
-           0, prog_header_buf.p_memsz - prog_header_buf.p_filesz);
+    // memset((uint8_t *)pf +
+    //            (prog_header_buf.p_offset + prog_header_buf.p_filesz +
+    //             prog_header_buf.p_vaddr - (uint64_t)pf),
+    //        0, prog_header_buf.p_memsz - prog_header_buf.p_filesz);
   }
   return elfHeader.e_entry;
 }
