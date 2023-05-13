@@ -32,12 +32,12 @@ static Context *do_event(Event e, Context *c) {
       Log("Triggered YIELD");
       yield();
       break;
+    case -1:
+      Log("event ID = -1, do nothing");
+      break;
     default:
       Panic("Unhandled triggered ID = %d", c->GPR1);
     }
-    break;
-  case EVENT_NOTHING:
-    Log("event ID = -1, do nothing");
     break;
   default:
     Panic("Unhandled event ID = %d", e.event);
