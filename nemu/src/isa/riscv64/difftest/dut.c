@@ -23,7 +23,7 @@ bool isa_difftest_checkregs(CPU_state* ref_r, vaddr_t pc) {
     ans &= difftest_check_reg(reg_name(i, 64), pc, ref_r->gpr[i], cpu.gpr[i]);
   }
   ans &= difftest_check_reg("pc", pc, ref_r->pc, pc);
-  // ans &= difftest_check_reg("mstatus", pc, ref_r->csr[0], cpu.csr[0]);
+  ans &= difftest_check_reg("mstatus", pc, ref_r->csr[0], cpu.csr[0]);
   
   return ans;
 }
