@@ -42,6 +42,4 @@ void naive_uload(PCB *pcb, const char *filename) {
   uintptr_t entry = loader(pcb, filename);
   Log("Jump to entry = %lx", (uint64_t)entry);
   ((void (*)())entry)();
-  Log("Jumpout");
-
 }
