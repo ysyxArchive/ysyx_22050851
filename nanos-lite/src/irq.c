@@ -28,6 +28,7 @@ static size_t sys_write(int fd, char *buf, size_t count) {
   // if (isout) {
   for (size_t c = 0; c < count; c++) {
     putch(buf[c]);
+    Log("%c", buf[c]);
   }
   // }
   return count;
