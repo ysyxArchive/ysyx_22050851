@@ -77,9 +77,9 @@ void sim_t::diff_set_regs(void *diff_context) {
   for (int i = 0; i < NXPR; i++) {
     state->XPR.write(i, (sword_t)ctx->gpr[i]);
   }
-  state->mstatus = ctx->mstatus;
-  state->mtvec = ctx->mtvec;
-  state->mepc = ctx->mepc;
+  *(state->mstatus) = ctx->mstatus;
+  *(state->mtvec) = ctx->mtvec;
+  *(state->mepc) = ctx->mepc;
   *(state->mcause) = ctx->mcause;
   state->pc = ctx->pc;
 }
