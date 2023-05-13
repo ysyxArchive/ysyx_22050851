@@ -22,9 +22,9 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     ramdisk_read(&prog_header_buf,
                  elfHeader.e_phoff + sizeof(prog_header_buf) * i,
                  sizeof(prog_header_buf));
-    if (prog_header_buf.p_type != PT_LOAD) {
-      continue;
-    }
+    // if (prog_header_buf.p_type != PT_LOAD) {
+    //   continue;
+    // }
 
     ramdisk_read((uint8_t *)pf + (prog_header_buf.p_offset +
                                   prog_header_buf.p_vaddr - (uint64_t)pf),
