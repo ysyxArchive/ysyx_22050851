@@ -65,10 +65,10 @@ void sim_t::diff_get_regs(void *diff_context) {
   for (int i = 0; i < NXPR; i++) {
     ctx->gpr[i] = state->XPR[i];
   }
-  ctx->mstatus = state->mstatus;
-  ctx->mtvec = state->mtvec;
-  ctx->mepc = state->mepc;
-  ctx->mcause = state->mcause;
+  ctx->mstatus = *(state->mstatus);
+  ctx->mtvec = *(state->mtvec);
+  ctx->mepc = *(state->mepc);
+  ctx->mcause = *(state->mcause);
   ctx->pc = state->pc;
 }
 
