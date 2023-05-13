@@ -12,9 +12,9 @@
  *
  * See the Mulan PSL v2 for more details.
  ***************************************************************************************/
-#include "../../include/common.h"
 #include "mmu.h"
 #include "sim.h"
+#include "../../include/common.h"
 #include <difftest-def.h>
 
 #ifdef CONFIG_ISA_riscv32
