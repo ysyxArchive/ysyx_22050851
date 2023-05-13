@@ -2,7 +2,7 @@
 static Context *do_event(Event e, Context *c) {
   switch (e.event) {
   case EVENT_YIELD:
-    Log("Triggered, id = %d", e.event);
+    Log("Triggered, id = %d", c->GPR1);
     switch (c->GPR1) {
     case EVENT_YIELD:
       Log("Triggered YIELD");
@@ -11,7 +11,7 @@ static Context *do_event(Event e, Context *c) {
       Log("Triggered SYSTEMCALL");
       break;
     default:
-      Panic("Unhandled event ID = %d", e.event);
+      Panic("Unhandled triggered ID = %d", e.event);
     }
     break;
   default:
