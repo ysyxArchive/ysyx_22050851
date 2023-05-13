@@ -12,7 +12,7 @@ static Context *do_event(Event e, Context *c) {
       Log("Triggered SYSTEMCALL");
       break;
     default:
-      Panic("Unhandled triggered ID = %d", e.event);
+      Panic("Unhandled triggered ID = %d", c->GPR1);
     }
     break;
   default:
