@@ -42,7 +42,7 @@
 #error _syscall_ is not implemented
 #endif
 
-extern __uint8_t *_end;
+extern char _end;
 
 intptr_t _syscall_(intptr_t type, intptr_t a0, intptr_t a1, intptr_t a2) {
   register intptr_t _gpr1 asm(GPR1) = type;
@@ -75,10 +75,10 @@ __uint8_t *program_break = 0;
 void *_sbrk(intptr_t increment) {
   char s[100];
   if (program_break == 0) {
-    program_break = _end;
+    program_break = &_end;
   }
   int ret = _syscall_(SYS_brk, program_break + increment, NULL, NULL);
-  sprintf(s, "%x %x %x ", program_break, increment, _end);
+  sprintf(s, "%x %x %x ", program_break, increment, &_end);
   write(1, s, 20);
   if (ret == 0) {
     __uint8_t *old = program_break;
