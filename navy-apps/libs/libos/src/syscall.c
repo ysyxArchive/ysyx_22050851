@@ -1,11 +1,11 @@
 #include "syscall.h"
 #include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
 // helper macros
 #define _concat(x, y) x##y
 #define concat(x, y) _concat(x, y)
@@ -76,7 +76,8 @@ void *_sbrk(intptr_t increment) {
   if (program_break == 0) {
     program_break = end;
   }
-  int ret = _syscall_(SYS_brk, program_break + increment, NULL, NULL);
+  // int ret = _syscall_(SYS_brk, program_break + increment, NULL, NULL);
+  int ret = _syscall_(SYS_brk, end, NULL, NULL);
   if (ret == 0) {
     __uint8_t *old = program_break;
     program_break = program_break + increment;
