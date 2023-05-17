@@ -58,7 +58,6 @@ static Context *do_event(Event e, Context *c) {
       Log("syscall SYS_brk %x", c->GPR2);
       c->GPRx = sys_brk((void *)c->GPR2);
       break;
-
     case -1:
       Log("syscall -1, do nothing");
       break;
