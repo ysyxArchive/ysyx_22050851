@@ -1,5 +1,5 @@
+#include "fs.h"
 #include <common.h>
-
 enum {
   SYS_exit,
   SYS_yield,
@@ -57,6 +57,18 @@ static Context *do_event(Event e, Context *c) {
     case SYS_brk:
       Log("syscall SYS_brk %x", c->GPR2);
       c->GPRx = sys_brk((void *)c->GPR2);
+      break;
+    case SYS_open:
+      Log("syscall SYS_open %x %x %x", c->GPR2, c->GPR3, c->GPR4);
+      c->GPRx = fs_open((void *)c->GPR2, c->GPR3, c->GPR4);
+      break;
+    case SYS_close:
+      Log("syscall SYS_close %x", c->GPR2);
+      c->GPRx = fs_close(c->GPR2);
+      break;
+    case SYS_read:
+      Log("syscall SYS_read %x %x %x", c->GPR2, c->GPR3, c->GPR4);
+      c->GPRx = fs_read(c->GPR2, (char *)c->GPR3, c->GPR4);
       break;
     case -1:
       Log("syscall -1, do nothing");
