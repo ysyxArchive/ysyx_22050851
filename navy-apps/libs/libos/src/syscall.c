@@ -73,22 +73,19 @@ int _write(int fd, void *buf, size_t count) {
 
 intptr_t program_break = 0;
 void *_sbrk(intptr_t increment) {
-  char s[100];
   if (program_break == 0) {
     program_break = &_end;
   }
   int ret = _syscall_(SYS_brk, program_break + increment, NULL, NULL);
-  sprintf(s, "%x", ret);
-  write(1, s, 25);
   if (ret == 0) {
     __uint8_t *old = program_break;
     program_break = program_break + increment;
-    write(1, s, 25);
     return old;
   } else {
     return -1;
   }
 }
+
 int _read(int fd, void *buf, size_t count) {
   _exit(SYS_read);
   return 0;
