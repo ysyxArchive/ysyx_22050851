@@ -71,7 +71,7 @@ int _write(int fd, void *buf, size_t count) {
   return _syscall_(SYS_write, fd, buf, count);
 }
 
-__uint8_t *program_break = 0;
+intptr_t program_break = 0;
 void *_sbrk(intptr_t increment) {
   char s[100];
   if (program_break == 0) {
