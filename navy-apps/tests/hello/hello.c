@@ -1,9 +1,9 @@
-#include <unistd.h>
 #include <stdio.h>
+#include <unistd.h>
 
 int main() {
   // write(1, "Hello World!\n", 13);
-  printf("Hello World!\n");
+  printf("%d\n", 123);
   int i = 2;
   // volatile int j = 0;
   // while (1) {
