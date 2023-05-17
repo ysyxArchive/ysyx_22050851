@@ -5,7 +5,7 @@ int main() {
   // write(1, "Hello World!\n", 13);
   int ret = printf("%d\n", 123);
   fflush(stdout);
-  printf("%d", ret);
+  printf("%d", ret < 0);
   int i = 2;
   // volatile int j = 0;
   // while (1) {
