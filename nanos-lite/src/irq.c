@@ -47,7 +47,7 @@ static Context *do_event(Event e, Context *c) {
       yield();
       break;
     case SYS_write:
-      Log("syscall SYS_write");
+      Log("syscall SYS_write %x %x %x", c->GPR2, c->GPR3, c->GPR4);
       c->GPRx = sys_write(c->GPR2, (char *)c->GPR3, c->GPR4);
       break;
     case -1:
