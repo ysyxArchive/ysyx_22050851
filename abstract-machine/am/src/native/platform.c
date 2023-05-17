@@ -12,7 +12,7 @@
 #define PMEM_START (void *)0x1000000  // for nanos-lite with vme disabled
 #define PMEM_SIZE (128 * 1024 * 1024) // 128MB
 static int pmem_fd = 0;
-static void *codepmem = NULL;
+static void *pmem = NULL;
 static ucontext_t uc_example = {};
 static void *(*memcpy_libc)(void *, const void *, size_t) = NULL;
 sigset_t __am_intr_sigmask = {};
