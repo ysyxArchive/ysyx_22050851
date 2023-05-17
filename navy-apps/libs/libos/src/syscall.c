@@ -73,13 +73,13 @@ int _write(int fd, void *buf, size_t count) {
 
 __uint8_t *program_break = 0;
 void *_sbrk(intptr_t increment) {
+  char s[100];
   if (program_break == 0) {
     program_break = end;
   }
-  // int ret = _syscall_(SYS_brk, program_break + increment, NULL, NULL);
-  int ret = _syscall_(SYS_brk, increment, NULL, NULL);
-  ret = _syscall_(SYS_brk, end, NULL, NULL);
-  ret = _syscall_(SYS_brk, program_break, NULL, NULL);
+  int ret = _syscall_(SYS_brk, program_break + increment, NULL, NULL);
+  sprintf(s, "%x %x %x ", program_break, increment, end);
+  write(1, s, 20);
   if (ret == 0) {
     __uint8_t *old = program_break;
     program_break = program_break + increment;
