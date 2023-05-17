@@ -29,6 +29,8 @@ static size_t sys_write(int fd, char *buf, size_t count) {
     for (size_t c = 0; c < count; c++) {
       putch(buf[c]);
     }
+  } else {
+    return -1;
   }
   return count;
 }
@@ -57,6 +59,8 @@ static Context *do_event(Event e, Context *c) {
       Panic("Unhandled triggered ID = %d", c->GPR1);
     }
     break;
+    Log("Return %d", c->GPRx);
+
   default:
     Panic("Unhandled event ID = %d", e.event);
   }
