@@ -79,10 +79,10 @@ void *_sbrk(intptr_t increment) {
   }
   int ret = _syscall_(SYS_brk, program_break + increment, NULL, NULL);
   sprintf(s, "%x %x %x ", program_break, increment, program_break + increment);
-  write(1, s, 25);
   if (ret == 0) {
     __uint8_t *old = program_break;
     program_break = program_break + increment;
+    write(1, s, 25);
     return old;
   } else {
     return -1;
