@@ -70,6 +70,11 @@ static Context *do_event(Event e, Context *c) {
       Log("syscall SYS_read %x %x %x", c->GPR2, c->GPR3, c->GPR4);
       c->GPRx = fs_read(c->GPR2, (char *)c->GPR3, c->GPR4);
       break;
+    case SYS_lseek:
+      Log("syscall SYS_seek %x %x %x", c->GPR2, c->GPR3, c->GPR4);
+      c->GPRx = fs_lseek(c->GPR2, c->GPR3, c->GPR4);
+      break;
+
     case -1:
       Log("syscall -1, do nothing");
       break;
