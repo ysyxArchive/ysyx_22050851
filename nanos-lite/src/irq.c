@@ -35,6 +35,8 @@ static size_t sys_write(int fd, char *buf, size_t count) {
   return count;
 }
 
+static size_t sys_brk(void *addr) { return 0; }
+
 static Context *do_event(Event e, Context *c) {
   switch (e.event) {
   case EVENT_YIELD:
@@ -52,6 +54,11 @@ static Context *do_event(Event e, Context *c) {
       Log("syscall SYS_write %x %x %x", c->GPR2, c->GPR3, c->GPR4);
       c->GPRx = sys_write(c->GPR2, (char *)c->GPR3, c->GPR4);
       break;
+    case SYS_brk:
+      Log("syscall SYS_brk %x", c->GPR2);
+      c->GPRx = sys_brk((void *)c->GPR2);
+      break;
+
     case -1:
       Log("syscall -1, do nothing");
       break;
