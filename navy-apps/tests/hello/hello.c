@@ -4,6 +4,7 @@
 int main() {
   // write(1, "Hello World!\n", 13);
   int ret = printf("%d\n", 123);
+  fflush(stdout);
   printf("%d", ret);
   int i = 2;
   // volatile int j = 0;
