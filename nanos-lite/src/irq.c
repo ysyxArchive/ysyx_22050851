@@ -58,8 +58,8 @@ static Context *do_event(Event e, Context *c) {
     default:
       Panic("Unhandled triggered ID = %d", c->GPR1);
     }
-    break;
     Log("Return %d", c->GPRx);
+    break;
 
   default:
     Panic("Unhandled event ID = %d", e.event);
