@@ -5,8 +5,8 @@
 
 #ifndef SEEK_SET
 enum { SEEK_SET, SEEK_CUR, SEEK_END };
-enum { FD_STDIN, FD_STDOUT, FD_STDERR, FD_FB };
 #endif
+enum { FD_STDIN, FD_STDOUT, FD_STDERR, FD_FB };
 int fs_open(const char *filename, int flags, int mode);
 int fs_close(int fd);
 size_t fs_read(int fd, void *buf, size_t count);

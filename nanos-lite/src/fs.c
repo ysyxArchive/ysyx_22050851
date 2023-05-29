@@ -1,3 +1,4 @@
+#include "device.h"
 #include "ramdisk.h"
 #include <fs.h>
 
@@ -33,8 +34,8 @@ size_t invalid_write(const void *buf, size_t offset, size_t len) {
 /* This is the information about all files in disk. */
 static Finfo file_table[] __attribute__((used)) = {
     [FD_STDIN] = {"stdin", 0, 0, invalid_read, invalid_write},
-    [FD_STDOUT] = {"stdout", 0, 0, invalid_read, invalid_write},
-    [FD_STDERR] = {"stderr", 0, 0, invalid_read, invalid_write},
+    [FD_STDOUT] = {"stdout", 0, 0, invalid_read, serial_write},
+    [FD_STDERR] = {"stderr", 0, 0, invalid_read, serial_write},
 #include "files.h"
 };
 
@@ -136,9 +137,13 @@ size_t fs_write(int fd, void *buf, size_t count) {
     Log("Warning file %d not opened", fd);
     return -1;
   }
-  return ramdisk_write(buf, file_table[fd].disk_offset + offset, count);
+  WriteFn fn = file_table[fd].write ? file_table[fd].write : ramdisk_write;
+  return fn(buf, file_table[fd].disk_offset + offset, count);
 }
 
 void init_fs() {
+  fs_open("stdin", 0, 0);
+  fs_open("stdout", 0, 0);
+  fs_open("stderr", 0, 0);
   // TODO: initialize the size of /dev/fb
 }

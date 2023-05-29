@@ -23,18 +23,6 @@ enum {
   SYS_gettimeofday
 };
 
-static size_t sys_write(int fd, char *buf, size_t count) {
-  if (fd == FD_STDIN) {
-    return -1;
-  } else if (fd == FD_STDOUT || fd == FD_STDERR) {
-    for (size_t c = 0; c < count; c++) {
-      putch(buf[c]);
-    }
-    return count;
-  } else {
-    return fs_write(fd, buf, count);
-  }
-}
 
 static size_t sys_brk(void *addr) { return 0; }
 
@@ -54,7 +42,7 @@ static Context *do_event(Event e, Context *c) {
     case SYS_write:
       Log("syscall SYS_write %s %x %x", get_file_name(c->GPR2), c->GPR3,
           c->GPR4);
-      c->GPRx = sys_write(c->GPR2, (char *)c->GPR3, c->GPR4);
+      c->GPRx = fs_write(c->GPR2, (char *)c->GPR3, c->GPR4);
       break;
     case SYS_brk:
       Log("syscall SYS_brk %x", c->GPR2);
