@@ -30,10 +30,10 @@ static size_t sys_write(int fd, char *buf, size_t count) {
     for (size_t c = 0; c < count; c++) {
       putch(buf[c]);
     }
+    return count;
   } else {
-    
+    return fs_write(fd, buf, count);
   }
-  return count;
 }
 
 static size_t sys_brk(void *addr) { return 0; }
