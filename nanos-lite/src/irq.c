@@ -52,7 +52,8 @@ static Context *do_event(Event e, Context *c) {
       yield();
       break;
     case SYS_write:
-      Log("syscall SYS_write %x %x %x", c->GPR2, c->GPR3, c->GPR4);
+      Log("syscall SYS_write %s %x %x", get_file_name(c->GPR2), c->GPR3,
+          c->GPR4);
       c->GPRx = sys_write(c->GPR2, (char *)c->GPR3, c->GPR4);
       break;
     case SYS_brk:
@@ -60,15 +61,17 @@ static Context *do_event(Event e, Context *c) {
       c->GPRx = sys_brk((void *)c->GPR2);
       break;
     case SYS_open:
-      Log("syscall SYS_open %x %x %x", c->GPR2, c->GPR3, c->GPR4);
+      Log("syscall SYS_open %s %x %x", get_file_name(c->GPR2), c->GPR3,
+          c->GPR4);
       c->GPRx = fs_open((void *)c->GPR2, c->GPR3, c->GPR4);
       break;
     case SYS_close:
-      Log("syscall SYS_close %x", c->GPR2);
+      Log("syscall SYS_close %s", get_file_name(c->GPR2));
       c->GPRx = fs_close(c->GPR2);
       break;
     case SYS_read:
-      Log("syscall SYS_read %x %x %x", c->GPR2, c->GPR3, c->GPR4);
+      Log("syscall SYS_read %s %x %x", get_file_name(c->GPR2), c->GPR3,
+          c->GPR4);
       c->GPRx = fs_read(c->GPR2, (char *)c->GPR3, c->GPR4);
       break;
     case SYS_lseek:

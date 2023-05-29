@@ -12,4 +12,5 @@ int fs_close(int fd);
 size_t fs_read(int fd, void *buf, size_t count);
 size_t fs_write(int fd, void *buf, size_t count);
 int fs_lseek(int fd, int offset, int whence);
+char *get_file_name(int fd);
 #endif

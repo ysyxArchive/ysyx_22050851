@@ -38,6 +38,11 @@ static Finfo file_table[] __attribute__((used)) = {
 #include "files.h"
 };
 
+char *get_file_name(int fd) {
+  Assert(fd < LENGTH(file_table), "file id %d error", fd);
+  return file_table[fd].name;
+}
+
 int fs_open(const char *filename, int flags, int mode) {
   int ret = -1;
   for (int i = 0; i < LENGTH(file_table); i++) {
