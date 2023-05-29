@@ -20,8 +20,6 @@ typedef struct openedFileInfo {
 
 OpenedFileInfo ofi = {.fd = -1, .next = NULL};
 
-enum { FD_STDIN, FD_STDOUT, FD_STDERR, FD_FB };
-
 size_t invalid_read(void *buf, size_t offset, size_t len) {
   panic("should not reach here");
   return 0;
@@ -118,6 +116,22 @@ size_t fs_read(int fd, void *buf, size_t count) {
     return -1;
   }
   return ramdisk_read(buf, file_table[fd].disk_offset + offset, count);
+}
+
+size_t fs_write(int fd, void *buf, size_t count) {
+  OpenedFileInfo *p = ofi.next;
+  size_t offset;
+  while (p && p->fd != fd) {
+    p = p->next;
+  }
+  if (p) {
+    offset = p->offset;
+    p->offset += count;
+  } else {
+    Log("Warning file %d not opened", fd);
+    return -1;
+  }
+  return ramdisk_write(buf, file_table[fd].disk_offset + offset, count);
 }
 
 void init_fs() {

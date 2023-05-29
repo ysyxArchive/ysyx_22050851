@@ -24,13 +24,14 @@ enum {
 };
 
 static size_t sys_write(int fd, char *buf, size_t count) {
-  bool isout = fd == 1 || fd == 2;
-  if (isout) {
+  if (fd == FD_STDIN) {
+    return -1;
+  } else if (fd == FD_STDOUT || fd == FD_STDERR) {
     for (size_t c = 0; c < count; c++) {
       putch(buf[c]);
     }
   } else {
-    return -1;
+    
   }
   return count;
 }
