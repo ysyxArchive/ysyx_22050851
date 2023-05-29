@@ -110,7 +110,6 @@ size_t fs_read(int fd, void *buf, size_t count) {
   }
   if (p) {
     offset = p->offset;
-    Log("offset %d\n", p->offset);
     p->offset += count;
   } else {
     Log("Warning file %d not opened", fd);
@@ -127,7 +126,6 @@ size_t fs_write(int fd, void *buf, size_t count) {
   }
   if (p) {
     offset = p->offset;
-    Log("offset %d\n", p->offset);
     p->offset += count;
   } else {
     Log("Warning file %d not opened", fd);
