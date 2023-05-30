@@ -13,7 +13,7 @@ int main() {
   int diff = 0;
   for (int i = 0; i < 100; i++) {
     int now = tv.tv_sec * 1000000 + tv.tv_usec;
-    while (diff < 500) {
+    while (diff < 500000) {
       gettimeofday(&tv, 0);
       now = tv.tv_sec * 1000000 + tv.tv_usec;
       diff = now - last;
