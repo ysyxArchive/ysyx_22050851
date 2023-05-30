@@ -66,6 +66,7 @@ int deal_with_key_value(char *buf, char *key, int *value) {
       if (buf[p] != key[o])
         break;
       p++;
+      o++;
     }
     printf("%s", buf + p);
     if ((buf[p] == ' ' || buf[p] == ':') && !key[o]) {
