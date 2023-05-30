@@ -13,7 +13,9 @@ static const char *keyname[256]
 
 size_t serial_write(const void *buf, size_t offset, size_t len) {
   ((char *)buf)[offset + len] = 0;
-  return printf("%s", buf + offset);
+  int l = printf("%s", buf + offset);
+  Log("%d", l);
+  return l;
 }
 
 size_t events_read(void *buf, size_t offset, size_t len) { return 0; }
