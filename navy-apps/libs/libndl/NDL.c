@@ -19,7 +19,6 @@ uint32_t NDL_GetTicks() {
 
 int NDL_PollEvent(char *buf, int len) {
   int ret = fread(buf, 1, len, eventFile);
-  printf("event: %s\n", buf);
   return buf[0] == 'k' && (buf[1] == 'd' || buf[1] == 'u') && buf[2] == ' ';
 }
 
