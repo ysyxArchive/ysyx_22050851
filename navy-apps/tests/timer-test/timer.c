@@ -1,27 +1,18 @@
+#include <NDL.h>
 #include <stdint.h>
 #include <sys/time.h>
-#ifdef __ISA_NATIVE__
-#error can not support ISA=native
-#endif
 
 #define SYS_yield 1
 
 int main() {
-  struct timeval tv;
-  gettimeofday(&tv, 0);
-  int last = tv.tv_sec * 1000000 + tv.tv_usec;
-  int diff = 0;
+  uint32_t last = NDL_GetTicks();
   for (int i = 0; i < 100; i++) {
-    int now = tv.tv_sec * 1000000 + tv.tv_usec;
-    while (diff < 500000) {
-      gettimeofday(&tv, 0);
-      now = tv.tv_sec * 1000000 + tv.tv_usec;
-      diff = now - last;
+    uint32_t now = NDL_GetTicks();
+    while (now - last < 500) {
+      now = NDL_GetTicks();
     }
-    now = last;
-    diff = 0;
-    printf("%d %d %d \n", i, tv.tv_sec, tv.tv_usec);
-    // printf("%d \n", i);
+    last = now;
+    printf("%d %d %d \n", i, now);
   }
   return _syscall_(SYS_yield, 0, 0, 0);
 }
