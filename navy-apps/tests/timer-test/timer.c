@@ -17,7 +17,6 @@ int main() {
       gettimeofday(&tv, 0);
       now = tv.tv_sec * 1000 + tv.tv_usec;
       diff = now - last;
-      printf("%d %d %d \n", i, tv.tv_sec, tv.tv_usec);
     }
     now = last;
     diff = 0;
