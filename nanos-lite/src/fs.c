@@ -122,7 +122,9 @@ size_t fs_read(int fd, void *buf, size_t count) {
     Log("Warning file %d not opened", fd);
     return -1;
   }
-  return ramdisk_read(buf, file_table[fd].disk_offset + offset, count);
+
+  ReadFn fn = file_table[fd].read ? file_table[fd].read : ramdisk_read;
+  return fn(buf, file_table[fd].disk_offset + offset, count);
 }
 
 size_t fs_write(int fd, void *buf, size_t count) {
