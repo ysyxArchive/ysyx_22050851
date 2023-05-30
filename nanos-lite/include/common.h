@@ -7,10 +7,12 @@
 // #define MULTIPROGRAM
 // #define TIME_SHARING
 #include <am.h>
-#include <klib.h>
-#include <klib-macros.h>
 #include <debug.h>
+#include <klib-macros.h>
+#include <klib.h>
 
 typedef struct Context Context;
+
+typedef struct timeval timeval;
 
 #endif

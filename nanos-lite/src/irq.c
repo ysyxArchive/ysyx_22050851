@@ -23,7 +23,6 @@ enum {
   SYS_gettimeofday
 };
 
-
 static size_t sys_brk(void *addr) { return 0; }
 
 static Context *do_event(Event e, Context *c) {
@@ -64,6 +63,14 @@ static Context *do_event(Event e, Context *c) {
     case SYS_lseek:
       Log("syscall SYS_seek %x %x %x", c->GPR2, c->GPR3, c->GPR4);
       c->GPRx = fs_lseek(c->GPR2, c->GPR3, c->GPR4);
+      break;
+    case SYS_gettimeofday:
+      Log("syscall SYS_gettimeofday %x %x", c->GPR2, c->GPR3);
+      uint64_t ms;
+      ioe_read(AM_TIMER_UPTIME, &ms);
+      ((uint64_t *)c->GPR2)[0] = ms % 1000;
+      ((uint64_t *)c->GPR2)[1] = ms / 1000;
+      c->GPRx = 0;
       break;
 
     case -1:
