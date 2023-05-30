@@ -25,6 +25,7 @@ size_t events_read(void *buf, size_t offset, size_t len) {
     int keycode;
   } keyboardEvent;
   ioe_read(AM_INPUT_KEYBRD, &keyboardEvent);
+  Log("%d %d\n", keyboardEvent.keydown, keyboardEvent.keycode);
   return sprintf(buf, "%s %s\n", keyboardEvent.keydown ? "kd" : "ku",
                  keyname[keyboardEvent.keycode]);
 }
