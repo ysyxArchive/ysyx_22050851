@@ -13,6 +13,4 @@
 
 typedef struct Context Context;
 
-typedef struct timeval timeval;
-
 #endif
