@@ -9,13 +9,13 @@
 int main() {
   struct timeval tv;
   gettimeofday(&tv, 0);
-  int last = tv.tv_sec * 1000 + tv.tv_usec;
+  int last = tv.tv_sec * 1000000 + tv.tv_usec;
   int diff = 0;
   for (int i = 0; i < 100; i++) {
-    int now = tv.tv_sec * 1000 + tv.tv_usec;
+    int now = tv.tv_sec * 1000000 + tv.tv_usec;
     while (diff < 500) {
       gettimeofday(&tv, 0);
-      now = tv.tv_sec * 1000 + tv.tv_usec;
+      now = tv.tv_sec * 1000000 + tv.tv_usec;
       diff = now - last;
     }
     now = last;

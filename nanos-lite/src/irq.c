@@ -68,8 +68,8 @@ static Context *do_event(Event e, Context *c) {
       Log("syscall SYS_gettimeofday %x %x", c->GPR2, c->GPR3);
       uint64_t ms;
       ioe_read(AM_TIMER_UPTIME, &ms);
-      ((uint64_t *)c->GPR2)[0] = ms / 1000;
-      ((uint64_t *)c->GPR2)[1] = ms % 1000;
+      ((uint64_t *)c->GPR2)[0] = ms / 1000000;
+      ((uint64_t *)c->GPR2)[1] = ms % 1000000;
       c->GPRx = 0;
       break;
 
