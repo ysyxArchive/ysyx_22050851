@@ -59,7 +59,7 @@ int NDL_Init(uint32_t flags) {
   if (getenv("NWM_APP")) {
     evtdev = 3;
   }
-  eventFile = fopen("/dev/evnets", "r");
+  eventFile = fopen("/dev/events", "r");
   return 0;
 }
 
