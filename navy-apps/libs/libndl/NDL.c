@@ -103,7 +103,7 @@ int NDL_Init(uint32_t flags) {
   fclose(dispConfigFile);
   assert(deal_with_key_value(buf, "WIDTH", &window_w));
   assert(deal_with_key_value(buf, "HEIGHT", &window_h));
-  printf("%d %d", window_w, window_h);
+  printf("%d %d\n", window_w, window_h);
   return 0;
 }
 
