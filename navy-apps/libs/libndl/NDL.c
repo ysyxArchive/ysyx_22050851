@@ -8,6 +8,7 @@
 static int evtdev = -1;
 static int fbdev = -1;
 static int screen_w = 0, screen_h = 0;
+static int eventFile;
 
 // return ms
 uint32_t NDL_GetTicks() {
@@ -16,7 +17,10 @@ uint32_t NDL_GetTicks() {
   return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
 
-int NDL_PollEvent(char *buf, int len) { return 0; }
+int NDL_PollEvent(char *buf, int len) {
+  int ret = fread(buf, 1, len, buf);
+  return buf[0] == 'k' && (buf[1] == 'd' || buf[1] == 'u') && buf[2] == ' ';
+}
 
 void NDL_OpenCanvas(int *w, int *h) {
   if (getenv("NWM_APP")) {
@@ -55,7 +59,8 @@ int NDL_Init(uint32_t flags) {
   if (getenv("NWM_APP")) {
     evtdev = 3;
   }
+  eventFile = fopen("/dev/evnets", "r");
   return 0;
 }
 
-void NDL_Quit() {}
+void NDL_Quit() { fclose(eventFile); }
