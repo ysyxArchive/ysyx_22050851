@@ -8,6 +8,7 @@
 static int evtdev = -1;
 static int fbdev = -1;
 static int screen_w = 0, screen_h = 0;
+static int window_w = 0, window_h = 0;
 static int eventFile;
 
 // return ms
@@ -60,6 +61,14 @@ int NDL_Init(uint32_t flags) {
     evtdev = 3;
   }
   eventFile = fopen("/dev/events", "r");
+  // read display info
+  int dispConfigFile = fopen("/dev/dispinfo", "r");
+  int info[2];
+  fread(info, sizeof(int), 2, dispConfigFile);
+  window_w = info[0];
+  window_h = info[1];
+  fclose(dispConfigFile);
+  printf("%d %d\n\n\n\n", window_w, window_h);
   return 0;
 }
 

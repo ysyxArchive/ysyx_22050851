@@ -20,17 +20,19 @@ size_t serial_write(const void *buf, size_t offset, size_t len) {
 }
 
 size_t events_read(void *buf, size_t offset, size_t len) {
-  struct {
-    bool keydown;
-    int keycode;
-  } keyboardEvent;
+  AM_INPUT_KEYBRD_T keyboardEvent;
   ioe_read(AM_INPUT_KEYBRD, &keyboardEvent);
-  Log("%d %d\n", keyboardEvent.keydown, keyboardEvent.keycode);
   return sprintf(buf, "%s %s\n", keyboardEvent.keydown ? "kd" : "ku",
                  keyname[keyboardEvent.keycode]);
 }
 
-size_t dispinfo_read(void *buf, size_t offset, size_t len) { return 0; }
+size_t dispinfo_read(void *buf, size_t offset, size_t len) {
+  AM_GPU_CONFIG_T gpuConfig;
+  ioe_read(AM_GPU_CONFIG, &gpuConfig);
+  ((int *)buf)[0] = gpuConfig.width;
+  ((int *)buf)[1] = gpuConfig.height;
+  return sizeof(int) * 2;
+}
 
 size_t fb_write(const void *buf, size_t offset, size_t len) { return 0; }
 
