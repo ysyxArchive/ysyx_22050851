@@ -12,16 +12,16 @@ int main() {
   int last = tv.tv_sec * 1000 + tv.tv_usec;
   int diff = 0;
   for (int i = 0; i < 100; i++) {
-    // int now = tv.tv_sec * 1000 + tv.tv_usec;
-    // while (diff < 500) {
-    // gettimeofday(&tv, 0);
-    // now = tv.tv_sec * 1000 + tv.tv_usec;
-    // diff = now - last;
-    //   printf("%d %d %d \n", i, tv.tv_sec, tv.tv_usec);
-    // }
-    // now = last;
-    // printf("%d %d %d \n", i, tv.tv_sec, tv.tv_usec);
-    printf("%d \n", i);
+    int now = tv.tv_sec * 1000 + tv.tv_usec;
+    while (diff < 500) {
+    gettimeofday(&tv, 0);
+    now = tv.tv_sec * 1000 + tv.tv_usec;
+    diff = now - last;
+      printf("%d %d %d \n", i, tv.tv_sec, tv.tv_usec);
+    }
+    now = last;
+    printf("%d %d %d \n", i, tv.tv_sec, tv.tv_usec);
+    // printf("%d \n", i);
   }
   return _syscall_(SYS_yield, 0, 0, 0);
 }
