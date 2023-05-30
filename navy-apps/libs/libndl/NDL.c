@@ -83,7 +83,6 @@ int deal_with_key_value(char *buf, char *key, int *value) {
       while (buf[p] != ' ') {
         p++;
       }
-      printf("%s\n", buf + p);
       sscanf(buf + p, "%d", value);
       return 1;
     }
