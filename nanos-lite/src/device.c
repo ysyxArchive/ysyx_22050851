@@ -13,9 +13,10 @@ static const char *keyname[256]
 
 size_t serial_write(const void *buf, size_t offset, size_t len) {
   ((char *)buf)[offset + len] = 0;
-  int l = printf("%s", buf + offset);
-  Log("%d", l);
-  return l;
+  for (int i = 0; i < len; i++) {
+    putch(((char *)buf)[i + offset]);
+  }
+  return len;
 }
 
 size_t events_read(void *buf, size_t offset, size_t len) { return 0; }
