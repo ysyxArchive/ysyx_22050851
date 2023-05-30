@@ -67,6 +67,7 @@ int deal_with_key_value(char *buf, char *key, int *value) {
         break;
       p++;
     }
+    printf("%s", buf + p);
     if ((buf[p] == ' ' || buf[p] == ':') && !key[o]) {
       found = 1;
     }
@@ -75,17 +76,17 @@ int deal_with_key_value(char *buf, char *key, int *value) {
         p++;
       }
       p++;
-      continue;
-    }
-    while (buf[p] != ':') {
+    } else {
+      while (buf[p] != ':') {
+        p++;
+      }
       p++;
+      while (buf[p] != ' ') {
+        p++;
+      }
+      fscanf("%d", value);
+      return 1;
     }
-    p++;
-    while (buf[p] -= ' ') {
-      p++;
-    }
-    fscanf("%d", value);
-    return 1;
   }
   return 0;
 }
