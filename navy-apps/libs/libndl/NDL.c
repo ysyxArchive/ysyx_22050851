@@ -59,6 +59,7 @@ int NDL_QueryAudio() { return 0; }
 int deal_with_key_value(char *buf, char *key, int *value) {
   int p = 0;
   while (buf[p]) {
+    printf("%s", buf + p);
     char found = 0;
     int o = 0;
     while (buf[p] != ' ' && buf[p] != ':' && key[o]) {
@@ -101,7 +102,7 @@ int NDL_Init(uint32_t flags) {
   fread(buf, 1, 100, dispConfigFile);
   fclose(dispConfigFile);
   assert(deal_with_key_value(buf, "WIDTH", &window_w));
-  assert(deal_with_key_value(buf, "HEIGHTs", &window_h));
+  assert(deal_with_key_value(buf, "HEIGHT", &window_h));
   printf("%d %d", window_w, window_h);
   return 0;
 }
