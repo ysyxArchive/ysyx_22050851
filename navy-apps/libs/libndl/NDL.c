@@ -1,10 +1,10 @@
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
-
 static int evtdev = -1;
 static int fbdev = -1;
 static int screen_w = 0, screen_h = 0;
@@ -56,6 +56,39 @@ int NDL_PlayAudio(void *buf, int len) { return 0; }
 
 int NDL_QueryAudio() { return 0; }
 
+int deal_with_key_value(char *buf, char *key, int *value) {
+  int p = 0;
+  while (buf[p]) {
+    char found = 0;
+    int o = 0;
+    while (buf[p] != ' ' && buf[p] != ':' && key[o]) {
+      if (buf[p] != key[o])
+        break;
+      p++;
+    }
+    if ((buf[p] == ' ' || buf[p] == ':') && !key[o]) {
+      found = 1;
+    }
+    if (!found) {
+      while (buf[p] != '\n') {
+        p++;
+      }
+      p++;
+      continue;
+    }
+    while (buf[p] != ':') {
+      p++;
+    }
+    p++;
+    while (buf[p] -= ' ') {
+      p++;
+    }
+    fscanf("%d", value);
+    return 1;
+  }
+  return 0;
+}
+
 int NDL_Init(uint32_t flags) {
   if (getenv("NWM_APP")) {
     evtdev = 3;
@@ -63,12 +96,13 @@ int NDL_Init(uint32_t flags) {
   eventFile = fopen("/dev/events", "r");
   // read display info
   int dispConfigFile = fopen("/dev/dispinfo", "r");
+  char buf[100];
   int info[2];
-  fread(info, sizeof(int), 2, dispConfigFile);
-  window_w = info[0];
-  window_h = info[1];
+  fread(buf, 1, 100, dispConfigFile);
   fclose(dispConfigFile);
-  printf("%d %d\n\n\n\n", window_w, window_h);
+  assert(deal_with_key_value(buf, "WIDTH", &window_w));
+  assert(deal_with_key_value(buf, "HEIGHTs", &window_h));
+  printf("%d %d", window_w, window_h);
   return 0;
 }
 

@@ -29,9 +29,8 @@ size_t events_read(void *buf, size_t offset, size_t len) {
 size_t dispinfo_read(void *buf, size_t offset, size_t len) {
   AM_GPU_CONFIG_T gpuConfig;
   ioe_read(AM_GPU_CONFIG, &gpuConfig);
-  ((int *)buf)[0] = gpuConfig.width;
-  ((int *)buf)[1] = gpuConfig.height;
-  return sizeof(int) * 2;
+  return sprintf(buf, "WIDTH : %d\nHEIGHT:    %d\n", gpuConfig.width,
+                 gpuConfig.height);
 }
 
 size_t fb_write(const void *buf, size_t offset, size_t len) { return 0; }
