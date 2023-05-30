@@ -59,7 +59,6 @@ int NDL_QueryAudio() { return 0; }
 int deal_with_key_value(char *buf, char *key, int *value) {
   int p = 0;
   while (buf[p]) {
-    printf("%s", buf + p);
     char found = 0;
     int o = 0;
     while (buf[p] != ' ' && buf[p] != ':' && key[o]) {
@@ -68,7 +67,6 @@ int deal_with_key_value(char *buf, char *key, int *value) {
       p++;
       o++;
     }
-    printf("%s", buf + p);
     if ((buf[p] == ' ' || buf[p] == ':') && !key[o]) {
       found = 1;
     }
