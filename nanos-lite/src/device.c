@@ -34,24 +34,14 @@ size_t dispinfo_read(void *buf, size_t offset, size_t len) {
 }
 
 size_t fb_write(void *buf, size_t offset, size_t len) {
-  int i = 0;
-  printf("%d\n", i++);
   AM_GPU_FBDRAW_T fbdraw;
-  printf("%d\n", i++);
   fbdraw.h = 1;
-  printf("%d\n", i++);
   fbdraw.w = len / sizeof(uint32_t);
-  printf("%d\n", i++);
   fbdraw.pixels = buf;
-  printf("%d\n", i++);
   fbdraw.sync = true;
-  printf("%d\n", i++);
   fbdraw.x = offset % gpuConfig.width;
-  printf("%d\n", i++);
   fbdraw.y = offset / gpuConfig.width;
-  printf("%d\n", i++);
   ioe_write(AM_GPU_FBDRAW, &fbdraw);
-  printf("%d\n", i++);
   return len;
 }
 
