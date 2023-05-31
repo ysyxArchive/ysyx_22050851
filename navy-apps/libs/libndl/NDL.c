@@ -9,8 +9,6 @@ static int evtdev = -1;
 static int fbdev = -1;
 static int screen_w = 0, screen_h = 0;
 static int window_w = 0, window_h = 0;
-static int eventFile;
-
 // return ms
 uint32_t NDL_GetTicks() {
   struct timeval tv;
@@ -19,12 +17,13 @@ uint32_t NDL_GetTicks() {
 }
 
 int NDL_PollEvent(char *buf, int len) {
-  int ret = fread(buf, 1, len, eventFile);
+  int ret = fread(buf, 1, len, evtdev);
   return buf[0] == 'k' && (buf[1] == 'd' || buf[1] == 'u') && buf[2] == ' ';
 }
 
 void NDL_OpenCanvas(int *w, int *h) {
   if (getenv("NWM_APP")) {
+    printf("123");
     int fbctl = 4;
     fbdev = 5;
     screen_w = *w;
@@ -46,7 +45,12 @@ void NDL_OpenCanvas(int *w, int *h) {
   }
 }
 
-void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {}
+void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
+  for (int row = 0; row < h; row++) {
+    fseek(fbdev, (y + row) * window_w + x, SEEK_SET);
+    fwrite(pixels + w * row, sizeof(uint32_t), w, fbdev);
+  }
+}
 
 void NDL_OpenAudio(int freq, int channels, int samples) {}
 
@@ -94,7 +98,8 @@ int NDL_Init(uint32_t flags) {
   if (getenv("NWM_APP")) {
     evtdev = 3;
   }
-  eventFile = fopen("/dev/events", "r");
+  evtdev = fopen("/dev/events", "r");
+  fbdev = fopen("/dev/fb", "w");
   // read display info
   int dispConfigFile = fopen("/dev/dispinfo", "r");
   char buf[100];
@@ -103,8 +108,11 @@ int NDL_Init(uint32_t flags) {
   fclose(dispConfigFile);
   assert(deal_with_key_value(buf, "WIDTH", &window_w));
   assert(deal_with_key_value(buf, "HEIGHT", &window_h));
-  printf("%d %d\n", window_w, window_h);
+
   return 0;
 }
 
-void NDL_Quit() { fclose(eventFile); }
+void NDL_Quit() {
+  fclose(evtdev);
+  fclose(fbdev);
+}
