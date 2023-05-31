@@ -35,6 +35,7 @@ size_t dispinfo_read(void *buf, size_t offset, size_t len) {
 }
 
 size_t fb_write(const void *buf, size_t offset, size_t len) {
+  Log("123");
   AM_GPU_FBDRAW_T fbdraw = {.h = 1,
                             .w = len / sizeof(uint32_t),
                             .pixels = &(((uint32_t *)buf)[0]),
