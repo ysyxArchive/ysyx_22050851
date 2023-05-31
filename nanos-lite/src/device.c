@@ -41,6 +41,7 @@ size_t fb_write(const void *buf, size_t offset, size_t len) {
                             .sync = true,
                             .x = offset % gpuConfig.width,
                             .y = offset / gpuConfig.width};
+  Log("123");
   ioe_write(AM_GPU_FBDRAW, &fbdraw);
   return len;
 }
