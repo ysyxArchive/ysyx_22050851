@@ -68,7 +68,6 @@ void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
                   .pixel = pixels};
   printf("%d %d %d %d %x\n", rect.x, rect.y, rect.w, rect.h, rect.pixel);
   write(fbdev, &rect, sizeof(am_rect));
-  fflush(fbdev);
   //   for (int row = 0; row < h; row++) {
   //     fseek(fbdev,
   //           ((top_offset + y + row) * window_w + x + left_offset) *
