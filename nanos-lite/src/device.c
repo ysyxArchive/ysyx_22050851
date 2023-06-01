@@ -23,10 +23,8 @@ size_t serial_write(const void *buf, size_t offset, size_t len) {
 size_t events_read(void *buf, size_t offset, size_t len) {
   AM_INPUT_KEYBRD_T keyboardEvent;
   ioe_read(AM_INPUT_KEYBRD, &keyboardEvent);
-  sprintf(buf, "%s %s\n", keyboardEvent.keydown ? "kd" : "ku",
-          keyname[keyboardEvent.keycode]);
-  ((char *)buf)[len - 1] = 0;
-  return len;
+  return snprintf(buf, len, "%s %s%c\n", keyboardEvent.keydown ? "kd" : "ku",
+                  keyname[keyboardEvent.keycode], -1);
 }
 
 size_t dispinfo_read(void *buf, size_t offset, size_t len) {
