@@ -30,7 +30,6 @@ void NDL_OpenCanvas(int *w, int *h) {
     screen_w = *w;
     screen_h = *h;
     char buf[64];
-    int len = sprintf(buf, "%d %d", screen_w, screen_h);
     // let NWM resize the window and create the frame buffer
     write(fbctl, buf, len);
     while (1) {
@@ -45,17 +44,29 @@ void NDL_OpenCanvas(int *w, int *h) {
     close(fbctl);
   }
 }
-
+typedef struct {
+  uint32_t x;
+  uint32_t y;
+  uint32_t w;
+  uint32_t h;
+  uint32_t *pixel;
+} am_rect;
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
   int left_offset = (window_w - screen_w) / 2;
   int top_offset = (window_h - screen_h) / 2;
-  for (int row = 0; row < h; row++) {
-    fseek(fbdev,
-          ((top_offset + y + row) * window_w + x + left_offset) *
-              sizeof(uint32_t),
-          SEEK_SET);
-    fwrite(pixels + w * row, sizeof(uint32_t), w, fbdev);
-  }
+  am_rect rect = {.x = x + left_offset,
+                  .y = y + top_offset,
+                  .w = w,
+                  .h = h,
+                  .pixel = pixels};
+  fwrite(&rect, sizeof(am_rect), 1, fbdev);
+  //   for (int row = 0; row < h; row++) {
+  //     fseek(fbdev,
+  //           ((top_offset + y + row) * window_w + x + left_offset) *
+  //               sizeof(uint32_t),
+  //           SEEK_SET);
+  //     fwrite(pixels + w * row, sizeof(uint32_t), w, fbdev);
+  //   }
 }
 
 void NDL_OpenAudio(int freq, int channels, int samples) {}
