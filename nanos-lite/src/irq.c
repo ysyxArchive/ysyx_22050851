@@ -55,8 +55,8 @@ static Context *do_event(Event e, Context *c) {
       c->GPRx = fs_close(c->GPR2);
       break;
     case SYS_read:
-      Log("syscall SYS_read %s %x %x", get_file_name(c->GPR2), c->GPR3,
-          c->GPR4);
+      //   Log("syscall SYS_read %s %x %x", get_file_name(c->GPR2), c->GPR3,
+      //   c->GPR4);
       c->GPRx = fs_read(c->GPR2, (char *)c->GPR3, c->GPR4);
       break;
     case SYS_lseek:
@@ -78,7 +78,7 @@ static Context *do_event(Event e, Context *c) {
     default:
       Panic("Unhandled triggered ID = %d", c->GPR1);
     }
-    Log("Return %d", c->GPRx);
+    // Log("Return %d", c->GPRx);
     break;
 
   default:
