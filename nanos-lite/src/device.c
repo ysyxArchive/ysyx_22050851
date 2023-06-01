@@ -51,7 +51,7 @@ size_t fb_write(void *buf, size_t offset, size_t len) {
   fbdraw.w = buf32[3];
   fbdraw.pixels = (void *)((uint64_t)buf32[4] << 32 | buf32[5]);
   fbdraw.sync = true;
-  Log("%d %d %d %d", fbdraw.h, fbdraw.w, fbdraw.x, fbdraw.y);
+  Log("%d %d %d %d %x", fbdraw.h, fbdraw.w, fbdraw.x, fbdraw.y, fbdraw.pixels);
   ioe_write(AM_GPU_FBDRAW, &fbdraw);
   return len;
 }
