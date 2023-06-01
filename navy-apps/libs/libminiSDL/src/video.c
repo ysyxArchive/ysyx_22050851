@@ -23,7 +23,6 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   //   for (int i = 0; i < h; i++) {
   //     NDL_DrawRect(s->pixels + (i * s->w + x) * 4, x, y + i, w, 1);
 }
-}
 
 // APIs below are already implemented.
 
