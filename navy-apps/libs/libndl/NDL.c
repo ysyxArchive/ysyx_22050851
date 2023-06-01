@@ -17,7 +17,7 @@ uint32_t NDL_GetTicks() {
 }
 
 int NDL_PollEvent(char *buf, int len) {
-  int ret = fread(buf, 1, len, evtdev);
+  int ret = read(evtdev, buf, len);
   printf("%s %s",
          buf[0] == 'k' && (buf[1] == 'd' || buf[1] == 'u') && buf[2] == ' '
              ? "true"
@@ -122,7 +122,7 @@ int NDL_Init(uint32_t flags) {
   if (getenv("NWM_APP")) {
     evtdev = 3;
   }
-  evtdev = fopen("/dev/events", "r");
+  evtdev = open("/dev/events", "r");
   fbdev = fopen("/dev/fb", "w");
   // read display info
   int dispConfigFile = fopen("/dev/dispinfo", "r");
