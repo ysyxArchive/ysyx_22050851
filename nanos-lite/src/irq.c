@@ -28,7 +28,6 @@ static size_t sys_brk(void *addr) { return 0; }
 static Context *do_event(Event e, Context *c) {
   switch (e.event) {
   case EVENT_YIELD:
-    Log("Triggered, id = %d", c->GPR1);
     switch (c->GPR1) {
     case SYS_exit:
       Log("syscall SYS_exit");
