@@ -13,6 +13,8 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst,
                     .x = srcrect ? srcrect->x : 0,
                     .y = srcrect ? srcrect->y : 0};
 
+  printf("%d %d %d %d\n", srect.x, srect.y, srect.w, srect.h);
+  printf("%d %d %d %d\n", dstrect->x, dstrect->y, dst->w, dst->h);
   for (int i = 0; i < srect.h; i++) {
     for (int j = 0; j < srect.w; j++) {
       printf("%d %d\n", (dstrect->y + i) * dst->w + dstrect->x + j,
