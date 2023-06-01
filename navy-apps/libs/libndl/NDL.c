@@ -50,7 +50,10 @@ void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
   int left_offset = (window_w - screen_w) / 2;
   int top_offset = (window_h - screen_h) / 2;
   for (int row = 0; row < h; row++) {
-    fseek(fbdev, (top_offset + y + row) * window_w + x + left_offset, SEEK_SET);
+    fseek(fbdev,
+          ((top_offset + y + row) * window_w + x + left_offset) *
+              sizeof(uint32_t),
+          SEEK_SET);
     fwrite(pixels + w * row, sizeof(uint32_t), w, fbdev);
   }
 }
