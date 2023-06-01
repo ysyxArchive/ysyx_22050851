@@ -66,7 +66,7 @@ void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
                   .w = w,
                   .h = h,
                   .pixel = pixels};
-  printf("%d %d %d %d %d\n", rect.x, rect.y, rect.w, rect.h);
+  printf("%d %d %d %d\n", rect.x, rect.y, rect.w, rect.h);
   write(fbdev, &rect, sizeof(am_rect));
   fflush(fbdev);
   //   for (int row = 0; row < h; row++) {
