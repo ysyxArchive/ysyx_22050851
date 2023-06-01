@@ -22,12 +22,9 @@ void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
 }
 
 void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
-  putch(ctl->x);
-  putch(ctl->y);
-  putch(ctl->w);
-  putch(ctl->h);
   for (int j = 0; j < ctl->h; j++) {
     for (int i = 0; i < ctl->w; i++) {
+      putch('a');
       outl(FB_ADDR + (ctl->x + i + (ctl->y + j) * width) * 4,
            ((uint32_t *)ctl->pixels)[i + j * ctl->w]);
     }
