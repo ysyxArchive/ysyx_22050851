@@ -16,7 +16,6 @@ int SDL_WaitEvent(SDL_Event *event) {
   if (!ans) {
     return 0;
   }
-  printf("%s", buf);
   event->type = buf[1] == 'u' ? SDL_KEYUP : SDL_KEYDOWN;
   for (int end = 3; buf[end]; end++) {
     if (buf[end] == '\n') {
