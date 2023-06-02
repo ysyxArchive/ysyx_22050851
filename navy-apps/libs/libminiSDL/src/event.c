@@ -9,9 +9,7 @@ static char buf[20];
 
 int SDL_PushEvent(SDL_Event *ev) { return 0; }
 
-int SDL_PollEvent(SDL_Event *ev) { return 0; }
-
-int SDL_WaitEvent(SDL_Event *event) {
+int SDL_PollEvent(SDL_Event *event) {
   int ans = NDL_PollEvent(buf, 20);
   if (!ans) {
     return 0;
@@ -30,6 +28,13 @@ int SDL_WaitEvent(SDL_Event *event) {
     }
   }
   return 0;
+}
+
+int SDL_WaitEvent(SDL_Event *event) {
+  int ans = NDL_PollEvent(buf, 20);
+  while (!SDL_PollEvent(event))
+    ;
+  return 1;
 }
 
 int SDL_PeepEvents(SDL_Event *ev, int numevents, int action, uint32_t mask) {
