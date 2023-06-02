@@ -145,6 +145,7 @@ size_t fs_write(int fd, void *buf, size_t count) {
     Log("Warning file %d not opened", fd);
     return -1;
   }
+  assert(count >= 0);
   WriteFn fn = file_table[fd].write ? file_table[fd].write : ramdisk_write;
   return fn(buf, file_table[fd].disk_offset + offset, count);
 }
