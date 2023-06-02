@@ -22,14 +22,15 @@ enum {
   SYS_times,
   SYS_gettimeofday
 };
-
-
-
 static size_t sys_brk(void *addr) { return 0; }
 
-// void strace(...){
-
-// }
+#ifdef STRACE
+#define strace(...) Log(##__VA_ARGS__)
+#else
+#define strace(...)                                                            \
+  do {                                                                         \
+  } while (0)
+#endif
 
 static Context *do_event(Event e, Context *c) {
   switch (e.event) {
