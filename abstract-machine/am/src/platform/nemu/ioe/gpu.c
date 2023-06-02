@@ -22,6 +22,7 @@ void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
 }
 
 void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
+  putstr("start draw\n");
   for (int j = 0; j < ctl->h; j++) {
     for (int i = 0; i < ctl->w; i++) {
       outl(FB_ADDR + (ctl->x + i + (ctl->y + j) * width) * 4,
@@ -31,6 +32,7 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
   if (ctl->sync) {
     outl(SYNC_ADDR, 1);
   }
+  putstr("end draw\n");
 }
 
 void __am_gpu_status(AM_GPU_STATUS_T *status) { status->ready = true; }
