@@ -119,12 +119,15 @@ size_t fs_read(int fd, void *buf, size_t count) {
   }
   if (p) {
     offset = p->offset;
+    if (!file_table[fd].read && offset + count > file_table[fd].size) {
+      count = file_table[fd].size - offset;
+    }
     p->offset += count;
   } else {
     Log("Warning file %d not opened", fd);
     return -1;
   }
-
+  assert(count >= 0);
   ReadFn fn = file_table[fd].read ? file_table[fd].read : ramdisk_read;
   return fn(buf, file_table[fd].disk_offset + offset, count);
 }
@@ -137,7 +140,7 @@ size_t fs_write(int fd, void *buf, size_t count) {
   }
   if (p) {
     offset = p->offset;
-    if (offset + count > file_table[fd].size) {
+    if (!file_table[fd].write && offset + count > file_table[fd].size) {
       count = file_table[fd].size - offset;
     }
     p->offset += count;
