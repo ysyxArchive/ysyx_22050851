@@ -12,10 +12,12 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst,
                     .w = srcrect ? srcrect->w : src->w,
                     .x = srcrect ? srcrect->x : 0,
                     .y = srcrect ? srcrect->y : 0};
+  SDL_Rect drect = {.x = dstrect ? dstrect->x : 0,
+                    .y = dstrect ? dstrect->y : 0};
 
   for (int i = 0; i < srect.h; i++) {
     for (int j = 0; j < srect.w; j++) {
-      ((uint32_t *)dst->pixels)[(dstrect->y + i) * dst->w + dstrect->x + j] =
+      ((uint32_t *)dst->pixels)[(drect.y + i) * dst->w + drect.x + j] =
           ((uint32_t *)src->pixels)[(srect.y + i) * src->w + srect.x + j];
     }
   }
