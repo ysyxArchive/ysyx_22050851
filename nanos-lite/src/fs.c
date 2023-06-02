@@ -137,6 +137,9 @@ size_t fs_write(int fd, void *buf, size_t count) {
   }
   if (p) {
     offset = p->offset;
+    if (offset + count > file_table[fd].size) {
+      count = file_table[fd].size - offset;
+    }
     p->offset += count;
   } else {
     Log("Warning file %d not opened", fd);
