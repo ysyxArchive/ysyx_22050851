@@ -23,7 +23,13 @@ enum {
   SYS_gettimeofday
 };
 
+
+
 static size_t sys_brk(void *addr) { return 0; }
+
+// void strace(...){
+
+// }
 
 static Context *do_event(Event e, Context *c) {
   switch (e.event) {
