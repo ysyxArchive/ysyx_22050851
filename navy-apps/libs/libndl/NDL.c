@@ -57,6 +57,7 @@ typedef struct {
   uint32_t *pixel;
 } am_rect;
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
+  printf("123\n");
   int left_offset = (window_w - screen_w) / 2;
   int top_offset = (window_h - screen_h) / 2;
   am_rect rect = {.x = x + left_offset,
