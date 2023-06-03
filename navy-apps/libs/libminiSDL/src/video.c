@@ -86,6 +86,7 @@ SDL_Surface *SDL_CreateRGBSurface(uint32_t flags, int width, int height,
     s->format->palette = malloc(sizeof(SDL_Palette));
     assert(s->format->palette);
     printf("start\n");
+    printf("%x %d\n", s->format->palette->colors, sizeof(SDL_Color) * 256);
     s->format->palette->colors = malloc(sizeof(SDL_Color) * 256);
     printf("end\n");
     assert(s->format->palette->colors);
