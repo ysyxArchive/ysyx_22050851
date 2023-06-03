@@ -34,13 +34,23 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
     }
   }
 }
-
+uint8_t pixelBuffer[300 * 400 * 4];
+// FIXME: magic number
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   if (x == 0 && y == 0 && w == 0 && h == 0) {
     w = s->w;
     h = s->h;
   }
-  NDL_DrawRect(s->pixels, x, y, w, h);
+  if (s->format) {
+    for (int i = 0; i < s->w * s->h; i++) {
+      pixelBuffer[i << 2 + 0] = s->format->palette->colors[s->pixels[i]].a;
+      pixelBuffer[i << 2 + 1] = s->format->palette->colors[s->pixels[i]].r;
+      pixelBuffer[i << 2 + 2] = s->format->palette->colors[s->pixels[i]].g;
+      pixelBuffer[i << 2 + 3] = s->format->palette->colors[s->pixels[i]].b;
+    }
+  } else {
+    NDL_DrawRect(s->pixels, x, y, w, h);
+  }
 
   //   for (int i = 0; i < h; i++) {
   //     NDL_DrawRect(s->pixels + (i * s->w + x) * 4, x, y + i, w, 1);
