@@ -200,15 +200,15 @@ void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors,
   if (s->flags & SDL_HWSURFACE) {
     assert(ncolors == 256);
     for (int i = 0; i < ncolors; i++) {
-      printf("st3\n");
       uint8_t r = colors[i].r;
       uint8_t g = colors[i].g;
       uint8_t b = colors[i].b;
     }
-    printf("st4\n");
+    printf("st3\n");
     SDL_UpdateRect(s, 0, 0, 0, 0);
-    printf("st5\n");
+    printf("st4\n");
   }
+  printf("st5\n");
 }
 
 static void ConvertPixelsARGB_ABGR(void *dst, void *src, int len) {
