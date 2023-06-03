@@ -267,4 +267,9 @@ int SDL_LockSurface(SDL_Surface *s) {
   return 0;
 }
 
+/**
+ * @deprecated in SDL2
+ */
+void SDL_WM_SetCaption(const char *title, const char *icon) { return; }
+
 void SDL_UnlockSurface(SDL_Surface *s) { assert(0); }
