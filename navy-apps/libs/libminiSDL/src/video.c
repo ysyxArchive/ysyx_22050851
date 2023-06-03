@@ -48,6 +48,7 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
       pixelBuffer[i << 2 + 2] = s->format->palette->colors[s->pixels[i]].g;
       pixelBuffer[i << 2 + 3] = s->format->palette->colors[s->pixels[i]].b;
     }
+    NDL_DrawRect(pixelBuffer, x, y, w, h);
   } else {
     NDL_DrawRect(s->pixels, x, y, w, h);
   }
