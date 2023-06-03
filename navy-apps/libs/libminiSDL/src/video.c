@@ -261,6 +261,10 @@ uint32_t SDL_MapRGBA(SDL_PixelFormat *fmt, uint8_t r, uint8_t g, uint8_t b,
   return p;
 }
 
-int SDL_LockSurface(SDL_Surface *s) { return 0; }
+int SDL_LockSurface(SDL_Surface *s) {
+  assert(0);
+  ;
+  return 0;
+}
 
-void SDL_UnlockSurface(SDL_Surface *s) {}
+void SDL_UnlockSurface(SDL_Surface *s) { assert(0); }
