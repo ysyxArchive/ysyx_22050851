@@ -48,7 +48,6 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
       pixelBuffer[(i << 2) + 2] = s->format->palette->colors[s->pixels[i]].r;
       pixelBuffer[(i << 2) + 3] = s->format->palette->colors[s->pixels[i]].a;
     }
-    printf("done\n");
     NDL_DrawRect(pixelBuffer, x, y, w, h);
   } else {
     NDL_DrawRect(s->pixels, x, y, w, h);
@@ -191,11 +190,8 @@ void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors,
   assert(s->format);
   assert(s->format->palette);
   assert(firstcolor == 0);
-  printf("setPalette\n");
   s->format->palette->ncolors = ncolors;
-  printf("st1\n");
   memcpy(s->format->palette->colors, colors, sizeof(SDL_Color) * ncolors);
-  printf("st2\n");
 
   if (s->flags & SDL_HWSURFACE) {
     assert(ncolors == 256);
@@ -204,11 +200,8 @@ void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors,
       uint8_t g = colors[i].g;
       uint8_t b = colors[i].b;
     }
-    printf("st3\n");
     SDL_UpdateRect(s, 0, 0, 0, 0);
-    printf("st4\n");
   }
-  printf("st5\n");
 }
 
 static void ConvertPixelsARGB_ABGR(void *dst, void *src, int len) {
