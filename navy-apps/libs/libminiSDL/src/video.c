@@ -43,7 +43,6 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   }
   if (s->format->palette) {
     for (int i = 0; i < s->w * s->h; i++) {
-    //   printf("%d, %x\n", i, s->pixels[i]);
       pixelBuffer[(i << 2) + 0] = s->format->palette->colors[s->pixels[i]].b;
       pixelBuffer[(i << 2) + 1] = s->format->palette->colors[s->pixels[i]].g;
       pixelBuffer[(i << 2) + 2] = s->format->palette->colors[s->pixels[i]].r;
@@ -54,9 +53,6 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   } else {
     NDL_DrawRect(s->pixels, x, y, w, h);
   }
-
-  //   for (int i = 0; i < h; i++) {
-  //     NDL_DrawRect(s->pixels + (i * s->w + x) * 4, x, y + i, w, 1);
 }
 
 // APIs below are already implemented.
@@ -88,7 +84,9 @@ SDL_Surface *SDL_CreateRGBSurface(uint32_t flags, int width, int height,
   s->format = malloc(sizeof(SDL_PixelFormat));
   assert(s->format);
   if (depth == 8) {
+    printf("start\n");
     s->format->palette = malloc(sizeof(SDL_Palette));
+    printf("end\n");
     assert(s->format->palette);
     s->format->palette->colors = malloc(sizeof(SDL_Color) * 256);
     assert(s->format->palette->colors);
