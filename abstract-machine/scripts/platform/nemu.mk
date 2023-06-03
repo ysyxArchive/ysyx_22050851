@@ -14,7 +14,7 @@ LDFLAGS   += --gc-sections -e _start
 NEMUFLAGS += -l $(shell dirname $(IMAGE).elf)/nemu-log.txt
 IMAGES=1
 NEMUFLAGS += --elf=$(IMAGE).elf
-A = for i in $(IMAGES); do \
+NEMUFLAGS += = for i in $(IMAGES); do \
     NEMUFLAGS += --elf=$$i; \
 done
 
