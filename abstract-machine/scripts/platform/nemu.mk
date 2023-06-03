@@ -14,9 +14,7 @@ LDFLAGS   += --gc-sections -e _start
 NEMUFLAGS += -l $(shell dirname $(IMAGE).elf)/nemu-log.txt
 IMAGES=1
 NEMUFLAGS += --elf=$(IMAGE).elf
-NEMUFLAGS += for i in $(IMAGES); do \
-    NEMUFLAGS += --elf=$$i; \
-done
+NEMUFLAGS += $(addprefix --elf=,$(IMAGES))
 
 CFLAGS += -DMAINARGS=\"$(mainargs)\"
 CFLAGS += -I$(AM_HOME)/am/src/platform/nemu/include
