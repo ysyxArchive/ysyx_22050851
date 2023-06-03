@@ -34,7 +34,7 @@ void init_ftrace(char *elflocation[], const int elfCount) {
     Assert(fp && fp2, "Cannot open elf file at %s", elflocation[i]);
     Elf64_Ehdr elfHeader;
     ret = fread(&elfHeader, sizeof(elfHeader), 1, fp);
-    Assert(ret > 0, "error when reading");
+    Assert(ret > 0, "error when reading header of %s", elflocation[i]);
 
     fseek(fp, elfHeader.e_shoff, SEEK_SET);
     Elf64_Shdr section_header_buf;
