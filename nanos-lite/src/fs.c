@@ -56,7 +56,8 @@ int fs_open(const char *filename, int flags, int mode) {
     }
   }
   if (ret == -1) {
-    Panic("file %s not found", filename);
+    // Panic("file %s not found", filename);
+    return -1;
   }
   OpenedFileInfo *p = &ofi;
   while (p->fd != ret && p->next) {
