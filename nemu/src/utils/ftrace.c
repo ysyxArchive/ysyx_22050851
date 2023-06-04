@@ -145,7 +145,7 @@ void check_jump(Decode *s) {
     getout(s);
   }
 }
-char chars[] = {'|', '+', '$', '!', '/'};
+const char chars[] = {'|', '+', '$', '!', '/'};
 void show_position() {
   PositionNode *p = positionNode.next;
   int depth = 0;
