@@ -113,6 +113,7 @@ static void statistic() {
 
 void assert_fail_msg() {
   isa_reg_display();
+  print_ring_buf();
   show_position();
   statistic();
 }
