@@ -121,7 +121,7 @@ int NDL_Init(uint32_t flags) {
     evtdev = 3;
   }
   evtdev = open("/dev/events", "r");
-  fbdev = open("/dev/fb", "w");
+  fbdev = fopen("/dev/fb", "w");
   // read display info
   int dispConfigFile = fopen("/dev/dispinfo", "r");
   char buf[100];
@@ -136,5 +136,5 @@ int NDL_Init(uint32_t flags) {
 
 void NDL_Quit() {
   close(evtdev);
-  close(fbdev);
+  fclose(fbdev);
 }
