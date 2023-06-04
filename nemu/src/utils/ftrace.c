@@ -84,25 +84,18 @@ void init_ftrace(char *elflocation[], const int elfCount) {
 }
 
 void prune() {
-  int depth = 0;
-  int maxdepth = -1;
-  PositionNode *p_to_free = NULL;
   if (positionLength > FRACE_MAX_TRACE) {
     PositionNode *p = positionNode.next;
     while (p && p->next && p->next->next && p->next->next->next) {
-      if (!p->next->isret && p->next->next->isret && depth > maxdepth) {
-        p_to_free = p;
-        maxdepth = depth;
+      if (!p->next->isret && p->next->next->isret) {
+        PositionNode *q = p->next;
+        p->next = p->next->next->next;
+        free(q->next);
+        free(q);
+        positionLength -= 2;
+        break;
       }
-      depth += p->isret ? -1 : 1;
       p = p->next;
-    }
-    if (p_to_free) {
-      PositionNode *q = p_to_free->next;
-      p_to_free->next = p_to_free->next->next->next;
-      free(q->next);
-      free(q);
-      positionLength -= 2;
     }
   }
 }
