@@ -145,7 +145,7 @@ void check_jump(Decode *s) {
     getout(s);
   }
 }
-
+char chars[] = {'|', '+', '$', '!', '/'};
 void show_position() {
   PositionNode *p = positionNode.next;
   int depth = 0;
@@ -154,7 +154,7 @@ void show_position() {
       depth--;
     printf("0x%lx: ", p->position);
     for (int i = 0; i < depth - 1; i++) {
-      printf("| ");
+      printf("%c ", chars[i % (sizeof(chars) / sizeof(char))]);
     }
     printf("%s [%s@0x%lx]\n", p->isret ? "ret " : "call", p->funcName,
            p->nextPosition);
