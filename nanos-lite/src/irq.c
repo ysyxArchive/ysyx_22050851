@@ -81,7 +81,6 @@ static Context *do_event(Event e, Context *c) {
       ((uint64_t *)c->GPR2)[1] = ms % 1000000;
       c->GPRx = 0;
       break;
-
     case -1:
       strace("syscall -1, do nothing");
       break;
