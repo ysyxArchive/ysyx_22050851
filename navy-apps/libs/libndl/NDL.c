@@ -59,19 +59,19 @@ typedef struct {
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
   int left_offset = (window_w - screen_w) / 2;
   int top_offset = (window_h - screen_h) / 2;
-  // am_rect rect = {.x = x + left_offset,
-  //                 .y = y + top_offset,
-  //                 .w = w,
-  //                 .h = h,
-  //                 .pixel = pixels};
-  // write(fbdev, &rect, sizeof(am_rect));
-  for (int row = 0; row < h; row++) {
-    fseek(fbdev,
-          ((top_offset + y + row) * window_w + x + left_offset) *
-              sizeof(uint32_t),
-          SEEK_SET);
-    fwrite(pixels + w * row, sizeof(uint32_t), w, fbdev);
-  }
+  am_rect rect = {.x = x + left_offset,
+                  .y = y + top_offset,
+                  .w = w,
+                  .h = h,
+                  .pixel = pixels};
+  write(fbdev, &rect, sizeof(am_rect));
+  //   for (int row = 0; row < h; row++) {
+  //     fseek(fbdev,
+  //           ((top_offset + y + row) * window_w + x + left_offset) *
+  //               sizeof(uint32_t),
+  //           SEEK_SET);
+  //     fwrite(pixels + w * row, sizeof(uint32_t), w, fbdev);
+  // }
 }
 
 void NDL_OpenAudio(int freq, int channels, int samples) {}
@@ -121,7 +121,7 @@ int NDL_Init(uint32_t flags) {
     evtdev = 3;
   }
   evtdev = open("/dev/events", "r");
-  fbdev = fopen("/dev/fb", "w");
+  fbdev = open("/dev/fb", "w");
   // read display info
   int dispConfigFile = fopen("/dev/dispinfo", "r");
   char buf[100];
@@ -136,5 +136,5 @@ int NDL_Init(uint32_t flags) {
 
 void NDL_Quit() {
   close(evtdev);
-  fclose(fbdev);
+  close(fbdev);
 }
