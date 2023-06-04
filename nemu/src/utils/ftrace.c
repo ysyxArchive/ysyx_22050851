@@ -153,8 +153,11 @@ void show_position() {
     if (p->isret)
       depth--;
     printf("0x%lx: ", p->position);
-    for (int i = 0; i < depth; i++) {
+    for (int i = 0; i < depth - 1; i++) {
       printf("  ");
+    }
+    if(depth > 0){
+      printf("| ");
     }
     printf("%s [%s@0x%lx]\n", p->isret ? "ret " : "call", p->funcName,
            p->nextPosition);
