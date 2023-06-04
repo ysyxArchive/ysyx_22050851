@@ -33,7 +33,7 @@ int atoi(const char* nptr) {
 static uint64_t addr = 0;
 void* malloc(size_t size) {
   putstr("123123123\n");
-  // On native, malloc() will be called during initializaion of C runtime.
+  // On native, malloc() will be called during initializails on of C runtime.
   // Therefore do not call panic() here, else it will yield a dead recursion:
   //   panic() -> putchar() -> (glibc) -> malloc() -> panic()
 #if !(defined(__ISA_NATIVE__) && defined(__NATIVE_USE_KLIB__))
