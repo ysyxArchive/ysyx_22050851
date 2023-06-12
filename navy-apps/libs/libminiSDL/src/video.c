@@ -26,7 +26,6 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst,
 }
 
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
-  printf("calling sdl fil\n");
   SDL_Rect rect = {.h = dstrect ? dstrect->h : dst->h,
                    .w = dstrect ? dstrect->w : dst->w,
                    .x = dstrect ? dstrect->x : 0,
@@ -47,6 +46,7 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   }
   if (s->format->palette) {
     printf("%d\n", s->format->palette->ncolors);
+    printf("%d %d\n", s->w, s->h);
     for (int i = 0; i < s->w * s->h; i++) {
       pixelBuffer[(i << 2) + 0] = s->format->palette->colors[s->pixels[i]].b;
       pixelBuffer[(i << 2) + 1] = s->format->palette->colors[s->pixels[i]].g;
