@@ -104,7 +104,7 @@ void getin(Decode *s) {
   uint64_t dnpc = s->dnpc;
   FuncNode *node = headFuncNode.next;
   PositionNode *target = (PositionNode *)malloc(sizeof(PositionNode));
-  while (node && (node->start > dnpc || node->start + node->length <= dnpc)) {
+  while (node && node->start != dnpc) {
     node = node->next;
   }
   target->position = s->pc;
