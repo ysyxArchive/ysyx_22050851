@@ -8,6 +8,7 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst,
                      SDL_Rect *dstrect) {
   printf("calling sdl blit\n");
   printf("src size: %d %d\n", src->w, src->h);
+  printf("dst size: %d %d\n", dst->w, dst->h);
   printf("srcrect %d %d %d %d\n", srcrect->x, srcrect->y, srcrect->w, srcrect->h);
   assert(dst && src);
   assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
@@ -17,12 +18,11 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst,
                     .y = srcrect ? srcrect->y : 0};
   SDL_Rect drect = {.x = dstrect ? dstrect->x : 0,
                     .y = dstrect ? dstrect->y : 0};
+  int bytes = src->format->BytesPerPixel;
 
   for (int i = 0; i < srect.h; i++) {
-    for (int j = 0; j < srect.w; j++) {
-      ((uint32_t *)dst->pixels)[(drect.y + i) * dst->w + drect.x + j] =
-          ((uint32_t *)src->pixels)[(srect.y + i) * src->w + srect.x + j];
-    }
+    memcpy(dst->pixels + ((drect.y + i) * dst->w + drect.x) * bytes, 
+      src->pixels + ((srect.y + i) * src->w + srect.x) * bytes, srect.w * bytes);
   }
 }
 
