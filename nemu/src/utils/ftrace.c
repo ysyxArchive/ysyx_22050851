@@ -4,7 +4,7 @@
 #include <malloc.h>
 #include <stdio.h>
 #include <string.h>
-#define FRACE_MAX_TRACE 20
+#define FRACE_MAX_TRACE 50
 
 typedef struct FuncNode {
   uint64_t name_index;
