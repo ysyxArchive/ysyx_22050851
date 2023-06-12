@@ -37,6 +37,7 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
   }
 }
 uint32_t pixelBuffer[300 * 400];
+uint32_t pixelBuffer2[300 * 400];
 // FIXME: magic number
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   printf("calling sdl updaterect\n");
@@ -47,7 +48,7 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   if (s->format->palette) {
     printf("%d\n", s->format->palette->ncolors);
     printf("%d %d\n", s->w, s->h);
-    for (int i = 0; i < s->w * s->h; i++) {
+    for (int i = 0 ; i < w * h; i++) {
       pixelBuffer[i] = s->format->palette->colors[s->pixels[i]].val;
       // pixelBuffer[(i << 2) + 0] = s->format->palette->colors[s->pixels[i]].b;
       // pixelBuffer[(i << 2) + 1] = s->format->palette->colors[s->pixels[i]].g;
