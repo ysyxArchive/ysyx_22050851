@@ -38,7 +38,6 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
   }
 }
 uint32_t pixelBuffer[300 * 400];
-uint32_t pixelBuffer2[300 * 400];
 // FIXME: magic number
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   if (x == 0 && y == 0 && w == 0 && h == 0) {
@@ -53,8 +52,8 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
       // pixelBuffer[(i << 2) + 2] = s->format->palette->colors[s->pixels[i]].r;
       // pixelBuffer[(i << 2) + 3] = s->format->palette->colors[s->pixels[i]].a;
     }
-    ConvertPixelsARGB_ABGR(pixelBuffer2, pixelBuffer, w * h);
-    NDL_DrawRect(pixelBuffer2, x, y, w, h);
+    ConvertPixelsARGB_ABGR(pixelBuffer, pixelBuffer, w * h);
+    NDL_DrawRect(pixelBuffer, x, y, w, h);
   } else {
     NDL_DrawRect(s->pixels, x, y, w, h);
   }
