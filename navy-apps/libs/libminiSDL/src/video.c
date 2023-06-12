@@ -47,12 +47,15 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   if (s->format->palette) {
     for (int i = 0 ; i < w * h; i++) {
       pixelBuffer[i] = s->format->palette->colors[s->pixels[i]].val;
+      uint8_t* p = ((uint8_t*)(pixelBuffer + i));
+      uint8_t tmp = p[0];
+      p[0] = p[2];
+      p[2] = tmp;
       // pixelBuffer[(i << 2) + 0] = s->format->palette->colors[s->pixels[i]].b;
       // pixelBuffer[(i << 2) + 1] = s->format->palette->colors[s->pixels[i]].g;
       // pixelBuffer[(i << 2) + 2] = s->format->palette->colors[s->pixels[i]].r;
       // pixelBuffer[(i << 2) + 3] = s->format->palette->colors[s->pixels[i]].a;
     }
-    ConvertPixelsARGB_ABGR(pixelBuffer, pixelBuffer, w * h);
     NDL_DrawRect(pixelBuffer, x, y, w, h);
   } else {
     NDL_DrawRect(s->pixels, x, y, w, h);
