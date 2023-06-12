@@ -6,10 +6,10 @@
 
 void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst,
                      SDL_Rect *dstrect) {
-  printf("calling sdl blit\n");
-  printf("src size: %d %d\n", src->w, src->h);
-  printf("dst size: %d %d\n", dst->w, dst->h);
-  printf("srcrect %d %d %d %d\n", srcrect->x, srcrect->y, srcrect->w, srcrect->h);
+  // printf("calling sdl blit\n");
+  // printf("src size: %d %d\n", src->w, src->h);
+  // printf("dst size: %d %d\n", dst->w, dst->h);
+  // printf("srcrect %d %d %d %d\n", srcrect->x, srcrect->y, srcrect->w, srcrect->h);
   assert(dst && src);
   assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
   SDL_Rect srect = {.h = srcrect ? srcrect->h : src->h,
