@@ -48,6 +48,7 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
     printf("%d\n", s->format->palette->ncolors);
     printf("%d %d\n", s->w, s->h);
     for (int i = 0; i < s->w * s->h; i++) {
+      printf("%d\n", s->pixels[i]);
       pixelBuffer[(i << 2) + 0] = s->format->palette->colors[s->pixels[i]].b;
       pixelBuffer[(i << 2) + 1] = s->format->palette->colors[s->pixels[i]].g;
       pixelBuffer[(i << 2) + 2] = s->format->palette->colors[s->pixels[i]].r;
