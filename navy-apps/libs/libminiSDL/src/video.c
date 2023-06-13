@@ -48,13 +48,13 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   for(int i = 0; i < h; i++){
     for(int j = 0; j < w; j++){
       if (s->format->palette) {
-        pixelBuffer[i * w + j] = s->format->palette->colors[s->pixels[(i + y) * w + x + j]].val;
+        pixelBuffer[i * w + j] = s->format->palette->colors[s->pixels[(i + y) * s->w + x + j]].val;
         uint8_t* p = ((uint8_t*)(pixelBuffer + i * w + j));
         uint8_t tmp = p[0];
         p[0] = p[2];
         p[2] = tmp;
       } else {
-        pixelBuffer[i * w + j] = s->pixels[(i + y) * w + x + j];
+        pixelBuffer[i * w + j] = s->pixels[(i + y) * s->w + x + j];
       }
  
     }
