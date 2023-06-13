@@ -32,7 +32,7 @@ int SDL_PollEvent(SDL_Event *event) {
     }
   }
   if(valid){
-    printf("detect valid event %s %d\n", buf+3, event->key.keysym.sym);
+    printf("detect valid event at %s %d\n", buf, event->key.keysym.sym);
   }
   keyVals[event->key.keysym.sym] = event->type == SDL_KEYDOWN;
   return valid;
