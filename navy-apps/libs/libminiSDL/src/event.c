@@ -3,7 +3,7 @@
 #include <string.h>
 #define keyname(k) #k,
 static const char *keyname[] = {"NONE", _KEYS(keyname)};
-static uint8_t keyVals[sizeof(keyname) / sizeof(char *)];
+static uint8_t keyVals[sizeof(keyname) / sizeof(char *) + 1];
 static char buf[20];
 
 int SDL_PushEvent(SDL_Event *ev) {
@@ -53,6 +53,12 @@ int SDL_PeepEvents(SDL_Event *ev, int numevents, int action, uint32_t mask) {
 uint8_t *SDL_GetKeyState(int *numkeys) {
   if (numkeys) {
     *numkeys = sizeof(keyVals) / sizeof(uint8_t);
+  }
+  printf("nwo state:\n");
+  for(int i = 0; i < sizeof(keyname) / sizeof(char *) + 1;i++){
+    if(keyVals[i]){
+      printf("down: %s\n", keyname[i]);
+    }
   }
   return keyVals;
 }
