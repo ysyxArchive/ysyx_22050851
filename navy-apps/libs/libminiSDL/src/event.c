@@ -32,7 +32,6 @@ int SDL_PollEvent(SDL_Event *event) {
     }
   }
   if(valid){
-    printf("detect valid event at %s %d\n", buf, event->key.keysym.sym);
     keyVals[event->key.keysym.sym] = event->type == SDL_KEYDOWN;
   }
   return valid;
@@ -53,12 +52,6 @@ int SDL_PeepEvents(SDL_Event *ev, int numevents, int action, uint32_t mask) {
 uint8_t *SDL_GetKeyState(int *numkeys) {
   if (numkeys) {
     *numkeys = sizeof(keyVals) / sizeof(uint8_t);
-  }
-  printf("nwo state:\n");
-  for(int i = 0; i < sizeof(keyname) / sizeof(char *) + 1;i++){
-    if(keyVals[i]){
-      printf("down: %s\n", keyname[i]);
-    }
   }
   return keyVals;
 }
