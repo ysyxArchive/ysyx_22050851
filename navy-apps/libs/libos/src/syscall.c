@@ -42,7 +42,7 @@
 #error _syscall_ is not implemented
 #endif
 
-extern __uint8_t *end;
+extern char _end;
 
 intptr_t _syscall_(intptr_t type, intptr_t a0, intptr_t a1, intptr_t a2) {
   register intptr_t _gpr1 asm(GPR1) = type;
@@ -63,23 +63,19 @@ void _exit(int status) {
 }
 
 int _open(const char *path, int flags, mode_t mode) {
-  _exit(SYS_open);
-  return 0;
+  return _syscall_(SYS_open, path, flags, mode);
 }
 
 int _write(int fd, void *buf, size_t count) {
   return _syscall_(SYS_write, fd, buf, count);
 }
 
-__uint8_t *program_break = 0;
+intptr_t program_break = 0;
 void *_sbrk(intptr_t increment) {
   if (program_break == 0) {
-    program_break = end;
+    program_break = &_end;
   }
-  // int ret = _syscall_(SYS_brk, program_break + increment, NULL, NULL);
-  int ret = _syscall_(SYS_brk, increment, NULL, NULL);
-  ret = _syscall_(SYS_brk, end, NULL, NULL);
-  ret = _syscall_(SYS_brk, program_break, NULL, NULL);
+  int ret = _syscall_(SYS_brk, program_break + increment, NULL, NULL);
   if (ret == 0) {
     __uint8_t *old = program_break;
     program_break = program_break + increment;
@@ -88,24 +84,19 @@ void *_sbrk(intptr_t increment) {
     return -1;
   }
 }
+
 int _read(int fd, void *buf, size_t count) {
-  _exit(SYS_read);
-  return 0;
+  return _syscall_(SYS_read, fd, buf, count);
 }
 
-int _close(int fd) {
-  _exit(SYS_close);
-  return 0;
-}
+int _close(int fd) { return _syscall_(SYS_close, fd, NULL, NULL); }
 
 off_t _lseek(int fd, off_t offset, int whence) {
-  _exit(SYS_lseek);
-  return 0;
+  return _syscall_(SYS_lseek, fd, offset, whence);
 }
 
 int _gettimeofday(struct timeval *tv, struct timezone *tz) {
-  _exit(SYS_gettimeofday);
-  return 0;
+  return _syscall_(SYS_gettimeofday, tv, tz, NULL);
 }
 
 int _execve(const char *fname, char *const argv[], char *const envp[]) {

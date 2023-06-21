@@ -1,5 +1,5 @@
+#include "fs.h"
 #include <common.h>
-
 enum {
   SYS_exit,
   SYS_yield,
@@ -23,18 +23,6 @@ enum {
   SYS_gettimeofday
 };
 
-static size_t sys_write(int fd, char *buf, size_t count) {
-  bool isout = fd == 1 || fd == 2;
-  if (isout) {
-    for (size_t c = 0; c < count; c++) {
-      putch(buf[c]);
-    }
-  } else {
-    return -1;
-  }
-  return count;
-}
-
 static size_t sys_brk(void *addr) { return 0; }
 
 static Context *do_event(Event e, Context *c) {
@@ -51,13 +39,40 @@ static Context *do_event(Event e, Context *c) {
       yield();
       break;
     case SYS_write:
-      Log("syscall SYS_write %x %x %x", c->GPR2, c->GPR3, c->GPR4);
-      c->GPRx = sys_write(c->GPR2, (char *)c->GPR3, c->GPR4);
+      Log("syscall SYS_write %s %x %x", get_file_name(c->GPR2), c->GPR3,
+          c->GPR4);
+      c->GPRx = fs_write(c->GPR2, (char *)c->GPR3, c->GPR4);
       break;
     case SYS_brk:
       Log("syscall SYS_brk %x", c->GPR2);
       c->GPRx = sys_brk((void *)c->GPR2);
       break;
+    case SYS_open:
+      Log("syscall SYS_open %s %x %x", c->GPR2, c->GPR3, c->GPR4);
+      c->GPRx = fs_open((void *)c->GPR2, c->GPR3, c->GPR4);
+      break;
+    case SYS_close:
+      Log("syscall SYS_close %s", get_file_name(c->GPR2));
+      c->GPRx = fs_close(c->GPR2);
+      break;
+    case SYS_read:
+      Log("syscall SYS_read %s %x %x", get_file_name(c->GPR2), c->GPR3,
+          c->GPR4);
+      c->GPRx = fs_read(c->GPR2, (char *)c->GPR3, c->GPR4);
+      break;
+    case SYS_lseek:
+      Log("syscall SYS_seek %x %x %x", c->GPR2, c->GPR3, c->GPR4);
+      c->GPRx = fs_lseek(c->GPR2, c->GPR3, c->GPR4);
+      break;
+    case SYS_gettimeofday:
+      Log("syscall SYS_gettimeofday %x %x", c->GPR2, c->GPR3);
+      uint64_t ms;
+      ioe_read(AM_TIMER_UPTIME, &ms);
+      ((uint64_t *)c->GPR2)[0] = ms / 1000000;
+      ((uint64_t *)c->GPR2)[1] = ms % 1000000;
+      c->GPRx = 0;
+      break;
+
     case -1:
       Log("syscall -1, do nothing");
       break;
