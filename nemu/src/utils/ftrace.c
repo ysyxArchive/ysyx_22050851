@@ -4,7 +4,7 @@
 #include <malloc.h>
 #include <stdio.h>
 #include <string.h>
-#define FRACE_MAX_TRACE 20
+#define FRACE_MAX_TRACE 30
 
 typedef struct FuncNode {
   uint64_t name_index;
@@ -104,7 +104,7 @@ void getin(Decode *s) {
   uint64_t dnpc = s->dnpc;
   FuncNode *node = headFuncNode.next;
   PositionNode *target = (PositionNode *)malloc(sizeof(PositionNode));
-  while (node && (node->start > dnpc || node->start + node->length <= dnpc)) {
+  while (node && node->start != dnpc) {
     node = node->next;
   }
   target->position = s->pc;
