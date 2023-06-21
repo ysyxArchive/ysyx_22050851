@@ -25,9 +25,9 @@ enum {
 static size_t sys_brk(void *addr) { return 0; }
 #define STRACE
 #ifdef STRACE
-#define strace(format, ...)                                                            \
+#define strace(format, ...)                                                    \
   do {                                                                         \
-    Log(format, ##__VA_ARGS__);                                                         \
+    Log(format, ##__VA_ARGS__);                                                \
   } while (0)
 #else
 #define strace(...)                                                            \
@@ -81,14 +81,13 @@ static Context *do_event(Event e, Context *c) {
       ((uint64_t *)c->GPR2)[1] = ms % 1000000;
       c->GPRx = 0;
       break;
-
     case -1:
       strace("syscall -1, do nothing");
       break;
     default:
       Panic("Unhandled triggered ID = %d", c->GPR1);
     }
-    // strace("Return %d", c->GPRx);
+    strace("Return %d", c->GPRx);
     break;
 
   default:

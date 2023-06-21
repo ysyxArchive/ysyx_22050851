@@ -123,11 +123,11 @@ int NDL_Init(uint32_t flags) {
   evtdev = open("/dev/events", "r");
   fbdev = open("/dev/fb", "w");
   // read display info
-  int dispConfigFile = fopen("/dev/dispinfo", "r");
+  int dispConfigFile = open("/dev/dispinfo", "r");
   char buf[100];
   int info[2];
-  fread(buf, 1, 100, dispConfigFile);
-  fclose(dispConfigFile);
+  read(dispConfigFile, buf, 100);
+  close(dispConfigFile);
   assert(deal_with_key_value(buf, "WIDTH", &window_w));
   assert(deal_with_key_value(buf, "HEIGHT", &window_h));
 

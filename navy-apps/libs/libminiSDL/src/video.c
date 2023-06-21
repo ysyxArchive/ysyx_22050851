@@ -6,6 +6,8 @@
 
 void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst,
                      SDL_Rect *dstrect) {
+  printf("calling sdl blit\n");
+
   assert(dst && src);
   assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
   SDL_Rect srect = {.h = srcrect ? srcrect->h : src->h,
@@ -34,16 +36,29 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
     }
   }
 }
-
+uint32_t pixelBuffer[300 * 400];
+uint32_t pixelBuffer2[300 * 400];
+// FIXME: magic number
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
+  printf("calling sdl updaterect\n");
   if (x == 0 && y == 0 && w == 0 && h == 0) {
     w = s->w;
     h = s->h;
   }
-  NDL_DrawRect(s->pixels, x, y, w, h);
-
-  //   for (int i = 0; i < h; i++) {
-  //     NDL_DrawRect(s->pixels + (i * s->w + x) * 4, x, y + i, w, 1);
+  if (s->format->palette) {
+    printf("%d\n", s->format->palette->ncolors);
+    printf("%d %d\n", s->w, s->h);
+    for (int i = 0 ; i < w * h; i++) {
+      pixelBuffer[i] = s->format->palette->colors[s->pixels[i]].val;
+      // pixelBuffer[(i << 2) + 0] = s->format->palette->colors[s->pixels[i]].b;
+      // pixelBuffer[(i << 2) + 1] = s->format->palette->colors[s->pixels[i]].g;
+      // pixelBuffer[(i << 2) + 2] = s->format->palette->colors[s->pixels[i]].r;
+      // pixelBuffer[(i << 2) + 3] = s->format->palette->colors[s->pixels[i]].a;
+    }
+    NDL_DrawRect(pixelBuffer, x, y, w, h);
+  } else {
+    NDL_DrawRect(s->pixels, x, y, w, h);
+  }
 }
 
 // APIs below are already implemented.
@@ -69,16 +84,22 @@ SDL_Surface *SDL_CreateRGBSurface(uint32_t flags, int width, int height,
                                   int depth, uint32_t Rmask, uint32_t Gmask,
                                   uint32_t Bmask, uint32_t Amask) {
   assert(depth == 8 || depth == 32);
+  printf("%d\n", sizeof(SDL_Surface));
   SDL_Surface *s = malloc(sizeof(SDL_Surface));
   assert(s);
   s->flags = flags;
+  printf("%d\n", sizeof(SDL_PixelFormat));
   s->format = malloc(sizeof(SDL_PixelFormat));
   assert(s->format);
   if (depth == 8) {
+    printf("%d\n", sizeof(SDL_Palette));
     s->format->palette = malloc(sizeof(SDL_Palette));
     assert(s->format->palette);
+    printf("%d\n", sizeof(SDL_Color));
     s->format->palette->colors = malloc(sizeof(SDL_Color) * 256);
+    
     assert(s->format->palette->colors);
+    printf("%d\n", sizeof(SDL_Color));
     memset(s->format->palette->colors, 0, sizeof(SDL_Color) * 256);
     s->format->palette->ncolors = 256;
   } else {
@@ -150,6 +171,7 @@ SDL_Surface *SDL_SetVideoMode(int width, int height, int bpp, uint32_t flags) {
 void SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst,
                      SDL_Rect *dstrect) {
   assert(src && dst);
+  printf("%d %d\n", dst->format->BitsPerPixel , src->format->BitsPerPixel);
   assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
   assert(dst->format->BitsPerPixel == 8);
 
@@ -180,7 +202,6 @@ void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors,
   assert(s->format);
   assert(s->format->palette);
   assert(firstcolor == 0);
-
   s->format->palette->ncolors = ncolors;
   memcpy(s->format->palette->colors, colors, sizeof(SDL_Color) * ncolors);
 
@@ -266,5 +287,10 @@ int SDL_LockSurface(SDL_Surface *s) {
   ;
   return 0;
 }
+
+/**
+ * @deprecated in SDL2
+ */
+void SDL_WM_SetCaption(const char *title, const char *icon) { return; }
 
 void SDL_UnlockSurface(SDL_Surface *s) { assert(0); }
