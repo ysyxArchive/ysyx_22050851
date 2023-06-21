@@ -13,12 +13,15 @@ char *SDL_GetError() {
 }
 
 int SDL_SetError(const char* fmt, ...) {
+    exit(0);
   return -1;
 }
 
 int SDL_ShowCursor(int toggle) {
+    exit(0);
   return 0;
 }
 
-void SDL_WM_SetCaption(const char *title, const char *icon) {
+void SDL_WM_SeCaption(const char *title, const char *icon) {
+    exit(0);
 }

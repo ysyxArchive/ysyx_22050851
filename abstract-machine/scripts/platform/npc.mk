@@ -25,7 +25,6 @@ image: $(IMAGE).elf
 
 
 run: image
-	echo 123
 	$(MAKE) -C $(NPC_HOME) run ARGS="$(NEMUFLAGS)" IMG=$(IMAGE).bin
 
 batch: image

@@ -1,3 +1,4 @@
+#include "fs.h"
 #include <elf.h>
 #include <proc.h>
 #include <ramdisk.h>
@@ -11,22 +12,23 @@
 #endif
 #define ADDR_BEGIN 0x83000000
 static uintptr_t loader(PCB *pcb, const char *filename) {
+  int fd = fs_open(filename, 0, 0);
   Elf_Ehdr elfHeader;
-  ramdisk_read(&elfHeader, 0, sizeof(elfHeader));
+  fs_read(fd, &elfHeader, sizeof(elfHeader));
   Assert(elfHeader.e_ident[0] == ELFMAG0 && elfHeader.e_ident[1] == ELFMAG1 &&
              elfHeader.e_ident[2] == ELFMAG2 && elfHeader.e_ident[3] == ELFMAG3,
-         "error file not elf");
-  // Assert(elfHeader.e_machine == EM_RISCV, "exec not support riscv");
+         "error file %s not elf", filename);
+  Assert(elfHeader.e_machine == EM_RISCV, "exec not support riscv");
   Elf_Phdr prog_header_buf;
   for (int i = 0; i < elfHeader.e_phnum; i++) {
-    ramdisk_read(&prog_header_buf,
-                 elfHeader.e_phoff + sizeof(prog_header_buf) * i,
-                 sizeof(prog_header_buf));
+    fs_lseek(fd, elfHeader.e_phoff + sizeof(prog_header_buf) * i, SEEK_SET);
+    fs_read(fd, &prog_header_buf, sizeof(prog_header_buf));
     if (prog_header_buf.p_type != PT_LOAD) {
       continue;
     }
-    ramdisk_read((uint8_t *)pf + (prog_header_buf.p_vaddr - (uint64_t)pf),
-                 prog_header_buf.p_offset, prog_header_buf.p_filesz);
+    fs_lseek(fd, prog_header_buf.p_offset, SEEK_SET);
+    fs_read(fd, (uint8_t *)pf + (prog_header_buf.p_vaddr - (uint64_t)pf),
+            prog_header_buf.p_filesz);
 
     memset((uint8_t *)pf + (prog_header_buf.p_filesz + prog_header_buf.p_vaddr -
                             (uint64_t)pf),
