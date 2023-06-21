@@ -18,16 +18,14 @@ uint32_t NDL_GetTicks() {
 
 int NDL_PollEvent(char *buf, int len) {
   int ret = read(evtdev, buf, len);
-  printf("%s %s",
-         buf[0] == 'k' && (buf[1] == 'd' || buf[1] == 'u') && buf[2] == ' '
-             ? "true"
-             : "false",
-         buf);
-
   return buf[0] == 'k' && (buf[1] == 'd' || buf[1] == 'u') && buf[2] == ' ';
 }
 
 void NDL_OpenCanvas(int *w, int *h) {
+  if (*w == 0 && *h == 0) {
+    *w = window_w;
+    *h = window_h;
+  }
   screen_w = *w;
   screen_h = *h;
   if (getenv("NWM_APP")) {
@@ -66,9 +64,7 @@ void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
                   .w = w,
                   .h = h,
                   .pixel = pixels};
-  printf("%d %d %d %d %x\n", rect.x, rect.y, rect.w, rect.h, rect.pixel);
   write(fbdev, &rect, sizeof(am_rect));
-  fflush(fbdev);
   //   for (int row = 0; row < h; row++) {
   //     fseek(fbdev,
   //           ((top_offset + y + row) * window_w + x + left_offset) *

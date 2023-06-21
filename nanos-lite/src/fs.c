@@ -56,7 +56,8 @@ int fs_open(const char *filename, int flags, int mode) {
     }
   }
   if (ret == -1) {
-    Panic("file %s not found", filename);
+    // Panic("file %s not found", filename);
+    return -1;
   }
   OpenedFileInfo *p = &ofi;
   while (p->fd != ret && p->next) {
@@ -119,12 +120,15 @@ size_t fs_read(int fd, void *buf, size_t count) {
   }
   if (p) {
     offset = p->offset;
+    if (!file_table[fd].read && offset + count > file_table[fd].size) {
+      count = file_table[fd].size - offset;
+    }
     p->offset += count;
   } else {
     Log("Warning file %d not opened", fd);
     return -1;
   }
-
+  assert(count >= 0);
   ReadFn fn = file_table[fd].read ? file_table[fd].read : ramdisk_read;
   return fn(buf, file_table[fd].disk_offset + offset, count);
 }
@@ -137,11 +141,15 @@ size_t fs_write(int fd, void *buf, size_t count) {
   }
   if (p) {
     offset = p->offset;
+    if (!file_table[fd].write && offset + count > file_table[fd].size) {
+      count = file_table[fd].size - offset;
+    }
     p->offset += count;
   } else {
     Log("Warning file %d not opened", fd);
     return -1;
   }
+  assert(count >= 0);
   WriteFn fn = file_table[fd].write ? file_table[fd].write : ramdisk_write;
   return fn(buf, file_table[fd].disk_offset + offset, count);
 }

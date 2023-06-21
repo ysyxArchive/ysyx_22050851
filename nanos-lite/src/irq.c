@@ -22,49 +22,59 @@ enum {
   SYS_times,
   SYS_gettimeofday
 };
-
 static size_t sys_brk(void *addr) { return 0; }
+#define STRACE
+#ifdef STRACE
+#define strace(format, ...)                                                            \
+  do {                                                                         \
+    Log(format, ##__VA_ARGS__);                                                         \
+  } while (0)
+#else
+#define strace(...)                                                            \
+  do {                                                                         \
+  } while (0)
+#endif
 
 static Context *do_event(Event e, Context *c) {
   switch (e.event) {
   case EVENT_YIELD:
     switch (c->GPR1) {
     case SYS_exit:
-      Log("syscall SYS_exit");
+      strace("syscall SYS_exit");
       halt(0);
       break;
     case SYS_yield:
-      Log("syscall SYS_yield");
+      strace("syscall SYS_yield");
       yield();
       break;
     case SYS_write:
-      Log("syscall SYS_write %s %x %x", get_file_name(c->GPR2), c->GPR3,
-          c->GPR4);
+      strace("syscall SYS_write %s %x %x", get_file_name(c->GPR2), c->GPR3,
+             c->GPR4);
       c->GPRx = fs_write(c->GPR2, (char *)c->GPR3, c->GPR4);
       break;
     case SYS_brk:
-      Log("syscall SYS_brk %x", c->GPR2);
+      strace("syscall SYS_brk %x", c->GPR2);
       c->GPRx = sys_brk((void *)c->GPR2);
       break;
     case SYS_open:
-      Log("syscall SYS_open %s %x %x", c->GPR2, c->GPR3, c->GPR4);
+      strace("syscall SYS_open %s %x %x", c->GPR2, c->GPR3, c->GPR4);
       c->GPRx = fs_open((void *)c->GPR2, c->GPR3, c->GPR4);
       break;
     case SYS_close:
-      Log("syscall SYS_close %s", get_file_name(c->GPR2));
+      strace("syscall SYS_close %s", get_file_name(c->GPR2));
       c->GPRx = fs_close(c->GPR2);
       break;
     case SYS_read:
-      Log("syscall SYS_read %s %x %x", get_file_name(c->GPR2), c->GPR3,
-          c->GPR4);
+      strace("syscall SYS_read %s %x %x", get_file_name(c->GPR2), c->GPR3,
+             c->GPR4);
       c->GPRx = fs_read(c->GPR2, (char *)c->GPR3, c->GPR4);
       break;
     case SYS_lseek:
-      Log("syscall SYS_seek %x %x %x", c->GPR2, c->GPR3, c->GPR4);
+      strace("syscall SYS_seek %x %x %x", c->GPR2, c->GPR3, c->GPR4);
       c->GPRx = fs_lseek(c->GPR2, c->GPR3, c->GPR4);
       break;
     case SYS_gettimeofday:
-      Log("syscall SYS_gettimeofday %x %x", c->GPR2, c->GPR3);
+      strace("syscall SYS_gettimeofday %x %x", c->GPR2, c->GPR3);
       uint64_t ms;
       ioe_read(AM_TIMER_UPTIME, &ms);
       ((uint64_t *)c->GPR2)[0] = ms / 1000000;
@@ -73,12 +83,12 @@ static Context *do_event(Event e, Context *c) {
       break;
 
     case -1:
-      Log("syscall -1, do nothing");
+      strace("syscall -1, do nothing");
       break;
     default:
       Panic("Unhandled triggered ID = %d", c->GPR1);
     }
-    // Log("Return %d", c->GPRx);
+    // strace("Return %d", c->GPRx);
     break;
 
   default:
