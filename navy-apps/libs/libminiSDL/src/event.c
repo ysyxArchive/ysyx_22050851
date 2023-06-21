@@ -3,7 +3,7 @@
 #include <string.h>
 #define keyname(k) #k,
 static const char *keyname[] = {"NONE", _KEYS(keyname)};
-static uint8_t keyVals[sizeof(keyname) / sizeof(char *)];
+static uint8_t keyVals[sizeof(keyname) / sizeof(char *) + 1];
 static char buf[20];
 
 int SDL_PushEvent(SDL_Event *ev) {
@@ -31,7 +31,9 @@ int SDL_PollEvent(SDL_Event *event) {
       break;
     }
   }
-  keyVals[event->key.keysym.sym] = event->type == SDL_KEYDOWN;
+  if(valid){
+    keyVals[event->key.keysym.sym] = event->type == SDL_KEYDOWN;
+  }
   return valid;
 }
 

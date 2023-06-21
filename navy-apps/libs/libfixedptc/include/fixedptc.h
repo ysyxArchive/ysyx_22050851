@@ -134,23 +134,31 @@ static inline fixedpt fixedpt_divi(fixedpt A, int B) { return A / B; }
 
 /* Multiplies two fixedpt numbers, returns the result. */
 static inline fixedpt fixedpt_mul(fixedpt A, fixedpt B) {
-  return ((fixedptd)A * B) >> FIXEDPT_FBITS;
+  printf("mul of %x %x is %lx\n", A,B, (((fixedptd)A * B) >> FIXEDPT_FBITS));
+  return (((fixedptd)A * B) >> FIXEDPT_FBITS);
 }
 
 /* Divides two fixedpt numbers, returns the result. */
 static inline fixedpt fixedpt_div(fixedpt A, fixedpt B) {
-  return ((fixedptd)A << FIXEDPT_FBITS) / B;
+  printf("div of %x %x is %lx\n", A,B, (((fixedptd)A << FIXEDPT_FBITS) / B));
+  return (((fixedptd)A << FIXEDPT_FBITS) / B);
 }
 
-static inline fixedpt fixedpt_abs(fixedpt A) { return A >= 0 ? A : -A; }
+static inline fixedpt fixedpt_abs(fixedpt A) { 
+  printf("abs of %x is %x\n", A, A >= 0 ? A : -A);
+  return (A >= 0 ? A : -A); 
+}
 
 static inline fixedpt fixedpt_floor(fixedpt A) {
-  return A >> FIXEDPT_FBITS << FIXEDPT_FBITS;
+  printf("floor of %x is %x\n", A, (A >> FIXEDPT_FBITS) << FIXEDPT_FBITS);
+  return ((A >> FIXEDPT_FBITS) << FIXEDPT_FBITS);
 }
 
 static inline fixedpt fixedpt_ceil(fixedpt A) {
-  return (A >> FIXEDPT_BITS << FIXEDPT_BITS) +
-         ((A & FIXEDPT_FMASK) ? FIXEDPT_ONE : 0);
+  printf("ceil of %x is %x\n", A, ((A >> FIXEDPT_FBITS) << FIXEDPT_FBITS) +
+         ((A & FIXEDPT_FMASK) ? FIXEDPT_ONE : 0) );
+  return (((A >> FIXEDPT_FBITS) << FIXEDPT_FBITS) +
+         ((A & FIXEDPT_FMASK) ? FIXEDPT_ONE : 0));
 }
 
 /*
@@ -208,6 +216,7 @@ static inline fixedpt fixedpt_log(fixedpt x, fixedpt base) {
 
 /* Return the power value (n^exp) of the given fixedpt numbers */
 static inline fixedpt fixedpt_pow(fixedpt n, fixedpt exp) {
+  printf("n %x, ln %x, exp %x, mul %x, exp %x\n", n, fixedpt_ln(n), exp, fixedpt_mul(fixedpt_ln(n), exp), (fixedpt_exp(fixedpt_mul(fixedpt_ln(n), exp))));
   if (exp == 0)
     return (FIXEDPT_ONE);
   if (n < 0)

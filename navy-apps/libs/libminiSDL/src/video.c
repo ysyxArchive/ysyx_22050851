@@ -9,7 +9,8 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst,
   // printf("calling sdl blit\n");
   // printf("src size: %d %d\n", src->w, src->h);
   // printf("dst size: %d %d\n", dst->w, dst->h);
-  // printf("srcrect %d %d %d %d\n", srcrect->x, srcrect->y, srcrect->w, srcrect->h);
+  // printf("srcrect %d %d %d %d\n", srcrect->x, srcrect->y, srcrect->w,
+  // srcrect->h);
   assert(dst && src);
   assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
   SDL_Rect srect = {.h = srcrect ? srcrect->h : src->h,
@@ -21,8 +22,9 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst,
   int bytes = src->format->BytesPerPixel;
 
   for (int i = 0; i < srect.h; i++) {
-    memcpy(dst->pixels + ((drect.y + i) * dst->w + drect.x) * bytes, 
-      src->pixels + ((srect.y + i) * src->w + srect.x) * bytes, srect.w * bytes);
+    memcpy(dst->pixels + ((drect.y + i) * dst->w + drect.x) * bytes,
+           src->pixels + ((srect.y + i) * src->w + srect.x) * bytes,
+           srect.w * bytes);
   }
 }
 
@@ -40,22 +42,26 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
 uint32_t pixelBuffer[300 * 400];
 // FIXME: magic number
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
+  // printf("x %d y %d w %d h %d surface w %d h %d\n", x, y, w, h, s->w, s->h);
   if (x == 0 && y == 0 && w == 0 && h == 0) {
     w = s->w;
     h = s->h;
   }
-  if (s->format->palette) {
-    for (int i = 0 ; i < w * h; i++) {
-      pixelBuffer[i] = s->format->palette->colors[s->pixels[i]].val;
-      // pixelBuffer[(i << 2) + 0] = s->format->palette->colors[s->pixels[i]].b;
-      // pixelBuffer[(i << 2) + 1] = s->format->palette->colors[s->pixels[i]].g;
-      // pixelBuffer[(i << 2) + 2] = s->format->palette->colors[s->pixels[i]].r;
-      // pixelBuffer[(i << 2) + 3] = s->format->palette->colors[s->pixels[i]].a;
+  for (int i = 0; i < h; i++) {
+    for (int j = 0; j < w; j++) {
+      if (s->format->palette) {
+        pixelBuffer[i * w + j] =
+            s->format->palette->colors[s->pixels[(i + y) * s->w + x + j]].val;
+        uint8_t *p = ((uint8_t *)(pixelBuffer + i * w + j));
+        uint8_t tmp = p[0];
+        p[0] = p[2];
+        p[2] = tmp;
+      } else {
+        pixelBuffer[i * w + j] = s->pixels[(i + y) * s->w + x + j];
+      }
     }
-    NDL_DrawRect(pixelBuffer, x, y, w, h);
-  } else {
-    NDL_DrawRect(s->pixels, x, y, w, h);
   }
+  NDL_DrawRect(pixelBuffer, x, y, w, h);
 }
 
 // APIs below are already implemented.
@@ -90,7 +96,7 @@ SDL_Surface *SDL_CreateRGBSurface(uint32_t flags, int width, int height,
     s->format->palette = malloc(sizeof(SDL_Palette));
     assert(s->format->palette);
     s->format->palette->colors = malloc(sizeof(SDL_Color) * 256);
-    
+
     assert(s->format->palette->colors);
     memset(s->format->palette->colors, 0, sizeof(SDL_Color) * 256);
     s->format->palette->ncolors = 256;
