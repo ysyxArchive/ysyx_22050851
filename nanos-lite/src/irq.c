@@ -29,9 +29,13 @@ static size_t sys_write(int fd, char *buf, size_t count) {
     for (size_t c = 0; c < count; c++) {
       putch(buf[c]);
     }
+  } else {
+    return -1;
   }
   return count;
 }
+
+static size_t sys_brk(void *addr) { return 0; }
 
 static Context *do_event(Event e, Context *c) {
   switch (e.event) {
@@ -47,8 +51,12 @@ static Context *do_event(Event e, Context *c) {
       yield();
       break;
     case SYS_write:
-      Log("syscall SYS_write");
+      Log("syscall SYS_write %x %x %x", c->GPR2, c->GPR3, c->GPR4);
       c->GPRx = sys_write(c->GPR2, (char *)c->GPR3, c->GPR4);
+      break;
+    case SYS_brk:
+      Log("syscall SYS_brk %x", c->GPR2);
+      c->GPRx = sys_brk((void *)c->GPR2);
       break;
     case -1:
       Log("syscall -1, do nothing");
@@ -56,7 +64,9 @@ static Context *do_event(Event e, Context *c) {
     default:
       Panic("Unhandled triggered ID = %d", c->GPR1);
     }
+    Log("Return %d", c->GPRx);
     break;
+
   default:
     Panic("Unhandled event ID = %d", e.event);
   }
