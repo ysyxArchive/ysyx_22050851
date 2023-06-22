@@ -23,7 +23,7 @@ enum {
   SYS_gettimeofday
 };
 static size_t sys_brk(void *addr) { return 0; }
-// #define STRACE
+#define STRACE
 #ifdef STRACE
 #define strace(format, ...)                                                    \
   do {                                                                         \
