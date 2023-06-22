@@ -58,7 +58,7 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
         p[2] = tmp;
       } else {
         printf("x %d y %d w %d h %d surface w %d h %d\n", x, y, w, h, s->w, s->h);
-        pixelBuffer[i * w + j] = s->pixels[(i + y) * s->w + x + j];
+        pixelBuffer[i * w + j] = ((uint32_t*)s->pixels)[(i + y) * s->w + x + j];
       }
     }
   }
