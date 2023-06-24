@@ -13,6 +13,7 @@ void get_dispinfo(AM_GPU_CONFIG_T *configInfo) {
   close(disp);
   char *token = strtok(buffer, "\n");
   while (token != NULL) {
+    printf("%s\n", token);
     int i = 0;
     int keyend = 0;
     for (; token[i]; i++) {
