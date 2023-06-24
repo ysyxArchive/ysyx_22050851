@@ -34,15 +34,6 @@ size_t dispinfo_read(void *buf, size_t offset, size_t len) {
 }
 
 size_t fb_write(void *buf, size_t offset, size_t len) {
-  //   Log("%d %d", offset, len);
-  //   AM_GPU_FBDRAW_T fbdraw;
-  //   fbdraw.h = 1;
-  //   fbdraw.w = len / sizeof(uint32_t);
-  //   fbdraw.pixels = buf;
-//   fbdraw.sync = true;
-  //   fbdraw.x = offset / sizeof(uint32_t) % gpuConfig.width;
-  //   fbdraw.y = offset / sizeof(uint32_t) / gpuConfig.width;
-  //   Log("%d %d %d %d", fbdraw.h, fbdraw.w, fbdraw.x, fbdraw.y);
   uint32_t *buf32 = buf;
   AM_GPU_FBDRAW_T fbdraw;
   fbdraw.x = buf32[0];
@@ -51,6 +42,7 @@ size_t fb_write(void *buf, size_t offset, size_t len) {
   fbdraw.h = buf32[3];
   fbdraw.pixels = (void *)((uint64_t *)buf32)[2];
   fbdraw.sync = true;
+  // printf("dispwrite x %d y %d w %d h %d \n", fbdraw.x,  fbdraw.y,  fbdraw.w,  fbdraw.h);
   ioe_write(AM_GPU_FBDRAW, &fbdraw);
   return len;
 }
