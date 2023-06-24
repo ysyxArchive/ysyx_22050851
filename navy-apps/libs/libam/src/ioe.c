@@ -75,8 +75,6 @@ void get_input_keybrd(AM_INPUT_KEYBRD_T* kbd) {
     i++;
   }
   sscanf(buffer+i, "%d", &(kbd->keycode));
-  if(kbd->keycode)
-  printf("%d\n", kbd->keycode);
 }
 
 static void __am_timer_config(AM_TIMER_CONFIG_T *cfg) {
