@@ -64,7 +64,7 @@ void get_time(AM_TIMER_UPTIME_T *time) {
 
 void get_input_keybrd(AM_INPUT_KEYBRD_T* kbd) {
   if(fbkbd == -1){
-    fbkbd = open("/dev/events");
+    fbkbd = open("/dev/events", "r");
   }
   read(fbkbd, buffer, 100);
   // printf("%s", buffer);
