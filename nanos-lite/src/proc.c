@@ -24,7 +24,7 @@ void init_proc() {
   Log("Initializing processes...");
 
   // load program here
-  naive_uload(NULL, "/bin/pal");
+  naive_uload(NULL, "/bin/bird");
 }
 
 Context *schedule(Context *prev) { return NULL; }
