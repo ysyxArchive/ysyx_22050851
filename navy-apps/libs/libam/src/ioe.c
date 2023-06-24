@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <assert.h>
 char buffer[100];
 #define SAMESTR(s, consts) !strncmp(s, consts, strlen(consts))
 void get_dispinfo(AM_GPU_CONFIG_T *configInfo) {
