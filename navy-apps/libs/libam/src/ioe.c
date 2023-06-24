@@ -67,6 +67,7 @@ void get_input_keybrd(AM_INPUT_KEYBRD_T* kbd) {
     fbkbd = open("/dev/events");
   }
   read(fbkbd, buffer, 100);
+  printf("%s", buffer);
   kbd->keydown = buffer[1] == 'd';
   sscanf(buffer+3, "%d", &(kbd->keycode));
 }
