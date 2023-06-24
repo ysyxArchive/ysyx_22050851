@@ -51,7 +51,7 @@ void fbdraw(AM_GPU_FBDRAW_T *fbd) {
   if (fbdev == -1) {
     fbdev = open("/dev/fb", "w");
   }
-  printf("x %d y %d w %d h %d\n", fbd->x, fbd->y, fbd->w, fbd->h);
+  // printf("x %d y %d w %d h %d\n", fbd->x, fbd->y, fbd->w, fbd->h);
   write(fbdev, fbd, sizeof(fbd));
   return;
 }
