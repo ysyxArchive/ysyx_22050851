@@ -54,14 +54,20 @@ void fbdraw(AM_GPU_FBDRAW_T *fbd) {
   return;
 }
 
+static void __am_timer_config(AM_TIMER_CONFIG_T *cfg) {
+  cfg->present = true;
+  cfg->has_rtc = true;
+}
+
 bool ioe_init() { return true; }
 
 void ioe_read(int reg, void *buf) {
-  printf("trying to read %d\n", reg);
   switch (reg) {
   case AM_GPU_CONFIG:
     get_dispinfo(buf);
     break;
+  case AM_TIMER_CONFIG:
+    __am_timer_config(buf);
   default:
     printf("trying to read from %d but not recongized\n", reg);
     break;
