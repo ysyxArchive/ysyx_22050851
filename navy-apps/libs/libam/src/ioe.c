@@ -36,6 +36,7 @@ void get_dispinfo(AM_GPU_CONFIG_T *configInfo) {
         }
       }
     }
+    token = strtok(NULL, "\n");
   }
   return 0;
 }
