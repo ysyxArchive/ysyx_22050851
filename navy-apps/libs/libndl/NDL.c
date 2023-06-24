@@ -9,6 +9,7 @@ static int evtdev = -1;
 static int fbdev = -1;
 static int screen_w = 0, screen_h = 0;
 static int window_w = 0, window_h = 0;
+static char NDL_Inited = 0;
 // return ms
 uint32_t NDL_GetTicks() {
   struct timeval tv;
@@ -117,6 +118,10 @@ int deal_with_key_value(char *buf, char *key, int *value) {
 }
 
 int NDL_Init(uint32_t flags) {
+  if (NDL_Inited) {
+    return 0;
+  }
+  NDL_Inited = 1;
   if (getenv("NWM_APP")) {
     evtdev = 3;
   }

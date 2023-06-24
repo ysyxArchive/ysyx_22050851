@@ -45,6 +45,7 @@ void get_dispinfo(AM_GPU_CONFIG_T *configInfo) {
 }
 
 void fbdraw(AM_GPU_FBDRAW_T* fbd) {
+  NDL_Init(0);
   NDL_DrawRect(fbd->pixels, fbd->x, fbd->y, fbd->w, fbd->h);
   return;
 }
