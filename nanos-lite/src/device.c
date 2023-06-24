@@ -33,17 +33,8 @@ size_t dispinfo_read(void *buf, size_t offset, size_t len) {
                  gpuConfig.height);
 }
 
-size_t fb_write(void *buf, size_t offset, size_t len) {
-  uint32_t *buf32 = buf;
-  AM_GPU_FBDRAW_T fbdraw;
-  fbdraw.x = buf32[0];
-  fbdraw.y = buf32[1];
-  fbdraw.w = buf32[2];
-  fbdraw.h = buf32[3];
-  fbdraw.pixels = (void *)((uint64_t *)buf32)[2];
-  fbdraw.sync = true;
-  // printf("dispwrite x %d y %d w %d h %d \n", fbdraw.x,  fbdraw.y,  fbdraw.w,  fbdraw.h);
-  ioe_write(AM_GPU_FBDRAW, &fbdraw);
+size_t fb_write(AM_GPU_FBDRAW_T *buf, size_t offset, size_t len) {
+  ioe_write(AM_GPU_FBDRAW, buf);
   return len;
 }
 
