@@ -59,7 +59,7 @@ void fbdraw(AM_GPU_FBDRAW_T *fbd) {
 void get_time(AM_TIMER_UPTIME_T *time) {
   struct timeval tv;
   gettimeofday(&tv, NULL);
-  time->us = tv.tv_sec * 1e6 + tv.tv_usec;
+  time->us = tv.tv_sec * 100000 + tv.tv_usec;
 }
 
 void get_input_keybrd(AM_INPUT_KEYBRD_T* kbd) {
