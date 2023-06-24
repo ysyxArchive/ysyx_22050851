@@ -22,9 +22,6 @@ void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
 }
 
 void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
-  
-  // assert(ctl->x >= 0 && ctl->y >= 0);
-  // assert(ctl->x + ctl->w < width && ctl->y + ctl->h < height);
   for (int j = 0; j < ctl->h; j++) {
     for (int i = 0; i < ctl->w; i++) {
       outl(FB_ADDR + (ctl->x + i + (ctl->y + j) * width) * 4,
