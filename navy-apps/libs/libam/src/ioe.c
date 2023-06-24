@@ -1,10 +1,10 @@
+#include <NDL.h>
 #include <am.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <NDL.h>
 char buffer[100];
 #define SAMESTR(s, consts) !strncmp(s, consts, strlen(consts))
 void get_dispinfo(AM_GPU_CONFIG_T *configInfo) {
@@ -44,9 +44,10 @@ void get_dispinfo(AM_GPU_CONFIG_T *configInfo) {
   return;
 }
 
-void fbdraw(AM_GPU_FBDRAW_T* fbd) {
-  NDL_Init(0);
-  NDL_DrawRect(fbd->pixels, fbd->x, fbd->y, fbd->w, fbd->h);
+void fbdraw(AM_GPU_FBDRAW_T *fbd) {
+  int fbdev = open("/dev/fb", "w");
+  write(fbdev, fbd, sizeof(fbd));
+  close(fbdev);
   return;
 }
 
