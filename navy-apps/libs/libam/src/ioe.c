@@ -1,9 +1,10 @@
 #include <am.h>
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <assert.h>
+#include <NDL.h>
 char buffer[100];
 #define SAMESTR(s, consts) !strncmp(s, consts, strlen(consts))
 void get_dispinfo(AM_GPU_CONFIG_T *configInfo) {
@@ -43,10 +44,15 @@ void get_dispinfo(AM_GPU_CONFIG_T *configInfo) {
   return;
 }
 
+void fbdraw(AM_GPU_FBDRAW_T* fbd) {
+  NDL_DrawRect(fbd->pixels, fbd->x, fbd->y, fbd->w, fbd->h);
+  return;
+}
+
 bool ioe_init() { return true; }
 
 void ioe_read(int reg, void *buf) {
-    printf("trying to read %d\n", reg);
+  printf("trying to read %d\n", reg);
   switch (reg) {
   case AM_GPU_CONFIG:
     get_dispinfo(buf);
@@ -58,6 +64,9 @@ void ioe_read(int reg, void *buf) {
 }
 void ioe_write(int reg, void *buf) {
   switch (reg) {
+  case AM_GPU_FBDRAW:
+    fbdraw(buf);
+    break;
   default:
     printf("trying to write to %d but not recongized\n", reg);
     break;
