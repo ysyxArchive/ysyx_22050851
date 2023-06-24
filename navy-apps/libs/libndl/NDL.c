@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,26 +54,21 @@ void NDL_OpenCanvas(int *w, int *h) {
 typedef struct {
   uint32_t x;
   uint32_t y;
+  uint32_t *pixel;
   uint32_t w;
   uint32_t h;
-  uint32_t *pixel;
-} am_rect;
+  bool sync;
+} GPU_FBDRAW_T;
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
   int left_offset = (window_w - screen_w) / 2;
   int top_offset = (window_h - screen_h) / 2;
-  am_rect rect = {.x = x + left_offset,
-                  .y = y + top_offset,
-                  .w = w,
-                  .h = h,
-                  .pixel = pixels};
-  write(fbdev, &rect, sizeof(am_rect));
-  //   for (int row = 0; row < h; row++) {
-  //     fseek(fbdev,
-  //           ((top_offset + y + row) * window_w + x + left_offset) *
-  //               sizeof(uint32_t),
-  //           SEEK_SET);
-  //     fwrite(pixels + w * row, sizeof(uint32_t), w, fbdev);
-  // }
+  GPU_FBDRAW_T rect = {.x = x + left_offset,
+                       .y = y + top_offset,
+                       .w = w,
+                       .h = h,
+                       .pixel = pixels,
+                       .sync = true};
+  write(fbdev, &rect, sizeof(GPU_FBDRAW_T));
 }
 
 void NDL_OpenAudio(int freq, int channels, int samples) {}
