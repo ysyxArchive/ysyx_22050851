@@ -5,7 +5,7 @@
 #include <unistd.h>
 char buffer[100];
 #define SAMESTR(s, consts) !strncmp(s, consts, strlen(consts))
-void get_dispinfo(AM_GPU_CONFIG_T* configInfo) {
+void get_dispinfo(AM_GPU_CONFIG_T *configInfo) {
   int disp = open("/dev/dispinfo", "r");
   assert(disp);
   read(disp, buffer, 100);
@@ -26,11 +26,11 @@ void get_dispinfo(AM_GPU_CONFIG_T* configInfo) {
       }
       int val = 0;
       int ret = sscanf(token + i, "%d", &val);
-      if(ret == 1){
-        if(SAMESTR(token, "WIDTH")){
+      if (ret == 1) {
+        if (SAMESTR(token, "WIDTH")) {
           configInfo->width = val;
         }
-        if(SAMESTR(token, "HEIGHT")){
+        if (SAMESTR(token, "HEIGHT")) {
           configInfo->height = val;
         }
       }
@@ -43,9 +43,9 @@ bool ioe_init() { return true; }
 
 void ioe_read(int reg, void *buf) {
   switch (reg) {
-    case AM_GPU_CONFIG:
-      get_dispinfo(buf);
-      break;
+  case AM_GPU_CONFIG:
+    get_dispinfo(buf);
+    break;
   default:
     printf("tryint to read from %d but not recongized\n", reg);
     break;
