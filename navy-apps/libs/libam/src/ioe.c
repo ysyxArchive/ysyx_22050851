@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 char buffer[100];
+static int fbdev = -1;
 #define SAMESTR(s, consts) !strncmp(s, consts, strlen(consts))
 void get_dispinfo(AM_GPU_CONFIG_T *configInfo) {
   int disp = open("/dev/dispinfo", "r");
@@ -45,9 +46,10 @@ void get_dispinfo(AM_GPU_CONFIG_T *configInfo) {
 }
 
 void fbdraw(AM_GPU_FBDRAW_T *fbd) {
-  int fbdev = open("/dev/fb", "w");
+  if (fbdev == -1) {
+    fbdev = open("/dev/fb", "w");
+  }
   write(fbdev, fbd, sizeof(fbd));
-  close(fbdev);
   return;
 }
 
