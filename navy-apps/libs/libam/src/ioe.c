@@ -39,7 +39,8 @@ void get_dispinfo(AM_GPU_CONFIG_T *configInfo) {
     }
     token = strtok(NULL, "\n");
   }
-  return 0;
+  printf("width: %d, height: %d\n", configInfo->width, configInfo->height);
+  return;
 }
 
 bool ioe_init() { return true; }
