@@ -42,19 +42,20 @@ void get_dispinfo(AM_GPU_CONFIG_T *configInfo) {
 bool ioe_init() { return true; }
 
 void ioe_read(int reg, void *buf) {
+    printf("trying to read %d\n", reg);
   switch (reg) {
   case AM_GPU_CONFIG:
     get_dispinfo(buf);
     break;
   default:
-    printf("tryint to read from %d but not recongized\n", reg);
+    printf("trying to read from %d but not recongized\n", reg);
     break;
   }
 }
 void ioe_write(int reg, void *buf) {
   switch (reg) {
   default:
-    printf("tryint to write to %d but not recongized\n", reg);
+    printf("trying to write to %d but not recongized\n", reg);
     break;
   }
 }
