@@ -134,7 +134,7 @@ static inline fixedpt fixedpt_divi(fixedpt A, int B) { return A / B; }
 
 /* Multiplies two fixedpt numbers, returns the result. */
 static inline fixedpt fixedpt_mul(fixedpt A, fixedpt B) {
-  printf("mul of %x %x is %lx\n", A,B, (((fixedptd)A * B) >> FIXEDPT_FBITS));
+  // printf("mul of %x %x is %lx\n", A,B, (((fixedptd)A * B) >> FIXEDPT_FBITS));
   return (((fixedptd)A * B) >> FIXEDPT_FBITS);
 }
 
