@@ -41,8 +41,12 @@ static Context *do_event(Event e, Context *c) {
   case EVENT_YIELD:
     switch (c->GPR1) {
     case SYS_exit:
-      strace("syscall SYS_exit");
-      naive_uload(NULL, "/bin/menu");
+      strace("syscall SYS_exit %d", c->GPR2);
+      if(c->GPR2 == 0){
+        naive_uload(NULL, "/bin/menu");
+      } else { 
+        halt(c->GPR2);
+      }
       break;
     case SYS_yield:
       strace("syscall SYS_yield");
