@@ -71,8 +71,8 @@ int main(int argc, char *argv[], char *envp[]) {
   screen = SDL_SetVideoMode(0, 0, 32, SDL_HWSURFACE);
 
   font = new BDF_Font(font_fname);
-  logo_sf = SDL_LoadBMP("/share/pictures/projectn.bmp");
-  assert(logo_sf);
+  // logo_sf = SDL_LoadBMP("/share/pictures/projectn.bmp");
+  // assert(logo_sf);
   set_i_max();
 
   while (1) {
@@ -169,8 +169,8 @@ static void display_menu(int n) {
   printf("start clear\n");
   clear_display();
   printf("done clear\n");
-  SDL_Rect rect = {.x = screen->w - logo_sf->w, .y = 0};
-  SDL_BlitSurface(logo_sf, NULL, screen, &rect);
+  // SDL_Rect rect = {.x = screen->w - logo_sf->w, .y = 0};
+  // SDL_BlitSurface(logo_sf, NULL, screen, &rect);
   printf("blit done\n");
   printf("Available applications:\n");
   char buf[80];
