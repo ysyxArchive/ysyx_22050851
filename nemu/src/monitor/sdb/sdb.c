@@ -22,8 +22,6 @@
 #include "cpu/difftest.h"
 #include "difftest-def.h"
 
-#include <unistd.h>
-
 extern long img_size;
 void init_difftest(char *ref_so_file, long img_size, int port);
 
@@ -203,7 +201,6 @@ static int cmd_load_snapshot(char* args){
     printf("bad usage of load\n");
     return 0;
   }
-  printf("%d", access(args, F_OK));
   FILE* fp = fopen(args, "r");
   if(!fp){
    printf("cannot open file %s\n", args);
