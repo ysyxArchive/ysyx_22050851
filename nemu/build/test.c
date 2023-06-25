@@ -104,14 +104,6 @@ void init_difftest(char* ref_so_file, long img_size, int port) {
   ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
 }
 
-void difftest_attach(){
-  difftest_working = true;
-  ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
-}
-
-void difftest_detach(){
-  difftest_working = false;
-}
 
 
 static void checkregs(CPU_state* ref, vaddr_t pc) {
