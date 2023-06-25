@@ -5,6 +5,9 @@
 char buffer[50];
 char handle_key(SDL_Event *ev);
 
+static void init(){
+  setenv("PATH", "/bin/", 1);
+}
 static void sh_printf(const char *format, ...) {
   static char buf[256] = {};
   va_list ap;
@@ -27,10 +30,11 @@ static void sh_handle_cmd(const char *cmd) {
   assert(len < 50);
   strncpy(buffer, cmd, len - 1);
   printf("input %s\n", buffer);
-  execve(buffer, NULL, NULL);
+  execvp(buffer, NULL);
 }
 
 void builtin_sh_run() {
+  init();
   sh_banner();
   sh_prompt();
 
