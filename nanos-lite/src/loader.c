@@ -13,6 +13,7 @@
 #define ADDR_BEGIN 0x83000000
 static uintptr_t loader(PCB *pcb, const char *filename) {
   int fd = fs_open(filename, 0, 0);
+  fs_lseek(fd, 0, SEEK_SET);
   Elf_Ehdr elfHeader;
   fs_read(fd, &elfHeader, sizeof(elfHeader));
   Log("%x %x %x %x", elfHeader.e_ident[0], elfHeader.e_ident[1], elfHeader.e_ident[2], elfHeader.e_ident[3]);
