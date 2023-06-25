@@ -209,6 +209,7 @@ static int cmd_load_snapshot(char* args){
   char buf[5];
   int ret;
   ret = fread(buf, 4, 1, fp);
+  printf("%d\n", ret);
   assert(ret == 4);
   if(!strncmp(buf, "SNAP", 4)){
     printf("magic code error, not a snapshot\n");
