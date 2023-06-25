@@ -203,7 +203,8 @@ static int cmd_load_snapshot(char* args){
   }
   FILE* fp = fopen(args, "r");
   if(!fp){
-    perror("Error opening file");
+   printf("cannot open file %s\n", args);
+   perror("Error opening file");
     return 0;
   }
   char buf[5];
