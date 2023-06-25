@@ -2,9 +2,12 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <SDL.h>
-
+char buffer[50];
 char handle_key(SDL_Event *ev);
 
+static void sh_init(){
+  setenv("PATH", "/bin/", 1);
+}
 static void sh_printf(const char *format, ...) {
   static char buf[256] = {};
   va_list ap;
@@ -23,9 +26,15 @@ static void sh_prompt() {
 }
 
 static void sh_handle_cmd(const char *cmd) {
+  int len = strlen(cmd);
+  assert(len < 50);
+  strncpy(buffer, cmd, len - 1);
+  printf("input %s\n", buffer);
+  execvp(buffer, NULL);
 }
 
 void builtin_sh_run() {
+  sh_init();
   sh_banner();
   sh_prompt();
 

@@ -5,8 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/time.h>
 char buffer[100];
 static int fbdev = -1;
+static int fbkbd = -1;
 #define SAMESTR(s, consts) !strncmp(s, consts, strlen(consts))
 void get_dispinfo(AM_GPU_CONFIG_T *configInfo) {
   int disp = open("/dev/dispinfo", "r");
@@ -49,9 +51,29 @@ void fbdraw(AM_GPU_FBDRAW_T *fbd) {
   if (fbdev == -1) {
     fbdev = open("/dev/fb", "w");
   }
-  printf("x %d y %d w %d h %d\n", fbd->x, fbd->y, fbd->w, fbd->h);
   write(fbdev, fbd, sizeof(fbd));
   return;
+}
+
+void get_time(AM_TIMER_UPTIME_T *time) {
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  time->us = tv.tv_sec * 100000 + tv.tv_usec;
+}
+
+void get_input_keybrd(AM_INPUT_KEYBRD_T* kbd) {
+  if(fbkbd == -1){
+    fbkbd = open("/dev/events", "r");
+  }
+  read(fbkbd, buffer, 100);
+  // printf("%s", buffer);
+  
+  kbd->keydown = buffer[1] == 'd';
+  int i =3;
+  while(buffer[i] && buffer[i] != ' '){
+    i++;
+  }
+  sscanf(buffer+i, "%d", &(kbd->keycode));
 }
 
 static void __am_timer_config(AM_TIMER_CONFIG_T *cfg) {
@@ -68,6 +90,13 @@ void ioe_read(int reg, void *buf) {
     break;
   case AM_TIMER_CONFIG:
     __am_timer_config(buf);
+    break;
+  case AM_TIMER_UPTIME:
+    get_time(buf);
+    break;
+  case AM_INPUT_KEYBRD:
+    get_input_keybrd(buf);
+    break;
   default:
     printf("trying to read from %d but not recongized\n", reg);
     break;

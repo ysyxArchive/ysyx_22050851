@@ -13,6 +13,7 @@
 #define ADDR_BEGIN 0x83000000
 static uintptr_t loader(PCB *pcb, const char *filename) {
   int fd = fs_open(filename, 0, 0);
+  fs_lseek(fd, 0, SEEK_SET);
   Elf_Ehdr elfHeader;
   fs_read(fd, &elfHeader, sizeof(elfHeader));
   Assert(elfHeader.e_ident[0] == ELFMAG0 && elfHeader.e_ident[1] == ELFMAG1 &&
@@ -38,6 +39,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
 }
 
 void naive_uload(PCB *pcb, const char *filename) {
+  reset_fs();
   uintptr_t entry = loader(pcb, filename);
   Log("Jump to entry = %p", (void *)entry);
   ((void (*)())entry)();

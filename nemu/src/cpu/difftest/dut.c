@@ -28,13 +28,14 @@ void (*ref_difftest_exec)(uint64_t n) = NULL;
 void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
 
 #ifdef CONFIG_DIFFTEST
-
+static bool difftest_working = false;
 static bool is_skip_ref = false;
 static int skip_dut_nr_inst = 0;
 
 // this is used to let ref skip instructions which
 // can not produce consistent behavior with NEMU
 void difftest_skip_ref() {
+  if(!difftest_working) return;
   is_skip_ref = true;
   // If such an instruction is one of the instruction packing in QEMU
   // (see below), we end the process of catching up with QEMU's pc to
@@ -53,6 +54,7 @@ void difftest_skip_ref() {
 //   Let REF run `nr_ref` instructions first.
 //   We expect that DUT will catch up with REF within `nr_dut` instructions.
 void difftest_skip_dut(int nr_ref, int nr_dut) {
+  if(!difftest_working) return;
   skip_dut_nr_inst += nr_dut;
 
   while (nr_ref-- > 0) {
@@ -105,6 +107,7 @@ static void checkregs(CPU_state *ref, vaddr_t pc) {
 }
 
 void difftest_step(vaddr_t pc, vaddr_t npc) {
+  if(!difftest_working) return;
   CPU_state ref_r;
 
   if (skip_dut_nr_inst > 0) {
@@ -133,6 +136,16 @@ void difftest_step(vaddr_t pc, vaddr_t npc) {
   ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
 
   checkregs(&ref_r, npc);
+}
+
+
+void difftest_attach(){
+  difftest_working = true;
+  ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
+}
+
+void difftest_detach(){
+  difftest_working = false;
 }
 #else
 void init_difftest(char *ref_so_file, long img_size, int port) {}

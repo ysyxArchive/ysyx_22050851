@@ -165,3 +165,13 @@ void init_fs() {
 
   // initialize the size of /dev/fb
 }
+
+void reset_fs(){
+  OpenedFileInfo *p = ofi.next;
+  while(p){
+    OpenedFileInfo *next = p->next;
+    free(p);
+    p = next;
+  }
+  init_fs();
+}

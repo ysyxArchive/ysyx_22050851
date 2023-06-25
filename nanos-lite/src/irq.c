@@ -1,3 +1,4 @@
+#include <loader.h>
 #include "fs.h"
 #include <common.h>
 enum {
@@ -40,8 +41,12 @@ static Context *do_event(Event e, Context *c) {
   case EVENT_YIELD:
     switch (c->GPR1) {
     case SYS_exit:
-      strace("syscall SYS_exit");
-      halt(0);
+      strace("syscall SYS_exit %d", c->GPR2);
+      if(c->GPR2 == 0){
+        naive_uload(NULL, "/bin/menu");
+      } else { 
+        halt(c->GPR2);
+      }
       break;
     case SYS_yield:
       strace("syscall SYS_yield");
@@ -80,6 +85,10 @@ static Context *do_event(Event e, Context *c) {
       ((uint64_t *)c->GPR2)[0] = ms / 1000000;
       ((uint64_t *)c->GPR2)[1] = ms % 1000000;
       c->GPRx = 0;
+      break;
+    case SYS_execve:
+      strace("syscall SYS_execve %s %x %x", c->GPR2, c->GPR3, c->GPR4);
+      naive_uload(NULL, (char*)c->GPR2);
       break;
     case -1:
       strace("syscall -1, do nothing");

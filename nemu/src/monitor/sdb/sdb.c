@@ -162,6 +162,15 @@ static int cmd_w(char* args) {
   printf("watchpoint created: %d %s\n", id, exp);
   return 0;
 }
+static int cmd_attach(char* args) {
+    difftest_attach();
+    return 0;
+}
+
+static int cmd_detach(char* args) {
+    difftest_detach();
+    return 0;
+}
 
 static int cmd_help(char* args);
 
@@ -179,6 +188,8 @@ static struct {
     {"p", "print", cmd_p},
     {"w", "set watchpoint", cmd_w},
     {"d", "delete watchpoint", cmd_d},
+    {"attach", "attach difftest", cmd_attach},
+    {"detach", "detach difftest", cmd_detach},
 };
 
 #define NR_CMD ARRLEN(cmd_table)
