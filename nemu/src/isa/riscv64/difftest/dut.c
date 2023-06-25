@@ -31,4 +31,6 @@ bool isa_difftest_checkregs(CPU_state* ref_r, vaddr_t pc) {
   return ans;
 }
 
-void isa_difftest_attach() {}
+void difftest_attach();
+void difftest_detach();
+
