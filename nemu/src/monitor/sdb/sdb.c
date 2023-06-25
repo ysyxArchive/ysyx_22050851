@@ -198,7 +198,7 @@ static int cmd_save_snapshot(char* args){
 
 static int cmd_load_snapshot(char* args){
   if(!args){
-    printf("bad usage of save\n");
+    printf("bad usage of load\n");
     return 0;
   }
   FILE* fp = fopen(args, "r");
