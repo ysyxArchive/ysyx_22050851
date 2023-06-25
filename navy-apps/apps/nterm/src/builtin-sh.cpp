@@ -2,7 +2,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <SDL.h>
-
+char buffer[50];
 char handle_key(SDL_Event *ev);
 
 static void sh_printf(const char *format, ...) {
@@ -23,7 +23,11 @@ static void sh_prompt() {
 }
 
 static void sh_handle_cmd(const char *cmd) {
-  printf("input %s\n", cmd);
+  int len = strlen(cmd);
+  assert(len < 50);
+  strncpy(buffer, cmd, len - 1);
+  printf("input %s\n", buffer);
+  execve(buffer, NULL, NULL);
 }
 
 void builtin_sh_run() {
