@@ -16,7 +16,6 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   fs_lseek(fd, 0, SEEK_SET);
   Elf_Ehdr elfHeader;
   fs_read(fd, &elfHeader, sizeof(elfHeader));
-  Log("%x %x %x %x", elfHeader.e_ident[0], elfHeader.e_ident[1], elfHeader.e_ident[2], elfHeader.e_ident[3]);
   Assert(elfHeader.e_ident[0] == ELFMAG0 && elfHeader.e_ident[1] == ELFMAG1 &&
              elfHeader.e_ident[2] == ELFMAG2 && elfHeader.e_ident[3] == ELFMAG3,
          "error file %s not elf", filename);

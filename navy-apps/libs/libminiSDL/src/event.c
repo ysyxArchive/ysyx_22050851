@@ -19,7 +19,7 @@ int SDL_PollEvent(SDL_Event *event) {
   }
   event->type = buf[1] == 'u' ? SDL_KEYUP : SDL_KEYDOWN;
   for (int end = 3; buf[end]; end++) {
-    if (buf[end] == ' ') {
+    if (buf[end] == ' ' || buf[end] == '\n') {
       buf[end] = 0;
       break;
     }

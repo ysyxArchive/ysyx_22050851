@@ -5,7 +5,7 @@
 char buffer[50];
 char handle_key(SDL_Event *ev);
 
-static void init(){
+static void sh_init(){
   setenv("PATH", "/bin/", 1);
 }
 static void sh_printf(const char *format, ...) {
@@ -34,7 +34,7 @@ static void sh_handle_cmd(const char *cmd) {
 }
 
 void builtin_sh_run() {
-  init();
+  sh_init();
   sh_banner();
   sh_prompt();
 

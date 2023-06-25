@@ -19,8 +19,13 @@
 #include <readline/history.h>
 #include <readline/readline.h>
 #include "memory/paddr.h"
-static bool is_batch_mode = false;
+#include "cpu/difftest.h"
+#include "difftest-def.h"
 
+extern long img_size;
+void init_difftest(char *ref_so_file, long img_size, int port);
+
+static bool is_batch_mode = false;
 void init_regex();
 void init_wp_pool();
 
@@ -172,6 +177,55 @@ static int cmd_detach(char* args) {
     return 0;
 }
 
+static int cmd_save_snapshot(char* args){
+  if(!args){
+    printf("bad usage of save\n");
+    return 0;
+  }
+  FILE* fp = fopen(args, "w");
+  if(!fp){
+    printf("cannot create or write file %s\n", args);
+    return 0;
+  }
+  fwrite("SNAP", 4, 1, fp);
+  fwrite(&cpu, sizeof(CPU_state), 1, fp);
+  fwrite(&img_size, sizeof(img_size), 1, fp);
+  fwrite(guest_to_host(RESET_VECTOR), img_size, 1, fp);
+  printf("snapshot saved at %s\n", args);
+  fclose(fp);
+  return 0;
+}
+
+static int cmd_load_snapshot(char* args){
+  if(!args){
+    printf("bad usage of save\n");
+    return 0;
+  }
+  FILE* fp = fopen(args, "r");
+  if(!fp){
+    printf("cannot open file %s\n", args);
+    return 0;
+  }
+  char buf[5];
+  int ret;
+  ret = fread(buf, 4, 1, fp);
+  assert(ret == 4);
+  if(!strncmp(buf, "SNAP", 4)){
+    printf("magic code error, not a snapshot\n");
+    fclose(fp);
+    return 0;
+  }
+  ret = fread(&cpu, sizeof(CPU_state), 1, fp);
+  ret = fread(&img_size, sizeof(img_size), 1, fp);
+  ret = fread(guest_to_host(RESET_VECTOR), img_size, 1, fp);
+  ref_difftest_memcpy(RESET_VECTOR, guest_to_host(RESET_VECTOR), img_size,
+                      DIFFTEST_TO_REF);
+  ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
+  printf("loaded snap shot at %s\n", args);
+  fclose(fp);
+  return 0;
+}
+
 static int cmd_help(char* args);
 
 static struct {
@@ -184,6 +238,9 @@ static struct {
     {"q", "Exit NEMU", cmd_q},
     {"si", "step N lines, default is 1", cmd_si},
     {"info", "print register status or watchpoints", cmd_info},
+    {"x", "scan N*4 Bytes starts from EXPR ", cmd_x},
+    {"save", "save snapshot", cmd_save_snapshot},
+    {"load", "load snapshot", cmd_load_snapshot},
     {"x", "scan N*4 Bytes starts from EXPR ", cmd_x},
     {"p", "print", cmd_p},
     {"w", "set watchpoint", cmd_w},
