@@ -7,9 +7,9 @@ static PCB pcb_boot = {};
 PCB *current = NULL;
 
 void switch_boot_pcb() { current = &pcb_boot; }
+int j = 1;
 
 void hello_fun(void *arg) {
-  int j = 1;
   while (1) {
     Log("Hello World from Nanos-lite with arg '%p' for the %dth time!",
         (uintptr_t)arg, j);
