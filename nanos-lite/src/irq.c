@@ -38,6 +38,7 @@ static size_t sys_brk(void *addr) { return 0; }
 #endif
 
 static Context *do_event(Event e, Context *c) {
+  printf("hi, event is %d\n", c->GPR1);
   switch (e.event) {
   case EVENT_YIELD:
     switch (c->GPR1) {
