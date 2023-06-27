@@ -52,8 +52,8 @@ static Context *do_event(Event e, Context *c) {
       break;
     case SYS_yield:
       strace("syscall SYS_yield");
-      yield();
-      // return schedule(c);
+      // yield();
+      return schedule(c);
       break;
     case SYS_write:
       strace("syscall SYS_write %s %x %x", get_file_name(c->GPR2), c->GPR3,
