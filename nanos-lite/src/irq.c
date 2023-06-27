@@ -52,7 +52,6 @@ static Context *do_event(Event e, Context *c) {
       break;
     case SYS_yield:
       strace("syscall SYS_yield");
-      yield();
       return schedule(c);
       break;
     case SYS_write:
