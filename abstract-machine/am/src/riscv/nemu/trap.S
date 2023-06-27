@@ -50,8 +50,8 @@ __am_asm_trap:
   mv a0, sp
   jal __am_irq_handle
 
-  LOAD t1, OFFSET_STATUS(sp)
-  LOAD t2, OFFSET_EPC(sp)
+  LOAD t1, OFFSET_STATUS(a0)
+  LOAD t2, OFFSET_EPC(a0)
   csrw mstatus, t1
   csrw mepc, t2
 

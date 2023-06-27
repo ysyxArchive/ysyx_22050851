@@ -16,8 +16,8 @@ Context *__am_irq_handle(Context *c) {
       ev.event = EVENT_ERROR;
       break;
     }
-
     c = user_handler(ev, c);
+
     assert(c != NULL);
   }
 
@@ -37,7 +37,9 @@ bool cte_init(Context *(*handler)(Event, Context *)) {
 }
 
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
-  return NULL;
+  Context c = {.mepc=(uint64_t)entry};
+  memcpy(kstack.start, &c, sizeof(c));
+  return kstack.start;
 }
 
 void yield() { asm volatile("li a7, -1; ecall"); }

@@ -18,13 +18,23 @@ void hello_fun(void *arg) {
   }
 }
 
-void init_proc() {
-  switch_boot_pcb();
-
-  Log("Initializing processes...");
-
-  // load program here
-  naive_uload(NULL, "/bin/menu");
+void context_kload(void *entry, void *arg)
+{
+  Area area = {.start=&pcb[0], .end=&pcb[1]};
+  pcb->cp = kcontext(area, entry, arg);
 }
 
-Context *schedule(Context *prev) { return NULL; }
+
+void init_proc() {
+  // switch_boot_pcb();
+
+  Log("Initializing processes...");
+  context_kload(hello_fun, NULL);
+  switch_boot_pcb();
+  // // load program here
+  // naive_uload(NULL, "/bin/menu");
+}
+
+Context *schedule(Context *prev) { 
+  return pcb[0].cp;
+}

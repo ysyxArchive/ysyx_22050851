@@ -244,7 +244,6 @@ static struct {
     {"x", "scan N*4 Bytes starts from EXPR ", cmd_x},
     {"save", "save snapshot", cmd_save_snapshot},
     {"load", "load snapshot", cmd_load_snapshot},
-    {"x", "scan N*4 Bytes starts from EXPR ", cmd_x},
     {"p", "print", cmd_p},
     {"w", "set watchpoint", cmd_w},
     {"d", "delete watchpoint", cmd_d},
