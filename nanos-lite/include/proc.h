@@ -6,7 +6,7 @@
 #include "am.h"
 #define STACK_SIZE (8 * PGSIZE)
 
-typedef union
+typedef struct 
 {
   uint8_t stack[STACK_SIZE] PG_ALIGN;
   struct
