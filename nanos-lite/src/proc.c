@@ -36,6 +36,8 @@ void init_proc() {
 }
 
 Context *schedule(Context *prev) { 
+
+  printf("%x %x\n", &(pcb[0].cp),&(pcb[0].as));
   printf("%x\n", pcb[0].cp);
   return pcb[0].cp;
 }
