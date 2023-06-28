@@ -21,9 +21,10 @@ void hello_fun(void *arg) {
 
 void context_uload(PCB *pcb, const char *filename) {
   Area area = {.start=&pcb[pcbcount], .end=&pcb[pcbcount + 1]};
-  Log("donw1");
   uintptr_t entry = loader(pcb, filename);
+  Log("donw1");
   pcb[pcbcount].cp = ucontext(NULL, area, (void *)entry);
+  Log("donw1");
   pcb[pcbcount].cp->GPRx = (uint64_t)heap.end;
 }
 
