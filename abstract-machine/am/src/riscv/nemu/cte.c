@@ -1,11 +1,9 @@
 #include <am.h>
 #include <klib.h>
 #include <riscv/riscv.h>
-#include <stdio.h>
 static Context *(*user_handler)(Event, Context *) = NULL;
 
 Context *__am_irq_handle(Context *c) {
-  printf("in %x\n", c);
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
@@ -19,7 +17,6 @@ Context *__am_irq_handle(Context *c) {
       break;
     }
   }
-  printf("ret %x\n", c);
   return c;
 }
 
@@ -36,7 +33,7 @@ bool cte_init(Context *(*handler)(Event, Context *)) {
 }
 
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
-  Context c = {.mepc=(uint64_t)entry, .mstatus=0xa00001800};
+  Context c = {.mepc=(uint64_t)entry, .mstatus=0xa00001800, .GPR2=(uint64_t)arg};
   memcpy(kstack.start, &c, sizeof(c));
   return kstack.start;
 }
