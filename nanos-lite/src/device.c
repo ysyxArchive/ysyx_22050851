@@ -13,6 +13,7 @@ static const char *keyname[256]
     __attribute__((used)) = {[AM_KEY_NONE] = "NONE", AM_KEYS(NAME)};
 
 size_t serial_write(const void *buf, size_t offset, size_t len) {
+  yield();
   ((char *)buf)[len] = 0;
   for (int i = 0; i < len; i++) {
     putch(((char *)buf)[i]);
@@ -21,6 +22,7 @@ size_t serial_write(const void *buf, size_t offset, size_t len) {
 }
 
 size_t events_read(void *buf, size_t offset, size_t len) {
+  yield();
   AM_INPUT_KEYBRD_T keyboardEvent;
   ioe_read(AM_INPUT_KEYBRD, &keyboardEvent);
   return sprintf(buf, "%s %s %d\n", keyboardEvent.keydown ? "kd" : "ku",
@@ -34,6 +36,7 @@ size_t dispinfo_read(void *buf, size_t offset, size_t len) {
 }
 
 size_t fb_write(AM_GPU_FBDRAW_T *buf, size_t offset, size_t len) {
+  yield();
   ioe_write(AM_GPU_FBDRAW, buf);
   return len;
 }
