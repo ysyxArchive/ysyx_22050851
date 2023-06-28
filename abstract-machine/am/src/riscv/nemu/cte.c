@@ -5,7 +5,7 @@
 static Context *(*user_handler)(Event, Context *) = NULL;
 
 Context *__am_irq_handle(Context *c) {
-  printf("in %x", c);
+  printf("in %x\n", c);
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
@@ -19,7 +19,7 @@ Context *__am_irq_handle(Context *c) {
       break;
     }
   }
-  printf("ret %x", c);
+  printf("ret %x\n", c);
   return c;
 }
 
