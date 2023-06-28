@@ -36,7 +36,7 @@ void init_proc() {
 }
 
 Context *schedule(Context *prev) { 
-  pcb[0].cp = prev;
+  current->cp  = prev;
   printf("%x %x\n", &(pcb[0].cp),&(pcb[0].stack));
   printf("%x\n", pcb[0].cp);
   return pcb[0].cp;
