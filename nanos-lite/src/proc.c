@@ -7,9 +7,9 @@ static PCB pcb_boot = {};
 PCB *current = NULL;
 
 void switch_boot_pcb() { current = &pcb_boot; }
+int j = 1;
 
 void hello_fun(void *arg) {
-  int j = 1;
   while (1) {
     Log("Hello World from Nanos-lite with arg '%p' for the %dth time!",
         (uintptr_t)arg, j);
@@ -18,13 +18,25 @@ void hello_fun(void *arg) {
   }
 }
 
-void init_proc() {
-  switch_boot_pcb();
-
-  Log("Initializing processes...");
-
-  // load program here
-  naive_uload(NULL, "/bin/menu");
+void context_kload(void *entry, void *arg)
+{
+  Area area = {.start=&pcb[0], .end=&pcb[1]};
+  pcb->cp = kcontext(area, entry, arg);
 }
 
-Context *schedule(Context *prev) { return NULL; }
+
+void init_proc() {
+  // switch_boot_pcb();
+
+  Log("Initializing processes...");
+  context_kload(hello_fun, NULL);
+  switch_boot_pcb();
+  // // load program here
+  // naive_uload(NULL, "/bin/menu");
+}
+
+Context *schedule(Context *prev) { 
+  current->cp  = prev;
+  current = &(pcb[0]);
+  return current->cp;
+}
