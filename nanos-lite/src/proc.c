@@ -41,6 +41,7 @@ void init_proc() {
   
   // context_kload(&(pcb[pcbcount++]), hello_fun, "p1");
   context_uload(&(pcb[pcbcount++]), "/bin/pal");
+  Log("donw1");
   context_kload(&(pcb[pcbcount++]), hello_fun, "p2");
   switch_boot_pcb();
   // // load program here
