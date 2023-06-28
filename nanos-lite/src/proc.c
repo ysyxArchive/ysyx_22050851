@@ -20,18 +20,16 @@ void hello_fun(void *arg) {
 
 
 void context_uload(PCB *pcb, const char *filename) {
-  Area area = {.start=&pcb[pcbcount], .end=&pcb[pcbcount + 1]};
+  Area area = {.start=pcb, .end=pcb + 1};
   uintptr_t entry = loader(pcb, filename);
-  Log("donw1");
-  pcb[pcbcount].cp = ucontext(NULL, area, (void *)entry);
-  Log("donw1");
-  pcb[pcbcount].cp->GPRx = (uint64_t)heap.end;
+  pcb->cp = ucontext(NULL, area, (void *)entry);
+  pcb->cp->GPRx = (uint64_t)heap.end;
 }
 
 
 void context_kload(PCB *pcb, void *entry, void *arg) {
-  Area area = {.start=&pcb[pcbcount], .end=&pcb[pcbcount + 1]};
-  pcb[pcbcount].cp = kcontext(area, entry, arg);
+  Area area = {.start=pcb, .end=pcb + 1};
+  pcb->cp = kcontext(area, entry, arg);
 }
 
 
