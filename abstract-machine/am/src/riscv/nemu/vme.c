@@ -70,6 +70,7 @@ void map(AddrSpace *as, void *va, void *pa, int prot) {
 }
 
 Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
-  
-  return NULL;
+  Context c = {.mepc=(uint64_t)entry, .mstatus=0xa00001800};
+  memcpy(kstack.start, &c, sizeof(c));
+  return kstack.start;
 }

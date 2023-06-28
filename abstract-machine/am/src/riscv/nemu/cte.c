@@ -33,9 +33,9 @@ bool cte_init(Context *(*handler)(Event, Context *)) {
 }
 
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
-  Context c = {.mepc=(uint64_t)entry, .mstatus=0xa00001800, .GPR2=(uint64_t)arg};
-  memcpy(kstack.end, &c, sizeof(c));
-  return kstack.end;
+  Context c = {.mepc=(uint64_t)entry, .mstatus=0xa00001800};
+  memcpy(kstack.start, &c, sizeof(c));
+  return kstack.start;
 }
 
 void yield() { asm volatile("li a7, 1; ecall"); }
