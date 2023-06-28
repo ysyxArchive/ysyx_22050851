@@ -19,6 +19,7 @@ void hello_fun(void *arg) {
 }
 
 void context_kload(void *entry, void *arg) {
+  printf("%x %x %x %x\n", &pcb[pcbcount], &pcb[pcbcount + 1], pcb->cp, pcb->stack);
   Area area = {.start=&pcb[pcbcount], .end=&pcb[pcbcount + 1]};
   pcb[pcbcount].cp = kcontext(area, entry, arg);
   pcbcount += 1;
