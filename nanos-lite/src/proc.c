@@ -18,19 +18,27 @@ void hello_fun(void *arg) {
   }
 }
 
-void context_kload(void *entry, void *arg) {
-  Area area = {.start=&pcb[pcbcount], .end=&pcb[pcbcount + 1]};
-  pcb[pcbcount].cp = kcontext(area, entry, arg);
-  pcbcount += 1;
+void context_kload(PCB *pcb, void *entry, void *arg) {
+  Area area = {.start=pcb, .end=pcb + 1};
+  pcb->cp = kcontext(area, entry, arg);
 }
 
+
+void context_uload(PCB *pcb, const char *filename) {
+  Area area = {.start=pcb, .end=pcb + 1};
+  uintptr_t entry = loader(pcb, filename);
+  pcb->cp = ucontext(NULL, area, (void *)entry);
+  pcb->cp->GPRx = (uint64_t)heap.end;
+}
 
 void init_proc() {
   // switch_boot_pcb();
 
   Log("Initializing processes...");
-  context_kload(hello_fun, "p1");
-  context_kload(hello_fun, "p2");
+  
+  // context_kload(&(pcb[pcbcount++]), hello_fun, "p1");
+  context_kload(&(pcb[pcbcount++]), hello_fun, "p2");
+  context_uload(&(pcb[pcbcount++]), "/bin/pal");
   switch_boot_pcb();
   // // load program here
   // naive_uload(NULL, "/bin/menu");
@@ -38,7 +46,7 @@ void init_proc() {
 
 Context *schedule(Context *prev) { 
   current->cp  = prev;
-  printf("%x %x %x\n", current, pcb, pcb + 1);
+  printf("%x %x %x\n", current, (pcb[0]).cp, (pcb[1]).cp);
   current = current == &(pcb[0]) ? &(pcb[1]) : &(pcb[0]);
   return current->cp;
 }

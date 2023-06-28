@@ -3,5 +3,5 @@
 #include <proc.h>
 
 void naive_uload(PCB *pcb, const char *filename);
-
+uintptr_t loader(PCB *pcb, const char *filename);
 #endif
