@@ -40,9 +40,8 @@ void init_proc() {
   Log("Initializing processes...");
   
   // context_kload(&(pcb[pcbcount++]), hello_fun, "p1");
-  context_uload(&(pcb[pcbcount++]), "/bin/pal");
-  Log("donw1");
   context_kload(&(pcb[pcbcount++]), hello_fun, "p2");
+  context_uload(&(pcb[pcbcount++]), "/bin/pal");
   switch_boot_pcb();
   // // load program here
   // naive_uload(NULL, "/bin/menu");
