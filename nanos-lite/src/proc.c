@@ -20,8 +20,8 @@ void hello_fun(void *arg) {
 
 void context_kload(void *entry, void *arg) {
   Area area = {.start=&pcb[pcbcount], .end=&pcb[pcbcount + 1]};
+  pcb[pcbcount].cp = kcontext(area, entry, arg);
   pcbcount += 1;
-  pcb->cp = kcontext(area, entry, arg);
 }
 
 
