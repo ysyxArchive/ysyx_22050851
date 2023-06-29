@@ -35,7 +35,6 @@ void context_uload(PCB *pcb, const char *filename) {
   *((uint64_t*)(heap.end - strlen(skiparg) - 1) - 2) = (uint64_t)NULL;
   *((uint64_t*)(heap.end - strlen(skiparg) - 1) - 3) = (uint64_t)(heap.end - strlen(skiparg) - 1);
   *((uint64_t*)(heap.end - strlen(skiparg) - 1) - 4) = 1;
-  printf("%x, %d\n", ((uint64_t*)(heap.end - strlen(skiparg) - 1) - 4), *((uint64_t*)(heap.end - strlen(skiparg) - 1) - 4));
   pcb->cp->GPRx = (uint64_t)((uint64_t*)(heap.end - strlen(skiparg) - 1) - 4);
   // pcb->cp->GPRx = (uint64_t)heap.end;
 
