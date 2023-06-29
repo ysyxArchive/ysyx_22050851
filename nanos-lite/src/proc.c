@@ -12,8 +12,8 @@ void switch_boot_pcb() { current = &pcb_boot; }
 void hello_fun(void *arg) {
   int j = 1;
   while (1) {
-    Log("Hello World from Nanos-lite with arg '%s' for the %dth time!%s",
-        (uintptr_t)arg, j, j>10?0:(uintptr_t)arg);
+    Log("Hello World from Nanos-lite with arg '%s' for the %dth time!",
+        (uintptr_t)arg, j);
     j++;
     yield();
   }
@@ -29,16 +29,16 @@ void context_uload(PCB *pcb, const char *filename) {
   Area area = {.start=pcb, .end=pcb + 1};
   uintptr_t entry = loader(pcb, filename);
   pcb->cp = ucontext(NULL, area, (void *)entry);
-  // const char skiparg[] = "--skip";
-  // printf("%x", heap.end);
-  // strcpy(heap.end, skiparg);
-  // *(uint64_t*)((uint8_t*)(heap.end + strlen(skiparg) + 1)) = (uint64_t)NULL;
-  // *(uint64_t*)((uint8_t*)(heap.end + strlen(skiparg) + 2)) = (uint64_t)NULL;
-  // *(uint64_t*)((uint8_t*)(heap.end + strlen(skiparg) + 3)) = (uint64_t)NULL;
-  // *(uint64_t*)((uint8_t*)(heap.end + strlen(skiparg) + 4)) = (uint64_t)heap.end;
-  // *(uint64_t*)((uint8_t*)(heap.end + strlen(skiparg) + 5)) = (uint64_t)1;
-  // pcb->cp->GPRx = (uint64_t)(heap.end + strlen(skiparg) + 5);
-  pcb->cp->GPRx = (uint64_t)heap.end;
+  const char skiparg[] = "--skip";
+  printf("%x", heap.end - (strlen(skiparg) + 1));
+  strcpy(heap.end, skiparg);
+  *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 1)) = (uint64_t)NULL;
+  *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 2)) = (uint64_t)NULL;
+  *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 3)) = (uint64_t)NULL;
+  *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 4)) = (uint64_t)heap.end;
+  *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 5)) = (uint64_t)1;
+  pcb->cp->GPRx = (uint64_t)(heap.end - strlen(skiparg) - 5);
+  // pcb->cp->GPRx = (uint64_t)(heap.end + strlen(skiparg) - 5);
 
 }
 
