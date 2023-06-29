@@ -29,16 +29,15 @@ void context_uload(PCB *pcb, const char *filename) {
   Area area = {.start=pcb, .end=pcb + 1};
   uintptr_t entry = loader(pcb, filename);
   pcb->cp = ucontext(NULL, area, (void *)entry);
-  const char* skiparg = "--skip";
-  printf("%x", heap.end - (strlen(skiparg) + 1));
-  strcpy(heap.end - (strlen(skiparg) + 1), skiparg);
-  *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 1)) = (uint64_t)NULL;
-  *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 2)) = (uint64_t)NULL;
-  *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 3)) = (uint64_t)NULL;
-  *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 4)) = (uint64_t)heap.end;
-  *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 5)) = (uint64_t)1;
-  pcb->cp->GPRx = (uint64_t)(heap.end - strlen(skiparg) - 5);
-  // pcb->cp->GPRx = (uint64_t)(heap.end + strlen(skiparg) - 5);
+  // const char skiparg[] = "--skip";
+  // strcpy(heap.end, skiparg);
+  // *(uint64_t*)((uint8_t*)(heap.end + strlen(skiparg) + 1)) = (uint64_t)NULL;
+  // *(uint64_t*)((uint8_t*)(heap.end + strlen(skiparg) + 2)) = (uint64_t)NULL;
+  // *(uint64_t*)((uint8_t*)(heap.end + strlen(skiparg) + 3)) = (uint64_t)NULL;
+  // *(uint64_t*)((uint8_t*)(heap.end + strlen(skiparg) + 4)) = (uint64_t)heap.end;
+  // *(uint64_t*)((uint8_t*)(heap.end + strlen(skiparg) + 5)) = (uint64_t)1;
+  // pcb->cp->GPRx = (uint64_t)(heap.end + strlen(skiparg) + 5);
+  pcb->cp->GPRx = (uint64_t)heap.end;
 
 }
 
@@ -57,7 +56,7 @@ void init_proc() {
 
 Context *schedule(Context *prev) { 
   current->cp  = prev;
-  printf("%x %x %x\n", current, (pcb[0]).cp, (pcb[1]).cp);
+  printf("%x\n", prev->gpr[2]);
   current = current == &(pcb[0]) ? &(pcb[1]) : &(pcb[0]);
   // current = &(pcb[1]);
   return current->cp;
