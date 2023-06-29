@@ -10,6 +10,7 @@ void call_main(uintptr_t *args) {
   printf("%lx, %ld\n", args, *((uint64_t*)args));
   int argc = *((uint64_t*)args);
   char **argv = (char**)*((uint64_t*)args + 1);
+  printf("%lx\n", argv);
   printf("%lx\n", argv[0]);
   printf("%s\n", argv[0]);
   environ = (char**)*((uint64_t*)args + 2 + argc);
