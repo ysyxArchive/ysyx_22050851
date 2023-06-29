@@ -18,6 +18,11 @@ void hello_fun(void *arg) {
   }
 }
 
+void context_kload(PCB *pcb, void *entry, void *arg) {
+  Area area = {.start=pcb, .end=pcb + 1};
+  pcb->cp = kcontext(area, entry, arg);
+}
+
 
 void context_uload(PCB *pcb, const char *filename) {
   Area area = {.start=pcb, .end=pcb + 1};
@@ -25,14 +30,6 @@ void context_uload(PCB *pcb, const char *filename) {
   pcb->cp = ucontext(NULL, area, (void *)entry);
   pcb->cp->GPRx = (uint64_t)heap.end;
 }
-
-
-void context_kload(PCB *pcb, void *entry, void *arg) {
-  Area area = {.start=pcb, .end=pcb + 1};
-  pcb->cp = kcontext(area, entry, arg);
-}
-
-
 
 void init_proc() {
   // switch_boot_pcb();
