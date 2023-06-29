@@ -36,6 +36,7 @@ void context_uload(PCB *pcb, const char *filename) {
   *((uint64_t*)(heap.end - strlen(skiparg) - 1) - 3) = (uint64_t)NULL;
   *((uint64_t*)(heap.end - strlen(skiparg) - 1) - 4) = (uint64_t)heap.end;
   *((uint64_t*)(heap.end - strlen(skiparg) - 1) - 5) = 1;
+  printf("%x", ((uint64_t*)(heap.end - strlen(skiparg) - 1) - 5));
   pcb->cp->GPRx = (uint64_t)((uint64_t*)(heap.end - strlen(skiparg) - 1) - 5);
   // pcb->cp->GPRx = (uint64_t)heap.end;
 
@@ -56,7 +57,6 @@ void init_proc() {
 
 Context *schedule(Context *prev) { 
   current->cp  = prev;
-  printf("%x %x\n", prev->gpr[2], prev);
   current = current == &(pcb[0]) ? &(pcb[1]) : &(pcb[0]);
   // current = &(pcb[1]);
   return current->cp;
