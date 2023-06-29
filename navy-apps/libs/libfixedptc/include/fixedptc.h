@@ -93,7 +93,7 @@ typedef __uint128_t fixedptud;
 #endif
 
 #ifndef FIXEDPT_WBITS
-#define FIXEDPT_WBITS 24
+#define FIXEDPT_WBITS 16
 #endif
 
 #if FIXEDPT_WBITS >= FIXEDPT_BITS
@@ -128,8 +128,6 @@ typedef __uint128_t fixedptud;
 
 /* Multiplies a fixedpt number with an integer, returns the result. */
 static inline fixedpt fixedpt_muli(fixedpt A, int B) { 
-  printf("muli of %d %d is %ld\n", A,B, (A * B));
-  
   return A * B; }
 
 /* Divides a fixedpt number with an integer, returns the result. */
