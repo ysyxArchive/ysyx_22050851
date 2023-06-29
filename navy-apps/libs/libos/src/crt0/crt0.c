@@ -6,7 +6,7 @@
 int main(int argc, char *argv[], char *envp[]);
 extern char **environ;
 void call_main(uintptr_t *args) {
-  printf("%ln, %ld", args, *((uint64_t*)args + 1));
+  printf("%lx, %ld", args, *((uint64_t*)args + 1));
   char *empty[] =  {NULL };
   environ = empty;
   exit(main(0, empty, empty));
