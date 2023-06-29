@@ -128,24 +128,24 @@ typedef __uint128_t fixedptud;
 
 /* Multiplies a fixedpt number with an integer, returns the result. */
 static inline fixedpt fixedpt_muli(fixedpt A, int B) { 
-  printf("muli of %x %x is %lx\n", A,B, (A * B));
+  printf("muli of %d %d is %ld\n", A,B, (A * B));
   
   return A * B; }
 
 /* Divides a fixedpt number with an integer, returns the result. */
 static inline fixedpt fixedpt_divi(fixedpt A, int B) { 
-  printf("divi of %x %x is %lx\n", A,B, (A / B));
+  printf("divi of %d %d is %ld\n", A,B, (A / B));
   return A / B; }
 
 /* Multiplies two fixedpt numbers, returns the result. */
 static inline fixedpt fixedpt_mul(fixedpt A, fixedpt B) {
-  printf("mul of %x %x is %lx\n", A,B, (((fixedptd)A * B) >> FIXEDPT_FBITS));
+  printf("mul of %d %d is %ld\n", A,B, (((fixedptd)A * B) >> FIXEDPT_FBITS));
   return (((fixedptd)A * B) >> FIXEDPT_FBITS);
 }
 
 /* Divides two fixedpt numbers, returns the result. */
 static inline fixedpt fixedpt_div(fixedpt A, fixedpt B) {
-  printf("div of %x %x is %lx\n", A,B, (((fixedptd)A << FIXEDPT_FBITS) / B));
+  printf("div of %d %d is %ld\n", A,B, (((fixedptd)A << FIXEDPT_FBITS) / B));
   return (((fixedptd)A << FIXEDPT_FBITS) / B);
 }
 
