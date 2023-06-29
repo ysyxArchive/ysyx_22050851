@@ -31,12 +31,12 @@ void context_uload(PCB *pcb, const char *filename) {
   pcb->cp = ucontext(NULL, area, (void *)entry);
   const char* skiparg = "--skip";
   printf("%x", heap.end - (strlen(skiparg) + 1));
-  strcpy(heap.end, skiparg);
+  strcpy(heap.end- (strlen(skiparg) + 1), skiparg);
+  *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 1)) = (uint64_t)NULL;
   *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 2)) = (uint64_t)NULL;
   *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 3)) = (uint64_t)NULL;
-  *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 4)) = (uint64_t)NULL;
-  *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 5)) = (uint64_t)heap.end;
-  *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 6)) = (uint64_t)1;
+  *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 4)) = (uint64_t)heap.end;
+  *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 5)) = (uint64_t)1;
   pcb->cp->GPRx = (uint64_t)(heap.end - strlen(skiparg) - 5);
   // pcb->cp->GPRx = (uint64_t)(heap.end + strlen(skiparg) - 5);
 
