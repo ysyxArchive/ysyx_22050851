@@ -31,7 +31,7 @@ void context_uload(PCB *pcb, const char *filename) {
   pcb->cp = ucontext(NULL, area, (void *)entry);
   const char* skiparg = "--skip";
   printf("%x", heap.end - (strlen(skiparg) + 1));
-  strcpy(heap.end- (strlen(skiparg) + 1), skiparg);
+  strcpy(heap.end - (strlen(skiparg) + 1), skiparg);
   *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 1)) = (uint64_t)NULL;
   *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 2)) = (uint64_t)NULL;
   *(uint64_t*)((uint8_t*)(heap.end - strlen(skiparg) - 3)) = (uint64_t)NULL;
