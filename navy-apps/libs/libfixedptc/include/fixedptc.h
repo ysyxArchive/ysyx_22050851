@@ -93,8 +93,8 @@ typedef __uint128_t fixedptud;
 #endif
 
 #ifndef FIXEDPT_WBITS
-// #define FIXEDPT_WBITS 24
-#define FIXEDPT_WBITS 16
+#define FIXEDPT_WBITS 24
+// #define FIXEDPT_WBITS 16
 #endif
 
 #if FIXEDPT_WBITS >= FIXEDPT_BITS
@@ -126,7 +126,7 @@ typedef __uint128_t fixedptud;
  * directly. Putting them only in macros will effectively make them optional. */
 #define fixedpt_tofloat(T)                                                     \
   ((float)((T) * ((float)(1) / (float)(1L << FIXEDPT_FBITS))))
-
+static inline fixedpt fixedpt_round(fixedpt A);
 /* Multiplies a fixedpt number with an integer, returns the result. */
 static inline fixedpt fixedpt_muli(fixedpt A, int B) { 
   return A * B; }
@@ -139,13 +139,13 @@ static inline fixedpt fixedpt_divi(fixedpt A, int B) {
 /* Multiplies two fixedpt numbers, returns the result. */
 static inline fixedpt fixedpt_mul(fixedpt A, fixedpt B) {
   printf("mul of %d %d is %ld\n", A,B, (((fixedptd)A * B) >> FIXEDPT_FBITS));
-  return (((fixedptd)A * B) >> FIXEDPT_FBITS);
+  return (fixedpt_round((fixedptd)A * B) >> FIXEDPT_FBITS);
 }
 
 /* Divides two fixedpt numbers, returns the result. */
 static inline fixedpt fixedpt_div(fixedpt A, fixedpt B) {
   printf("div of %d %d is %ld\n", A,B, (((fixedptd)A << FIXEDPT_FBITS) / B));
-  return (((fixedptd)A << FIXEDPT_FBITS) / B);
+  return (fixedpt_round((((fixedptd)A << FIXEDPT_FBITS) << FIXEDPT_FBITS) / B) >> FIXEDPT_FBITS);
 }
 
 static inline fixedpt fixedpt_abs(fixedpt A) { 
@@ -164,7 +164,10 @@ static inline fixedpt fixedpt_ceil(fixedpt A) {
   return (((A >> FIXEDPT_FBITS) << FIXEDPT_FBITS) +
          ((A & FIXEDPT_FMASK) ? FIXEDPT_ONE : 0));
 }
-
+static inline fixedpt fixedpt_round(fixedpt A) {
+  printf("round of %x is %x\n", A, fixedpt_floor(A) + (A & FIXEDPT_FMASK >= FIXEDPT_ONE_HALF ? FIXEDPT_ONE : 0));
+  return (fixedpt_floor(A) + (A & FIXEDPT_FMASK >= FIXEDPT_ONE_HALF ? FIXEDPT_ONE : 0));
+}
 /*
  * Note: adding and substracting fixedpt numbers can be done by using
  * the regular integer operators + and -.
