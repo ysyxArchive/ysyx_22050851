@@ -46,19 +46,19 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   int tempOffset = 0;
   *((uint64_t*)(heap.end - offsetCount) - 1) = (uint64_t)NULL;
   offsetCount += sizeof(uint64_t);
+  for(int i = 0; envp[i]; i++) {
+    tempOffset += strlen(envp[i]) + 1;
+    *((uint64_t*)(heap.end - offsetCount) - 1) = (uint64_t)(heap.end - tempOffset);
+    offsetCount += sizeof(uint64_t);
+  }  
+  *((uint64_t*)(heap.end - offsetCount) - 1) = (uint64_t)NULL;
+  offsetCount += sizeof(uint64_t);
   for(int i = 0; argv[i]; i++) {
     tempOffset += strlen(argv[i]) + 1;
     *((uint64_t*)(heap.end - offsetCount) - 1) = (uint64_t)(heap.end - tempOffset);
     offsetCount += sizeof(uint64_t);
     printf("args[%d] %x %s\n", i, (uint64_t*)(heap.end - offsetCount), (uint64_t*)(heap.end - offsetCount));
   }
-  *((uint64_t*)(heap.end - offsetCount) - 1) = (uint64_t)NULL;
-  offsetCount += sizeof(uint64_t);
-  for(int i = 0; envp[i]; i++) {
-    tempOffset += strlen(envp[i]) + 1;
-    *((uint64_t*)(heap.end - offsetCount) - 1) = (uint64_t)(heap.end - tempOffset);
-    offsetCount += sizeof(uint64_t);
-  }  
   *((uint64_t*)(heap.end - offsetCount) - 1) = argc;
   offsetCount += sizeof(uint64_t);
   pcb->cp->GPRx = (uint64_t)(heap.end - offsetCount);
