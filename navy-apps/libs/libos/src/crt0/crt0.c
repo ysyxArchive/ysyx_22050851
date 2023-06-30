@@ -13,7 +13,7 @@ void call_main(uintptr_t *args) {
   printf("%lx\n", argv);
   printf("%lx\n", argv[0]);
   printf("%s\n", argv[0]);
-  environ = (char**)*((uint64_t*)args + 2 + argc);
+  environ = (char**)*((uint64_t*)args + argc + 1);
   exit(main(argc, argv, environ));
   assert(0);
 }
