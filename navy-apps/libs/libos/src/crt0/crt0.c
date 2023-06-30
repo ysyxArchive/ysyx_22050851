@@ -10,6 +10,7 @@ void call_main(uintptr_t *args) {
   printf("%lx, %ld\n", args, *((uint64_t*)args));
   int argc = *((uint64_t*)args);
   char **argv = ((uint64_t*)args + 1);
+  printf("argc %d\n", argc);
   printf("%lx\n", argv);
   printf("%lx\n", argv[0]);
   printf("%s\n", argv[0]);
