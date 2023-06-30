@@ -50,7 +50,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     tempOffset += strlen(argv[i]) + 1;
     *((uint64_t*)(heap.end - offsetCount) - 1) = (uint64_t)(heap.end - tempOffset);
     offsetCount += sizeof(uint64_t);
-    printf("args[%d] %lx\n", i, (uint64_t*)(heap.end - offsetCount));
+    printf("args[%d] \n", i, heap.end - offsetCount);
     // printf("args[%d] %lx %s\n", i, (uint64_t*)(heap.end - offsetCount), (uint64_t*)(heap.end - offsetCount));
   }
   *((uint64_t*)(heap.end - offsetCount) - 1) = (uint64_t)NULL;
