@@ -89,7 +89,7 @@ static Context *do_event(Event e, Context *c) {
       break;
     case SYS_execve:
       strace("syscall SYS_execve %s %x %x", c->GPR2, c->GPR3, c->GPR4);
-      naive_uload(NULL, (char*)c->GPR2);
+      // uload(NULL, (char*)c->GPR2);
       break;
     case -1:
       strace("syscall -1, do nothing");
