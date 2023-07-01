@@ -6,7 +6,7 @@ char buffer[100];
 char handle_key(SDL_Event *ev);
 
 static void sh_init(){
-  // setenv("PATH", "/bin/", 0);
+  setenv("PATH", "/bin/", 1);
 }
 static void sh_printf(const char *format, ...) {
   static char buf[256] = {};
