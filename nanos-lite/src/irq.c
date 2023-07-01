@@ -90,6 +90,7 @@ static Context *do_event(Event e, Context *c) {
     case SYS_execve:
       strace("syscall SYS_execve %s %x %x", c->GPR2, c->GPR3, c->GPR4);
       PCB* newpcb = getPCB();
+      printf("%x", (char**)c->GPR3);
       context_uload(newpcb, (char*)c->GPR2, (char**)c->GPR3, (char**)c->GPR4);
       replacePCB(newpcb);
       return schedule(c);
