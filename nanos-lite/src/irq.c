@@ -90,6 +90,7 @@ static Context *do_event(Event e, Context *c) {
     case SYS_execve:
       strace("syscall SYS_execve %s %x %x", c->GPR2, c->GPR3, c->GPR4);
       context_uload(getPCB(), (char*)c->GPR2, (char**)c->GPR3, (char**)c->GPR4);
+      yield();
       break;
     case -1:
       strace("syscall -1, do nothing");
