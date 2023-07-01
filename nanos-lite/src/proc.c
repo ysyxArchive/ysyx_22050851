@@ -8,7 +8,7 @@ static PCB pcb_boot = {};
 PCB *current = NULL;
 int pcbcount = 0;
 void switch_boot_pcb() { current = &pcb_boot; }
-
+PCB* executing[2];
 void hello_fun(void *arg) {
   int j = 1;
   while (1) {
@@ -91,19 +91,31 @@ void init_proc() {
   Log("Initializing processes...");
   
   // context_kload(&(pcb[pcbcount++]), hello_fun, "p1");
-  context_kload(&(pcb[pcbcount++]), hello_fun, "p2");
+  executing[0] = getPCB();
+  context_kload(executing[0], hello_fun, "p2");
   // char* args[] = {"--skip", NULL};
   char* args[] = {NULL};
   char* envp[] = {NULL};
-  context_uload(getPCB(), "/bin/nterm", args, envp);
+  executing[1] = getPCB();
+  context_uload(executing[1], "/bin/nterm", args, envp);
   switch_boot_pcb();
   // // load program here
   // naive_uload(NULL, "/bin/menu");
 }
 
+void create_then_destroy(PCB* prev, PCB* newone){
+  for (int i = 0; i < 2; i++){
+    if(executing[i] == prev){
+      executing[i] = newone;
+      return;
+    }
+  }
+}
+
 Context *schedule(Context *prev) { 
   current->cp  = prev;
-  current = current == &(pcb[0]) ? &(pcb[1]) : &(pcb[0]);
+  // current = current == &(pcb[0]) ? &(pcb[1]) : &(pcb[0]);
+  current = current == executing[0] ? executing[1] : executing[0];
   // current = &(pcb[1]);
   return current->cp;
 }
