@@ -103,9 +103,9 @@ void init_proc() {
   // naive_uload(NULL, "/bin/menu");
 }
 
-void create_then_destroy(PCB* prev, PCB* newone){
+void replacePCB(PCB* newone){
   for (int i = 0; i < 2; i++){
-    if(executing[i] == prev){
+    if(executing[i] == current){
       executing[i] = newone;
       return;
     }
