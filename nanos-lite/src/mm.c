@@ -6,7 +6,6 @@ uint8_t* page_end = NULL;
 void *new_page(size_t nr_page) { 
   uint8_t* ret = page_end;
   page_end -= nr_page * PGSIZE;
-  printf("%d %d\n", (int)nr_page, (int)PGSIZE);
   printf("from %x to %x\n", (uint32_t)(uint64_t)ret, (uint32_t)(uint64_t)page_end);
   return ret;
 }
