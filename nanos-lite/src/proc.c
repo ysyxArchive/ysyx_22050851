@@ -80,6 +80,10 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
 
 }
 
+PCB* getPCB() {
+  return &(pcb[pcbcount++]);
+}
+
 void init_proc() {
   // switch_boot_pcb();
 
@@ -89,7 +93,7 @@ void init_proc() {
   context_kload(&(pcb[pcbcount++]), hello_fun, "p2");
   char* args[] = {"--skip", NULL};
   char* envp[] = {NULL};
-  context_uload(&(pcb[pcbcount++]), "/bin/pal", args, envp);
+  context_uload(getPCB(), "/bin/nterm", args, envp);
   switch_boot_pcb();
   // // load program here
   // naive_uload(NULL, "/bin/menu");
