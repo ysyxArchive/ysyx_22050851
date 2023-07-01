@@ -19,6 +19,8 @@ typedef struct
 } PCB;
 
 extern PCB *current;
-
+void context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]);
 Context *schedule(Context *prev);
+void replacePCB(PCB* newone);
+PCB* getPCB();
 #endif
