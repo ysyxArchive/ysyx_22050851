@@ -1,10 +1,12 @@
 #include <memory.h>
 #include <stdint.h>
+#include <stdio.h>
 void *pf = NULL;
 uint8_t* page_end = NULL;
 void *new_page(size_t nr_page) { 
   uint8_t* ret = page_end;
   page_end -= nr_page * PGSIZE;
+  printf("from %lx to %lx\n", (uint64_t)ret, (uint64_t)page_end);
   return ret;
 }
 
