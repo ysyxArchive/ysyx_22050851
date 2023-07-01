@@ -61,7 +61,7 @@ void init_ftrace(char *elflocation[], const int elfCount) {
       printf("not found string table at %s", elflocation[i]);
       continue;
     }
-    fseek(fp, section_header_symtab.sh_offset, SEEK_SET);
+      fseek(fp, section_header_symtab.sh_offset, SEEK_SET);
     Elf64_Sym symbuf;
     for (int i = 0;
          i < section_header_symtab.sh_size / section_header_symtab.sh_entsize;
