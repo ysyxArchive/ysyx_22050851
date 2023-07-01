@@ -58,11 +58,15 @@ int check_indent(const char *str, uint64_t data, char **ret) {
   while (1) {
     switch (str[p]) {
     case 'd':
+      zero_padding = str[0] == '0';
+      width = str2num(str, p);
+      num2str(buffer_string, data, zero_padding, width, 10, false);
+      *ret = buffer_string;
+      return p + 1;
     case 'x':
       zero_padding = str[0] == '0';
       width = str2num(str, p);
-      num2str(buffer_string, data, zero_padding, width, str[p] == 'd' ? 10 : 16,
-              false);
+      num2str(buffer_string, data, zero_padding, width, 16, true);
       *ret = buffer_string;
       return p + 1;
     case 'p':
