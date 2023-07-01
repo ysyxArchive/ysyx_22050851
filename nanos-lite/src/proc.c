@@ -62,23 +62,6 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   *((uint64_t*)(stack - offsetCount) - 1) = argc;
   offsetCount += sizeof(uint64_t);
   pcb->cp->GPRx = (uint64_t)(stack - offsetCount);
-  
-
-  // for(int i = 0; argv[i]; i++) {
-  //   argc += 1;
-  //   offsetCount += strlen(argv[i] + 1);
-  //   strcpy(heap.end - offsetCount, argv[i]);
-  // }
-  
-  // const char* skiparg = "--skip";
-  // strcpy(heap.end - strlen(skiparg) - 1, skiparg);
-  // *((uint64_t*)(heap.end - strlen(skiparg) - 1) - 1) = (uint64_t)NULL;
-  // *((uint64_t*)(heap.end - strlen(skiparg) - 1) - 2) = (uint64_t)NULL;
-  // *((uint64_t*)(heap.end - strlen(skiparg) - 1) - 3) = (uint64_t)(heap.end - strlen(skiparg) - 1);
-  // *((uint64_t*)(heap.end - strlen(skiparg) - 1) - 4) = 1;
-  // pcb->cp->GPRx = (uint64_t)((uint64_t*)(heap.end - strlen(skiparg) - 1) - 4);
-  // pcb->cp->GPRx = (uint64_t)heap.end;
-
 }
 
 PCB* getPCB() {
@@ -93,7 +76,6 @@ void init_proc() {
   // context_kload(&(pcb[pcbcount++]), hello_fun, "p1");
   executing[0] = getPCB();
   context_kload(executing[0], hello_fun, "p2");
-  // char* args[] = {"--skip", NULL};
   char* args[] = {NULL};
   char* envp[] = {NULL};
   executing[1] = getPCB();
@@ -114,8 +96,6 @@ void replacePCB(PCB* newone){
 
 Context *schedule(Context *prev) { 
   current->cp  = prev;
-  // current = current == &(pcb[0]) ? &(pcb[1]) : &(pcb[0]);
   current = current == executing[0] ? executing[1] : executing[0];
-  // current = &(pcb[1]);
   return current->cp;
 }

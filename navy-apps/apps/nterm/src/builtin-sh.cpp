@@ -39,13 +39,6 @@ static void sh_handle_cmd(const char *cmd) {
   }
   argv[argc] = NULL;
 
-  printf("input %s, argc: %d, args: ", buffer, argc);
-  for(int i = 0; i < argc; i++){
-    printf("%s, ", argv[i]);
-  }
-  printf("\n");
-  printf("end of argv %x\n", argv[argc]);
-  
   execvp(buffer, argv);
 }
 
