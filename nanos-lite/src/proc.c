@@ -91,7 +91,8 @@ void init_proc() {
   
   // context_kload(&(pcb[pcbcount++]), hello_fun, "p1");
   context_kload(&(pcb[pcbcount++]), hello_fun, "p2");
-  char* args[] = {"--skip", NULL};
+  // char* args[] = {"--skip", NULL};
+  char* args[] = {NULL};
   char* envp[] = {NULL};
   context_uload(getPCB(), "/bin/nterm", args, envp);
   switch_boot_pcb();
