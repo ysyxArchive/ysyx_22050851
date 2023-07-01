@@ -1,8 +1,12 @@
 #include <memory.h>
-
+#include <stdint.h>
 void *pf = NULL;
-
-void *new_page(size_t nr_page) { return NULL; }
+uint8_t* page_end = NULL;
+void *new_page(size_t nr_page) { 
+  uint8_t* ret = page_end;
+  page_end -= nr_page * PGSIZE;
+  return ret;
+}
 
 #ifdef HAS_VME
 static void *pg_alloc(int n) { return NULL; }
@@ -15,6 +19,7 @@ int mm_brk(uintptr_t brk) { return 0; }
 
 void init_mm() {
   pf = (void *)ROUNDUP(heap.start, PGSIZE);
+  page_end = heap.end;
   Log("PGSIZE %d", PGSIZE);
   Log("free physical pages starting from %p", pf);
 
