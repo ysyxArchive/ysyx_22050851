@@ -41,7 +41,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   for(int i = 0; envp[i]; i++) {
     envc += 1;
     offsetCount += strlen(envp[i]) + 1;  
-    strcpy(stack - offsetCount, argv[i]);
+    strcpy(stack - offsetCount, envp[i]);
   }
   
   int tempOffset = 0;
