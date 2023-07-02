@@ -2,7 +2,7 @@
 #include <nterm.h>
 #include <stdarg.h>
 #include <unistd.h>
-char buffer[100];
+static char buffer[100];
 char handle_key(SDL_Event *ev);
 
 static void sh_init() { setenv("PATH", "/bin/:/usr/bin/", 1); }
