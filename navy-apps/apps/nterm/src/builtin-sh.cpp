@@ -2,10 +2,13 @@
 #include <nterm.h>
 #include <stdarg.h>
 #include <unistd.h>
-static char buffer[100];
+static char *buffer;
 char handle_key(SDL_Event *ev);
 
-static void sh_init() { setenv("PATH", "/bin/:/usr/bin/", 1); }
+static void sh_init() {
+  setenv("PATH", "/bin/:/usr/bin/", 1);
+  buffer = (char *)malloc(100 * sizeof(char));
+}
 static void sh_printf(const char *format, ...) {
   static char buf[256] = {};
   va_list ap;
