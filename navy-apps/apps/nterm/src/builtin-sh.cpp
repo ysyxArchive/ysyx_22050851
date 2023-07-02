@@ -29,21 +29,17 @@ static void sh_handle_cmd(const char *cmd) {
   char *program = strtok(buffer, " ");
   char *argv[100];
   int argc = 0;
-  char *p = strtok(buffer, " ");
+  char *p = strtok(NULL, " ");
   int i = 0;
   while (p != NULL) {
-    if (i == 0) {
-    } else {
-      argv[argc++] = p;
-      assert(argc < 100);
-      printf("builtin: %s\n", p);
-    }
+    argv[argc++] = p;
+    assert(argc < 100);
+    printf("builtin: %s\n", p);
     p = strtok(NULL, " ");
-    i++;
   }
   argv[argc] = NULL;
 
-  execvp(buffer, argv);
+  execvp(program, argv);
 }
 
 void builtin_sh_run() {
