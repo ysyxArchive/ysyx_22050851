@@ -34,7 +34,7 @@ static void sh_handle_cmd(const char *cmd) {
     argv[argc++] = p;
     assert(argc < 100);
     printf("builtin: %x %s\n", p, p);
-    printf("builtin: %x %s\n", argv[argc], argv[argc]);
+    printf("builtin: %x %s\n", argv[argc - 1], argv[argc - 1]);
     p = strtok(NULL, " ");
   }
   argv[argc] = NULL;
