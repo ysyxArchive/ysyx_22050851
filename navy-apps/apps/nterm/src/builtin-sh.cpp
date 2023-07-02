@@ -30,7 +30,6 @@ static void sh_handle_cmd(const char *cmd) {
   char *argv[100];
   int argc = 0;
   char *p = strtok(NULL, " ");
-  int i = 0;
   while (p != NULL) {
     argv[argc++] = p;
     assert(argc < 100);
