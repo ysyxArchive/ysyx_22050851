@@ -43,7 +43,7 @@ static void welcome() {
 #include <getopt.h>
 
 void sdb_set_batch_mode();
-
+long img_size;
 static char *log_file = NULL;
 static char *elf_files[20];
 static int elf_file_cnt = 0;
@@ -143,7 +143,7 @@ void init_monitor(int argc, char *argv[]) {
   init_isa();
 
   /* Load the image to memory. This will overwrite the built-in image. */
-  long img_size = load_img();
+  img_size = load_img();
 
   /* Initialize differential testing. */
   init_difftest(diff_so_file, img_size, difftest_port);

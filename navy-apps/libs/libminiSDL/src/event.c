@@ -19,7 +19,7 @@ int SDL_PollEvent(SDL_Event *event) {
   }
   event->type = buf[1] == 'u' ? SDL_KEYUP : SDL_KEYDOWN;
   for (int end = 3; buf[end]; end++) {
-    if (buf[end] == '\n') {
+    if (buf[end] == ' ' || buf[end] == '\n') {
       buf[end] = 0;
       break;
     }
@@ -38,7 +38,6 @@ int SDL_PollEvent(SDL_Event *event) {
 }
 
 int SDL_WaitEvent(SDL_Event *event) {
-  int ans = NDL_PollEvent(buf, 20);
   while (!SDL_PollEvent(event))
     ;
   return 1;

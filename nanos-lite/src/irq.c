@@ -1,5 +1,7 @@
+#include <loader.h>
 #include "fs.h"
 #include <common.h>
+#include "proc.h"
 enum {
   SYS_exit,
   SYS_yield,
@@ -40,12 +42,16 @@ static Context *do_event(Event e, Context *c) {
   case EVENT_YIELD:
     switch (c->GPR1) {
     case SYS_exit:
-      strace("syscall SYS_exit");
-      halt(0);
+      strace("syscall SYS_exit %d", c->GPR2);
+      if(c->GPR2 == 0){
+        naive_uload(NULL, "/bin/menu");
+      } else { 
+        halt(c->GPR2);
+      }
       break;
     case SYS_yield:
       strace("syscall SYS_yield");
-      yield();
+      return schedule(c);
       break;
     case SYS_write:
       strace("syscall SYS_write %s %x %x", get_file_name(c->GPR2), c->GPR3,
@@ -80,6 +86,13 @@ static Context *do_event(Event e, Context *c) {
       ((uint64_t *)c->GPR2)[0] = ms / 1000000;
       ((uint64_t *)c->GPR2)[1] = ms % 1000000;
       c->GPRx = 0;
+      break;
+    case SYS_execve:
+      strace("syscall SYS_execve %s %x %x", c->GPR2, c->GPR3, c->GPR4);
+      PCB* newpcb = getPCB();
+      context_uload(newpcb, (char*)c->GPR2, (char**)c->GPR3, (char**)c->GPR4);
+      replacePCB(newpcb);
+      return schedule(c);
       break;
     case -1:
       strace("syscall -1, do nothing");

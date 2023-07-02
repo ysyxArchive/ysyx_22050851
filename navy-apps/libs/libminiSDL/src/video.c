@@ -11,7 +11,8 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst,
   // printf("dst size: %d %d\n", dst->w, dst->h);
   // printf("srcrect %d %d %d %d\n", srcrect->x, srcrect->y, srcrect->w,
   // srcrect->h);
-  assert(dst && src);
+  assert(dst);
+  assert(src);
   assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
   SDL_Rect srect = {.h = srcrect ? srcrect->h : src->h,
                     .w = srcrect ? srcrect->w : src->w,
@@ -42,7 +43,7 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
 uint32_t pixelBuffer[300 * 400];
 // FIXME: magic number
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
-  // printf("x %d y %d w %d h %d surface w %d h %d\n", x, y, w, h, s->w, s->h);
+  // printf("x %d y %d w %d h %d surface w %d h %d %s\n", x, y, w, h, s->w, s->h, s->format->palette ? "with palette" : "");
   if (x == 0 && y == 0 && w == 0 && h == 0) {
     w = s->w;
     h = s->h;
