@@ -31,7 +31,7 @@ void init_ftrace(char *elflocation[], const int elfCount) {
     size_t ret;
     FILE *fp = fopen(elflocation[i], "r");
     FILE *fp2 = fopen(elflocation[i], "r");
-    Assert(fp && fp2, "Cannot open elf file %s", elflocation[i]);
+    Assert(fp && fp2, "Cannot open elf file at %s", elflocation[i]);
     Elf64_Ehdr elfHeader;
     ret = fread(&elfHeader, sizeof(elfHeader), 1, fp);
     Assert(ret > 0, "error when reading header of %s", elflocation[i]);
@@ -53,15 +53,15 @@ void init_ftrace(char *elflocation[], const int elfCount) {
         section_header_strtab = section_header_buf;
       }
     }
-    if(section_header_symtab.sh_type == SHT_NULL){
-      printf("not found symbol table at %s", elflocation[i]);
+    if (section_header_symtab.sh_type == SHT_NULL){
+      printf("not found symbol table in file %s\n", elflocation[i]);
       continue;
     }
     if(section_header_strtab.sh_type == SHT_NULL){
-      printf("not found string table at %s", elflocation[i]);
+      printf("error not found string table in file %s\n", elflocation[i]);
       continue;
     }
-      fseek(fp, section_header_symtab.sh_offset, SEEK_SET);
+    fseek(fp, section_header_symtab.sh_offset, SEEK_SET);
     Elf64_Sym symbuf;
     for (int i = 0;
          i < section_header_symtab.sh_size / section_header_symtab.sh_entsize;
