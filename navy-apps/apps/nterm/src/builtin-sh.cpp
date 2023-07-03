@@ -29,10 +29,10 @@ static void sh_handle_cmd(const char *cmd) {
   printf("cmd: %s\n", cmd);
   assert(len < 100);
   strncpy(buffer, cmd, len - 1);
-  char *program = strtok(buffer, " ");
   char *argv[100];
   int argc = 0;
-  char *p = strtok(NULL, " ");
+  char *p = strtok(buffer, " ");
+  char *program = p;
   while (p != NULL) {
     argv[argc++] = p;
     assert(argc < 100);
