@@ -29,16 +29,16 @@ static void sh_handle_cmd(const char *cmd) {
   int len = strlen(cmd);
   assert(len < 100);
   strncpy(buffer, cmd, len - 1);
-  char* program = strtok(buffer, " ");
   char* argv[100];
   int argc = 0;
-  char* p;
+  char* p = strtok(buffer, " ");
   while((p = strtok(NULL, " "))){
     argv[argc++] = p;
     assert(argc < 100);
+    printf("%s-", argv[argc-1]);
   }
   argv[argc] = NULL;
-
+  
   execvp(buffer, argv);
 }
 
