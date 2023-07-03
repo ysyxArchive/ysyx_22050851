@@ -27,9 +27,9 @@ static void sh_prompt() { sh_printf("sh> "); }
 static void sh_handle_cmd(const char *cmd) {
   printf("cmd: %s\n", cmd);
   int len = strlen(cmd);
-  printf("cmd: %s\n", cmd);
   assert(len < 100);
   strncpy(buffer, cmd, len - 1);
+  printf("buffer: %s\n", buffer);
   char *argv[100];
   int argc = 0;
   char *p = strtok(buffer, " ");
