@@ -75,6 +75,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   while(NULLCOUNT < 2) { 
     printf("%s\n", ((uint64_t*)(stack - offsetCount))[i] == 0 ? nullstr : (char*)((uint64_t*)(stack - offsetCount))[i]);
     if(((uint64_t*)(stack - offsetCount))[i] == 0){NULLCOUNT ++;}
+    i++;
   }
   *((uint64_t*)(stack - offsetCount) - 1) = argc;
   offsetCount += sizeof(uint64_t);
