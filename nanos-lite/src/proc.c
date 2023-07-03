@@ -34,6 +34,11 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   uint64_t offsetCount = 0;
   int argc = 0;
   int envc = 0;
+  for(int i = 0; envp[i]; i++) {
+    envc += 1;
+    offsetCount += strlen(envp[i]) + 1;  
+    strcpy(stack - offsetCount, envp[i]);
+  }
   printf("argv: \n");
   for(int i = 0; argv[i]; i++) {
     argc += 1;
@@ -42,11 +47,6 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     printf("%x %s %s\n",argv[i], argv[i], "test");
   }
   printf("...... argc: %d\n", argc);
-  for(int i = 0; envp[i]; i++) {
-    envc += 1;
-    offsetCount += strlen(envp[i]) + 1;  
-    strcpy(stack - offsetCount, envp[i]);
-  }
   
   int tempOffset = 0;
   *((uint64_t*)(stack - offsetCount) - 1) = (uint64_t)NULL;
