@@ -60,7 +60,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   offsetCount += sizeof(uint64_t);
   for(int i = 0; argv[i]; i++) {
     tempOffset += strlen(argv[i]) + 1;
-    uint64_t* reversedp = (uint64_t*)(stack - offsetCount) - 1 - argc + i; 
+    uint64_t* reversedp = (uint64_t*)(stack - offsetCount) - 1 - argc + i + i; 
     *reversedp = (uint64_t)(stack - tempOffset);
     offsetCount += sizeof(uint64_t);
   }
