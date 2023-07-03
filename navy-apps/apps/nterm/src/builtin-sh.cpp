@@ -25,6 +25,7 @@ static void sh_banner() {
 static void sh_prompt() { sh_printf("sh> "); }
 
 static void sh_handle_cmd(const char *cmd) {
+  printf("cmd: %s\n", cmd);
   int len = strlen(cmd);
   printf("cmd: %s\n", cmd);
   assert(len < 100);
