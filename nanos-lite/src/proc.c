@@ -58,7 +58,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   offsetCount += sizeof(uint64_t);
   for(int i = 0; envp[i]; i++) {
     tempOffset += strlen(envp[i]) + 1;
-    *((uint64_t*)(stack - offsetCount) - 1) = (uint64_t)(heap.end - tempOffset);
+    *((uint64_t*)(stack - offsetCount) - 1) = (uint64_t)(stack - tempOffset);
     offsetCount += sizeof(uint64_t);
   }  
   *((uint64_t*)(stack - offsetCount) - 1) = (uint64_t)NULL;
