@@ -173,5 +173,6 @@ void reset_fs(){
     free(p);
     p = next;
   }
+  ofi.next = NULL;
   init_fs();
 }
