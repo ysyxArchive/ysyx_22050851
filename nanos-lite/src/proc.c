@@ -78,20 +78,15 @@ PCB* getPCB() {
 }
 
 void init_proc() {
-  // switch_boot_pcb();
-
   Log("Initializing processes...");
-  
-  // context_kload(&(pcb[pcbcount++]), hello_fun, "p1");
+  char target_program[] = "/bin/exec-test";  
   executing[0] = getPCB();
   context_kload(executing[0], hello_fun, "p2");
-  char* args[] = {NULL};
+  char* args[] = {target_program};
   char* envp[] = {NULL};
   executing[1] = getPCB();
-  context_uload(executing[1], "/bin/exec-test", args, envp);
+  context_uload(executing[1], target_program, args, envp);
   switch_boot_pcb();
-  // // load program here
-  // naive_uload(NULL, "/bin/menu");
 }
 
 void replacePCB(PCB* newone){
