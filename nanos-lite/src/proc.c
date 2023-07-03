@@ -31,7 +31,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   Assert(argv, "argv is NULL when executing %s", filename);
   Assert(envp, "envp is NULL when executing %s", filename);
   for(int i = 0; envp[i]; i++) {
-        printf("%s\n", envp[i]);
+        printf("nanos %s\n", envp[i]);
     }
 
   reset_fs();
