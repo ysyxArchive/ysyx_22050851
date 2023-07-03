@@ -36,7 +36,7 @@ static size_t sys_brk(void *addr) { return 0; }
   do {                                                                         \
   } while (0)
 #endif
-
+char** NULLARR = {NULL};
 static Context *do_event(Event e, Context *c) {
   switch (e.event) {
   case EVENT_YIELD:
@@ -44,7 +44,10 @@ static Context *do_event(Event e, Context *c) {
     case SYS_exit:
       strace("syscall SYS_exit %d", c->GPR2);
       if(c->GPR2 == 0){
-        naive_uload(NULL, "/bin/nterm");
+        PCB* newpcb = getPCB();
+        context_uload(newpcb, "/bin/nterm", NULLARR, NULLARR);
+        replacePCB(newpcb);
+        return schedule(c);
       } else { 
         halt(c->GPR2);
       }
