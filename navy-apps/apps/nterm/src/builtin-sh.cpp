@@ -28,7 +28,7 @@ static void sh_handle_cmd(const char *cmd) {
   printf("cmd: %s\n", cmd);
   int len = strlen(cmd);
   assert(len < 100);
-  strncpy(buffer, cmd, len);
+  strcpy(buffer, cmd);
   printf("buffer: %s\n", buffer);
   char *argv[100];
   int argc = 0;
