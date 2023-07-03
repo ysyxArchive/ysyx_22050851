@@ -71,6 +71,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   }
   int NULLCOUNT = 0;
   int i = 1;
+  printf("start\n");
   char* nullstr = "(null)";
   while(NULLCOUNT < 2) { 
     printf("%s\n", ((uint64_t*)(stack - offsetCount))[i] == 0 ? nullstr : (char*)((uint64_t*)(stack - offsetCount))[i]);
