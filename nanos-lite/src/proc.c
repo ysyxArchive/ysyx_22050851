@@ -69,6 +69,13 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     *reversedp = (uint64_t)(stack - tempOffset);
     offsetCount += sizeof(uint64_t);
   }
+  int NULLCOUNT = 0;
+  int i = 1;
+  char* nullstr = "(null)";
+  while(NULLCOUNT < 2) { 
+    printf("%s\n", ((uint64_t*)(stack - offsetCount))[i] == 0 ? nullstr : (char*)((uint64_t*)(stack - offsetCount))[i]);
+    if(((uint64_t*)(stack - offsetCount))[i] == 0){NULLCOUNT ++;}
+  }
   *((uint64_t*)(stack - offsetCount) - 1) = argc;
   offsetCount += sizeof(uint64_t);
   pcb->cp->GPRx = (uint64_t)(stack - offsetCount);
