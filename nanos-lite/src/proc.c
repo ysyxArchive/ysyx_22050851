@@ -70,7 +70,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     offsetCount += sizeof(uint64_t);
   }
   int NULLCOUNT = 0;
-  int i = 1;
+  int i = 0;
   printf("start\n");
   char* nullstr = "(null)";
   while(NULLCOUNT < 2) { 
