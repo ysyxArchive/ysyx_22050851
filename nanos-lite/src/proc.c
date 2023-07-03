@@ -1,6 +1,7 @@
 #include <loader.h>
 #include <proc.h>
 #include <string.h>
+#include "fs.h"
 #define MAX_NR_PROC 4
 
 static PCB pcb[MAX_NR_PROC] __attribute__((used)) = {};
@@ -27,6 +28,7 @@ void context_kload(PCB *pcb, void *entry, void *arg) {
 
 
 void context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]) {
+  reset_fs();
   Assert(argv, "argv is NULL when executing %s", filename);
   Assert(envp, "envp is NULL when executing %s", filename);
   void* stack = new_page(8);
