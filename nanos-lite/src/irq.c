@@ -36,7 +36,7 @@ static size_t sys_brk(void *addr) { return 0; }
   do {                                                                         \
   } while (0)
 #endif
-char** NULLARR = {NULL};
+char* NULLARR[] = {NULL};
 static Context *do_event(Event e, Context *c) {
   switch (e.event) {
   case EVENT_YIELD:
