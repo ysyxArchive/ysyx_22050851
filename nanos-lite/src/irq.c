@@ -44,7 +44,7 @@ static Context *do_event(Event e, Context *c) {
     case SYS_exit:
       strace("syscall SYS_exit %d", c->GPR2);
       if(c->GPR2 == 0){
-        naive_uload(NULL, "/bin/menu");
+        naive_uload(NULL, "/bin/nterm");
       } else { 
         halt(c->GPR2);
       }
