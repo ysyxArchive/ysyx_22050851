@@ -28,9 +28,9 @@ void context_kload(PCB *pcb, void *entry, void *arg) {
 
 
 void context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]) {
-  reset_fs();
   Assert(argv, "argv is NULL when executing %s", filename);
   Assert(envp, "envp is NULL when executing %s", filename);
+  reset_fs();
   void* stack = new_page(8);
   Area area = {.start=pcb, .end=pcb + 1};
   uintptr_t entry = loader(pcb, filename);
@@ -43,14 +43,11 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     offsetCount += strlen(envp[i]) + 1;  
     strcpy(stack - offsetCount, envp[i]);
   }
-  printf("argv: \n");
   for(int i = 0; argv[i]; i++) {
     argc += 1;
     offsetCount += strlen(argv[i]) + 1;
     strcpy(stack - offsetCount, argv[i]);
-    printf("%x %s %s\n",argv[i], argv[i], "test");
   }
-  printf("...... argc: %d\n", argc);
   
   int tempOffset = 0;
   *((uint64_t*)(stack - offsetCount) - 1) = (uint64_t)NULL;

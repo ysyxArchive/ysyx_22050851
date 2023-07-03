@@ -25,12 +25,10 @@ static void sh_banner() {
 static void sh_prompt() { sh_printf("sh> "); }
 
 static void sh_handle_cmd(const char *cmd) {
-  printf("cmd: %s\n", cmd);
   int len = strlen(cmd);
   assert(len < 100);
   strcpy(buffer, cmd);
   buffer[len - 1] = 0; // clear the "\n"
-  printf("buffer: %s\n", buffer);
   char *argv[100];
   int argc = 0;
   char *p = strtok(buffer, " ");
@@ -38,8 +36,6 @@ static void sh_handle_cmd(const char *cmd) {
   while (p != NULL) {
     argv[argc++] = p;
     assert(argc < 100);
-    printf("builtin: %x %s\n", p, p);
-    printf("builtin: %x %s\n", argv[argc - 1], argv[argc - 1]);
     p = strtok(NULL, " ");
   }
   argv[argc] = NULL;
