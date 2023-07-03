@@ -45,6 +45,7 @@ static Context *do_event(Event e, Context *c) {
       strace("syscall SYS_exit %d", c->GPR2);
       if(c->GPR2 == 0){
         PCB* newpcb = getPCB();
+        Log("exit triggered");
         context_uload(newpcb, "/bin/nterm", NULLARR, NULLARR);
         replacePCB(newpcb);
         return schedule(c);
