@@ -88,7 +88,7 @@ void init_proc() {
   char* args[] = {NULL};
   char* envp[] = {NULL};
   executing[1] = getPCB();
-  context_uload(executing[1], "/bin/nterm", args, envp);
+  context_uload(executing[1], "/bin/exec-test", args, envp);
   switch_boot_pcb();
   // // load program here
   // naive_uload(NULL, "/bin/menu");
