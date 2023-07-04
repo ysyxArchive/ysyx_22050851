@@ -10,7 +10,12 @@ Terminal *term = NULL;
 void builtin_sh_run();
 void extern_app_run(const char *app_path);
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[], char* env[]) {
+
+  for(int i = 0; env[i]; i++){
+    printf("env: %s\n", env[i]);
+  }
+
   SDL_Init(0);
   font = new BDF_Font(font_fname);
 
