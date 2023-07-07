@@ -13,7 +13,7 @@ PCB* executing[2];
 void hello_fun(void *arg) {
   int j = 1;
   while (1) {
-    if(j % 20 == 0)
+    if(j % 200 == 0)
     Log("Hello World from Nanos-lite with arg '%s' for the %dth time!",
         (uintptr_t)arg, j);
     j++;
@@ -54,7 +54,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   offsetCount += sizeof(uint64_t);
   for(int i = 0; envp[i]; i++) {
     tempOffset += strlen(envp[i]) + 1;
-    *((uint64_t*)(stack - offsetCount) - 1) = (uint64_t)(heap.end - tempOffset);
+    *((uint64_t*)(stack - offsetCount) - 1) = (uint64_t)(stack - tempOffset);
     offsetCount += sizeof(uint64_t);
   }  
   *((uint64_t*)(stack - offsetCount) - 1) = (uint64_t)NULL;
@@ -76,7 +76,7 @@ PCB* getPCB() {
 
 void init_proc() {
   Log("Initializing processes...");
-  char target_program[] = "/bin/exec-test";  
+  char target_program[] = "/bin/nterm";  
   executing[0] = getPCB();
   context_kload(executing[0], hello_fun, "p2");
   char* args[] = {target_program, NULL};

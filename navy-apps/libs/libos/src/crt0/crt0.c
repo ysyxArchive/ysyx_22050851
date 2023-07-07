@@ -8,7 +8,7 @@ extern char **environ;
 void call_main(uintptr_t *args) {
   int argc = *((uint64_t*)args);
   char **argv = ((uint64_t*)args + 1);
-  environ = (char**)((uint64_t*)args + argc + 1);
+  environ = (char**)((uint64_t*)args + argc + 2);
   exit(main(argc, argv, environ));
   assert(0);
 }
