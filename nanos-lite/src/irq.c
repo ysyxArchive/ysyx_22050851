@@ -2,6 +2,7 @@
 #include "fs.h"
 #include <common.h>
 #include "proc.h"
+#include "errno.h"
 enum {
   SYS_exit,
   SYS_yield,
@@ -92,6 +93,11 @@ static Context *do_event(Event e, Context *c) {
       break;
     case SYS_execve:
       strace("syscall SYS_execve %s %x %x", c->GPR2, c->GPR3, c->GPR4);
+      int ret = fs_open((char*)c->GPR2, 0, 0);
+      if(ret == -ENOENT) {
+        c->GPRx = ret;
+        break;
+      }
       PCB* newpcb = getPCB();
       context_uload(newpcb, (char*)c->GPR2, (char**)c->GPR3, (char**)c->GPR4);
       replacePCB(newpcb);
