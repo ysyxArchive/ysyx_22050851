@@ -30,9 +30,6 @@ void context_kload(PCB *pcb, void *entry, void *arg) {
 void context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]) {
   Assert(argv, "argv is NULL when executing %s", filename);
   Assert(envp, "envp is NULL when executing %s", filename);
-  for(int i = 0; envp[i]; i++) {
-        printf("nanos %s\n", envp[i]);
-    }
 
   reset_fs();
   void* stack = new_page(8);
@@ -69,15 +66,14 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     *reversedp = (uint64_t)(stack - tempOffset);
     offsetCount += sizeof(uint64_t);
   }
-  int NULLCOUNT = 0;
-  int i = 0;
-  printf("start\n");
-  char* nullstr = "(null)";
-  while(NULLCOUNT < 2) { 
-    printf("%s\n", ((uint64_t*)(stack - offsetCount))[i] == 0 ? nullstr : (char*)((uint64_t*)(stack - offsetCount))[i]);
-    if(((uint64_t*)(stack - offsetCount))[i] == 0){NULLCOUNT ++;}
-    i++;
-  }
+  // int NULLCOUNT = 0;
+  // int i = 0;
+  // char* nullstr = "(null)";
+  // while(NULLCOUNT < 2) { 
+  //   printf("%s\n", ((uint64_t*)(stack - offsetCount))[i] == 0 ? nullstr : (char*)((uint64_t*)(stack - offsetCount))[i]);
+  //   if(((uint64_t*)(stack - offsetCount))[i] == 0){NULLCOUNT ++;}
+  //   i++;
+  // }
   *((uint64_t*)(stack - offsetCount) - 1) = argc;
   offsetCount += sizeof(uint64_t);
   pcb->cp->GPRx = (uint64_t)(stack - offsetCount);
@@ -93,7 +89,7 @@ void init_proc() {
   executing[0] = getPCB();
   context_kload(executing[0], hello_fun, "p2");
   char* args[] = {target_program, NULL};
-  char* envp[] = {"22222", NULL};
+  char* envp[] = {NULL};
   executing[1] = getPCB();
   context_uload(executing[1], target_program, args, envp);
   switch_boot_pcb();
