@@ -9,7 +9,6 @@ void call_main(uintptr_t *args) {
   int argc = *((uint64_t*)args);
   char **argv = ((uint64_t*)args + 1);
   environ = (char**)((uint64_t*)args + argc + 2);
-  printf("environnnnnn: %s", *environ);
   exit(main(argc, argv, environ));
   assert(0);
 }
