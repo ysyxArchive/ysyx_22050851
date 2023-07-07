@@ -93,7 +93,7 @@ void init_proc() {
   executing[0] = getPCB();
   context_kload(executing[0], hello_fun, "p2");
   char* args[] = {target_program, NULL};
-  char* envp[] = {"123123", NULL};
+  char* envp[] = {"22222", NULL};
   executing[1] = getPCB();
   context_uload(executing[1], target_program, args, envp);
   switch_boot_pcb();
