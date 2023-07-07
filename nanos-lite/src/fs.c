@@ -57,7 +57,7 @@ int fs_open(const char *filename, int flags, int mode) {
   }
   if (ret == ENOENT) {
     Log("Attempt to open file %s but not found", filename);
-    return ENOENT;
+    return -ENOENT;
   }
   OpenedFileInfo *p = &ofi;
   while (p->fd != ret && p->next) {
