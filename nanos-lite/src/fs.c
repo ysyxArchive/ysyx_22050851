@@ -1,7 +1,7 @@
 #include "device.h"
 #include "ramdisk.h"
 #include <fs.h>
-
+#include <errno.h>
 typedef size_t (*ReadFn)(void *buf, size_t offset, size_t len);
 typedef size_t (*WriteFn)(const void *buf, size_t offset, size_t len);
 
@@ -48,16 +48,16 @@ char *get_file_name(int fd) {
 }
 
 int fs_open(const char *filename, int flags, int mode) {
-  int ret = -1;
+  int ret = -ENOENT;
   for (int i = 0; i < LENGTH(file_table); i++) {
     if (strcmp(filename, file_table[i].name) == 0) {
       ret = i;
       break;
     }
   }
-  if (ret == -1) {
-    // Panic("file %s not found", filename);
-    return -1;
+  if (ret == -ENOENT) {
+    Log("Attempt to open file %s but not found", filename);
+    return -ENOENT;
   }
   OpenedFileInfo *p = &ofi;
   while (p->fd != ret && p->next) {
@@ -147,7 +147,7 @@ size_t fs_write(int fd, void *buf, size_t count) {
     p->offset += count;
   } else {
     Log("Warning file %d not opened", fd);
-    return -1;
+    return ENOENT;
   }
   assert(count >= 0);
   WriteFn fn = file_table[fd].write ? file_table[fd].write : ramdisk_write;
