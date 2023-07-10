@@ -16,7 +16,7 @@
 
 stb_vorbis *v = NULL;
 stb_vorbis_info info = {};
-SDL_Surface *screen = NULL; 
+SDL_Surface *screen = NULL;
 int is_end = 0;
 int16_t *stream_save = NULL;
 int volume = MAX_VOLUME;
