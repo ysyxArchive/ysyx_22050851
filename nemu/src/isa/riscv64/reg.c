@@ -66,6 +66,7 @@ int isa_reg_str2index(const char* s) {
   }
   for (int i = 0; i < CSRLEN; i++) {
     if (strcmp(s, csrregs[i]) == 0) {
+      Log("match %s index %d", s, i);
       return i;
     }
   }
