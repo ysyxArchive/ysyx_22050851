@@ -51,7 +51,7 @@ static struct {
     {.length = 3, .TKS = {TK_OCTNUMBER, TK_HEXNUMBER, TK_REG}},
     // 以上不参与分割
     {.length = 3, .TKS = {TK_POSITIVE, TK_NEGATIVE, TK_DEREF}},
-    {.length = 2, .TKS = {TK_MUL, TK_DIV, TK_MOD}},
+    {.length = 3, .TKS = {TK_MUL, TK_DIV, TK_MOD}},
     {.length = 2, .TKS = {TK_ADD, TK_MINUS}},
     {.length = 3, .TKS = {TK_EQ, TK_NEQ, TK_AND}},
 };
