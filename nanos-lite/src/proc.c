@@ -98,6 +98,6 @@ void replacePCB(PCB* newone){
 Context *schedule(Context *prev) { 
   current->cp  = prev;
   // current = current = executing[0] ? executing[1] : executing[0];
-  // current = current == executing[0] ? executing[1] : executing[0];
+  current = current == executing[0] ? executing[0] : executing[0];
   return current->cp;
 }
