@@ -66,7 +66,7 @@ static struct rule {
     {"-", '-'},
     {"\\*", '*'},
     {"/", TK_DIV},
-    {"%%", TK_MOD},
+    {"%", TK_MOD},
     {"==", TK_EQ},
     {"!=", TK_NEQ},
     {"&&", TK_AND},
