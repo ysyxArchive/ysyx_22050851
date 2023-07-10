@@ -151,7 +151,7 @@ void cpu_exec(uint64_t n) {
                     ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN)
                     : ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
         nemu_state.halt_pc);
-    if (nemu_state.halt_ret != 0 || nemu_state.halt_ret == NEMU_ABORT) {
+    if (nemu_state.halt_ret != 0 || nemu_state.state == NEMU_ABORT) {
       print_ring_buf();
       show_position();
     }
