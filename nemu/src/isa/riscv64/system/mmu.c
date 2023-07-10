@@ -31,6 +31,7 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
   Log("%lx", ptentry);
   PTE pte1 = paddr_read(((PTE *)ptentry)[vpn[2]], sizeof(PTE));
   Assert(PTEVALID(pte1), "pte level 1 is not available");
+  Log("%lx", pte1);
   // 二级页表
   PTE *table2 = (PTE *)PTEPPN(pte1);
   Assert(table2, "table2 is NULL");
