@@ -140,12 +140,12 @@ void difftest_step(vaddr_t pc, vaddr_t npc) {
 
   checkregs(&ref_r, npc);
 }
-extern char _pmem_start;
-#define PMEM_SIZE (128 * 1024 * 1024)
+
 void difftest_attach() {
   difftest_working = true;
+  
   ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
-  ref_difftest_memcpy((uintptr_t)&_pmem_start, &_pmem_start, PMEM_SIZE, DIFFTEST_TO_REF);
+  ref_difftest_memcpy(CONFIG_MBASE, (void*)CONFIG_MBASE, CONFIG_MSIZE, DIFFTEST_TO_REF);
 }
 
 void difftest_detach() { difftest_working = false; }
