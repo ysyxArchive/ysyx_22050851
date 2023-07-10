@@ -21,12 +21,14 @@
 #define PTEPPN(x) (BITS(x, 53, 10) << 12)
 typedef uint64_t PTE;
 paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
+  Log("translate");
   uint64_t vpn[] = {
       BITS(vaddr, 20, 12),
       BITS(vaddr, 29, 21),
       BITS(vaddr, 38, 30),
   };
   uintptr_t ptentry = BITS(csrs("satp"), 43, 0);
+  Assert(ptentry, "ptentry is NULL");
   PTE pte1 = paddr_read(((PTE *)ptentry)[vpn[2]], sizeof(PTE));
   Assert(PTEVALID(pte1), "pte level 1 is not available");
   // 二级页表
