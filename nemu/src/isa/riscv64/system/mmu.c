@@ -21,7 +21,6 @@
 #define PTEPPN(x) (BITS(x, 53, 10) << 12)
 typedef uint64_t PTE;
 paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
-  Log("translate");
   uint64_t vpn[] = {
       BITS(vaddr, 20, 12),
       BITS(vaddr, 29, 21),
@@ -33,10 +32,12 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
   Assert(PTEVALID(pte1), "pte level 1 is not available");
   // 二级页表
   PTE *table2 = (PTE *)PTEPPN(pte1);
+  Assert(table2, "table2 is NULL");
   PTE pte2 = paddr_read(table2[vpn[1]], sizeof(PTE));
   Assert(PTEVALID(pte2), "pte level 2 is not available");
   // 三级页表
   PTE *table3 = (PTE *)PTEPPN(pte2);
+  Assert(table3, "table3 is NULL");
   PTE pte3 = paddr_read(table3[vpn[0]], sizeof(PTE));
   Assert(PTEVALID(pte3), "pte level 3 is not available");
   return PTEPPN(pte3) | BITS(vaddr, 11, 0);
