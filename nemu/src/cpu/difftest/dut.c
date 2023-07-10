@@ -149,7 +149,7 @@ void difftest_attach() {
   difftest_working = true;
   
   ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
-  ref_difftest_memcpy(CONFIG_MBASE, heap.start, CONFIG_MSIZE, DIFFTEST_TO_REF);
+  ref_difftest_memcpy(CONFIG_MBASE, guest_to_host(CONFIG_MBASE), CONFIG_MSIZE, DIFFTEST_TO_REF);
 }
 
 void difftest_detach() { difftest_working = false; }
