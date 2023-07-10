@@ -78,11 +78,11 @@ void init_proc() {
   Log("Initializing processes...");
   char target_program[] = "/bin/pal";  
   executing[0] = getPCB();
-  // context_kload(executing[0], hello_fun, "p2");
+  context_kload(executing[0], hello_fun, "p2");
   char* args[] = {target_program, NULL};
   char* envp[] = {NULL};
-  // executing[1] = getPCB();
-  context_uload(executing[0], target_program, args, envp);
+  executing[1] = getPCB();
+  context_uload(executing[1], target_program, args, envp);
   switch_boot_pcb();
 }
 
@@ -97,7 +97,6 @@ void replacePCB(PCB* newone){
 
 Context *schedule(Context *prev) { 
   current->cp  = prev;
-  // current = current = executing[0] ? executing[1] : executing[0];
-  current = current == executing[0] ? executing[0] : executing[0];
+  current = current == executing[0] ? executing[1] : executing[0];
   return current->cp;
 }

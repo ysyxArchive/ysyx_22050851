@@ -12,6 +12,8 @@ ifeq ($(MAKECMDGOALS),)
   MAKECMDGOALS  = app
   .DEFAULT_GOAL = app
 endif
+VME = 1
+ISA=riscv64
 
 ### Override checks when `make clean/clean-all/html/init`
 ifeq ($(findstring $(MAKECMDGOALS),clean|clean-all|html|init),)
