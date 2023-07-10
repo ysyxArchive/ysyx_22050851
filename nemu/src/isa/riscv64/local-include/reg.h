@@ -41,6 +41,8 @@ static inline const char *csr_name(int idx) {
     return "mepc";
   case 0x342:
     return "mcause";
+  case 0x180:
+    return "satp";
   default:
     panic("csr index %x not implemented", idx);
   }
