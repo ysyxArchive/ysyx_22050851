@@ -27,6 +27,7 @@ bool isa_difftest_checkregs(CPU_state* ref_r, vaddr_t pc) {
   // ans &= difftest_check_reg("mstatus", pc, ref_r->csr[1], cpu.csr[1]);
   ans &= difftest_check_reg("mcause", pc, ref_r->csr[2], cpu.csr[2]);
   ans &= difftest_check_reg("mvec", pc, ref_r->csr[3], cpu.csr[3]);
+  ans &= difftest_check_reg("satp", pc, ref_r->csr[4], cpu.csr[4]);
   
   return ans;
 }
