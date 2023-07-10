@@ -26,6 +26,7 @@ word_t vaddr_read(vaddr_t addr, int len) {
   } else {
     paddr_t paddr = isa_mmu_translate(addr, len, 0);
     Assert(paddr != MEM_RET_FAIL, "paddr translate return fail");
+    Assert(paddr == addr, "paddr translate wrong");
     data = paddr_read(paddr, len);
   }
   mtrace(true, addr, len, data);
@@ -39,6 +40,7 @@ void vaddr_write(vaddr_t addr, int len, word_t data) {
   } else {
     paddr_t paddr = isa_mmu_translate(addr, len, 0);
     Assert(paddr != MEM_RET_FAIL, "paddr translate return fail");
+    Assert(paddr == addr, "paddr translate wrong");
     paddr_write(paddr, len, data);
   }
 }
