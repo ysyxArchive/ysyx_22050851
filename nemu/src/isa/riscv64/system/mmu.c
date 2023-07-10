@@ -28,7 +28,7 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
   };
   uintptr_t ptentry = BITS(csrs("satp"), 43, 0);
   Assert(ptentry, "ptentry is NULL");
-  Log("%lx", ptentry);
+  Log("ptentry %lx, vpn %lx", ptentry, vpn[2]);
   PTE pte1 = paddr_read(((PTE *)ptentry)[vpn[2]], sizeof(PTE));
   Assert(PTEVALID(pte1), "pte level 1 is not available");
   Log("%lx", pte1);
