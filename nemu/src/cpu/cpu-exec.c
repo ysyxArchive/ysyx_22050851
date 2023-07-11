@@ -62,16 +62,14 @@ static void exec_once(Decode *s, vaddr_t pc) {
   // update pc
   cpu.pc = s->dnpc;
 
-  // #ifdef CONFIG_ITRACE
   char *p = s->logbuf;
-  IFDEF(CONFIG_ITRACE,
-        p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc));
+  p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
   int ilen = s->snpc - s->pc;
   int i;
-  IFDEF(CONFIG_ITRACE, uint8_t *inst = (uint8_t *)&s->isa.inst.val);
+  uint8_t *inst = (uint8_t *)&s->isa.inst.val;
 
   for (i = ilen - 1; i >= 0; i--) {
-    IFDEF(CONFIG_ITRACE, p += snprintf(p, 4, " %02x", inst[i]));
+    p += snprintf(p, 4, " %02x", inst[i]);
   }
   int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
   int space_len = ilen_max - ilen;
