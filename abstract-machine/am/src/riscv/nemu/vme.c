@@ -91,7 +91,7 @@ void map(AddrSpace *as, void *va, void *pa, int prot) {
     table1[vpn[1]] = (BITS(newpage, 55, 12) << 10) | 1;
   }
   PTE *table2 = (PTE *)PTEPPN(table1[vpn[1]]);
-  table2[vpn[0]] = BITS((uintptr_t)pa, 55, 12) << 10 | 1 | (0x7 << 1);
+  table2[vpn[0]] = BITS((uintptr_t)pa, 55, 12) << 10 | 1 | (0x7 << 1) | ((!!prot) << 4);
 }
 
 Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
