@@ -32,6 +32,7 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
   uintptr_t ptentry = BITS(csrs("satp"), 43, 0) << 12;
   if (last != ptentry) {
     Log("ptentry %lx -> %lx", last, ptentry);
+    last = ptentry;
   }
   Assert(ptentry, "ptentry is NULL");
   PTE pte1 = paddr_read(ptentry + vpn[2] * sizeof(PTE), sizeof(PTE));
