@@ -42,7 +42,8 @@ void vaddr_write(vaddr_t addr, int len, word_t data) {
   } else {
     paddr_t paddr = isa_mmu_translate(addr, len, 0);
     Assert(paddr != MEM_RET_FAIL, "paddr translate return fail");
-    Assert(paddr == addr, "paddr translate wrong");
+    Assert(addr > CONFIG_MBASE || paddr != addr,
+           "paddr translate wrong, vaddr: %lx, paddr: %x", addr, paddr);
     paddr_write(paddr, len, data);
   }
 }
