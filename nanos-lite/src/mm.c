@@ -1,5 +1,5 @@
-#include "memory.h"
 #include <common.h>
+#include "memory.h"
 #include <stdint.h>
 #include <stdio.h>
 extern AddrSpace kernel_addr_space;
@@ -8,14 +8,11 @@ uint8_t *page_end = NULL;
 void *new_page(size_t nr_page) {
   uint8_t *ret = page_end;
   page_end -= nr_page * PGSIZE;
-  Log("alloc %d pages, paddr from %x to %x", (int)nr_page,
-      (unsigned)(uint64_t)page_end, (unsigned)(uint64_t)ret);
   return ret;
 }
 
 #ifdef HAS_VME
 static void *pg_alloc(int n) {
-  Log("n == %d", n);
   void *page_addr = (uint8_t *)new_page(n) - PGSIZE * n;
   memset(page_addr, PGSIZE, 0);
   return page_addr;
