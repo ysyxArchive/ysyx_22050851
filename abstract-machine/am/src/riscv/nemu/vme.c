@@ -38,7 +38,7 @@ bool vme_init(void *(*pgalloc_f)(int), void (*pgfree_f)(void *)) {
   for (i = 0; i < LENGTH(segments); i++) {
     void *va = segments[i].start;
     for (; va < segments[i].end; va += PGSIZE) {
-      map(&kernel_addr_space, va, va, 0);
+      map(&kernel_addr_space, va, va, 1);
     }
   }
 
