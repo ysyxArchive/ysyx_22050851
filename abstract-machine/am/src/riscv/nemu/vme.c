@@ -69,7 +69,6 @@ void __am_switch(Context *c) {
     set_satp(c->pdir);
   }
 }
-
 void map(AddrSpace *as, void *va, void *pa, int prot) {
   uint64_t vaint = (uint64_t)va;
   // assert high position is equal
@@ -92,11 +91,11 @@ void map(AddrSpace *as, void *va, void *pa, int prot) {
     table1[vpn[1]] = (BITS(newpage, 55, 12) << 10) | 1;
   }
   PTE *table2 = (PTE *)PTEPPN(table1[vpn[1]]);
-  table2[vpn[0]] = BITS((uintptr_t)pa, 55, 12) << 10 | 1 | (prot && (0x7 << 1));
+  table2[vpn[0]] = BITS((uintptr_t)pa, 55, 12) << 10 | 1 | ((!!prot) << 4) | (0x7 << 1);
 }
 
 Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
-  
+
   Context c = {
       .mepc = (uint64_t)entry, .mstatus = 0xa00001800, .pdir = as->ptr};
   memcpy(kstack.start, &c, sizeof(c));
