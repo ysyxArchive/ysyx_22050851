@@ -83,7 +83,8 @@ void map(AddrSpace *as, void *va, void *pa, int prot) {
   // 二级页表
   if (!PTEVALID(((PTE *)as->ptr)[vpn[2]])) {
     uintptr_t newpage = (uintptr_t)pgalloc_usr(1);
-    ((PTE *)as->ptr)[vpn[2]] = (BITS(newpage, 55, 12) << 10) | 1;
+    ((PTE *)as->ptr)[vpn[2]] =
+        (BITS(newpage, 55, 12) << 10) | 1 | (prot && (0x7 << 1));
   }
   PTE *table1 = (PTE *)PTEPPN(((PTE *)(as->ptr))[vpn[2]]);
   // 三级页表
@@ -96,7 +97,8 @@ void map(AddrSpace *as, void *va, void *pa, int prot) {
 }
 
 Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
-  Context c = {.mepc = (uint64_t)entry, .mstatus = 0xa00001800, .pdir = as->ptr};
+  Context c = {
+      .mepc = (uint64_t)entry, .mstatus = 0xa00001800, .pdir = as->ptr};
   memcpy(kstack.start, &c, sizeof(c));
   return kstack.start;
 }
