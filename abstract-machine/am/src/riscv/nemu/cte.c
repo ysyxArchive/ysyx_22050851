@@ -6,7 +6,7 @@ extern void __am_get_cur_as(Context *c);
 extern void __am_switch(Context *c);
 
 Context *__am_irq_handle(Context *c) {
-  __am_get_cur_as(c);
+  __am_switch(c);
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
@@ -20,7 +20,7 @@ Context *__am_irq_handle(Context *c) {
       break;
     }
   }
-  __am_switch(c);
+  __am_get_cur_as(c);
   return c;
 }
 
