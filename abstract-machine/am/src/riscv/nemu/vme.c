@@ -32,7 +32,7 @@ bool vme_init(void *(*pgalloc_f)(int), void (*pgfree_f)(void *)) {
   pgalloc_usr = pgalloc_f;
   pgfree_usr = pgfree_f;
 
-  kernel_addr_space.ptr = pgalloc_f(PGSIZE);
+  kernel_addr_space.ptr = pgalloc_f(1);
 
   int i;
   for (i = 0; i < LENGTH(segments); i++) {
@@ -43,13 +43,14 @@ bool vme_init(void *(*pgalloc_f)(int), void (*pgfree_f)(void *)) {
   }
 
   set_satp(kernel_addr_space.ptr);
+  printf("kernel addr dir %p\n", kernel_addr_space.ptr);
   vme_enable = 1;
 
   return true;
 }
 
 void protect(AddrSpace *as) {
-  PTE *updir = (PTE *)(pgalloc_usr(PGSIZE));
+  PTE *updir = (PTE *)(pgalloc_usr(1));
   as->ptr = updir;
   as->area = USER_SPACE;
   as->pgsize = PGSIZE;
@@ -95,7 +96,7 @@ void map(AddrSpace *as, void *va, void *pa, int prot) {
 }
 
 Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
-  Context c = {.mepc = (uint64_t)entry, .mstatus = 0xa00001800};
+  Context c = {.mepc = (uint64_t)entry, .mstatus = 0xa00001800, .pdir = as->ptr};
   memcpy(kstack.start, &c, sizeof(c));
   return kstack.start;
 }

@@ -20,6 +20,7 @@
 #define PTEVALID(x) BITS(x, 0, 0)
 #define PTEPPN(x) (BITS(x, 53, 10) << 12)
 typedef uint64_t PTE;
+uintptr_t last = 0;
 paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
   uint64_t vpn[] = {
       BITS(vaddr, 20, 12),
@@ -27,18 +28,29 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
       BITS(vaddr, 38, 30),
   };
   uintptr_t ptentry = BITS(csrs("satp"), 43, 0) << 12;
+  if (last != ptentry) {
+    printf("ptentry %lx -> %lx\n", last, ptentry);
+    last = ptentry;
+  }
   Assert(ptentry, "ptentry is NULL");
   PTE pte1 = paddr_read(ptentry + vpn[2] * sizeof(PTE), sizeof(PTE));
-  Assert(PTEVALID(pte1), "pte level 1 is not available");
+  Assert(PTEVALID(pte1),
+         "pte level 1 is not available when finding for vaddr %lx, pdir is %lx",
+         vaddr, ptentry);
   // 二级页表
   uintptr_t table2 = PTEPPN(pte1);
   Assert(table2, "table2 is NULL");
   PTE pte2 = paddr_read(table2 + vpn[1] * sizeof(PTE), sizeof(PTE));
-  Assert(PTEVALID(pte2), "pte level 2 is not available");
+  Assert(PTEVALID(pte2),
+         "pte level 2 is not available when finding for vaddr %lx, pdir is %lx",
+         vaddr, ptentry);
   // 三级页表
   uintptr_t table3 = PTEPPN(pte2);
   Assert(table3, "table3 is NULL");
   PTE pte3 = paddr_read(table3 + vpn[0] * sizeof(PTE), sizeof(PTE));
-  Assert(PTEVALID(pte3), "pte level 3 is not available");
+  Assert(PTEVALID(pte3),
+         "pte level 3 is not available when finding for vaddr %lx, pdir is %lx",
+         vaddr, ptentry);
+         
   return PTEPPN(pte3) | BITS(vaddr, 11, 0);
 }

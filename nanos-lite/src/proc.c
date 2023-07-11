@@ -28,16 +28,17 @@ void context_kload(PCB *pcb, void *entry, void *arg) {
 
 
 void context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]) {
+  Log("loading bin file %s", filename);
   Assert(argv, "argv is NULL when executing %s", filename);
   Assert(envp, "envp is NULL when executing %s", filename);
   reset_fs();
-  void* stack = new_page(8);
   Area area = {.start=pcb, .end=pcb + 1};
   uintptr_t entry = loader(pcb, filename);
-  pcb->cp = ucontext(NULL, area, (void *)entry);
+  pcb->cp = ucontext(&(pcb->as), area, (void *)entry);
   uint64_t offsetCount = 0;
   int argc = 0;
   int envc = 0;
+  void* stack = pcb->stack + STACK_SIZE;
   for(int i = 0; envp[i]; i++) {
     envc += 1;
     offsetCount += strlen(envp[i]) + 1;  
@@ -76,7 +77,7 @@ PCB* getPCB() {
 
 void init_proc() {
   Log("Initializing processes...");
-  char target_program[] = "/bin/pal";  
+  char target_program[] = "/bin/dummy";  
   executing[0] = getPCB();
   context_kload(executing[0], hello_fun, "p2");
   char* args[] = {target_program, NULL};
