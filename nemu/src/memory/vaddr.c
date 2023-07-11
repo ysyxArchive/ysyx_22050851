@@ -26,7 +26,7 @@ word_t vaddr_read(vaddr_t addr, int len) {
   } else {
     paddr_t paddr = isa_mmu_translate(addr, len, 0);
     Assert(paddr != MEM_RET_FAIL, "paddr translate return fail");
-    Assert(paddr == addr, "paddr translate wrong");
+    Assert(addr > 0x80000000 || paddr != addr, "paddr translate wrong, vaddr: %lx, paddr: %x", addr, paddr);
     data = paddr_read(paddr, len);
   }
   mtrace(true, addr, len, data);
