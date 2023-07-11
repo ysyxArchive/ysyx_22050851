@@ -88,29 +88,17 @@ extern "C" void init_disasm(const char *triple) {
 }
 
 extern "C" void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte) {
-  printf("123\n");
   MCInst inst;
-  printf("123\n");
   llvm::ArrayRef<uint8_t> arr(code, nbyte);
-  printf("123\n");
   uint64_t dummy_size = 0;
-  printf("123\n");
   gDisassembler->getInstruction(inst, dummy_size, arr, pc, llvm::nulls());
-  printf("123\n");
 
   std::string s;
-  printf("123\n");
   raw_string_ostream os(s);
-  printf("123\n");
   gIP->printInst(&inst, pc, "", *gSTI, os);
-  printf("123\n");
 
   int skip = s.find_first_not_of('\t');
-  printf("123\n");
   const char *p = s.c_str() + skip;
-  printf("123\n");
   assert((int)s.length() - skip < size);
-  printf("123\n");
   strcpy(str, p);
-  printf("123\n");
 }
