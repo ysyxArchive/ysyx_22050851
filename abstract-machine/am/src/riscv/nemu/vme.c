@@ -32,7 +32,7 @@ bool vme_init(void *(*pgalloc_f)(int), void (*pgfree_f)(void *)) {
   pgalloc_usr = pgalloc_f;
   pgfree_usr = pgfree_f;
 
-  kernel_addr_space.ptr = pgalloc_f(PGSIZE);
+  kernel_addr_space.ptr = pgalloc_f(1);
 
   int i;
   for (i = 0; i < LENGTH(segments); i++) {
