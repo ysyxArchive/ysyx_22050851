@@ -31,7 +31,7 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
   };
   uintptr_t ptentry = BITS(csrs("satp"), 43, 0) << 12;
   if (last != ptentry) {
-    Log("ptentry %lx -> %lx", last, ptentry);
+    printf("ptentry %lx -> %lx\n", last, ptentry);
     last = ptentry;
   }
   Assert(ptentry, "ptentry is NULL");
