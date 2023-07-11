@@ -40,6 +40,7 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
   Assert(table3, "table3 is NULL");
   PTE pte3 = paddr_read(table3 + vpn[0] * sizeof(PTE), sizeof(PTE));
   Assert(PTEVALID(pte3), "pte level 3 is not available");
-  printf("%lx -> %llx\n", vaddr, PTEPPN(pte3) | BITS(vaddr, 11, 0));
+  if (vaddr < 0x80000000)
+    printf("%lx -> %llx\n", vaddr, PTEPPN(pte3) | BITS(vaddr, 11, 0));
   return PTEPPN(pte3) | BITS(vaddr, 11, 0);
 }
