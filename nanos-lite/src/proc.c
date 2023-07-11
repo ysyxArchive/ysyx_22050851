@@ -34,7 +34,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   void* stack = new_page(8);
   Area area = {.start=pcb, .end=pcb + 1};
   uintptr_t entry = loader(pcb, filename);
-  pcb->cp = ucontext(NULL, area, (void *)entry);
+  pcb->cp = ucontext(&(pcb->as), area, (void *)entry);
   uint64_t offsetCount = 0;
   int argc = 0;
   int envc = 0;
