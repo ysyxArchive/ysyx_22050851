@@ -17,16 +17,17 @@
 #include <isa.h>
 #include <memory/paddr.h>
 #include <tracers.h>
-word_t vaddr_ifetch(vaddr_t addr, int len) { return paddr_read(addr, len); }
 
 word_t vaddr_read(vaddr_t addr, int len) {
   word_t data;
   if (isa_mmu_check_easy() == MMU_DIRECT) {
+    Assert(addr >= CONFIG_MBASE, "vaddr %lx should not direct access", addr);
     data = paddr_read(addr, len);
   } else {
     paddr_t paddr = isa_mmu_translate(addr, len, 0);
     Assert(paddr != MEM_RET_FAIL, "paddr translate return fail");
-    Assert(addr > 0x80000000 || paddr != addr, "paddr translate wrong, vaddr: %lx, paddr: %x", addr, paddr);
+    Assert(addr > CONFIG_MBASE || paddr != addr,
+           "paddr translate wrong, vaddr: %lx, paddr: %x", addr, paddr);
     data = paddr_read(paddr, len);
   }
   mtrace(true, addr, len, data);
@@ -36,6 +37,7 @@ word_t vaddr_read(vaddr_t addr, int len) {
 void vaddr_write(vaddr_t addr, int len, word_t data) {
   mtrace(false, addr, len, data);
   if (isa_mmu_check_easy() == MMU_DIRECT) {
+    Assert(addr >= CONFIG_MBASE, "vaddr %lx should not access", addr);
     paddr_write(addr, len, data);
   } else {
     paddr_t paddr = isa_mmu_translate(addr, len, 0);
@@ -44,3 +46,5 @@ void vaddr_write(vaddr_t addr, int len, word_t data) {
     paddr_write(paddr, len, data);
   }
 }
+
+word_t vaddr_ifetch(vaddr_t addr, int len) { return vaddr_read(addr, len); }
