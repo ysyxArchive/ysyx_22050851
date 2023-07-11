@@ -43,6 +43,7 @@ bool vme_init(void *(*pgalloc_f)(int), void (*pgfree_f)(void *)) {
   }
 
   set_satp(kernel_addr_space.ptr);
+  printf("kernel addr dir %p\n", kernel_addr_space.ptr);
   vme_enable = 1;
 
   return true;

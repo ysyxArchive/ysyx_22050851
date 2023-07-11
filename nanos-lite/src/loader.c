@@ -13,6 +13,7 @@
 #endif
 uintptr_t loader(PCB *pcb, const char *filename) {
   protect(&(pcb->as));
+  Log("new process dir %p", pcb->as.ptr);
   int fd = fs_open(filename, 0, 0);
   fs_lseek(fd, 0, SEEK_SET);
   Elf_Ehdr elfHeader;
