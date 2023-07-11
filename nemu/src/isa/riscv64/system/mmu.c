@@ -21,6 +21,8 @@
 #define PTEPPN(x) (BITS(x, 53, 10) << 12)
 typedef uint64_t PTE;
 paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
+  if (vaddr < 0x80000000)
+    printf("start trans\n");
   uint64_t vpn[] = {
       BITS(vaddr, 20, 12),
       BITS(vaddr, 29, 21),
