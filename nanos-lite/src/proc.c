@@ -51,7 +51,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[],
   }
 
   int tempOffset = 0;
-  while (((uint64_t)stack - offsetCount) % 4) {
+  while (((uint64_t)stack - offsetCount) % 8) {
     offsetCount++;
   }
   *((uint64_t *)(stack - offsetCount) - 1) = (uint64_t)NULL;
