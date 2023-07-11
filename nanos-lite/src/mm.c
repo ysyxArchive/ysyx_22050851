@@ -1,5 +1,5 @@
 #include <common.h>
-#include <memory.h>
+#include "memory.h"
 #include <stdint.h>
 #include <stdio.h>
 extern AddrSpace kernel_addr_space;
@@ -13,7 +13,7 @@ void *new_page(size_t nr_page) {
 
 #ifdef HAS_VME
 static void *pg_alloc(int n) {
-  void *page_addr = new_page(n) - PGSIZE;
+  void *page_addr = new_page(n) - PGSIZE * n;
   memset(page_addr, PGSIZE, 0);
   return page_addr;
 }

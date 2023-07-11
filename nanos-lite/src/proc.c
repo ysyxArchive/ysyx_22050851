@@ -32,13 +32,13 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   Assert(argv, "argv is NULL when executing %s", filename);
   Assert(envp, "envp is NULL when executing %s", filename);
   reset_fs();
-  void* stack = new_page(8);
   Area area = {.start=pcb, .end=pcb + 1};
   uintptr_t entry = loader(pcb, filename);
   pcb->cp = ucontext(&(pcb->as), area, (void *)entry);
   uint64_t offsetCount = 0;
   int argc = 0;
   int envc = 0;
+  void* stack = pcb->stack + STACK_SIZE;
   for(int i = 0; envp[i]; i++) {
     envc += 1;
     offsetCount += strlen(envp[i]) + 1;  
