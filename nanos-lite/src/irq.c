@@ -44,14 +44,14 @@ static Context *do_event(Event e, Context *c) {
     switch (c->GPR1) {
     case SYS_exit:
       strace("syscall SYS_exit %d", c->GPR2);
-      if(c->GPR2 == 0){
-        PCB* newpcb = getPCB();
-        context_uload(newpcb, "/bin/nterm", NULLARR, NULLARR);
-        replacePCB(newpcb);
-        return schedule(c);
-      } else { 
+      // if(c->GPR2 == 0){
+      //   PCB* newpcb = getPCB();
+      //   context_uload(newpcb, "/bin/nterm", NULLARR, NULLARR);
+      //   replacePCB(newpcb);
+      //   return schedule(c);
+      // } else { 
         halt(c->GPR2);
-      }
+      // }
       break;
     case SYS_yield:
       strace("syscall SYS_yield");
