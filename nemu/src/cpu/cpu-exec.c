@@ -62,7 +62,6 @@ static void exec_once(Decode *s, vaddr_t pc) {
   // update pc
   cpu.pc = s->dnpc;
 
-#ifdef CONFIG_ITRACE
   char *p = s->logbuf;
   p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
   int ilen = s->snpc - s->pc;
@@ -83,7 +82,6 @@ static void exec_once(Decode *s, vaddr_t pc) {
               MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc),
               (uint8_t *)&s->isa.inst.val, ilen);
   add_inst_to_ring(s->logbuf);
-#endif
 }
 
 static void execute(uint64_t n) {
