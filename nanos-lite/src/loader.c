@@ -44,6 +44,7 @@ uintptr_t loader(PCB *pcb, const char *filename) {
       (max_addr - min_addr) / PGSIZE + ((max_addr - min_addr) % PGSIZE != 0);
   uint8_t *pages =
       (uint8_t *)((uint64_t)new_page(pages_need) - PGSIZE * pages_need);
+  Log("alloc pages for addr from %lx to %lx", min_addr, min_addr + pages_need * PGSIZE);
   for (int i = 0; i < pages_need; i++) {
     map(&(pcb->as), (void *)(min_addr + i * PGSIZE), pages + i * PGSIZE, 1);
   }

@@ -51,5 +51,6 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
   Assert(PTEVALID(pte3),
          "pte level 3 is not available when finding for vaddr %lx, pdir is %lx",
          vaddr, ptentry);
+         
   return PTEPPN(pte3) | BITS(vaddr, 11, 0);
 }
