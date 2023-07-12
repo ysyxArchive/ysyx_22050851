@@ -24,11 +24,9 @@ typedef long unsigned int size_t;
 static bool difftest_working = false;
 #define NULL 0
 
-void (*ref_difftest_memcpy)(paddr_t addr,
-                            void* buf,
-                            size_t n,
+void (*ref_difftest_memcpy)(paddr_t addr, void *buf, size_t n,
                             bool direction) = NULL;
-void (*ref_difftest_regcpy)(void* dut, bool direction) = NULL;
+void (*ref_difftest_regcpy)(void *dut, bool direction) = NULL;
 void (*ref_difftest_exec)(uint64_t n) = NULL;
 void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
 
@@ -38,7 +36,7 @@ static int skip_dut_nr_inst = 0;
 // this is used to let ref skip instructions which
 // can not produce consistent behavior with NEMU
 void difftest_skip_ref() {
-  if(!difftest_working){
+  if (!difftest_working) {
     return;
   }
   is_skip_ref = true;
@@ -59,7 +57,7 @@ void difftest_skip_ref() {
 //   Let REF run `nr_ref` instructions first.
 //   We expect that DUT will catch up with REF within `nr_dut` instructions.
 void difftest_skip_dut(int nr_ref, int nr_dut) {
-  if(!difftest_working){
+  if (!difftest_working) {
     return;
   }
   skip_dut_nr_inst += nr_dut;
@@ -69,10 +67,10 @@ void difftest_skip_dut(int nr_ref, int nr_dut) {
   }
 }
 
-void init_difftest(char* ref_so_file, long img_size, int port) {
+void init_difftest(char *ref_so_file, long img_size, int port) {
   assert(ref_so_file != NULL);
 
-  void* handle;
+  void *handle;
   handle = dlopen(ref_so_file, RTLD_LAZY);
   assert(handle);
 
@@ -104,8 +102,25 @@ void init_difftest(char* ref_so_file, long img_size, int port) {
   ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
 }
 
-static void checkregs(CPU_state* ref, vaddr_t pc) {
+static void checkregs(CPU_state *ref, vaddr_t pc) {
   if (!isa_difftest_checkregs(ref, pc)) {
+    nemu_state.state = NEMU_ABORT;
+    nemu_state.halt_pc = pc;
+    isa_reg_display();
+  }
+}
+word_t pmem_read(paddr_t addr, int len);
+paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type);
+static void checkmem(vaddr_t addr, size_t len) {
+  uint64_t ref;
+  paddr_t paddr = isa_mmu_translate(addr, len, NULL);
+  for (size_t i = 0; i < len; i += 8) {
+    ref_difftest_memcpy(paddr + i, &ref, 8, DIFFTEST_TO_REF);
+    uint64_t actdata = pmem_read(paddr, 8);
+    if (ref != actdata) {
+      Log("difftest check mem failed at paddr = %x, right = %x, wrong = %x",
+          paddr, ref, actdata);
+    }
     nemu_state.state = NEMU_ABORT;
     nemu_state.halt_pc = pc;
     isa_reg_display();
@@ -113,7 +128,7 @@ static void checkregs(CPU_state* ref, vaddr_t pc) {
 }
 
 void difftest_step(vaddr_t pc, vaddr_t npc) {
-  if(!difftest_working){
+  if (!difftest_working) {
     return;
   }
   CPU_state ref_r;
