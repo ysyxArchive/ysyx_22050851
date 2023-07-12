@@ -21,10 +21,10 @@ void init_rand();
 void init_log(const char *log_file);
 void init_ftrace(char *elflocation[], const int elfCount);
 void init_mem();
-void init_difftest(char *ref_so_file, long img_size, int port);
+void init_difftest(char* ref_so_file, long img_size, int port);
 void init_device();
 void init_sdb();
-void init_disasm(const char *triple);
+void init_disasm(const char* triple);
 
 static void welcome() {
   Log("Trace: %s", MUXDEF(CONFIG_TRACE, ANSI_FMT("ON", ANSI_FG_GREEN),
@@ -54,10 +54,10 @@ static int difftest_port = 1234;
 static long load_img() {
   if (img_file == NULL) {
     Log("No image is given. Use the default build-in image.");
-    return 4096; // built-in image size
+    return 4096;  // built-in image size
   }
 
-  FILE *fp = fopen(img_file, "rb");
+  FILE* fp = fopen(img_file, "rb");
   Assert(fp, "Can not open '%s'", img_file);
 
   fseek(fp, 0, SEEK_END);
@@ -73,7 +73,7 @@ static long load_img() {
   return size;
 }
 
-static int parse_args(int argc, char *argv[]) {
+static int parse_args(int argc, char* argv[]) {
   const struct option table[] = {
       {"batch", no_argument, NULL, 'b'},
       {"log", required_argument, NULL, 'l'},
@@ -118,7 +118,7 @@ static int parse_args(int argc, char *argv[]) {
   return 0;
 }
 
-void init_monitor(int argc, char *argv[]) {
+void init_monitor(int argc, char* argv[]) {
   /* Perform some global initialization. */
 
   /* Parse arguments. */
@@ -164,7 +164,7 @@ void init_monitor(int argc, char *argv[]) {
   /* Display welcome message. */
   welcome();
 }
-#else // CONFIG_TARGET_AM
+#else  // CONFIG_TARGET_AM
 static long load_img() {
   extern char bin_start, bin_end;
   size_t size = &bin_end - &bin_start;
