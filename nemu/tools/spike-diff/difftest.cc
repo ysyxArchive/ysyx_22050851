@@ -12,9 +12,9 @@
  *
  * See the Mulan PSL v2 for more details.
  ***************************************************************************************/
+#include "../../include/common.h"
 #include "mmu.h"
 #include "sim.h"
-#include "../../include/common.h"
 #include <difftest-def.h>
 
 #ifdef CONFIG_ISA_riscv32
@@ -100,7 +100,10 @@ void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
   if (direction == DIFFTEST_TO_REF) {
     s->diff_memcpy(addr, buf, n);
   } else {
-    assert(0);
+    mmu_t *mmu = p->get_mmu();
+    for (size_t i = 0; i < n; i++) {
+      ((uint8_t *)buf)[i] = mmu->load<uint8_t>(dest + i);
+    }
   }
 }
 
