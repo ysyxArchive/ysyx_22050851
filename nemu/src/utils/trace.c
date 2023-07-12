@@ -2,6 +2,7 @@
 #include <elf.h>
 #include <string.h>
 #include "device/map.h"
+#include <tracers.h>
 //  iringbuf -------------------------------------------------
 #define RING_SIZE 16
 
@@ -77,8 +78,8 @@ void dtrace(bool is_read,
 void etrace(bool is_call, paddr_t source, word_t NO, paddr_t target) {
 #ifdef CONFIG_ETRACE
   char buf[200];
-  sprintf(buf, "detected exception %s, from 0x%08x to 0x%08x, exception number is %ld",
-              is_call ? "call" : "ret ", source, target, NO);
+  sprintf(buf, "detected exception %s, from 0x%08x to 0x%08x, exception number is %ld, mstatus number is %lx",
+              is_call ? "call" : "ret ", source, target, NO, csrs("mstatus"));
   Log(ANSI_FMT("%s", ANSI_FG_WHITE), buf);
 #endif
   return;
