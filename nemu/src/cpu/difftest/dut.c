@@ -158,6 +158,7 @@ void difftest_step(vaddr_t pc, vaddr_t npc) {
   checkregs(&ref_r, npc);
 
   if (mm_write) {
+    Log("checking ");
     checkmem(mm_write, 8);
     mm_write = 0;
   }
