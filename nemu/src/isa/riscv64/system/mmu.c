@@ -22,8 +22,6 @@
 typedef uint64_t PTE;
 uintptr_t last = 0;
 paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
-  if (isa_mmu_check_easy() == MMU_DIRECT)
-    return vaddr;
   uint64_t vpn[] = {
       BITS(vaddr, 20, 12),
       BITS(vaddr, 29, 21),
@@ -53,6 +51,6 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
   Assert(PTEVALID(pte3),
          "pte level 3 is not available when finding for vaddr %lx, pdir is %lx",
          vaddr, ptentry);
-
+         
   return PTEPPN(pte3) | BITS(vaddr, 11, 0);
 }

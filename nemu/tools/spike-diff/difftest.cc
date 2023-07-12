@@ -97,15 +97,10 @@ void sim_t::diff_memcpy(reg_t dest, void *src, size_t n) {
 extern "C" {
 
 void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
-  Log("%x", addr);
   if (direction == DIFFTEST_TO_REF) {
     s->diff_memcpy(addr, buf, n);
   } else {
-    // assert(0);
-    mmu_t *mmu = p->get_mmu();
-    for (size_t i = 0; i < n; i++) {
-      ((uint8_t *)buf)[i] = mmu->load<uint8_t>(addr + i);
-    }
+    assert(0);
   }
 }
 

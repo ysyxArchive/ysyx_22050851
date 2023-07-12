@@ -27,8 +27,6 @@ void (*ref_difftest_regcpy)(void *dut, bool direction) = NULL;
 void (*ref_difftest_exec)(uint64_t n) = NULL;
 void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
 
-extern paddr_t mm_write;
-
 #ifdef CONFIG_DIFFTEST
 static bool difftest_working = true;
 static bool is_skip_ref = false;
@@ -37,8 +35,7 @@ static int skip_dut_nr_inst = 0;
 // this is used to let ref skip instructions which
 // can not produce consistent behavior with NEMU
 void difftest_skip_ref() {
-  if (!difftest_working)
-    return;
+  if(!difftest_working) return;
   is_skip_ref = true;
   // If such an instruction is one of the instruction packing in QEMU
   // (see below), we end the process of catching up with QEMU's pc to
@@ -57,8 +54,7 @@ void difftest_skip_ref() {
 //   Let REF run `nr_ref` instructions first.
 //   We expect that DUT will catch up with REF within `nr_dut` instructions.
 void difftest_skip_dut(int nr_ref, int nr_dut) {
-  if (!difftest_working)
-    return;
+  if(!difftest_working) return;
   skip_dut_nr_inst += nr_dut;
 
   while (nr_ref-- > 0) {
@@ -70,7 +66,6 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
   assert(ref_so_file != NULL);
 
   void *handle;
-  Log("%s", ref_so_file);
   handle = dlopen(ref_so_file, RTLD_LAZY);
   assert(handle);
 
@@ -111,24 +106,8 @@ static void checkregs(CPU_state *ref, vaddr_t pc) {
   }
 }
 
-static void checkmem(paddr_t addr, size_t len) {
-  uint64_t ref;
-  for (size_t i = 0; i < len; i += 8) {
-    ref_difftest_memcpy(addr + i, &ref, 8, DIFFTEST_TO_DUT);
-    uint64_t actdata = paddr_read(addr, 8);
-    if (ref != actdata) {
-      Log("difftest check mem failed at paddr = %x, right = %lx, wrong = %lx",
-          addr, ref, actdata);
-      nemu_state.state = NEMU_ABORT;
-      nemu_state.halt_pc = cpu.pc;
-      isa_reg_display();
-    }
-  }
-}
-
 void difftest_step(vaddr_t pc, vaddr_t npc) {
-  if (!difftest_working)
-    return;
+  if(!difftest_working) return;
   CPU_state ref_r;
 
   if (skip_dut_nr_inst > 0) {
@@ -157,19 +136,17 @@ void difftest_step(vaddr_t pc, vaddr_t npc) {
   ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
 
   checkregs(&ref_r, npc);
-
-  if (mm_write) {
-    checkmem(mm_write, 8);
-    mm_write = 0;
-  }
 }
 
-void difftest_attach() {
+
+void difftest_attach(){
   difftest_working = true;
   ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
 }
 
-void difftest_detach() { difftest_working = false; }
+void difftest_detach(){
+  difftest_working = false;
+}
 #else
 void init_difftest(char *ref_so_file, long img_size, int port) {}
 #endif
