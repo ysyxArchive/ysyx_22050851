@@ -53,7 +53,7 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
   Assert(PTEVALID(pte3),
          "pte level 3 is not available when finding for vaddr %lx, pdir is %lx",
          vaddr, ptentry);
-  if (vaddr < 0x8000000)
+  if (vaddr < 0x80000000)
     Log("vaddr: %lx -> paddr: %llx", vaddr, PTEPPN(pte3) | BITS(vaddr, 11, 0));
   return PTEPPN(pte3) | BITS(vaddr, 11, 0);
 }
