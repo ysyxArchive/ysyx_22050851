@@ -118,10 +118,10 @@ static void checkmem(paddr_t addr, size_t len) {
     if (ref != actdata) {
       Log("difftest check mem failed at paddr = %x, right = %lx, wrong = %lx",
           addr, ref, actdata);
+      nemu_state.state = NEMU_ABORT;
+      nemu_state.halt_pc = cpu.pc;
+      isa_reg_display();
     }
-    nemu_state.state = NEMU_ABORT;
-    nemu_state.halt_pc = cpu.pc;
-    isa_reg_display();
   }
 }
 
