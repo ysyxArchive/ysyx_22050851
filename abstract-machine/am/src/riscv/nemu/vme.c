@@ -83,13 +83,13 @@ void map(AddrSpace *as, void *va, void *pa, int prot) {
   // 二级页表
   if (!PTEVALID(((PTE *)as->ptr)[vpn[2]])) {
     uintptr_t newpage = (uintptr_t)pgalloc_usr(1);
-    ((PTE *)as->ptr)[vpn[2]] = (BITS(newpage, 55, 12) << 10) | 1 | 0x11;
+    ((PTE *)as->ptr)[vpn[2]] = (BITS(newpage, 55, 12) << 10) | 1;
   }
   PTE *table1 = (PTE *)PTEPPN(((PTE *)(as->ptr))[vpn[2]]);
   // 三级页表
   if (!PTEVALID(table1[vpn[1]])) {
     uintptr_t newpage = (uintptr_t)pgalloc_usr(1);
-    table1[vpn[1]] = (BITS(newpage, 55, 12) << 10) | 1 | 0x11;
+    table1[vpn[1]] = (BITS(newpage, 55, 12) << 10) | 1;
   }
   PTE *table2 = (PTE *)PTEPPN(table1[vpn[1]]);
   table2[vpn[0]] = BITS((uintptr_t)pa, 55, 12) << 10 | 0x1F; //1 | (0x7 << 1) | ((!!prot) << 4);
