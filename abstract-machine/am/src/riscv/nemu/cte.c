@@ -17,6 +17,8 @@ Context *__am_irq_handle(Context *c) {
       c = user_handler(ev, c);
       break;
     default:
+      printf("unkown error code %x", c->mcause);
+      halt(1);
       ev.event = EVENT_ERROR;
       break;
     }
