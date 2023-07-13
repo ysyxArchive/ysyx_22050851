@@ -38,13 +38,17 @@ uintptr_t loader(PCB *pcb, const char *filename) {
                    ? prog_header_buf.p_vaddr + prog_header_buf.p_memsz
                    : max_addr;
   }
+  // determine minmax
   min_addr = min_addr - min_addr % PGSIZE;
+  max_addr =
+      max_addr + ((max_addr % PGSIZE) ? (PGSIZE - max_addr % PGSIZE) : 0);
+  pcb->max_brk = max_addr;
   // alloc pages
-  int pages_need =
-      (max_addr - min_addr) / PGSIZE + ((max_addr - min_addr) % PGSIZE != 0);
+  int pages_need = (max_addr - min_addr) / PGSIZE;
   uint8_t *pages =
       (uint8_t *)((uint64_t)new_page(pages_need) - PGSIZE * pages_need);
-  Log("alloc pages for addr from %x to %x", (uint32_t)min_addr, (uint32_t)(min_addr + pages_need * PGSIZE));
+  Log("alloc pages for addr from %x to %x", (uint32_t)min_addr,
+      (uint32_t)max_addr);
   for (int i = 0; i < pages_need; i++) {
     map(&(pcb->as), (void *)(min_addr + i * PGSIZE), pages + i * PGSIZE, 1);
   }

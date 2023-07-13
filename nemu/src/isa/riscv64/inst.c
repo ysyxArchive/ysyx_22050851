@@ -24,6 +24,8 @@
 #define Mr vaddr_read
 #define Mw vaddr_write
 
+extern uint8_t priv_status;
+
 enum {
   TYPE_I, TYPE_U, TYPE_S, TYPE_J,
   TYPE_R, TYPE_B, TYPE_N
@@ -94,7 +96,7 @@ static int decode_exec(Decode *s) {
   INSTPAT("??????? ????? ????? 101 ????? 11100 11", csrrwi , I, TODO());
   INSTPAT("??????? ????? ????? 110 ????? 11100 11", csrrsi , I, TODO());
   INSTPAT("??????? ????? ????? 111 ????? 11100 11", csrrci , I, TODO());
-  INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , I, etrace(false, cpu.pc, csrs("mcause"), csrs("mepc")); s->dnpc = csrs("mepc"); csrs("mstatus") = ((csrs("mstatus") & 0xFFFFF0000) | 0x0080));
+  INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , I, word_t mstatus = csrs("mstatus"); csrs("mstatus") = ((mstatus & 0xFFFFF0000) | 0x0080); s->dnpc = csrs("mepc"); priv_status = ((mstatus >> 11) & 3); etrace(false, cpu.pc, mstatus));
 
   INSTPAT("0000000 ????? ????? 000 ????? 01100 11", add    , R, Reg(dest) = src1 + src2);
   INSTPAT("0100000 ????? ????? 000 ????? 01100 11", sub    , R, Reg(dest) = src1 - src2);

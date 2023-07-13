@@ -1,5 +1,6 @@
-#include <common.h>
 #include "memory.h"
+#include <common.h>
+#include <proc.h>
 #include <stdint.h>
 #include <stdio.h>
 extern AddrSpace kernel_addr_space;
@@ -20,9 +21,22 @@ static void *pg_alloc(int n) {
 #endif
 
 void free_page(void *p) { panic("not implement yet"); }
-
+extern PCB *current;
 /* The brk() system call handler. */
-int mm_brk(uintptr_t brk) { return 0; }
+int mm_brk(uintptr_t brk) {
+  if (brk > current->max_brk) {
+    unsigned addr_to_alloc = brk - current->max_brk;
+    unsigned pages_to_alloc =
+        addr_to_alloc / PGSIZE + (addr_to_alloc % PGSIZE != 0);
+    uint64_t addr = (uintptr_t)pg_alloc(pages_to_alloc);
+    for (int i = 0; i < pages_to_alloc; i++) {
+      map(&(current->as), (void *)(current->max_brk + i * PGSIZE),
+          (void *)(addr + i * PGSIZE), 1);
+    }
+    current->max_brk += pages_to_alloc * PGSIZE;
+  }
+  return 0;
+}
 
 void init_mm() {
   pf = (void *)ROUNDUP(heap.start, PGSIZE);
