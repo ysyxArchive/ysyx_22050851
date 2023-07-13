@@ -23,7 +23,6 @@
 #define Csr(i) csr(i)
 #define Mr vaddr_read
 #define Mw vaddr_write
-bool just_enable_intr = false;
 extern uint8_t priv_status;
 
 enum {
@@ -102,7 +101,6 @@ static int decode_exec(Decode *s) {
     s->dnpc = csrs("mepc"); 
     priv_status = ((mstatus >> 11) & 3); 
     etrace(false, cpu.pc, mstatus);
-    just_enable_intr = true;
   );
 
   INSTPAT("0000000 ????? ????? 000 ????? 01100 11", add    , R, Reg(dest) = src1 + src2);
@@ -154,11 +152,6 @@ static int decode_exec(Decode *s) {
 #ifdef CONFIG_ITRACE
   Log("pc= %lx, dnpc= %lx, snpc= %lx", s->pc, s->dnpc, s->snpc);
 #endif
-  word_t intr = isa_query_intr();
-  if (!just_enable_intr && intr != INTR_EMPTY) {
-    s->dnpc = isa_raise_intr(intr, cpu.pc);
-  }
-  just_enable_intr = false;
   return 0;
 }
 
