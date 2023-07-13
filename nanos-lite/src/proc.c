@@ -78,7 +78,7 @@ PCB *getPCB() { return &(pcb[pcbcount++]); }
 
 void init_proc() {
   Log("Initializing processes...");
-  char target_program[] = "/bin/dummy";
+  char target_program[] = "/bin/pal";
   executing[0] = getPCB();
   context_kload(executing[0], hello_fun, "p2");
   char *args[] = {target_program, NULL};
