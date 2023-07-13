@@ -13,6 +13,7 @@ Context *__am_irq_handle(Context *c) {
     switch (c->mcause) {
     case 8:
     case 11:
+      halt(1);
       ev.event = EVENT_YIELD;
       c->mepc += 4;
       c = user_handler(ev, c);
