@@ -8,18 +8,18 @@ extern void __am_switch(Context *c);
 Context *__am_irq_handle(Context *c) {
   __am_get_cur_as(c);
   if (user_handler) {
-    // Event ev = {0};
+    Event ev = {0};
     switch (c->mcause) {
-    // case 8:
-    // case 11:
-    //   ev.event = EVENT_YIELD;
-    //   c->mepc += 4;
-    //   c = user_handler(ev, c);
-    //   break;
+    case 8:
+    case 11:
+      ev.event = EVENT_YIELD;
+      c->mepc += 4;
+      c = user_handler(ev, c);
+      break;
     default:
       printf("unkown error code %x", c->mcause);
       halt(1);
-      // ev.event = EVENT_ERROR;
+      ev.event = EVENT_ERROR;
       break;
     }
   }

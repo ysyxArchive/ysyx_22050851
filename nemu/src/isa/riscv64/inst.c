@@ -155,7 +155,7 @@ static int decode_exec(Decode *s) {
 #endif
   word_t intr = isa_query_intr();
   if (intr != INTR_EMPTY) {
-    cpu.pc = isa_raise_intr(intr, cpu.pc);
+    s->dnpc = isa_raise_intr(intr, cpu.pc);
   }
   return 0;
 }
