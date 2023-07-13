@@ -10,6 +10,7 @@ Context *__am_irq_handle(Context *c) {
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
+    case 8:
     case 11:
       ev.event = EVENT_YIELD;
       c->mepc += 4;
@@ -37,8 +38,8 @@ bool cte_init(Context *(*handler)(Event, Context *)) {
 }
 
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
-  Context c = {.mepc=(uint64_t)entry, .mstatus=0xa00001800};
-  c.GPR2=(uint64_t)arg;
+  Context c = {.mepc = (uint64_t)entry, .mstatus = 0xa00001800};
+  c.GPR2 = (uint64_t)arg;
   memcpy(kstack.start, &c, sizeof(c));
   return kstack.start;
 }
