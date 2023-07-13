@@ -2,6 +2,7 @@
 #include <common.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <proc.h>
 extern AddrSpace kernel_addr_space;
 void *pf = NULL;
 uint8_t *page_end = NULL;
@@ -20,10 +21,10 @@ static void *pg_alloc(int n) {
 #endif
 
 void free_page(void *p) { panic("not implement yet"); }
-
+extern PCB* current;
 /* The brk() system call handler. */
 int mm_brk(uintptr_t brk) {
-  Log("brk: %x", (uint32_t)brk);
+  Log("brk: %x, maxbrk %x", (uint32_t)brk, (uint32_t)current->max_brk);
   return 0;
 }
 
