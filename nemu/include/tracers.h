@@ -1,6 +1,7 @@
 
 #include "device/map.h"
 #include <common.h>
+#include "isa.h"
 // copy the source to the ringbuf
 void add_inst_to_ring(char *source);
 

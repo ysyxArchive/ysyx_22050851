@@ -56,6 +56,7 @@ void protect(AddrSpace *as) {
   as->pgsize = PGSIZE;
   // map kernel space
   memcpy(updir, kernel_addr_space.ptr, PGSIZE);
+  map(as, updir, updir, 1);
 }
 
 void unprotect(AddrSpace *as) {}
@@ -91,13 +92,13 @@ void map(AddrSpace *as, void *va, void *pa, int prot) {
     table1[vpn[1]] = (BITS(newpage, 55, 12) << 10) | 1;
   }
   PTE *table2 = (PTE *)PTEPPN(table1[vpn[1]]);
-  table2[vpn[0]] = BITS((uintptr_t)pa, 55, 12) << 10 | 1 | (0x7 << 1) | ((!!prot) << 4);
+  table2[vpn[0]] = BITS((uintptr_t)pa, 55, 12) << 10 | 0xDF;
 }
 
 Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
 
   Context c = {
-      .mepc = (uint64_t)entry, .mstatus = 0xa00001800, .pdir = as->ptr};
+      .mepc = (uint64_t)entry, .mstatus = 0xa000c0000, .pdir = as->ptr};
   memcpy(kstack.start, &c, sizeof(c));
   return kstack.start;
 }
