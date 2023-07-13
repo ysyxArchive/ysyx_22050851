@@ -15,12 +15,12 @@
 
 #include <isa.h>
 #include <tracers.h>
+static uint8_t priv_status = PRIV_M;
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   word_t mstatus = csrs("mstatus");
-  bool is_u = mstatus & 0xff;
   csrs("mepc") = cpu.pc;
   csrs("mstatus") = mstatus >> 8 << 8;
-  csrs("mcause") = is_u ? 0x8 : 0xb;
+  csrs("mcause") = priv_status ? 0x8 : 0xb;
   etrace(true, cpu.pc, mstatus);
   return epc;
 }
