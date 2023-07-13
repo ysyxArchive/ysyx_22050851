@@ -19,7 +19,7 @@ uint8_t priv_status = PRIV_M;
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   word_t mstatus = csrs("mstatus");
   csrs("mepc") = cpu.pc;
-  csrs("mstatus") = mstatus >> 8 << 8;
+  csrs("mstatus") = mstatus >> 8 << 8 | (priv_status << 11);
   csrs("mcause") = priv_status == PRIV_U ? 0x8 : 0xb;
   etrace(true, cpu.pc, mstatus);
   return epc;
