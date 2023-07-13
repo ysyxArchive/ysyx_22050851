@@ -21,6 +21,7 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   csrs("mepc") = cpu.pc;
   csrs("mstatus") = mstatus >> 8 << 8 | (priv_status << 11);
   csrs("mcause") = priv_status == PRIV_U ? 0x8 : 0xb;
+  priv_status = PRIV_M;
   etrace(true, cpu.pc, mstatus);
   return epc;
 }
