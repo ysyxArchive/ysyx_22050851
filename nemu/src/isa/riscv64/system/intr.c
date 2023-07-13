@@ -15,7 +15,7 @@
 
 #include <isa.h>
 #include <tracers.h>
-static uint8_t priv_status = PRIV_M;
+uint8_t priv_status = PRIV_M;
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   word_t mstatus = csrs("mstatus");
   csrs("mepc") = cpu.pc;
