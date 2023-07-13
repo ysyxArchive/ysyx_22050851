@@ -96,7 +96,13 @@ static int decode_exec(Decode *s) {
   INSTPAT("??????? ????? ????? 101 ????? 11100 11", csrrwi , I, TODO());
   INSTPAT("??????? ????? ????? 110 ????? 11100 11", csrrsi , I, TODO());
   INSTPAT("??????? ????? ????? 111 ????? 11100 11", csrrci , I, TODO());
-  INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , I, word_t mstatus = csrs("mstatus"); csrs("mstatus") = ((mstatus & 0xFFFFF0000) | 0x0080); s->dnpc = csrs("mepc"); priv_status = ((mstatus >> 11) & 3); etrace(false, cpu.pc, mstatus));
+  INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , I, 
+    word_t mstatus = csrs("mstatus"); 
+    csrs("mstatus") = ((mstatus & 0xFFFFF0000) | 0x0080); 
+    s->dnpc = csrs("mepc"); 
+    priv_status = ((mstatus >> 11) & 3); 
+    etrace(false, cpu.pc, mstatus)
+  );
 
   INSTPAT("0000000 ????? ????? 000 ????? 01100 11", add    , R, Reg(dest) = src1 + src2);
   INSTPAT("0100000 ????? ????? 000 ????? 01100 11", sub    , R, Reg(dest) = src1 - src2);
@@ -138,7 +144,7 @@ static int decode_exec(Decode *s) {
   INSTPAT("??????? ????? ????? 110 ????? 11000 11", bltu   , B, s->dnpc = src1 < src2 ? s->pc + imm : s->snpc);
   INSTPAT("??????? ????? ????? 111 ????? 11000 11", bgeu   , B, s->dnpc = src1 >= src2 ? s->pc + imm : s->snpc);
   
-  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, s->dnpc = isa_raise_intr(0xb, csrs("mtvec")));
+  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, s->dnpc = isa_raise_intr(priv_status == PRIV_U ? 0x8 : 0xb, csrs("mtvec")));
   INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, NEMUTRAP(s->pc, Reg(10))); // R(10) is $a0
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    , N, INV(s->pc));
   INSTPAT_END();
@@ -147,6 +153,10 @@ static int decode_exec(Decode *s) {
 #ifdef CONFIG_ITRACE
   Log("pc= %lx, dnpc= %lx, snpc= %lx", s->pc, s->dnpc, s->snpc);
 #endif
+  word_t intr = isa_query_intr();
+  if (intr != INTR_EMPTY) {
+    cpu.pc = isa_raise_intr(intr, cpu.pc);
+  }
   return 0;
 }
 
