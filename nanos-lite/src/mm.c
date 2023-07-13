@@ -23,7 +23,7 @@ void free_page(void *p) { panic("not implement yet"); }
 
 /* The brk() system call handler. */
 int mm_brk(uintptr_t brk) {
-  Log("brk: %lx", brk);
+  Log("brk: %x", (uint32_t)brk);
   return 0;
 }
 
