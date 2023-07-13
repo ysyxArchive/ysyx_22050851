@@ -1,5 +1,5 @@
-#include <common.h>
 #include "memory.h"
+#include <common.h>
 #include <stdint.h>
 #include <stdio.h>
 extern AddrSpace kernel_addr_space;
@@ -22,7 +22,10 @@ static void *pg_alloc(int n) {
 void free_page(void *p) { panic("not implement yet"); }
 
 /* The brk() system call handler. */
-int mm_brk(uintptr_t brk) { return 0; }
+int mm_brk(uintptr_t brk) {
+  Log("brk: %lx", brk);
+  return 0;
+}
 
 void init_mm() {
   pf = (void *)ROUNDUP(heap.start, PGSIZE);

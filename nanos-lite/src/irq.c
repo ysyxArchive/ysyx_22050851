@@ -3,6 +3,7 @@
 #include <common.h>
 #include "proc.h"
 #include "errno.h"
+#include "memory.h"
 enum {
   SYS_exit,
   SYS_yield,
@@ -25,7 +26,6 @@ enum {
   SYS_times,
   SYS_gettimeofday
 };
-static size_t sys_brk(void *addr) { return 0; }
 // #define STRACE
 #ifdef STRACE
 #define strace(format, ...)                                                    \
@@ -64,7 +64,7 @@ static Context *do_event(Event e, Context *c) {
       break;
     case SYS_brk:
       strace("syscall SYS_brk %x", c->GPR2);
-      c->GPRx = sys_brk((void *)c->GPR2);
+      c->GPRx = mm_brk(c->GPR2);
       break;
     case SYS_open:
       strace("syscall SYS_open %s %x %x", c->GPR2, c->GPR3, c->GPR4);
