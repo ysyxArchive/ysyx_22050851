@@ -13,7 +13,7 @@ PCB *executing[2];
 void hello_fun(void *arg) {
   int j = 1;
   while (1) {
-    if (j % 200 == 0)
+    if (j % 1 == 0)
       Log("Hello World from Nanos-lite with arg '%s' for the %dth time!",
           (uintptr_t)arg, j);
     j++;
