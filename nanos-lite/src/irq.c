@@ -40,6 +40,10 @@ enum {
 char* NULLARR[] = {NULL};
 static Context *do_event(Event e, Context *c) {
   switch (e.event) {
+  case EVENT_IRQ_TIMER:
+    strace("syscall SYS_yield from irq timer");
+    return schedule(c);
+    break;
   case EVENT_YIELD:
     switch (c->GPR1) {
     case SYS_exit:

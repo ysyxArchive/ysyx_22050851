@@ -16,7 +16,13 @@ Context *__am_irq_handle(Context *c) {
       c->mepc += 4;
       c = user_handler(ev, c);
       break;
+    case 0x8000000000000007:
+      ev.event = EVENT_IRQ_TIMER;
+      c = user_handler(ev, c);
+      break;
     default:
+      printf("unkown error code %x", c->mcause);
+      halt(1);
       ev.event = EVENT_ERROR;
       break;
     }
@@ -38,7 +44,7 @@ bool cte_init(Context *(*handler)(Event, Context *)) {
 }
 
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
-  Context c = {.mepc = (uint64_t)entry, .mstatus = 0xa00001800};
+  Context c = {.mepc = (uint64_t)entry, .mstatus = 0xa00001880};
   c.GPR2 = (uint64_t)arg;
   memcpy(kstack.start, &c, sizeof(c));
   return kstack.start;
