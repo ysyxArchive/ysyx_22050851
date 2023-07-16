@@ -62,12 +62,12 @@ void protect(AddrSpace *as) {
 void unprotect(AddrSpace *as) {}
 
 void __am_get_cur_as(Context *c) {
-  c->pdir = (uintptr_t)(vme_enable ? (void *)get_satp() : NULL);
+  c->pdir = (vme_enable ? (void *)get_satp() : NULL);
 }
 
 void __am_switch(Context *c) {
-  if (vme_enable && c->pdir) {
-    set_satp((void *)c->pdir);
+  if (vme_enable && c->pdir != NULL) {
+    set_satp(c->pdir);
   }
 }
 void map(AddrSpace *as, void *va, void *pa, int prot) {
@@ -98,7 +98,7 @@ void map(AddrSpace *as, void *va, void *pa, int prot) {
 Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
 
   Context c = {
-      .mepc = (uint64_t)entry, .mstatus = 0xa000c0080, .pdir = (uintptr_t)as->ptr};
+      .mepc = (uint64_t)entry, .mstatus = 0xa000c0080, .pdir = as->ptr};
   memcpy(kstack.start, &c, sizeof(c));
   return kstack.start;
 }

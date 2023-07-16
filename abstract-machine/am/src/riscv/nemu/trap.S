@@ -21,25 +21,15 @@ f(30) f(31)
 #define PUSH(n) STORE concat(x, n), (n * XLEN)(sp);
 #define POP(n)  LOAD  concat(x, n), (n * XLEN)(sp);
 
-#define CONTEXT_SIZE  ((32 + 4 + 1) * XLEN)
+#define CONTEXT_SIZE  ((32 + 3 + 1) * XLEN)
 #define OFFSET_SP     ( 2 * XLEN)
 #define OFFSET_CAUSE  (32 * XLEN)
 #define OFFSET_STATUS (33 * XLEN)
 #define OFFSET_EPC    (34 * XLEN)
-#define OFFSET_PDIR   (35 * XLEN)
-#define OFFSET_NP     (36 * XLEN)
 
 .align 3
 .globl __am_asm_trap
 __am_asm_trap:
-  csrrw sp, mscratch, sp   // (1) atomically exchange sp and mscratch
-  bnez sp, save_context    // (2) take the branch if we trapped from user
-  csrr sp, mscratch        // (3) if we trapped from kernel, restore the original sp
-
-save_context:
-  // now sp is pointing to the kernel stack
-  // save the context...
-  
   addi sp, sp, -CONTEXT_SIZE
 
   MAP(REGS, PUSH)
@@ -47,15 +37,10 @@ save_context:
   csrr t0, mcause
   csrr t1, mstatus
   csrr t2, mepc
-  csrr t3, satp
 
   STORE t0, OFFSET_CAUSE(sp)
   STORE t1, OFFSET_STATUS(sp) 
   STORE t2, OFFSET_EPC(sp)
-  STORE t3, OFFSET_PDIR(sp)
-
-  xor t0, t0, t0
-  csrw mscratch, t0
 
   # set mstatus.MPRV to pass difftest
   li a0, (1 << 17)
@@ -68,17 +53,9 @@ save_context:
   mv sp, a0
   LOAD t1, OFFSET_STATUS(sp)
   LOAD t2, OFFSET_EPC(sp)
-  // LOAD t3, OFFSET_PDIR(sp)
   csrw mstatus, t1
   csrw mepc, t2
-  // csrw satp, t3
 
-  srli t1, t1, 11
-  andi t1, t1, 3
-  // now t1 is next priviledge
-  bnez t1, temp1
-  csrw mscratch, sp
-temp1:
   MAP(REGS, POP)
 
   addi sp, sp, CONTEXT_SIZE

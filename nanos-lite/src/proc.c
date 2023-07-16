@@ -10,16 +10,16 @@ PCB *current = NULL;
 int pcbcount = 0;
 void switch_boot_pcb() { current = &pcb_boot; }
 PCB *executing[2];
-// void hello_fun(void *arg) {
-//   int j = 1;
-//   while (1) {
-//     if (j % 200 == 0)
-//       Log("Hello World from Nanos-lite with arg '%s' for the %dth time!",
-//           (uintptr_t)arg, j);
-//     j++;
-//     yield();
-//   }
-// }
+void hello_fun(void *arg) {
+  int j = 1;
+  while (1) {
+    if (j % 200 == 0)
+      Log("Hello World from Nanos-lite with arg '%s' for the %dth time!",
+          (uintptr_t)arg, j);
+    j++;
+    yield();
+  }
+}
 
 void context_kload(PCB *pcb, void *entry, void *arg) {
   Area area = {.start = pcb, .end = pcb + 1};
@@ -79,12 +79,11 @@ PCB *getPCB() { return &(pcb[pcbcount++]); }
 void init_proc() {
   Log("Initializing processes...");
   char target_program[] = "/bin/nterm";
-  // context_kload(executing[0], hello_fun, "p2");
+  executing[0] = getPCB();
+  context_kload(executing[0], hello_fun, "p2");
   char *args[] = {target_program, NULL};
   char *envp[] = {NULL};
-  executing[0] = getPCB();
   executing[1] = getPCB();
-  context_uload(executing[0], "/bin/hello", args, envp);
   context_uload(executing[1], target_program, args, envp);
   switch_boot_pcb();
 }
