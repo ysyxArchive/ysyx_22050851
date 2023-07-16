@@ -34,8 +34,10 @@ static int skip_dut_nr_inst = 0;
 
 // this is used to let ref skip instructions which
 // can not produce consistent behavior with NEMU
-void difftest_skip_ref() {
-  if(!difftest_working) return;
+void difftest_skip_ref()
+{
+  if (!difftest_working)
+    return;
   is_skip_ref = true;
   // If such an instruction is one of the instruction packing in QEMU
   // (see below), we end the process of catching up with QEMU's pc to
@@ -53,16 +55,20 @@ void difftest_skip_ref() {
 // The semantic is
 //   Let REF run `nr_ref` instructions first.
 //   We expect that DUT will catch up with REF within `nr_dut` instructions.
-void difftest_skip_dut(int nr_ref, int nr_dut) {
-  if(!difftest_working) return;
+void difftest_skip_dut(int nr_ref, int nr_dut)
+{
+  if (!difftest_working)
+    return;
   skip_dut_nr_inst += nr_dut;
 
-  while (nr_ref-- > 0) {
+  while (nr_ref-- > 0)
+  {
     ref_difftest_exec(1);
   }
 }
 
-void init_difftest(char *ref_so_file, long img_size, int port) {
+void init_difftest(char *ref_so_file, long img_size, int port)
+{
   assert(ref_so_file != NULL);
 
   void *handle;
@@ -98,21 +104,27 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
   ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
 }
 
-static void checkregs(CPU_state *ref, vaddr_t pc) {
-  if (!isa_difftest_checkregs(ref, pc)) {
+static void checkregs(CPU_state *ref, vaddr_t pc)
+{
+  if (!isa_difftest_checkregs(ref, pc))
+  {
     nemu_state.state = NEMU_ABORT;
     nemu_state.halt_pc = pc;
     isa_reg_display();
   }
 }
 
-void difftest_step(vaddr_t pc, vaddr_t npc) {
-  if(!difftest_working) return;
+void difftest_step(vaddr_t pc, vaddr_t npc)
+{
+  if (!difftest_working)
+    return;
   CPU_state ref_r;
 
-  if (skip_dut_nr_inst > 0) {
+  if (skip_dut_nr_inst > 0)
+  {
     ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
-    if (ref_r.pc == npc) {
+    if (ref_r.pc == npc)
+    {
       skip_dut_nr_inst = 0;
       checkregs(&ref_r, npc);
       return;
@@ -124,7 +136,8 @@ void difftest_step(vaddr_t pc, vaddr_t npc) {
     return;
   }
 
-  if (is_skip_ref) {
+  if (is_skip_ref)
+  {
     // to skip the checking of an instruction, just copy the reg state to
     // reference design
     ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
@@ -138,15 +151,21 @@ void difftest_step(vaddr_t pc, vaddr_t npc) {
   checkregs(&ref_r, npc);
 }
 
-
-void difftest_attach(){
+void difftest_attach()
+{
   difftest_working = true;
   ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
 }
 
-void difftest_detach(){
+void difftest_detach()
+{
   difftest_working = false;
 }
 #else
+
+void difftest_attach() {}
+
+void difftest_detach() {}
+
 void init_difftest(char *ref_so_file, long img_size, int port) {}
 #endif
