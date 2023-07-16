@@ -43,19 +43,20 @@ save_context:
   addi sp, sp, -CONTEXT_SIZE
 
   MAP(REGS, PUSH)
-
   csrr t0, mcause
   csrr t1, mstatus
   csrr t2, mepc
   csrr t3, satp
+  csrr t4, mscratch
 
   STORE t0, OFFSET_CAUSE(sp)
   STORE t1, OFFSET_STATUS(sp) 
   STORE t2, OFFSET_EPC(sp)
   STORE t3, OFFSET_PDIR(sp)
+  STORE t4, OFFSET_SP(sp) // store sp
 
   xor t0, t0, t0
-  csrw mscratch, t0
+  csrw mscratch, t0 // clear mscratch
 
   # set mstatus.MPRV to pass difftest
   li a0, (1 << 17)
@@ -69,16 +70,19 @@ save_context:
   LOAD t1, OFFSET_STATUS(sp)
   LOAD t2, OFFSET_EPC(sp)
   // LOAD t3, OFFSET_PDIR(sp)
+  LOAD t4, OFFSET_SP(sp) // load sp
+
   csrw mstatus, t1
   csrw mepc, t2
   // csrw satp, t3
+  csrw mscratch, t4
 
   srli t1, t1, 11
   andi t1, t1, 3
   // now t1 is next priviledge
   csrrw sp, mscratch, sp   // (1) atomically exchange sp and mscratch
   beqz t1, temp1           // (2) take the branch if we will return user
-  csrr sp, mscratch        // (3) if we will return kernel, restore the original sp
+  csrwi mscratch, 0        // (3) if we will return kernel, restore the original sp
 temp1:
   MAP(REGS, POP)
 
