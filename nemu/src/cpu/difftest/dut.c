@@ -28,7 +28,7 @@ void (*ref_difftest_exec)(uint64_t n) = NULL;
 void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
 
 #ifdef CONFIG_DIFFTEST
-static bool difftest_working = false;
+static bool difftest_working = true;
 static bool is_skip_ref = false;
 static int skip_dut_nr_inst = 0;
 
@@ -53,16 +53,20 @@ void difftest_skip_ref() {
 // The semantic is
 //   Let REF run `nr_ref` instructions first.
 //   We expect that DUT will catch up with REF within `nr_dut` instructions.
-void difftest_skip_dut(int nr_ref, int nr_dut) {
-  if(!difftest_working) return;
+void difftest_skip_dut(int nr_ref, int nr_dut)
+{
+  if (!difftest_working)
+    return;
   skip_dut_nr_inst += nr_dut;
 
-  while (nr_ref-- > 0) {
+  while (nr_ref-- > 0)
+  {
     ref_difftest_exec(1);
   }
 }
 
-void init_difftest(char *ref_so_file, long img_size, int port) {
+void init_difftest(char *ref_so_file, long img_size, int port)
+{
   assert(ref_so_file != NULL);
 
   void *handle;
@@ -137,7 +141,6 @@ void difftest_step(vaddr_t pc, vaddr_t npc) {
 
   checkregs(&ref_r, npc);
 }
-
 
 void difftest_attach(){
   difftest_working = true;

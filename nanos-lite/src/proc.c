@@ -10,16 +10,16 @@ PCB *current = NULL;
 int pcbcount = 0;
 void switch_boot_pcb() { current = &pcb_boot; }
 PCB *executing[2];
-void hello_fun(void *arg) {
-  int j = 1;
-  while (1) {
-    if (j % 200 == 0)
-      Log("Hello World from Nanos-lite with arg '%s' for the %dth time!",
-          (uintptr_t)arg, j);
-    j++;
-    yield();
-  }
-}
+// void hello_fun(void *arg) {
+//   int j = 1;
+//   while (1) {
+//     if (j % 200 == 0)
+//       Log("Hello World from Nanos-lite with arg '%s' for the %dth time!",
+//           (uintptr_t)arg, j);
+//     j++;
+//     yield();
+//   }
+// }
 
 void context_kload(PCB *pcb, void *entry, void *arg) {
   Area area = {.start = pcb, .end = pcb + 1};
@@ -41,12 +41,10 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[],
   // create stack space
   uint8_t *stack_pages = (uint8_t *)new_page(STACK_SIZE / PGSIZE) - STACK_SIZE;
   for (int i = 0; i < STACK_SIZE / PGSIZE; i++) {
-    Log("%p -> %p", pcb->as.area.end - STACK_SIZE + i * PGSIZE, stack_pages + i * PGSIZE);
     map(&(pcb->as), pcb->as.area.end - STACK_SIZE + i * PGSIZE,
         stack_pages + i * PGSIZE, 1);
   }
   void *stack = stack_pages + STACK_SIZE;
-  Log("%x", stack);
   for (int i = 0; envp[i]; i++) {
     envc += 1;
     offsetCount += strlen(envp[i]) + 1;
@@ -87,11 +85,12 @@ PCB *getPCB() { return &(pcb[pcbcount++]); }
 void init_proc() {
   Log("Initializing processes...");
   char target_program[] = "/bin/nterm";
-  executing[0] = getPCB();
-  context_kload(executing[0], hello_fun, "p2");
+  // context_kload(executing[0], hello_fun, "p2");
   char *args[] = {target_program, NULL};
   char *envp[] = {NULL};
+  executing[0] = getPCB();
   executing[1] = getPCB();
+  context_uload(executing[0], "/bin/hello", args, envp);
   context_uload(executing[1], target_program, args, envp);
   switch_boot_pcb();
 }
