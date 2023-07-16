@@ -77,6 +77,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[],
   }
   *((uint64_t *)(stack - offsetCount) - 1) = argc;
   offsetCount += sizeof(uint64_t);
+  Log("stack %x", (uint64_t)(stack - offsetCount));
   pcb->cp->GPRx = (uint64_t)(stack - offsetCount);
 }
 
