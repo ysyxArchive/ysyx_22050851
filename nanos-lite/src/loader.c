@@ -66,13 +66,6 @@ uintptr_t loader(PCB *pcb, const char *filename) {
                (prog_header_buf.p_filesz + prog_header_buf.p_vaddr - min_addr),
            0, prog_header_buf.p_memsz - prog_header_buf.p_filesz);
   }
-  // create stack space
-  uint8_t *stack_pages = (uint8_t *)new_page(STACK_SIZE / PGSIZE) - STACK_SIZE;
-  for (int i = 0; i < STACK_SIZE / PGSIZE; i++) {
-    Log("%p -> %p", pcb->as.area.end - STACK_SIZE + i * PGSIZE, stack_pages + i * PGSIZE);
-    map(&(pcb->as), pcb->as.area.end - STACK_SIZE + i * PGSIZE,
-        stack_pages + i * PGSIZE, 1);
-  }
   return elfHeader.e_entry;
 }
 

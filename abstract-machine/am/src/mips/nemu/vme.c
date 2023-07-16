@@ -10,7 +10,7 @@ static int vme_enable = 0;
 bool vme_init(void* (*pgalloc_f)(int), void (*pgfree_f)(void*)) {
   pgalloc_usr = pgalloc_f;
   pgfree_usr = pgfree_f;
-  vme_enable = 1;
+  vme_enable = 1;stack_pages + i * PGSIZE
 
   return true;
 }
