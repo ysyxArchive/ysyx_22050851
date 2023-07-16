@@ -68,10 +68,10 @@ save_context:
   mv sp, a0
   LOAD t1, OFFSET_STATUS(sp)
   LOAD t2, OFFSET_EPC(sp)
-  LOAD t3, OFFSET_PDIR(sp)
+  // LOAD t3, OFFSET_PDIR(sp)
   csrw mstatus, t1
   csrw mepc, t2
-  csrw satp, t3
+  // csrw satp, t3
 
   srli t1, t1, 11
   andi t1, t1, 3
