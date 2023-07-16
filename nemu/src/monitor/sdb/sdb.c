@@ -168,12 +168,16 @@ static int cmd_w(char* args) {
   return 0;
 }
 static int cmd_attach(char* args) {
+#ifdef CONFIG_DIFFTEST
     difftest_attach();
+#endif
     return 0;
 }
 
 static int cmd_detach(char* args) {
+#ifdef CONFIG_DIFFTEST
     difftest_detach();
+#endif
     return 0;
 }
 
