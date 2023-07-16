@@ -33,18 +33,13 @@ static inline const char *reg_name(int idx, int width) {
 
 static inline const char *csr_name(int idx) {
   switch (idx) {
-  case 0x300:
-    return "mstatus";
-  case 0x305:
-    return "mtvec";
-  case 0x341:
-    return "mepc";
-  case 0x342:
-    return "mcause";
-  case 0x180:
-    return "satp";
-  default:
-    panic("csr index %x not implemented", idx);
+  case 0x180: return "satp";
+  case 0x300: return "mstatus";
+  case 0x305: return "mtvec";
+  case 0x340: return "mscratch";
+  case 0x341: return "mepc";
+  case 0x342: return "mcause";
+  default: panic("csr index %x not implemented", idx);
   }
 }
 
