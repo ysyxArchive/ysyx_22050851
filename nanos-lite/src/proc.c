@@ -10,16 +10,16 @@ PCB *current = NULL;
 int pcbcount = 0;
 void switch_boot_pcb() { current = &pcb_boot; }
 PCB *executing[2];
-void hello_fun(void *arg) {
-  int j = 1;
-  while (1) {
-    if (j % 200 == 0)
-      Log("Hello World from Nanos-lite with arg '%s' for the %dth time!",
-          (uintptr_t)arg, j);
-    j++;
-    yield();
-  }
-}
+// void hello_fun(void *arg) {
+//   int j = 1;
+//   while (1) {
+//     if (j % 200 == 0)
+//       Log("Hello World from Nanos-lite with arg '%s' for the %dth time!",
+//           (uintptr_t)arg, j);
+//     j++;
+//     yield();
+//   }
+// }
 
 void context_kload(PCB *pcb, void *entry, void *arg) {
   Area area = {.start = pcb, .end = pcb + 1};
