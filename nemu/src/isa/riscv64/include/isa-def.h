@@ -33,5 +33,5 @@ typedef struct {
 } riscv64_ISADecodeInfo;
 
 #define isa_mmu_check_easy() isa_mmu_check(0, 0, 0)
-#define make isa_mmu_check(vaddr, len, type) ((csrs("satp") >> 60) ? MMU_TRANSLATE : MMU_DIRECT)
+#define isa_mmu_check(vaddr, len, type) ((csrs("satp") >> 60) ? MMU_TRANSLATE : MMU_DIRECT)
 #endif
