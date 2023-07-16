@@ -23,7 +23,7 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   word_t mstatus = csrs("mstatus");
   csrs("mepc") = cpu.pc;
   csrs("mstatus") = ((mstatus | (priv_status << 11)) // set MPP to priv mode
-                     | (BITS(mstatus, 3, 3) << 7))   // set MIE to MPIE
+                     & (BITS(mstatus, 3, 3) << 7))   // set MIE to MPIE
                     & (0xFFFFFFFFFFFFFFF7);          // set MIE 0
   csrs("mcause") = NO;
   priv_status = PRIV_M;
