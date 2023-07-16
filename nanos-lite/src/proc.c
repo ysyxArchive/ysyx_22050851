@@ -38,7 +38,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[],
   uint64_t offsetCount = 0;
   int argc = 0;
   int envc = 0;
-  void *stack = pcb->stack + STACK_SIZE;
+  void *stack = pcb->as.area.end;
   for (int i = 0; envp[i]; i++) {
     envc += 1;
     offsetCount += strlen(envp[i]) + 1;
