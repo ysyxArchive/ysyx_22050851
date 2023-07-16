@@ -98,7 +98,7 @@ void map(AddrSpace *as, void *va, void *pa, int prot) {
 Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
 
   Context c = {
-      .mepc = (uint64_t)entry, .mstatus = 0xa000c0080, .pdir = (uintptr_t)as->ptr};
+      .mepc = (uint64_t)entry, .mstatus = 0xa000c0080, .pdir = (uintptr_t)as->ptr, .gpr[2]=(uintptr_t)kstack.start};
   memcpy(kstack.start, &c, sizeof(c));
   return kstack.start;
 }
