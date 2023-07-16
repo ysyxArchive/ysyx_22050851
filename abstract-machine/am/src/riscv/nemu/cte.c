@@ -6,6 +6,7 @@ extern void __am_get_cur_as(Context *c);
 extern void __am_switch(Context *c);
 
 Context *__am_irq_handle(Context *c) {
+  printf("in abs machine , kernel sp is %x and context sp is %x\n", c, c->gpr[2]);
   __am_get_cur_as(c);
   printf("%x\n", c->mcause);
   if (user_handler) {
