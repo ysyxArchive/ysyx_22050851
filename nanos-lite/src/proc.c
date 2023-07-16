@@ -84,8 +84,8 @@ void init_proc() {
   char *envp[] = {NULL};
   executing[0] = getPCB();
   executing[1] = getPCB();
-  context_uload(executing[0], "/bin/hello", args, envp);
-  context_uload(executing[1], target_program, args, envp);
+  context_uload(executing[0], target_program, args, envp);
+  // context_uload(executing[0], "/bin/hello", args, envp);
   switch_boot_pcb();
 }
 
@@ -101,6 +101,6 @@ void replacePCB(PCB *newone) {
 Context *schedule(Context *prev) {
   current->cp = prev;
   Log("jump to proc %d", current == executing[0] ? 1 : 0);
-  current = current == executing[0] ? executing[1] : executing[1];
+  current = current == executing[0] ? executing[0] : executing[0];
   return current->cp;
 }
