@@ -18,8 +18,7 @@ Context *__am_irq_handle(Context *c) {
       c = user_handler(ev, c);
       break;
     case 0x8000000000000007:
-      ev.event = -2;
-      c->mepc += 4;
+      ev.event = EVENT_IRQ_TIMER;
       c = user_handler(ev, c);
       break;
     default:

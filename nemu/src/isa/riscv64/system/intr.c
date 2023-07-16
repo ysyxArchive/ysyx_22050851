@@ -39,7 +39,7 @@ word_t isa_query_intr() {
   }
   clock_t end = clock();
   double elapsed = ((double)(end - start)) / CLOCKS_PER_SEC; // 计算经过的秒数
-  if (elapsed >= 0.01) {
+  if (elapsed >= 1) { // 每秒一次的时钟中断
     Log("trigger!");
     start = end;
     cpu.INTR = false;
