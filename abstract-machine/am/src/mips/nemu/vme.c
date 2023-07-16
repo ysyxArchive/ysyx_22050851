@@ -16,7 +16,7 @@ bool vme_init(void* (*pgalloc_f)(int), void (*pgfree_f)(void*)) {
 }
 
 void protect(AddrSpace *as) {
-  as->ptr = (PTE*)(pgalloc_usr(PGSIZE));
+  as->ptr = (PTE*)(pgalloc_usr(1));
   as->pgsize = PGSIZE;
   as->area = USER_SPACE;
 }
