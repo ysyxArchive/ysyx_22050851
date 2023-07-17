@@ -90,7 +90,7 @@ save_context:
   csrwi mscratch, 0
   MAP(REGS, POP)
   addi sp, sp, CONTEXT_SIZE
-  jal handleout
+  j handleout
 returnuser:
   // if return to user, mscratch will be kernel stack head,
   // sp will be user stack head
