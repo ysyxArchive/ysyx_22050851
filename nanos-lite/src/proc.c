@@ -6,6 +6,7 @@
 
 static PCB pcb[MAX_NR_PROC] __attribute__((used)) = {};
 static PCB *pcb_boot;
+Context contexts[MAX_NR_PROC] __attribute__((used)) = {};
 PCB *current = NULL;
 int pcbcount = 0;
 void switch_boot_pcb() { current = pcb_boot; }
@@ -22,7 +23,7 @@ PCB *executing[2];
 // }
 
 void context_kload(PCB *pcb, void *entry, void *arg) {
-  Area area = {.start = pcb, .end = pcb + 1};
+  Area area = {.start = pcb->stack, .end = pcb->stack + STACK_SIZE};
   pcb->cp = kcontext(area, entry, arg);
 }
 
@@ -32,7 +33,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[],
   Assert(argv, "argv is NULL when executing %s", filename);
   Assert(envp, "envp is NULL when executing %s", filename);
   reset_fs();
-  Area area = {.start = pcb, .end = pcb + 1};
+  Area area = {.start = pcb->stack, .end = pcb->stack + STACK_SIZE};
   uintptr_t entry = loader(pcb, filename);
   pcb->cp = ucontext(&(pcb->as), area, (void *)entry);
   uint64_t offsetCount = 0;
@@ -109,7 +110,9 @@ void replacePCB(PCB *newone) {
 Context *schedule(Context *prev) {
   printf("curernt %x, %x\n", current, &pcb_boot);
   printf("curernt.cp %x, %x\n", current->cp, pcb_boot->cp);
-  memcpy(current->cp, prev, sizeof(Context));
+  if (current != pcb_boot) {
+    memcpy(current->cp, prev, sizeof(Context));
+  }
   current->cp = prev;
   Log("jump to proc %d", current == executing[0]);
   current = current == executing[0] ? executing[1] : executing[1];
