@@ -81,7 +81,7 @@ save_context:
   andi t1, t1, 3
   // now t1 is next priviledge
   csrrw sp, mscratch, sp   // (1) atomically exchange sp and mscratch
-  bnez t1, temp1           // (2) take the branch if we will return user
+  beqz t1, temp1           // (2) take the branch if we will return user
   csrwi mscratch, 0        // (3) if we will return kernel, restore the original sp
 temp1:
   MAP(REGS, POP)
