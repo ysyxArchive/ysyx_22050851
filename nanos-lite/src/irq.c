@@ -103,7 +103,7 @@ static Context *do_event(Event e, Context *c) {
         c->GPRx = ret;
         break;
       }
-      PCB* newpcb = getPCB();
+      PCB* newpcb = getPCB(); 
       context_uload(newpcb, (char*)c->GPR2, (char**)c->GPR3, (char**)c->GPR4);
       replacePCB(newpcb);
       return schedule(c);
