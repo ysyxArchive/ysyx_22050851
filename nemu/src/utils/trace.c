@@ -80,8 +80,8 @@ void etrace(bool is_call, paddr_t source, word_t mstatus_old) {
           "%lx -> %lx, mepc: %lx",
           is_call ? "call" : "ret ", source, csrs("mcause"), mstatus_old,
           csrs("mstatus"), csrs("mepc"));
-  printf(ANSI_FMT("%s", ANSI_FG_WHITE) "\n", buf);
-  isa_reg_display();
+  Log(ANSI_FMT("%s", ANSI_FG_WHITE), buf);
+  // isa_reg_display();
 #endif
   return;
 }
