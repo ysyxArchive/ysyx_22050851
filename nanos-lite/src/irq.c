@@ -1,9 +1,9 @@
-#include <loader.h>
-#include "fs.h"
-#include <common.h>
-#include "proc.h"
 #include "errno.h"
+#include "fs.h"
 #include "memory.h"
+#include "proc.h"
+#include <common.h>
+#include <loader.h>
 enum {
   SYS_exit,
   SYS_yield,
@@ -37,7 +37,7 @@ enum {
   do {                                                                         \
   } while (0)
 #endif
-char* NULLARR[] = {NULL};
+char *NULLARR[] = {NULL};
 static Context *do_event(Event e, Context *c) {
   Log("in event, context sp is %x", c->gpr[2]);
   switch (e.event) {
@@ -49,14 +49,14 @@ static Context *do_event(Event e, Context *c) {
     switch (c->GPR1) {
     case SYS_exit:
       strace("syscall SYS_exit %d", c->GPR2);
-      // if(c->GPR2 == 0){
-      //   PCB* newpcb = getPCB();
-      //   context_uload(newpcb, "/bin/nterm", NULLARR, NULLARR);
-      //   replacePCB(newpcb);
-      //   return schedule(c);
-      // } else { 
+      if (c->GPR2 == 0) {
+        PCB *newpcb = getPCB();
+        context_uload(newpcb, "/bin/nterm", NULLARR, NULLARR);
+        replacePCB(newpcb);
+        return schedule(c);
+      } else {
         halt(c->GPR2);
-      // }
+      }
       break;
     case SYS_yield:
       strace("syscall SYS_yield");
@@ -98,13 +98,14 @@ static Context *do_event(Event e, Context *c) {
       break;
     case SYS_execve:
       strace("syscall SYS_execve %s %x %x", c->GPR2, c->GPR3, c->GPR4);
-      int ret = fs_open((char*)c->GPR2, 0, 0);
-      if(ret == -ENOENT) {
+      int ret = fs_open((char *)c->GPR2, 0, 0);
+      if (ret == -ENOENT) {
         c->GPRx = ret;
         break;
       }
-      PCB* newpcb = getPCB(); 
-      context_uload(newpcb, (char*)c->GPR2, (char**)c->GPR3, (char**)c->GPR4);
+      PCB *newpcb = getPCB();
+      context_uload(newpcb, (char *)c->GPR2, (char **)c->GPR3,
+                    (char **)c->GPR4);
       replacePCB(newpcb);
       return schedule(c);
       break;
