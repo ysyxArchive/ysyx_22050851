@@ -71,12 +71,12 @@ save_context:
   LOAD t1, OFFSET_STATUS(sp)
   LOAD t2, OFFSET_EPC(sp)
   // LOAD t3, OFFSET_PDIR(sp)
-  // LOAD t4, OFFSET_SP(sp) // load sp
+  LOAD t4, OFFSET_SP(sp) // load sp
 
   csrw mstatus, t1
   csrw mepc, t2
   // csrw satp, t3
-  // csrw mscratch, t4
+  csrw mscratch, t4
 
 
   // temperory use t1
@@ -84,7 +84,7 @@ save_context:
   srli t1, t1, 11
   andi t1, t1, 3
   // now t1 is next priviledge
-  beqz t1, returnuser
+  beqz t1, returnuser   // (2) take the branch if we will return user
   // if return to kernel, mscratch will be  0, sp is stack top
   // means do nothing but restore
   csrwi mscratch, 0
