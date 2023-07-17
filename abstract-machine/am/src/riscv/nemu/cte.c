@@ -8,10 +8,7 @@ extern void __am_switch(Context *c);
 Context *__am_irq_handle(Context *c) {
   printf("in abs machine , kernel sp is %x and context sp is %x\n", c, c->gpr[2]);
   __am_get_cur_as(c);
-  printf("call:\n");
-  for(int i =0 ; i < 32 ; i ++){
-    printf("%x%s", c->gpr[i], (i + 1)%4 == 0 ? "\n": " " );
-  }
+  printf("callc: %x\n", c);
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
@@ -33,10 +30,7 @@ Context *__am_irq_handle(Context *c) {
     }
   }
   __am_switch(c);
-  printf("ret:\n");
-  for(int i =0 ; i < 32 ; i ++){
-    printf("%x%s", c->gpr[i], (i + 1)%4 == 0 ? "\n": " " );
-  }
+  printf("retc: %x\n", c);
   return c;
 }
 
