@@ -120,5 +120,5 @@ Context *schedule(Context *prev) {
     printf("%x ", current->cp->gpr[i]);
   }
   memcpy(prev, current->cp, sizeof(Context));
-  return current->cp;
+  return prev;
 }
