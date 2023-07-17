@@ -55,6 +55,7 @@ static Context *do_event(Event e, Context *c) {
         replacePCB(newpcb);
         return schedule(c);
       } else {
+        Log("exit with error number %d", c->GPR2);
         halt(c->GPR2);
       }
       break;
