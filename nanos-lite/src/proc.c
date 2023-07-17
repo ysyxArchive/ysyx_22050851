@@ -106,6 +106,7 @@ void replacePCB(PCB *newone) {
 }
 
 Context *schedule(Context *prev) {
+  printf("curernt %x", current);
   current->cp = prev;
   Log("jump to proc %d", current == executing[0]);
   current = current == executing[0] ? executing[1] : executing[1];
