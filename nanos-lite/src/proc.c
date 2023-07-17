@@ -113,7 +113,7 @@ Context *schedule(Context *prev) {
   if (current != pcb_boot) {
     memcpy(current->cp, prev, sizeof(Context));
   }
-  current->cp = prev;
+  // current->cp = prev;
   Log("jump to proc %d", current == executing[0]);
   current = current == executing[0] ? executing[1] : executing[1];
   memcpy(prev, current->cp, sizeof(Context));
