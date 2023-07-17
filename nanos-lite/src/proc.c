@@ -5,10 +5,10 @@
 #define MAX_NR_PROC 4
 
 static PCB pcb[MAX_NR_PROC] __attribute__((used)) = {};
-static PCB pcb_boot = {};
+static PCB *pcb_boot;
 PCB *current = NULL;
 int pcbcount = 0;
-void switch_boot_pcb() { current = &pcb_boot; }
+void switch_boot_pcb() { current = pcb_boot; }
 PCB *executing[2];
 // void hello_fun(void *arg) {
 //   int j = 1;
@@ -89,6 +89,7 @@ void init_proc() {
   // context_kload(executing[0], hello_fun, "p2");
   char *args[] = {target_program, NULL};
   char *envp[] = {NULL};
+  pcb_boot = getPCB();
   executing[0] = getPCB();
   executing[1] = getPCB();
   context_uload(executing[0], "/bin/hello", args, envp);
@@ -107,11 +108,11 @@ void replacePCB(PCB *newone) {
 
 Context *schedule(Context *prev) {
   printf("curernt %x, %x\n", current, &pcb_boot);
-  printf("curernt.cp %x, %x\n", current->cp, pcb_boot.cp);
+  printf("curernt.cp %x, %x\n", current->cp, pcb_boot->cp);
   memcpy(current->cp, prev, sizeof(Context));
   current->cp = prev;
   Log("jump to proc %d", current == executing[0]);
   current = current == executing[0] ? executing[1] : executing[1];
-  memcpy(prev, current->cp,  sizeof(Context));
+  memcpy(prev, current->cp, sizeof(Context));
   return current->cp;
 }
