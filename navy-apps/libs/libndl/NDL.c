@@ -80,7 +80,7 @@ int NDL_PlayAudio(void *buf, int len) { return 0; }
 int NDL_QueryAudio() { return 0; }
 
 int deal_with_key_value(char *buf, char *key, int *value) {
-  prinf("%s", buf);
+  printf("%s", buf);
   int p = 0;
   while (buf[p]) {
     char found = 0;
