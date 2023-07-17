@@ -6,7 +6,10 @@ extern void __am_get_cur_as(Context *c);
 extern void __am_switch(Context *c);
 
 Context *__am_irq_handle(Context *c) {
-  printf("in abs machine , kernel sp is %x and context sp is %x\n", c, c->gpr[2]);
+  printf("irqstart\n");
+  for (int i = 0 ; i < 32 ; i ++){
+    printf("%x ", c->gpr[i]);
+  }
   __am_get_cur_as(c);
   printf("callc: %x\n", c);
   if (user_handler) {
@@ -30,7 +33,11 @@ Context *__am_irq_handle(Context *c) {
     }
   }
   __am_switch(c);
-  printf("retc: %x\n", c);
+  printf("irqend\n");
+  for (int i = 0 ; i < 32 ; i ++){
+    printf("%x ", c->gpr[i]);
+  }
+  
   return c;
 }
 
