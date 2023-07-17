@@ -116,9 +116,9 @@ Context *schedule(Context *prev) {
   // current->cp = prev;
   Log("jump to proc %d", current == executing[0]);
   current = current == executing[0] ? executing[1] : executing[1];
-  for (int i = 0 ; i < 32 ; i ++){
-    printf("%x ", current->cp->gpr[i]);
-  }
   memcpy(prev, current->cp, sizeof(Context));
+  for (int i = 0 ; i < 32 ; i ++){
+    printf("%x ", prev->gpr[i]);
+  }
   return prev;
 }
