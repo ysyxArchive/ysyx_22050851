@@ -28,6 +28,7 @@ f(30) f(31)
 #define OFFSET_EPC    (34 * XLEN)
 #define OFFSET_PDIR   (35 * XLEN)
 #define OFFSET_NP     (36 * XLEN)
+#define OFFSET_PP     (37 * XLEN)
 
 .align 3
 .globl __am_asm_trap
@@ -70,21 +71,31 @@ save_context:
   LOAD t1, OFFSET_STATUS(sp)
   LOAD t2, OFFSET_EPC(sp)
   // LOAD t3, OFFSET_PDIR(sp)
-  LOAD t4, OFFSET_SP(sp) // load sp
+  // LOAD t4, OFFSET_SP(sp) // load sp
 
   csrw mstatus, t1
   csrw mepc, t2
   // csrw satp, t3
-  csrw mscratch, t4
+  // csrw mscratch, t4
 
+
+  // temperory use t1
+  LOAD t1, OFFSET_STATUS(sp)
   srli t1, t1, 11
   andi t1, t1, 3
   // now t1 is next priviledge
-  csrrw sp, mscratch, sp   // (1) atomically exchange sp and mscratch
-  beqz t1, temp1           // (2) take the branch if we will return user
-  csrwi mscratch, 0        // (3) if we will return kernel, restore the original sp
-temp1:
+  beqz t1, returnuser
+  // if return to kernel, mscratch will be  0, sp is stack top
+  // means do nothing but restore
+  csrwi mscratch, 0
   MAP(REGS, POP)
-
   addi sp, sp, CONTEXT_SIZE
+  jal handleout
+returnuser:
+  // if return to user, mscratch will be kernel stack head,
+  // sp will be user stack head
+  MAP(REGS, POP)
+  addi sp, sp, CONTEXT_SIZE
+  csrrw sp, mscratch, sp  
+handleout:
   mret
