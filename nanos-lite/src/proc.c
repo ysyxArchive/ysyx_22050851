@@ -107,9 +107,11 @@ void replacePCB(PCB *newone) {
 
 Context *schedule(Context *prev) {
   printf("curernt %x, %x\n", current, &pcb_boot);
+  printf("curernt.cp %x, %x\n", current->cp, &pcb_boot.cp);
   memcpy(current->cp, prev, sizeof(Context));
+  current->cp = prev;
   Log("jump to proc %d", current == executing[0]);
   current = current == executing[0] ? executing[1] : executing[1];
-  memcpy(prev, current->cp, sizeof(Context));
+  memcpy(prev, current->cp,  sizeof(Context));
   return current->cp;
 }
