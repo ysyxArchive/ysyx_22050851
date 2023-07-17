@@ -26,7 +26,7 @@ enum {
   SYS_times,
   SYS_gettimeofday
 };
-#define STRACE
+// #define STRACE
 #ifdef STRACE
 #define strace(format, ...)                                                    \
   do {                                                                         \
