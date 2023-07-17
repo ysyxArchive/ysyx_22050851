@@ -30,6 +30,9 @@ Context *__am_irq_handle(Context *c) {
     }
   }
   __am_switch(c);
+  for(int i =0 ; i < 16 ; i ++){
+    printf("%x%s", c->gpr[i], (i + 1)%4 == 0 ? "\n": " " );
+  }
   return c;
 }
 
