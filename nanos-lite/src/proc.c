@@ -114,7 +114,7 @@ Context *schedule(Context *prev) {
     memcpy(current->cp, prev, sizeof(Context));
   }
   // current->cp = prev;
-  Log("jump to proc %d", current == executing[0]);
+  // Log("jump to proc %d", current == executing[0]);
   current = current == executing[0] ? executing[1] : executing[0];
   memcpy(prev, current->cp, sizeof(Context));
   // for (int i = 0 ; i < 32 ; i ++){

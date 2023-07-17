@@ -11,7 +11,7 @@ Context *__am_irq_handle(Context *c) {
   //   printf("%x ", c->gpr[i]);
   // }
   __am_get_cur_as(c);
-  printf("callc: %x\n", c);
+  // printf("callc: %x\n", c);
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {

@@ -39,7 +39,7 @@ enum {
 #endif
 char *NULLARR[] = {NULL};
 static Context *do_event(Event e, Context *c) {
-  Log("in event, context sp is %x", c->gpr[2]);
+  // Log("in event, context sp is %x", c->gpr[2]);
   switch (e.event) {
   case EVENT_IRQ_TIMER:
     strace("syscall SYS_yield from irq timer");
