@@ -51,6 +51,7 @@ bool vme_init(void *(*pgalloc_f)(int), void (*pgfree_f)(void *)) {
 
 void protect(AddrSpace *as) {
   PTE *updir = (PTE *)(pgalloc_usr(1));
+  printf("alloc ptentry page %x\n",updir);
   as->ptr = updir;
   as->area = USER_SPACE;
   as->pgsize = PGSIZE;
