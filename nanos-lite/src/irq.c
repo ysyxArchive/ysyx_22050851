@@ -39,11 +39,11 @@ enum {
 #endif
 char *NULLARR[] = {NULL};
 static Context *do_event(Event e, Context *c) {
-  // Log("in event, context sp is %x", c->gpr[2]);
+  Log("in event, input context is  %x", c);
   switch (e.event) {
   case EVENT_IRQ_TIMER:
     strace("syscall SYS_yield from irq timer");
-    return schedule(c);
+    c = schedule(c);
     break;
   case EVENT_YIELD:
     switch (c->GPR1) {
@@ -53,7 +53,7 @@ static Context *do_event(Event e, Context *c) {
         PCB *newpcb = getPCB();
         context_uload(newpcb, "/bin/nterm", NULLARR, NULLARR);
         replacePCB(newpcb);
-        return schedule(c);
+        c =  schedule(c);
       } else {
         Log("exit with error number %d", c->GPR2);
         halt(c->GPR2);
@@ -61,7 +61,7 @@ static Context *do_event(Event e, Context *c) {
       break;
     case SYS_yield:
       strace("syscall SYS_yield");
-      return schedule(c);
+      c = schedule(c);
       break;
     case SYS_write:
       strace("syscall SYS_write %s %x %x", get_file_name(c->GPR2), c->GPR3,
@@ -108,7 +108,7 @@ static Context *do_event(Event e, Context *c) {
       context_uload(newpcb, (char *)c->GPR2, (char **)c->GPR3,
                     (char **)c->GPR4);
       replacePCB(newpcb);
-      return schedule(c);
+      c = schedule(c);
       break;
     case -1:
       strace("syscall -1, do nothing");
@@ -122,7 +122,8 @@ static Context *do_event(Event e, Context *c) {
   default:
     Panic("Unhandled event ID = %d", e.event);
   }
-
+  Log("in event, output context is  %x", c);
+  
   return c;
 }
 
