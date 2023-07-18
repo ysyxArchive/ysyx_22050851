@@ -74,7 +74,7 @@ void __am_switch(Context *c) {
   }
 }
 void map(AddrSpace *as, void *va, void *pa, int prot) {
-printf("map , va is %x, pa is %x\n", va, pa);
+// printf("map , va is %x, pa is %x\n", va, pa);
   uint64_t vaint = (uint64_t)va;
   // assert high position is equal
   assert(((((uint64_t)vaint << 1) ^ ((uint64_t)vaint)) & 0xFFFFFF8000000000) ==
