@@ -63,11 +63,13 @@ void unprotect(AddrSpace *as) {}
 
 void __am_get_cur_as(Context *c) {
   c->pdir = (uintptr_t)(vme_enable ? (void *)get_satp() : NULL);
+  printf("store stap %x to context %x", get_satp(), c);
 }
 
 void __am_switch(Context *c) {
   if (vme_enable && c->pdir) {
     set_satp((void *)c->pdir);
+    printf("load stap %x from context %x", c->pdir, c);
   }
 }
 void map(AddrSpace *as, void *va, void *pa, int prot) {
@@ -97,8 +99,10 @@ void map(AddrSpace *as, void *va, void *pa, int prot) {
 
 Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
 
-  Context c = {
-      .mepc = (uint64_t)entry, .mstatus = 0xa000c0080, .pdir = (uintptr_t)as->ptr, .gpr[2]=(uintptr_t)as->area.end};
+  Context c = {.mepc = (uint64_t)entry,
+               .mstatus = 0xa000c0080,
+               .pdir = (uintptr_t)as->ptr,
+               .gpr[2] = (uintptr_t)as->area.end};
   memcpy(kstack.end - sizeof(c), &c, sizeof(c));
   return kstack.end - sizeof(c);
 }
