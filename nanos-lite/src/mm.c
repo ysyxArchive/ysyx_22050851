@@ -36,6 +36,7 @@ int mm_brk(uintptr_t brk) {
     }
     current->max_brk += pages_to_alloc * PGSIZE;
   }
+  Log("now is %x", (uint32_t)current->max_brk);
   return 0;
 }
 
