@@ -39,7 +39,7 @@ enum {
 #endif
 char *NULLARR[] = {NULL};
 static Context *do_event(Event e, Context *c) {
-  Log("in event, input context is  %x", c);
+  Log("in event, input context is  %x, ptentry is %x", c, c->pdir);
   switch (e.event) {
   case EVENT_IRQ_TIMER:
     strace("syscall SYS_yield from irq timer");
@@ -122,7 +122,7 @@ static Context *do_event(Event e, Context *c) {
   default:
     Panic("Unhandled event ID = %d", e.event);
   }
-  Log("in event, output context is  %x", c);
+  Log("in event, output context is %x, ptentry is %x", c, c->pdir);
   
   return c;
 }
