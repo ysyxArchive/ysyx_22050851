@@ -93,8 +93,8 @@ void init_proc() {
   pcb_boot = getPCB();
   executing[0] = getPCB();
   executing[1] = getPCB();
-  context_uload(executing[0], "/bin/hello", args, envp);
-  context_uload(executing[1], target_program, args, envp);
+  context_uload(executing[1], "/bin/hello", args, envp);
+  context_uload(executing[0], target_program, args, envp);
   switch_boot_pcb();
 }
 
