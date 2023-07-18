@@ -63,13 +63,13 @@ void unprotect(AddrSpace *as) {}
 
 void __am_get_cur_as(Context *c) {
   c->pdir = (uintptr_t)(vme_enable ? (void *)get_satp() : NULL);
-  printf("store stap %x to context %x", get_satp(), c);
+  printf("store stap %x to context %x\n", get_satp(), c);
 }
 
 void __am_switch(Context *c) {
   if (vme_enable && c->pdir) {
     set_satp((void *)c->pdir);
-    printf("load stap %x from context %x", c->pdir, c);
+    printf("load stap %x from context %x\n", c->pdir, c);
   }
 }
 void map(AddrSpace *as, void *va, void *pa, int prot) {
