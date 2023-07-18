@@ -39,6 +39,8 @@ uintptr_t loader(PCB *pcb, const char *filename) {
                    : max_addr;
   }
   // determine minmax
+  Log("raw addr range from %x to %x", (uint32_t)min_addr,
+      (uint32_t)max_addr);
   min_addr = min_addr - min_addr % PGSIZE;
   max_addr =
       max_addr + ((max_addr % PGSIZE) ? (PGSIZE - max_addr % PGSIZE) : 0);
