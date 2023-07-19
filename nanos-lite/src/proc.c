@@ -111,7 +111,7 @@ Context *schedule(Context *prev)
 {
   current->cp = prev;
   int currentidx = current == (pcb + 1) ? 1 : 2;
-  Log("jump to proc %d", 2 - currentidx);
-  current = pcb + (2 - currentidx);
+  Log("jump to proc %d", 3 - currentidx);
+  current = pcb + (3 - currentidx);
   return current->cp;
 }
