@@ -51,7 +51,6 @@ bool vme_init(void *(*pgalloc_f)(int), void (*pgfree_f)(void *)) {
 
 void protect(AddrSpace *as) {
   PTE *updir = (PTE *)(pgalloc_usr(1));
-  printf("alloc ptentry page %x\n",updir);
   as->ptr = updir;
   as->area = USER_SPACE;
   as->pgsize = PGSIZE;
@@ -64,17 +63,14 @@ void unprotect(AddrSpace *as) {}
 
 void __am_get_cur_as(Context *c) {
   c->pdir = (uintptr_t)(vme_enable ? (void *)get_satp() : NULL);
-  printf("store stap %x to context %x\n", get_satp(), c);
 }
 
 void __am_switch(Context *c) {
   if (vme_enable && c->pdir) {
     set_satp((void *)c->pdir);
-    printf("load stap %x from context %x\n", c->pdir, c);
   }
 }
 void map(AddrSpace *as, void *va, void *pa, int prot) {
-// printf("map , va is %x, pa is %x\n", va, pa);
   uint64_t vaint = (uint64_t)va;
   // assert high position is equal
   assert(((((uint64_t)vaint << 1) ^ ((uint64_t)vaint)) & 0xFFFFFF8000000000) ==

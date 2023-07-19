@@ -26,7 +26,7 @@ enum {
   SYS_times,
   SYS_gettimeofday
 };
-#define STRACE
+// #define STRACE
 #ifdef STRACE
 #define strace(format, ...)                                                    \
   do {                                                                         \
@@ -122,8 +122,6 @@ static Context *do_event(Event e, Context *c) {
   default:
     Panic("Unhandled event ID = %d", e.event);
   }
-  Log("out event, output context is %x, ptentry is %x", c, c->pdir);
-  
   return c;
 }
 

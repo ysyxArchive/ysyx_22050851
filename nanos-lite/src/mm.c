@@ -24,7 +24,6 @@ void free_page(void *p) { panic("not implement yet"); }
 extern PCB *current;
 /* The brk() system call handler. */
 int mm_brk(uintptr_t brk) {
-  Log("wanted to %x, now is %x", (uint32_t)brk, (uint32_t)current->max_brk);
   if (brk > current->max_brk) {
     unsigned addr_to_alloc = brk - current->max_brk;
     unsigned pages_to_alloc =
@@ -36,7 +35,6 @@ int mm_brk(uintptr_t brk) {
     }
     current->max_brk += pages_to_alloc * PGSIZE;
   }
-  Log("now is %x", (uint32_t)current->max_brk);
   return 0;
 }
 

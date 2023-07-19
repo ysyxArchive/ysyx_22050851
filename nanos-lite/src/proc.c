@@ -6,21 +6,20 @@
 
 static PCB pcb[MAX_NR_PROC] __attribute__((used)) = {};
 static PCB *pcb_boot;
-Context contexts[MAX_NR_PROC] __attribute__((used)) = {};
 PCB *current = NULL;
 int pcbcount = 0;
 void switch_boot_pcb() { current = pcb_boot; }
 PCB *executing[2];
-// void hello_fun(void *arg) {
-//   int j = 1;
-//   while (1) {
-//     if (j % 200 == 0)
-//       Log("Hello World from Nanos-lite with arg '%s' for the %dth time!",
-//           (uintptr_t)arg, j);
-//     j++;
-//     yield();
-//   }
-// }
+void hello_fun(void *arg) {
+  int j = 1;
+  while (1) {
+    if (j % 200 == 0)
+      Log("Hello World from Nanos-lite with arg '%s' for the %dth time!",
+          (uintptr_t)arg, j);
+    j++;
+    yield();
+  }
+}
 
 void context_kload(PCB *pcb, void *entry, void *arg) {
   Area area = {.start = pcb->stack, .end = pcb->stack + STACK_SIZE};
@@ -108,17 +107,8 @@ void replacePCB(PCB *newone) {
 }
 
 Context *schedule(Context *prev) {
-  // printf("curernt %x, %x\n", current, &pcb_boot);
-  // printf("curernt.cp %x, %x\n", current->cp, pcb_boot->cp);
-  // if (current != pcb_boot) {
-  //   memcpy(current->cp, prev, sizeof(Context));
-  // }
   current->cp = prev;
+  Log("jump to proc %d", current == executing[0]);
   current = current == executing[0] ? executing[1] : executing[0];
-  // Log("jump to proc %d, max_brk is %x", current == executing[1], current->max_brk);
-  // memcpy(prev, current->cp, sizeof(Context));
-  // for (int i = 0 ; i < 32 ; i ++){
-  //   printf("%x ", prev->gpr[i]);
-  // }
   return current->cp;
 }
