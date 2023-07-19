@@ -96,7 +96,7 @@ PCB *getPCB() { return &(pcb[pcbcount++]); }
 void init_proc()
 {
   Log("Initializing processes...");
-  char *target_program[] = {"/bin/bird", "/bin/hello", "/bin/pal"};
+  char *target_program[] = {"/bin/nterm", "/bin/hello", "/bin/pal"};
   pcb_boot = getPCB();
   for (int i = 0; i < MAX_NR_PROC - 1; i++)
   {
