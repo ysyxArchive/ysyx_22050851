@@ -122,7 +122,7 @@ static Context *do_event(Event e, Context *c) {
   default:
     Panic("Unhandled event ID = %d", e.event);
   }
-  Log("in event, output context is %x, ptentry is %x", c, c->pdir);
+  Log("out event, output context is %x, ptentry is %x", c, c->pdir);
   
   return c;
 }
