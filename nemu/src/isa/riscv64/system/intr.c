@@ -35,16 +35,16 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
 #define IRQ_TIMER 0x8000000000000007
 
 word_t isa_query_intr() {
-  // if (!(csrs("mstatus") & 0x8)) {
-  //   return INTR_EMPTY;
-  // }
-  // clock_t end = clock();
-  // double elapsed = ((double)(end - start)) / CLOCKS_PER_SEC; // 计算经过的秒数
-  // if (elapsed >= 1) { // 每秒一次的时钟中断
-  //   Log("trigger!");
-  //   start = end;
-  //   cpu.INTR = false;
-  //   return IRQ_TIMER;
-  // }
+  if (!(csrs("mstatus") & 0x8)) {
+    return INTR_EMPTY;
+  }
+  clock_t end = clock();
+  double elapsed = ((double)(end - start)) / CLOCKS_PER_SEC; // 计算经过的秒数
+  if (elapsed >= 1) { // 每秒一次的时钟中断
+    Log("trigger!");
+    start = end;
+    cpu.INTR = false;
+    return IRQ_TIMER;
+  }
   return INTR_EMPTY;
 }
