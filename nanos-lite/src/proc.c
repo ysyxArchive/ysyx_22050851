@@ -110,15 +110,15 @@ void replacePCB(PCB *newone) {
 Context *schedule(Context *prev) {
   // printf("curernt %x, %x\n", current, &pcb_boot);
   // printf("curernt.cp %x, %x\n", current->cp, pcb_boot->cp);
-  if (current != pcb_boot) {
-    memcpy(current->cp, prev, sizeof(Context));
-  }
-  // current->cp = prev;
+  // if (current != pcb_boot) {
+  //   memcpy(current->cp, prev, sizeof(Context));
+  // }
+  current->cp = prev;
   current = current == executing[0] ? executing[1] : executing[0];
-  Log("jump to proc %d, max_brk is %x", current == executing[1], current->max_brk);
-  memcpy(prev, current->cp, sizeof(Context));
+  // Log("jump to proc %d, max_brk is %x", current == executing[1], current->max_brk);
+  // memcpy(prev, current->cp, sizeof(Context));
   // for (int i = 0 ; i < 32 ; i ++){
   //   printf("%x ", prev->gpr[i]);
   // }
-  return prev;
+  return current->cp;
 }
