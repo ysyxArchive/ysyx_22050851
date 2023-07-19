@@ -110,8 +110,8 @@ void init_proc()
 Context *schedule(Context *prev)
 {
   current->cp = prev;
-  int currentidx = current == pcb ? 0 : 1;
-  Log("jump to proc %d", 1 - currentidx);
-  current = pcb + (1 - currentidx);
+  int currentidx = current == (pcb + 1) ? 1 : 2;
+  Log("jump to proc %d", 2 - currentidx);
+  current = pcb + (2 - currentidx);
   return current->cp;
 }
