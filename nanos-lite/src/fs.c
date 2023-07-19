@@ -113,7 +113,7 @@ int fs_lseek(int fd, int offset, int whence) {
 }
 
 size_t fs_read(int fd, void *buf, size_t count) {
-  OpenedFileInfo *p = ofi.next;
+ OpenedFileInfo *p = ofi.next;
   size_t offset;
   while (p && p->fd != fd) {
     p = p->next;

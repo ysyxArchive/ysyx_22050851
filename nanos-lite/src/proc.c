@@ -5,10 +5,10 @@
 #define MAX_NR_PROC 4
 
 static PCB pcb[MAX_NR_PROC] __attribute__((used)) = {};
-static PCB pcb_boot = {};
+static PCB *pcb_boot;
 PCB *current = NULL;
 int pcbcount = 0;
-void switch_boot_pcb() { current = &pcb_boot; }
+void switch_boot_pcb() { current = pcb_boot; }
 PCB *executing[2];
 void hello_fun(void *arg) {
   int j = 1;
@@ -22,7 +22,7 @@ void hello_fun(void *arg) {
 }
 
 void context_kload(PCB *pcb, void *entry, void *arg) {
-  Area area = {.start = pcb, .end = pcb + 1};
+  Area area = {.start = pcb->stack, .end = pcb->stack + STACK_SIZE};
   pcb->cp = kcontext(area, entry, arg);
 }
 
@@ -32,7 +32,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[],
   Assert(argv, "argv is NULL when executing %s", filename);
   Assert(envp, "envp is NULL when executing %s", filename);
   reset_fs();
-  Area area = {.start = pcb, .end = pcb + 1};
+  Area area = {.start = pcb->stack, .end = pcb->stack + STACK_SIZE};
   uintptr_t entry = loader(pcb, filename);
   pcb->cp = ucontext(&(pcb->as), area, (void *)entry);
   uint64_t offsetCount = 0;
@@ -77,6 +77,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[],
   }
   *((uint64_t *)(stack - offsetCount) - 1) = argc;
   offsetCount += sizeof(uint64_t);
+  Log("stack %x", (uint64_t)(pcb->as.area.end - offsetCount));
   pcb->cp->GPRx = (uint64_t)(pcb->as.area.end - offsetCount);
 }
 
@@ -85,11 +86,13 @@ PCB *getPCB() { return &(pcb[pcbcount++]); }
 void init_proc() {
   Log("Initializing processes...");
   char target_program[] = "/bin/nterm";
-  executing[0] = getPCB();
-  context_kload(executing[0], hello_fun, "p2");
+  // context_kload(executing[0], hello_fun, "p2");
   char *args[] = {target_program, NULL};
   char *envp[] = {NULL};
+  pcb_boot = getPCB();
+  executing[0] = getPCB();
   executing[1] = getPCB();
+  context_uload(executing[0], "/bin/hello", args, envp);
   context_uload(executing[1], target_program, args, envp);
   switch_boot_pcb();
 }

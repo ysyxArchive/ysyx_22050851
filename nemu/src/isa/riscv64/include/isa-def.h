@@ -17,11 +17,11 @@
 #define __ISA_RISCV64_H__
 
 #include <common.h>
-
+#define CSR_CNT 6
 typedef struct {
   word_t gpr[32];
   vaddr_t pc;
-  word_t csr[5];
+  word_t csr[CSR_CNT];
   bool INTR;
 } riscv64_CPU_state;
 
