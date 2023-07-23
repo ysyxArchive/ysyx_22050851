@@ -16,7 +16,6 @@ object playground extends ScalaModule with ScalafmtModule { m =>
     "-P:chiselplugin:genBundleElements"
   )
   override def ivyDeps = Agg(
-    ivy"ivy.com.lihaoyi::mill-contrib-testng:0.9.9",
     ivy"edu.berkeley.cs::chisel3:3.5.4",
     ivy"com.sifive::chisel-circt:0.6.0",
   )
