@@ -5,6 +5,14 @@ import mill.scalalib.scalafmt.ScalafmtModule
 import mill.scalalib.TestModule.Utest
 // support BSP
 import mill.bsp._
+import coursier.maven.MavenRepository
+
+object CustomZincWorkerModule extends ZincWorkerModule {
+  def repositories() = super.repositories ++ Seq(
+    MavenRepository("https://oss.sonatype.org/content/repositories/releases"),
+    MavenRepository("https://oss.sonatype.org/content/repositories/snapshots")
+  )  
+}
 
 object playground extends ScalaModule with ScalafmtModule { m =>
   override def scalaVersion = "2.13.8"
