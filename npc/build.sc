@@ -5,7 +5,7 @@ import mill.scalalib.scalafmt.ScalafmtModule
 import mill.scalalib.TestModule.Utest
 // support BSP
 import mill.bsp._
-import $ivy.``com.lihaoyi::mill-contrib-testng:0.9.9``
+`import $ivy.`com.lihaoyi::mill-contrib-testng:0.9.9``
 
 object playground extends ScalaModule with ScalafmtModule { m =>
   override def scalaVersion = "2.13.8"
