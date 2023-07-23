@@ -62,6 +62,7 @@ static void exec_once(Decode* s, vaddr_t pc) {
   // update pc
   cpu.pc = s->dnpc;
 
+#ifdef CONFIG_TARGET_NATIVE_ELF
   char* p = s->logbuf;
   p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
   int ilen = s->snpc - s->pc;
@@ -77,7 +78,6 @@ static void exec_once(Decode* s, vaddr_t pc) {
   space_len = space_len * 3 + 1;
   memset(p, ' ', space_len);
   p += space_len;
-#ifdef CONFIG_TARGET_NATIVE_ELF
   void disassemble(char* str, int size, uint64_t pc, uint8_t* code, int nbyte);
   disassemble(p, s->logbuf - p + sizeof(s->logbuf),
               MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc),
