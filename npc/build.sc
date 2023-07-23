@@ -3,7 +3,6 @@ import mill._
 import mill.scalalib._
 import mill.scalalib.scalafmt.ScalafmtModule
 import mill.scalalib.TestModule.Utest
-import mill.scalalib.TestModule.Tests
 // support BSP
 import mill.bsp._
 
