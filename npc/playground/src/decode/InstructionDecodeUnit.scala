@@ -29,7 +29,7 @@ class InstructionDecodeUnit extends Module {
   val outputnew = DecoupledIO(new DecodeOut)
   val decodeOut = Wire(new DecodeOut)
 
-  val controlDecoder = new InstContorlDecoder()
+  val controlDecoder = Module(new InstContorlDecoder)
 
   controlDecoder.input := io.inst
   decodeOut.controlOut := controlDecoder.output
@@ -64,7 +64,7 @@ class InstructionDecodeUnit extends Module {
   when(outputnew.ready) {
     outputnew.enq(decodeOut)
   }
-  
+
   // follow temp
   val output = IO(Decoupled(Vec(2, Operation())))
 
