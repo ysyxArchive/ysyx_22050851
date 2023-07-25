@@ -26,7 +26,7 @@ class InstructionDecodeUnit extends Module {
     val inst   = Input(UInt(32.W))
     val ready  = Output(Bool())
   })
-  val outputnew = DecoupledIO(new DecodeOut)
+  val outputnew = IO(Decoupled(new DecodeOut))
   val decodeOut = Wire(new DecodeOut)
 
   val controlDecoder = Module(new InstContorlDecoder)
