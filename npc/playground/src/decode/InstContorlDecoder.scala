@@ -175,7 +175,7 @@ class InstContorlDecoder extends Module {
   val input  = IO(Input(UInt(32.W)))
   val output  = IO(new DecodeControlOut)
   val decodeOut = decoder(input, table)
-  output.insttype := decodeOut(0, 2)
+  output.insttype := decodeOut(2, 0)
   output.srccast1 := decodeOut(3, 3)
   output.srccast2 := decodeOut(4, 4)
   output.alumux1 := decodeOut(5, 6)
