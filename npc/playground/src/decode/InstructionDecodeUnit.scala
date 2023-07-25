@@ -58,7 +58,7 @@ class InstructionDecodeUnit extends Module {
     )
   )
   decodeOut.dataOut.src1 := rs1
-  decodeOut.dataOut.src1 := rs2
+  decodeOut.dataOut.src2 := rs2
   decodeOut.dataOut.dst  := rd
 
   when(outputnew.ready) {
