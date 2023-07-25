@@ -8,12 +8,64 @@ import decode._
 import org.joda.time.field.SkipUndoDateTimeField
 import execute._
 
+class DecodeDataOut extends Bundle {
+  val src1 = Output(UInt(5.W))
+  val src2 = Output(UInt(5.W))
+  val dst  = Output(UInt(5.W))
+  val imm  = Output(UInt(64.W))
+}
+
+class DecodeOut extends Bundle {
+  val dataOut    = Output(new DecodeDataOut);
+  val controlOut = Output(new DecodeControlOut);
+}
+
 class InstructionDecodeUnit extends Module {
   val io = IO(new Bundle {
     val enable = Input(Bool())
     val inst   = Input(UInt(32.W))
     val ready  = Output(Bool())
   })
+  val outputnew = DecoupledIO(new DecodeOut)
+  val decodeOut = Wire(new DecodeOut)
+
+  val controlDecoder = new InstContorlDecoder()
+
+  controlDecoder.input := io.inst
+  decodeOut.controlOut := controlDecoder.output
+
+  val rs1  = io.inst(19, 15)
+  val rs2  = io.inst(24, 20)
+  val rd   = io.inst(11, 7)
+  val immI = Utils.signalExtend(io.inst(31, 20), 12)
+  val immS = Cat(io.inst(31, 25), io.inst(11, 7))
+  val immU = Cat(Utils.signalExtend(io.inst(31, 12), 20), 0.U(12.W))
+  val immB = Cat(Utils.signalExtend(io.inst(31), 1), io.inst(7), io.inst(30, 25), io.inst(11, 8), 0.U(1.W))
+  val immJ = Utils.signalExtend(
+    Cat(io.inst(31), io.inst(19, 12), io.inst(20), io.inst(30, 21), 0.U(1.W)),
+    20
+  );
+
+  decodeOut.dataOut.imm := MuxLookup(
+    controlDecoder.output.insttype,
+    DontCare,
+    Seq(
+      InstType.I.asUInt -> immI,
+      InstType.S.asUInt -> immS,
+      InstType.U.asUInt -> immU,
+      InstType.B.asUInt -> immB,
+      InstType.J.asUInt -> immJ
+    )
+  )
+  decodeOut.dataOut.src1 := rs1
+  decodeOut.dataOut.src1 := rs2
+  decodeOut.dataOut.dst  := rd
+
+  when(outputnew.ready) {
+    outputnew.enq(decodeOut)
+  }
+  
+  // follow temp
   val output = IO(Decoupled(Vec(2, Operation())))
 
   val resultValid = RegInit(false.B)
@@ -22,20 +74,9 @@ class InstructionDecodeUnit extends Module {
   output.valid := !output.ready && resultValid
   output.bits  := DontCare
 
-  val rs1    = io.inst(19, 15)
-  val rs2    = io.inst(24, 20)
-  val rd     = io.inst(11, 7)
   val opcode = io.inst(6, 0)
   val funct3 = io.inst(14, 12)
   val funct7 = io.inst(31, 25)
-  val immI   = Utils.signalExtend(io.inst(31, 20), 12)
-  val immS   = Cat(io.inst(31, 25), io.inst(11, 7))
-  val immU   = Cat(Utils.signalExtend(io.inst(31, 12), 20), 0.U(12.W))
-  val immB   = Cat(Utils.signalExtend(io.inst(31), 1), io.inst(7), io.inst(30, 25), io.inst(11, 8), 0.U(1.W))
-  val immJ = Utils.signalExtend(
-    Cat(io.inst(31), io.inst(19, 12), io.inst(20), io.inst(30, 21), 0.U(1.W)),
-    20
-  );
 
   val result = MuxLookup(
     opcode,
