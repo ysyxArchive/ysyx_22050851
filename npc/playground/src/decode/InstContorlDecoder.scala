@@ -4,24 +4,24 @@ import chisel3._
 import chisel3.util.BitPat
 import chisel3.util.experimental.decode._
 import chisel3.experimental.ChiselEnum
-object src1cast extends ChiselEnum {
+object SrcCast1 extends ChiselEnum {
 	val no = Value(0.U)
 	val yes = Value(1.U)
 }
-object src2cast extends ChiselEnum {
+object SrcCast2 extends ChiselEnum {
 	val no = Value(0.U)
 	val yes = Value(1.U)
 }
-object alumux1 extends ChiselEnum {
+object AluMux1 extends ChiselEnum {
 	val src1 = Value(0.U)
 	val pc = Value(1.U)
 	val zero = Value(2.U)
 }
-object alumux2 extends ChiselEnum {
+object AluMux2 extends ChiselEnum {
 	val src2 = Value(0.U)
 	val imm = Value(1.U)
 }
-object alumode extends ChiselEnum {
+object AluMode extends ChiselEnum {
 	val add = Value(0.U)
 	val and = Value(1.U)
 	val sub = Value(2.U)
@@ -36,52 +36,52 @@ object alumode extends ChiselEnum {
 	val rl = Value(11.U)
 	val xor = Value(12.U)
 }
-object regw extends ChiselEnum {
+object RegWrite extends ChiselEnum {
 	val yes = Value(0.U)
 	val no = Value(1.U)
 }
-object regwmux extends ChiselEnum {
+object RegWriteMux extends ChiselEnum {
 	val alu = Value(0.U)
 	val snpc = Value(1.U)
 	val mem = Value(2.U)
 	val aluneg = Value(3.U)
 }
-object regwsignextend extends ChiselEnum {
+object RegWSEXT extends ChiselEnum {
 	val no = Value(0.U)
 	val yes = Value(1.U)
 }
-object memmode extends ChiselEnum {
+object MemMode extends ChiselEnum {
 	val no = Value(0.U)
 	val read = Value(1.U)
 	val readu = Value(2.U)
 	val write = Value(3.U)
 }
-object memlen extends ChiselEnum {
+object MemLen extends ChiselEnum {
 	val one = Value(0.U)
 	val eight = Value(1.U)
 	val two = Value(2.U)
 	val four = Value(3.U)
 }
-object pcaddrsrc extends ChiselEnum {
+object PCAddrSrc extends ChiselEnum {
 	val zero = Value(0.U)
 	val aluzero = Value(1.U)
 	val alunotneg = Value(2.U)
 	val aluneg = Value(3.U)
 	val alunotzero = Value(4.U)
 }
-object pcsrc extends ChiselEnum {
+object PcSrc extends ChiselEnum {
 	val imm = Value(0.U)
 	val src1 = Value(1.U)
 }
 class DecodeOut extends Bundle {
-	val src1cast = Output(UInt(1.W))
-	val src2cast = Output(UInt(1.W))
+	val srccast1 = Output(UInt(1.W))
+	val srccast2 = Output(UInt(1.W))
 	val alumux1 = Output(UInt(2.W))
 	val alumux2 = Output(UInt(1.W))
 	val alumode = Output(UInt(4.W))
-	val regw = Output(UInt(1.W))
-	val regwmux = Output(UInt(2.W))
-	val regwsignextend = Output(UInt(1.W))
+	val regwrite = Output(UInt(1.W))
+	val regwritemux = Output(UInt(2.W))
+	val regwsext = Output(UInt(1.W))
 	val memmode = Output(UInt(2.W))
 	val memlen = Output(UInt(2.W))
 	val pcaddrsrc = Output(UInt(3.W))
@@ -166,14 +166,14 @@ class InstContorlDecoder extends Module {
   val input  = IO(Input(UInt(32.W)))
   val output  = IO(new DecodeOut)
   val decodeOut = decoder(input, table)
-  output.src1cast := decodeOut(0, 0)
-  output.src2cast := decodeOut(1, 1)
+  output.srccast1 := decodeOut(0, 0)
+  output.srccast2 := decodeOut(1, 1)
   output.alumux1 := decodeOut(2, 3)
   output.alumux2 := decodeOut(4, 4)
   output.alumode := decodeOut(5, 8)
-  output.regw := decodeOut(9, 9)
-  output.regwmux := decodeOut(10, 11)
-  output.regwsignextend := decodeOut(12, 12)
+  output.regwrite := decodeOut(9, 9)
+  output.regwritemux := decodeOut(10, 11)
+  output.regwsext := decodeOut(12, 12)
   output.memmode := decodeOut(13, 14)
   output.memlen := decodeOut(15, 16)
   output.pcaddrsrc := decodeOut(17, 19)
