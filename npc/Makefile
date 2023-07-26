@@ -34,7 +34,7 @@ $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 
 $(VSRCS): $(SCALAS)
 	make verilog
-	touch build/*.v
+	touch $(VSRCS)
 
 $(abspath ./playground/src/decode/InstructionDecodeUnit.scala): playground/scripts/codemap.csv playground/scripts/parsedecode.py
 	python playground/scripts/parsedecode.py
