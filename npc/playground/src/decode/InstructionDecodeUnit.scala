@@ -396,7 +396,7 @@ class InstructionDecodeUnit extends Module {
   //   io.inst,
   //   Instruction.noMatch,
   //   Seq(
-  //     "b00000000000100000000000001110011".U -> Instruction(
+  //     "3".U -> Instruction(
   //       InstructionType.iType,
   //       Operation(Source.imm(0.U), Source.imm(3.U), Source.pc, OperationType.halt)
   //     )
