@@ -26,7 +26,7 @@ object DecodeOut {
   def default() = {
     val defaultout = Wire(new DecodeOut)
     defaultout.control := DecodeControlOut.default()
-    defaultout.data    := DecodeDataOut.default()
+    defaultout.data    := DecodeDataOut.default
     defaultout
   }
 }
