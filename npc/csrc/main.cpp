@@ -67,7 +67,6 @@ void one_step() {
   top->eval();
   tfp->dump(npc_clock++);
   uint64_t npc = top->pcio_pc;
-  printf("test %llx\n", npc);
   top->pcio_inst = read_mem_nolog(npc, 4);
   tfp->flush();
   update_cpu();
