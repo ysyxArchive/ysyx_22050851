@@ -4,6 +4,8 @@
 !Makefile
 !*.mk
 !*.scala
+!*.py
+!*.csv
 !*.[cSh]
 !*.v
 !*.cpp

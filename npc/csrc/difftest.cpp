@@ -1,13 +1,11 @@
 #include "difftest.h"
-#include <dlfcn.h>
 #include "common.h"
+#include <dlfcn.h>
 
-void (*difftest_memcpy)(paddr_t addr,
-                        void* buf,
-                        size_t n,
+void (*difftest_memcpy)(paddr_t addr, void *buf, size_t n,
                         bool direction) = NULL;
 
-void (*difftest_regcpy)(void* dut, bool direction) = NULL;
+void (*difftest_regcpy)(void *dut, bool direction) = NULL;
 
 void (*difftest_exec)(uint64_t n) = NULL;
 
@@ -15,9 +13,9 @@ void (*difftest_raise_intr)(word_t NO) = NULL;
 
 void (*difftest_init)(int port) = NULL;
 
-void load_difftest_so(char* diff_so_file) {
-  void* handle;
-  char* error;
+void load_difftest_so(char *diff_so_file) {
+  void *handle;
+  char *error;
 
   // 打开动态链接库
   handle = dlopen(diff_so_file, RTLD_LAZY);
@@ -26,19 +24,19 @@ void load_difftest_so(char* diff_so_file) {
   // 清除之前存在的错误
   dlerror();
   // 获取函数
-  *(void**)(&difftest_memcpy) = dlsym(handle, "difftest_memcpy");
+  *(void **)(&difftest_memcpy) = dlsym(handle, "difftest_memcpy");
   Assert(!(error = dlerror()), "load diff so symbol error! %s", error);
 
-  *(void**)(&difftest_regcpy) = dlsym(handle, "difftest_regcpy");
+  *(void **)(&difftest_regcpy) = dlsym(handle, "difftest_regcpy");
   Assert(!(error = dlerror()), "load diff so symbol error! %s", error);
 
-  *(void**)(&difftest_exec) = dlsym(handle, "difftest_exec");
+  *(void **)(&difftest_exec) = dlsym(handle, "difftest_exec");
   Assert(!(error = dlerror()), "load diff so symbol error! %s", error);
 
-  *(void**)(&difftest_raise_intr) = dlsym(handle, "difftest_raise_intr");
+  *(void **)(&difftest_raise_intr) = dlsym(handle, "difftest_raise_intr");
   Assert(!(error = dlerror()), "load diff so symbol error! %s", error);
 
-  *(void**)(&difftest_init) = dlsym(handle, "difftest_init");
+  *(void **)(&difftest_init) = dlsym(handle, "difftest_init");
   Assert(!(error = dlerror()), "load diff so symbol error! %s", error);
 
   Assert(difftest_memcpy && difftest_regcpy && difftest_exec &&
@@ -54,7 +52,7 @@ void load_difftest_so(char* diff_so_file) {
          difftest_init != NULL);
 }
 
-void difftest_check(CPU* cpu) {
+void difftest_check(CPU *cpu) {
   CPU refcpu;
   difftest_exec(1);
   difftest_regcpy(&refcpu, FROM_REF);
@@ -68,23 +66,24 @@ void difftest_check(CPU* cpu) {
            "%llx, Actual: %llx ",
            i, cpu->pc, refcpu.gpr[i], cpu->gpr[i]);
   }
-  difftest_checkmem();
+  difftest_checkmem(cpu);
   return;
 }
 
-void difftest_checkmem() {
+void difftest_checkmem(CPU *cpu) {
   uint64_t from_ref = 0, local = 0;
   for (uint64_t addr = MEM_START; addr <= MEM_START + MEM_LEN - 0x8;
        addr += 0x8) {
     difftest_memcpy(addr, &from_ref, 8, FROM_REF);
     local = read_mem_nolog(addr, 0x8);
     Assert(from_ref == local,
-           "mem check error at %016lx! \n expected: %016lx actual: %016lx",
-           addr, from_ref, local);
+           "mem check error at %016lx when pc is %llx! \n expected: %016lx "
+           "actual: %016lx",
+           addr, cpu->pc, from_ref, local);
   }
 }
 
-void difftest_initial(CPU* cpu) {
+void difftest_initial(CPU *cpu) {
   Log("difftest_init");
   difftest_regcpy(cpu, TO_REF);
   Log("difftest_memcpy, %d", difftest_memcpy);
