@@ -17,8 +17,7 @@ class InstructionExecuteUnit extends Module {
   val controlIn = decodeIn.control
   val dataIn    = decodeIn.data
 
-  val alu      = Module(new ALU)
-  val blackBox = Module(new BlackBoxHalt);
+  val alu = Module(new ALU)
 
   // TODO: impl this
   in.ready := true.B
@@ -113,11 +112,14 @@ class InstructionExecuteUnit extends Module {
     )
   )
   memIO.wdata := src2
+  // blackBoxHalt
+  val blackBox = Module(new BlackBoxHalt);
+  blackBox.io.halt     := controlIn.goodtrap
+  blackBox.io.bad_halt := controlIn.badtrap
 
   // val in       = IO(Flipped(Decoupled(Vec(2, Operation()))))
   // val regIO    = IO(Flipped(new RegisterFileIO()))
   // val memIO    = IO(Flipped(new MemIO()))
-  // val blackBox = Module(new BlackBoxHalt);
   // val alu      = Module(new ALU)
   // val pcAdder  = Module(new SimpleAdder)
 
