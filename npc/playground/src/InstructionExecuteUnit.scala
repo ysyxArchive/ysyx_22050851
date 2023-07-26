@@ -96,6 +96,7 @@ class InstructionExecuteUnit extends Module {
   alu.io.opType := AluMode.apply(controlIn.alumode)
 
   // mem
+  memIO.clock  := clock
   memIO.addr   := alu.io.out
   memIO.isRead := controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   memIO.enable := controlIn.memmode =/= MemMode.no.asUInt
