@@ -5,7 +5,7 @@
 
 void difftest_check(CPU* cpu);
 
-void difftest_checkmem();
+void difftest_checkmem(CPU* cpu);
 
 void difftest_initial(CPU* cpu);
 

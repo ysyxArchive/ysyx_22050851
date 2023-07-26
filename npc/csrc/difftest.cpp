@@ -68,18 +68,18 @@ void difftest_check(CPU* cpu) {
            "%llx, Actual: %llx ",
            i, cpu->pc, refcpu.gpr[i], cpu->gpr[i]);
   }
-  difftest_checkmem();
+  difftest_checkmem(cpu);
   return;
 }
 
-void difftest_checkmem() {
+void difftest_checkmem(CPU* cpu) {
   uint64_t from_ref = 0, local = 0;
   for (uint64_t addr = MEM_START; addr <= MEM_START + MEM_LEN - 0x8;
        addr += 0x8) {
     difftest_memcpy(addr, &from_ref, 8, FROM_REF);
     local = read_mem_nolog(addr, 0x8);
     Assert(from_ref == local,
-           "mem check error at %016lx! \n expected: %016lx actual: %016lx",
+           "mem check error at %016lx when pc is %lx! \n expected: %016lx actual: %016lx",
            addr, from_ref, local);
   }
 }
