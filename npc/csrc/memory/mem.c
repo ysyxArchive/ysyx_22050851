@@ -16,7 +16,7 @@ void init_memory(char *bin_path) {
 
 uint64_t read_mem(uint64_t addr, size_t length) {
   uint64_t ret = read_mem_nolog(addr, length);
-
+  
   Log(ANSI_FMT("Reading %d bytes, starts with %lx, data is %lx",
                ANSI_FG_YELLOW),
       length, addr, ret);
