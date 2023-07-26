@@ -21,7 +21,6 @@ object Utils {
   def signExtend(num: UInt, width: Int, targetWidth: Int = 64): UInt = {
     Cat(Fill(targetWidth - width, num(width - 1)), num(width - 1, 0))
   }
-
   def isRegType(source: Source): Bool =
     source.stype === SourceType.reg.asUInt || source.stype === SourceType.regLow.asUInt
 
