@@ -14,10 +14,7 @@ class DecodeDataOut extends Bundle {
 }
 
 object DecodeDataOut {
-  def default() = {
-    // val defaultout = Wire(new DecodeDataOut)
-    val defaultout = new DecodeDataOut().Lit(_.dst -> 0.U, _.src1 -> 0.U, _.src2 -> 0.U, _.imm -> 0.U)
-    defaultout
+  def default() = new DecodeDataOut().Lit(_.dst -> 0.U, _.src1 -> 0.U, _.src2 -> 0.U, _.imm -> 0.U)
   }
 }
 
