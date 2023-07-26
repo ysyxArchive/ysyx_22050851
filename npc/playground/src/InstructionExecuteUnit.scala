@@ -17,6 +17,7 @@ class InstructionExecuteUnit extends Module {
   val dataIn    = decodeIn.data
 
   val alu = Module(new ALU)
+  val blackBox = Module(new BlackBoxHalt);
 
   // TODO: impl this
   in.ready := true.B
@@ -71,8 +72,6 @@ class InstructionExecuteUnit extends Module {
       regIO.out1
     )
 
-  // halt box
-  val blackBox = Module(new BlackBoxHalt);
 
   // alu
   alu.io.inA := MuxLookup(
