@@ -79,8 +79,8 @@ void difftest_checkmem(CPU* cpu) {
     difftest_memcpy(addr, &from_ref, 8, FROM_REF);
     local = read_mem_nolog(addr, 0x8);
     Assert(from_ref == local,
-           "mem check error at %016lx when pc is %lx! \n expected: %016lx actual: %016lx",
-           addr, from_ref, local);
+           "mem check error at %016lx when pc is %llx! \n expected: %016lx actual: %016lx",
+           cpu->pc,addr, from_ref, local);
   }
 }
 
