@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
   Log("init_done");
 
   tfp->dump(npc_clock++);
-  while (!is_halt && npc_clock < 50) {
+  while (!is_halt && npc_clock < 5000) {
     one_step();
   }
 
