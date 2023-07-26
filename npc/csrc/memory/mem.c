@@ -23,7 +23,6 @@ uint64_t read_mem(uint64_t addr, size_t length) {
   return ret;
 }
 uint64_t read_mem_nolog(uint64_t addr, size_t length) {
-  printf("test %llx\n", addr);
   uint64_t ret = 0;
   Assert(addr >= MEM_START, "addr 0x%lx < MEM_START 0x%x", addr, MEM_START);
   Assert(addr + length <= MEM_START + MEM_LEN,
