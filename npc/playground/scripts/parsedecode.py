@@ -15,7 +15,7 @@ pat2 = """
 class InstContorlDecoder extends Module {
   val table = TruthTable(
     Map(
-"""
+"""  
 
 
 df = pd.read_csv(
