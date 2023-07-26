@@ -11,7 +11,7 @@ import execute.ALUUtils
 object Utils {
 
   def cast(num: UInt, castWidth: Int, outputWidth: Int): UInt = {
-    zeroExtend(num(castWidth - 1, 0), castWidth, outputWidth)
+    signExtend(num(castWidth - 1, 0), castWidth, outputWidth)
   }
 
   def zeroExtend(num: UInt, width: Int, targetWidth: Int): UInt = {
