@@ -46,7 +46,7 @@ class InstructionExecuteUnit extends Module {
     controlIn.pcsrc,
     regIO.pc,
     Seq(
-      PcSrc.pc.asUInt -> dataIn.imm,
+      PcSrc.pc.asUInt -> regIO.pc,
       PcSrc.src1.asUInt -> src1
     )
   )

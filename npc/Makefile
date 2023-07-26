@@ -32,9 +32,6 @@ $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
 
-test:
-	mill -i __.test
-
 $(VSRCS): $(SCALAS)
 	make verilog
 
