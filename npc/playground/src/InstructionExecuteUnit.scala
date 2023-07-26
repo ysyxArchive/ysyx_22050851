@@ -8,7 +8,7 @@ import utils._
 import firrtl.seqCat
 
 class InstructionExecuteUnit extends Module {
-  val in    = IO(Flipped(Decoupled(new DecodeOut)))
+  val in    = IO(Flipped(Decoupled(new DecodeOut())))
   val memIO = IO(Flipped(new MemIO()))
   val regIO = IO(Flipped(new RegisterFileIO()))
 
