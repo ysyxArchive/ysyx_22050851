@@ -49,7 +49,7 @@ void write_mem(uint64_t addr, size_t length, uint64_t data) {
          "addr 0x%lx + 0x%lx > MEM_END 0x%x", addr, length,
          MEM_START + MEM_LEN);
 
-  Log(ANSI_FMT("writing %lx to %lx, len is %lx\n", ANSI_FG_YELLOW), data, addr,
+  Log(ANSI_FMT("writing %lx to %lx, len is %lx", ANSI_FG_YELLOW), data, addr,
       length);
   if (length == 1) {
     *((uint8_t *)(mem + (addr - MEM_START))) = (uint8_t)data;
