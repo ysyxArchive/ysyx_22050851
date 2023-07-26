@@ -15,7 +15,7 @@ class BlackBoxMem extends BlackBox with HasBlackBoxInline {
   val io = IO(new MemIO);
   setInline(
     "BlackBoxMem.v",
-    """import "DPI-C" function void mem_read_npc(input [63:0] addr, input [3:0] len, output [63:0] data);
+    """import "DPI-C" function void mem_read(input [63:0] addr, input [3:0] len, output [63:0] data);
       |import "DPI-C" function void mem_write(input [63:0] addr, input [3:0] len, input [63:0] data);
       |module BlackBoxMem (
       |  input enable,
@@ -29,7 +29,7 @@ class BlackBoxMem extends BlackBox with HasBlackBoxInline {
       |  wire read = enable & isRead;
       |/* verilator lint_off LATCH */
       |  always @(*) begin
-      |    if(read&& !clock) read_mem_npc(addr, len, rdata);
+      |    if(read&& !clock) mem_read(addr, len, rdata);
       |  end
       |  wire write = enable & !isRead;
       |/* verilator lint_off LATCH */
