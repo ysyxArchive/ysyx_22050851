@@ -60,8 +60,8 @@ class InstructionDecodeUnit extends Module {
   val rs2  = io.inst(24, 20)
   val rd   = io.inst(11, 7)
   val immI = Utils.signExtend(io.inst(31, 20), 12)
-  val immS = Cat(io.inst(31, 25), io.inst(11, 7))
-  val immU = Cat(Utils.signExtend(io.inst(31, 12), 20), 0.U(12.W))
+  val immS = Utils.signExtend(Cat(io.inst(31, 25), io.inst(11, 7)), 12)
+  val immU = Utils.signExtend(io.inst(31, 12), 20) << 12
   val immB = Cat(Utils.signExtend(io.inst(31), 1), io.inst(7), io.inst(30, 25), io.inst(11, 8), 0.U(1.W))
   val immJ = Utils.signExtend(
     Cat(io.inst(31), io.inst(19, 12), io.inst(20), io.inst(30, 21), 0.U(1.W)),
