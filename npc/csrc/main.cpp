@@ -37,18 +37,19 @@ void init_npc() {
 }
 
 extern "C" void mem_read(const svLogicVecVal *addr, const svLogicVecVal *len,
-                         svLogicVecVal *ret) {
+                         svLogicVecVal *ret, unsigned char is_unsigned) {
   uint64_t data = read_mem(*(uint64_t *)addr, *(uint8_t *)len);
-  // if (*(uint8_t *)len == 1) {
-  //   data = (uint64_t)(int64_t)(int8_t)data;
-  // } else if (*(uint8_t *)len == 2) {
-  //   data = (uint64_t)(int64_t)(int16_t)data;
-  // } else if (*(uint8_t *)len == 4) {
-  //   data = (uint64_t)(int64_t)(int32_t)data;
-  // } else if (*(uint8_t *)len == 8) {
-  //   data = (uint64_t)(int64_t)(int64_t)data;
-  // }
-
+  if (!is_unsigned) {
+    if (*(uint8_t *)len == 1) {
+      data = (uint64_t)(int64_t)(int8_t)data;
+    } else if (*(uint8_t *)len == 2) {
+      data = (uint64_t)(int64_t)(int16_t)data;
+    } else if (*(uint8_t *)len == 4) {
+      data = (uint64_t)(int64_t)(int32_t)data;
+    } else if (*(uint8_t *)len == 8) {
+      data = (uint64_t)(int64_t)(int64_t)data;
+    }
+  }
   ret[0].aval = data;
   ret[1].aval = data >> 32;
 }
@@ -62,7 +63,6 @@ extern "C" void mem_write(const svLogicVecVal *addr, const svLogicVecVal *len,
 extern "C" void set_gpr_ptr(const svOpenArrayHandle r) {
   cpu_gpr = (uint64_t *)(((VerilatedDpiOpenVar *)r)->datap());
 }
-
 
 void update_cpu() {
   memcpy(&(cpu.gpr), cpu_gpr, 32 * sizeof(uint64_t));
