@@ -15,7 +15,7 @@ pat2 = """
 class InstContorlDecoder extends Module {
   val table = TruthTable(
     Map(
-"""  
+"""
 
 
 df = pd.read_csv(
@@ -42,10 +42,16 @@ def num_to_bin(x):
 # 编码
 for colIndex in range(3, len(df.columns)):
     colName = df.columns[colIndex]
-    # 对字符串进行编码枚举
-    codes, values = pd.factorize(df.iloc[:, colIndex])
-    df_new[colName] = [num_to_bin(val) for val in codes]
-    codemap.append((colName, list(values)))
+    values = set(df[colName].unique())
+    # 如果只有 yes no，那就不用做map了
+    if values == {"yes", "no"}:
+        codemap.append((colName, []))
+        df_new[colName] = df[colName].replace({np.NaN: "?", "yes": "1", "no": "0"})
+    else:
+        # 对字符串进行编码枚举
+        codes, values = pd.factorize(df.iloc[:, colIndex])
+        df_new[colName] = [num_to_bin(val) for val in codes]
+        codemap.append((colName, list(values)))
     # 对df的每一列应用一个lambda函数，用于计算该列的最大位宽
     max_width = max(len(x) for x in df_new[colName])
     # 对df的所有元素应用一个lambda函数，用于根据最大位宽进行补齐或截断
@@ -56,6 +62,8 @@ df_new["concat"] = df_new.apply(lambda row: " ".join(row[3:]), axis=1)
 
 
 def genEnum(colName: str, values: list[str]):
+    if len(values) == 0:
+        return ""
     # TODO: yesno -> 10
     ret = f"object {colName} extends ChiselEnum {'{'}\n"
     for index, value in enumerate(values):
@@ -66,7 +74,7 @@ def genEnum(colName: str, values: list[str]):
 def genIOClass():
     ret = "class DecodeControlOut extends Bundle {\n"
     for colName, _ in codemap:
-        ret += f"\tval {colName.lower()} = Output(UInt({len(df_new[colName].iloc[0])}.W))\n"
+        ret += f"\tval {colName.lower()} = Output({ 'Bool()' if len(df_new[colName].iloc[0]) == 1 else f'UInt({len(df_new[colName].iloc[0])}.W)'})\n"
     return ret + "}\n"
 
 
@@ -78,7 +86,10 @@ object DecodeControlOut{
 """
     for colName, _ in codemap:
         defaultValue = defaultDict[colName]
-        ret += f"\t defaultout.{colName.lower()} := {f'{colName}.{defaultValue}.asUInt' if defaultValue != 'any' else '0.U'}\n"
+        if len(df_new[colName].iloc[0]) == 1:
+            ret += f"\t defaultout.{colName.lower()} := {'true.B' if defaultValue == 'yes' else 'false.B'}\n"
+        else:
+            ret += f"\t defaultout.{colName.lower()} := {f'{colName}.{defaultValue}.asUInt' if defaultValue != 'any' else '0.U'}\n"
     return ret + "defaultout\n}\n}\n"
 
 

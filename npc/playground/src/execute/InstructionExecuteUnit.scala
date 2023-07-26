@@ -27,7 +27,7 @@ class InstructionExecuteUnit extends Module {
   val src2 = Wire(UInt(64.W))
   regIO.raddr0 := dataIn.src1
   regIO.raddr1 := dataIn.src2
-  regIO.waddr  := Mux(controlIn.regwrite === RegWrite.yes.asUInt, dataIn.dst, 0.U)
+  regIO.waddr  := Mux(controlIn.regwrite, dataIn.dst, 0.U)
   val snpc = regIO.pc + 4.U
   val pcBranch = MuxLookup(
     controlIn.pcaddrsrc,
@@ -60,17 +60,17 @@ class InstructionExecuteUnit extends Module {
       RegWriteMux.aluneg.asUInt -> Utils.zeroExtend(ALUUtils.test(alu.io.signals, ALUUtils.isNegative), 1, 64)
     )
   )
-  regIO.wdata := Mux(controlIn.regwsext === RegWSEXT.yes.asUInt, Utils.signExtend(regwdata.asUInt, 32), regwdata)
+  regIO.wdata := Mux(controlIn.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)
 
   src1 :=
     Mux(
-      controlIn.srccast1 === SrcCast1.yes.asUInt,
+      controlIn.srccast1,
       Utils.cast(regIO.out0, 32, 64),
       regIO.out0
     )
   src2 :=
     Mux(
-      controlIn.srccast2 === SrcCast2.yes.asUInt,
+      controlIn.srccast2,
       Utils.cast(regIO.out1, 32, 64),
       regIO.out1
     )
@@ -96,11 +96,11 @@ class InstructionExecuteUnit extends Module {
   alu.io.opType := AluMode.apply(controlIn.alumode)
 
   // mem
-  memIO.clock  := clock
-  memIO.addr   := alu.io.out
-  memIO.isRead := controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
+  memIO.clock      := clock
+  memIO.addr       := alu.io.out
+  memIO.isRead     := controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   memIO.isUnsigned := controlIn.memmode === MemMode.readu.asUInt
-  memIO.enable := controlIn.memmode =/= MemMode.no.asUInt
+  memIO.enable     := controlIn.memmode =/= MemMode.no.asUInt
   // TODO
   memIO.len := MuxLookup(
     controlIn.memlen,
