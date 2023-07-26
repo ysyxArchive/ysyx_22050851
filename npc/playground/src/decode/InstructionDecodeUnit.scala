@@ -1,5 +1,6 @@
 import chisel3._
 import chisel3.experimental.ChiselEnum
+import chisel3.experimental.BundleLiterals._
 import chisel3.util._
 import utils._
 import decode._
@@ -13,14 +14,7 @@ class DecodeDataOut extends Bundle {
 }
 
 object DecodeDataOut {
-  def default() = {
-    val defaultout = Wire(new DecodeDataOut)
-    defaultout.dst  := 0.U
-    defaultout.src1 := 0.U
-    defaultout.src2 := 0.U
-    defaultout.imm  := 0.U
-    defaultout
-  }
+  val default = new DecodeDataOut().Lit(_.dst -> 0.U, _.src1 -> 0.U, _.src2 -> 0.U, _.imm -> 0.U)
 }
 
 class DecodeOut extends Bundle {
@@ -29,12 +23,7 @@ class DecodeOut extends Bundle {
 }
 
 object DecodeOut {
-  def default() = {
-    val defaultout = Wire(new DecodeOut)
-    defaultout.control := DecodeControlOut.default()
-    defaultout.data    := DecodeDataOut.default()
-    defaultout
-  }
+  val default = new DecodeOut().Lit(_.control -> DecodeControlOut.default(), _.data -> DecodeDataOut.default)
 }
 
 class InstructionDecodeUnit extends Module {
