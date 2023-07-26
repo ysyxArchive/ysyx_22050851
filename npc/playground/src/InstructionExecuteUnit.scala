@@ -93,7 +93,7 @@ class InstructionExecuteUnit extends Module {
       AluMux2.src2.asUInt -> src2
     )
   )
-  alu.io.opType := controlIn.alumode
+  alu.io.opType := AluMode.apply(controlIn.alumode)
 
   // mem
   memIO.addr   := alu.io.out
