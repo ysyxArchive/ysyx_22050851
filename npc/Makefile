@@ -35,7 +35,7 @@ $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 $(VSRCS): $(SCALAS)
 	make verilog
 
-playground/src/decode/InstContorlDecoder.scala: playground/scripts/codemap.csv playground/scripts/parsedecode.py
+$(SCALAS): playground/scripts/codemap.csv playground/scripts/parsedecode.py
 	python playground/scripts/parsedecode.py
 
 verilog: $(SCALAS)
