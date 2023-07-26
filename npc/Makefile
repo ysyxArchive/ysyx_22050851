@@ -10,6 +10,7 @@ VERILATOR_CFLAGS += -MMD --build -cc \
 VERILATOR_CFLAGS += -Wno-WIDTH  # 记得删掉
 BIN = $(BUILD_DIR)/$(TOPNAME)
 
+
 VSRCS = $(shell find $(abspath ./build) -name "*.v")
 CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
 INCLUDES = $(shell find $(abspath ./include) -name "*.h")
@@ -36,6 +37,9 @@ test:
 
 $(VSRCS): $(SCALAS)
 	make verilog
+
+playground/src/decode/InstContorlDecoder.scala: playground/scripts/codemap.csv playground/scripts/parsedecode.py
+	python playground/scripts/parsedecode.py
 
 verilog: $(SCALAS)
 	$(call git_commit, "generate verilog")

@@ -13,11 +13,11 @@ class InstructionExecuteUnit extends Module {
   val regIO = IO(Flipped(new RegisterFileIO()))
 
   // val decodeIn = RegNext(in.bits, DecodeOut.default())
-  val decodeIn = in.bits
+  val decodeIn  = in.bits
   val controlIn = decodeIn.control
   val dataIn    = decodeIn.data
 
-  val alu = Module(new ALU)
+  val alu      = Module(new ALU)
   val blackBox = Module(new BlackBoxHalt);
 
   // TODO: impl this
@@ -38,7 +38,8 @@ class InstructionExecuteUnit extends Module {
       PCAddrSrc.aluneg.asUInt -> ALUUtils.test(alu.io.signals, ALUUtils.isNegative),
       PCAddrSrc.alunotneg.asUInt -> ALUUtils.test(alu.io.signals, ALUUtils.notNegative),
       PCAddrSrc.alunotzero.asUInt -> ALUUtils.test(alu.io.signals, ALUUtils.notZero),
-      PCAddrSrc.zero.asUInt -> false.B
+      PCAddrSrc.zero.asUInt -> false.B,
+      PCAddrSrc.one.asUInt -> true.B
     )
   )
   val dnpcAddSrc = MuxLookup(
@@ -74,7 +75,6 @@ class InstructionExecuteUnit extends Module {
       Utils.cast(regIO.out1, 32, 64),
       regIO.out1
     )
-
 
   // alu
   alu.io.inA := MuxLookup(
