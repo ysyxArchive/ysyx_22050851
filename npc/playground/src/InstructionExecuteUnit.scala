@@ -53,7 +53,7 @@ class InstructionExecuteUnit extends Module {
     controlIn.regwritemux,
     DontCare,
     Seq(
-      RegWriteMux.alu.asUInt -> alu.out,
+      RegWriteMux.alu.asUInt -> alu.io.out,
       RegWriteMux.snpc.asUInt -> snpc,
       RegWriteMux.mem.asUInt -> memIO.rdata,
       RegWriteMux.aluneg.asUInt -> Utils.zeroExtend(ALUUtils.test(alu.io.signals, ALUUtils.isNegative), 1, 64)
