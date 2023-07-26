@@ -23,6 +23,8 @@ class InstructionExecuteUnit extends Module {
   in.ready := true.B
 
   // regIO
+  val src1 = Wire(UInt(64.W))
+  val src2 = Wire(UInt(64.W))
   regIO.raddr0 := dataIn.src1
   regIO.raddr1 := dataIn.src2
   regIO.waddr  := Mux(controlIn.regwrite === RegWrite.yes.asUInt, dataIn.dst, 0.U)
@@ -59,13 +61,13 @@ class InstructionExecuteUnit extends Module {
   )
   regIO.wdata := Mux(controlIn.regwsext === RegWSEXT.yes.asUInt, Utils.signExtend(regwdata.asUInt, 32), regwdata)
 
-  val src1 =
+  src1 :=
     Mux(
       controlIn.srccast1 === SrcCast1.yes.asUInt,
       Utils.cast(regIO.out0, 32, 64),
       regIO.out0
     )
-  val src2 =
+  src2 :=
     Mux(
       controlIn.srccast2 === SrcCast2.yes.asUInt,
       Utils.cast(regIO.out1, 32, 64),
