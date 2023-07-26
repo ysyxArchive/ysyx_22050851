@@ -103,6 +103,7 @@ class ALU extends Module {
       AluMode.ll.asUInt -> (io.inA << io.inB(5, 0)),
       AluMode.ra.asUInt -> (io.inA.asSInt >> io.inB(5, 0)).asUInt,
       AluMode.rl.asUInt -> (io.inA >> io.inB(5, 0)),
+      AluMode.rlw.asUInt -> (io.inA(31, 0) >> io.inB(5, 0)),
       AluMode.xor.asUInt -> (io.inA ^ io.inB)
     )
   )
