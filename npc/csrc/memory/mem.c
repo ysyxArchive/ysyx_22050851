@@ -22,6 +22,21 @@ uint64_t read_mem(uint64_t addr, size_t length) {
       length, addr, ret);
   return ret;
 }
+
+uint64_t read_mem_npc(uint64_t addr, size_t length) {
+  uint64_t ret = read_mem(addr, length);
+  if (length == 1) {
+    ret = (uint64_t)(int64_t)(int8_t)ret;
+  } else if (length == 2) {
+    ret = (uint64_t)(int64_t)(int16_t)ret;
+  } else if (length == 4) {
+    ret = (uint64_t)(int64_t)(int32_t)ret;
+  } else if (length == 8) {
+    ret = (uint64_t)(int64_t)(int64_t)ret;
+  }
+
+  return ret;
+}
 uint64_t read_mem_nolog(uint64_t addr, size_t length) {
   uint64_t ret = 0;
   Assert(addr >= MEM_START, "addr 0x%lx < MEM_START 0x%x", addr, MEM_START);

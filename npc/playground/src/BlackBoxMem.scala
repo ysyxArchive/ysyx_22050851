@@ -29,7 +29,7 @@ class BlackBoxMem extends BlackBox with HasBlackBoxInline {
       |  wire read = enable & isRead;
       |/* verilator lint_off LATCH */
       |  always @(*) begin
-      |    if(read&& !clock) mem_read(addr, len, rdata);
+      |    if(read&& !clock) read_mem_npc(addr, len, rdata);
       |  end
       |  wire write = enable & !isRead;
       |/* verilator lint_off LATCH */
