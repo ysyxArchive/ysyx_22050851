@@ -10,7 +10,7 @@ import execute.ALUUtils
 
 object Utils {
 
-  def cast(num: UInt, castWidth: Int, outputWidth: Int = castWidth): UInt = {
+  def cast(num: UInt, castWidth: Int, outputWidth: Int): UInt = {
     zeroExtend(num(castWidth - 1, 0), castWidth, outputWidth)
   }
 
