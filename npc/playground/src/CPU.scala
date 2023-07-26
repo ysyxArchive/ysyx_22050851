@@ -26,6 +26,7 @@ class CPU extends Module {
   decoder.io.enable := true.B
 
   exe.in <> decoder.output
+  exe.innew <> decoder.outputnew
   exe.regIO <> regs.io
   exe.memIO <> mem.io
 

@@ -15,9 +15,29 @@ class DecodeDataOut extends Bundle {
   val imm  = Output(UInt(64.W))
 }
 
+object DecodeDataOut {
+  def default() = {
+    val defaultout = Wire(new DecodeDataOut)
+    defaultout.dst  := 0.U
+    defaultout.src1 := 0.U
+    defaultout.src2 := 0.U
+    defaultout.imm  := 0.U
+    defaultout
+  }
+}
+
 class DecodeOut extends Bundle {
-  val dataOut    = Output(new DecodeDataOut);
-  val controlOut = Output(new DecodeControlOut);
+  val data    = Output(new DecodeDataOut);
+  val control = Output(new DecodeControlOut);
+}
+
+object DecodeOut {
+  def default() = {
+    val defaultout = Wire(new DecodeOut)
+    defaultout.control := DecodeControlOut.default()
+    defaultout.data    := DecodeDataOut.default()
+    defaultout
+  }
 }
 
 class InstructionDecodeUnit extends Module {
@@ -32,21 +52,21 @@ class InstructionDecodeUnit extends Module {
   val controlDecoder = Module(new InstContorlDecoder)
 
   controlDecoder.input := io.inst
-  decodeOut.controlOut := controlDecoder.output
+  decodeOut.control    := controlDecoder.output
 
   val rs1  = io.inst(19, 15)
   val rs2  = io.inst(24, 20)
   val rd   = io.inst(11, 7)
-  val immI = Utils.signalExtend(io.inst(31, 20), 12)
+  val immI = Utils.signExtend(io.inst(31, 20), 12)
   val immS = Cat(io.inst(31, 25), io.inst(11, 7))
-  val immU = Cat(Utils.signalExtend(io.inst(31, 12), 20), 0.U(12.W))
-  val immB = Cat(Utils.signalExtend(io.inst(31), 1), io.inst(7), io.inst(30, 25), io.inst(11, 8), 0.U(1.W))
-  val immJ = Utils.signalExtend(
+  val immU = Cat(Utils.signExtend(io.inst(31, 12), 20), 0.U(12.W))
+  val immB = Cat(Utils.signExtend(io.inst(31), 1), io.inst(7), io.inst(30, 25), io.inst(11, 8), 0.U(1.W))
+  val immJ = Utils.signExtend(
     Cat(io.inst(31), io.inst(19, 12), io.inst(20), io.inst(30, 21), 0.U(1.W)),
     20
   );
 
-  decodeOut.dataOut.imm := MuxLookup(
+  decodeOut.data.imm := MuxLookup(
     controlDecoder.output.insttype,
     DontCare,
     Seq(
@@ -57,9 +77,9 @@ class InstructionDecodeUnit extends Module {
       InstType.J.asUInt -> immJ
     )
   )
-  decodeOut.dataOut.src1 := rs1
-  decodeOut.dataOut.src2 := rs2
-  decodeOut.dataOut.dst  := rd
+  decodeOut.data.src1 := rs1
+  decodeOut.data.src2 := rs2
+  decodeOut.data.dst  := rd
 
   when(outputnew.ready) {
     outputnew.enq(decodeOut)
