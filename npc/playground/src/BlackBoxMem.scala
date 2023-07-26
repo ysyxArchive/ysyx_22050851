@@ -16,7 +16,7 @@ class BlackBoxMem extends BlackBox with HasBlackBoxInline {
   val io = IO(new MemIO);
   setInline(
     "BlackBoxMem.v",
-    """import "DPI-C" function void mem_read(input [63:0] addr, input [3:0] len, output [63:0] data);
+    """import "DPI-C" function void mem_read(input [63:0] addr, input [3:0] len, output [63:0] data, input is_unsigned);
       |import "DPI-C" function void mem_write(input [63:0] addr, input [3:0] len, input [63:0] data);
       |module BlackBoxMem (
       |  input enable,
