@@ -2,11 +2,15 @@ package execute
 
 import chisel3._
 import chisel3.util.MuxLookup
-import decode.OperationType
 import chisel3.util.Cat
 import chisel3.util.Reverse
 import chisel3.util.Fill
+import chisel3.experimental.ChiselEnum
 import decode.AluMode
+
+object ALUSignalType extends ChiselEnum {
+  val isZero, isNegative = Value
+}
 
 object ALUUtils {
   val width = 2
