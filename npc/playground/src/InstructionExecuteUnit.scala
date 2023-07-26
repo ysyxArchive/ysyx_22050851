@@ -101,7 +101,7 @@ class InstructionExecuteUnit extends Module {
   // TODO
   memIO.len := MuxLookup(
     controlIn.memlen,
-    1.U,
+    1.U(4.W),
     Seq(
       MemLen.one.asUInt -> 1.U,
       MemLen.two.asUInt -> 2.U,
