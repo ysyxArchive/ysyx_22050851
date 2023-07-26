@@ -16,6 +16,8 @@ class InstructionExecuteUnit extends Module {
   val controlIn = decodeIn.control
   val dataIn    = decodeIn.data
 
+  val alu = Module(new ALU)
+
   // TODO: impl this
   in.ready := true.B
 
@@ -73,7 +75,6 @@ class InstructionExecuteUnit extends Module {
   val blackBox = Module(new BlackBoxHalt);
 
   // alu
-  val alu = Module(new ALU)
   alu.io.inA := MuxLookup(
     controlIn.alumux1,
     DontCare,
@@ -98,17 +99,16 @@ class InstructionExecuteUnit extends Module {
   memIO.isRead := controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   memIO.enable := controlIn.memmode =/= MemMode.no.asUInt
   // TODO
-  memIO.len := 1.U
-  // MuxLookup(
-  //   controlIn.memlen,
-  //   1.U,
-  //   Seq(
-  //     MemLen.one.asUInt -> 1.U,
-  //     MemLen.two.asUInt -> 2.U,
-  //     MemLen.four.asUInt -> 4.U,
-  //     MemLen.eight.asUInt -> 8.U
-  //   )
-  // )
+  memIO.len := MuxLookup(
+    controlIn.memlen,
+    1.U,
+    Seq(
+      MemLen.one.asUInt -> 1.U,
+      MemLen.two.asUInt -> 2.U,
+      MemLen.four.asUInt -> 4.U,
+      MemLen.eight.asUInt -> 8.U
+    )
+  )
   memIO.wdata := src2
 
   // val in       = IO(Flipped(Decoupled(Vec(2, Operation()))))
