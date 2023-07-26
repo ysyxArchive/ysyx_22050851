@@ -67,7 +67,7 @@ extern "C" void set_gpr_ptr(const svOpenArrayHandle r) {
 void update_cpu() {
   memcpy(&(cpu.gpr), cpu_gpr, 32 * sizeof(uint64_t));
   cpu.pc = cpu_gpr[32];
-  Log("updating cpu , pc is %lx", cpu.pc);
+  // Log("updating cpu , pc is %lx", cpu.pc);
 }
 
 void one_step() {
