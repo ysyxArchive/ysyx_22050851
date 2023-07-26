@@ -23,7 +23,7 @@ class DecodeOut extends Bundle {
 }
 
 object DecodeOut {
-  val default = new DecodeOut().Li
+  val default = new DecodeOut().Lit()
   def default() = {
     val defaultout = Wire(new DecodeOut)
     defaultout.control := DecodeControlOut.default()
