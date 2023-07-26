@@ -167,6 +167,8 @@ static int cmd_w(char* args) {
   printf("watchpoint created: %d %s\n", id, exp);
   return 0;
 }
+void difftest_detach();
+void difftest_attach();
 static int cmd_attach(char* args) {
     difftest_attach();
     return 0;

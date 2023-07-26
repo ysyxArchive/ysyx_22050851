@@ -14,18 +14,18 @@ void haltop(unsigned char good_halt) {
   is_bad_halt = !good_halt;
 }
 
-VCPU* top;
-VerilatedVcdC* tfp;
+VCPU *top;
+VerilatedVcdC *tfp;
 CPU cpu;
 
-uint64_t* cpu_gpr = NULL;
-uint64_t* cpu_pc = NULL;
+uint64_t *cpu_gpr = NULL;
+uint64_t *cpu_pc = NULL;
 int npc_clock = 0;
 
 void init_npc() {
   top->trace(tfp, 0);
-  tfp->open("wave.vcd");        // 打开vcd
-  top->pcio_inst = 0x00000013;  // 默认为 addi e0, 0;
+  tfp->open("wave.vcd");       // 打开vcd
+  top->pcio_inst = 0x00000013; // 默认为 addi e0, 0;
   for (int i = 0; i < 10; i++) {
     top->reset = true;
     top->clock = 1;
@@ -36,29 +36,39 @@ void init_npc() {
   top->reset = false;
 }
 
-extern "C" void mem_read(const svLogicVecVal* addr,
-                         const svLogicVecVal* len,
-                         svLogicVecVal* ret) {
-  uint64_t data = read_mem(*(uint64_t*)addr, *(uint8_t*)len);
+extern "C" void mem_read(const svLogicVecVal *addr, const svLogicVecVal *len,
+                         svLogicVecVal *ret, unsigned char is_unsigned) {
+  uint64_t data = read_mem(*(uint64_t *)addr, *(uint8_t *)len);
+  if (!is_unsigned) {
+    if (*(uint8_t *)len == 1) {
+      data = (uint64_t)(int64_t)(int8_t)data;
+    } else if (*(uint8_t *)len == 2) {
+      data = (uint64_t)(int64_t)(int16_t)data;
+    } else if (*(uint8_t *)len == 4) {
+      data = (uint64_t)(int64_t)(int32_t)data;
+    } else if (*(uint8_t *)len == 8) {
+      data = (uint64_t)(int64_t)(int64_t)data;
+    }
+  }
   ret[0].aval = data;
   ret[1].aval = data >> 32;
 }
 
-extern "C" void mem_write(const svLogicVecVal* addr,
-                          const svLogicVecVal* len,
-                          const svLogicVecVal* data) {
+extern "C" void mem_write(const svLogicVecVal *addr, const svLogicVecVal *len,
+                          const svLogicVecVal *data) {
   uint64_t dataVal = (uint64_t)(data[1].aval) << 32 | data[0].aval;
-  write_mem(*(uint64_t*)addr, *(uint8_t*)len, dataVal);
+  write_mem(*(uint64_t *)addr, *(uint8_t *)len, dataVal);
 }
 
 extern "C" void set_gpr_ptr(const svOpenArrayHandle r) {
-  cpu_gpr = (uint64_t*)(((VerilatedDpiOpenVar*)r)->datap());
+  cpu_gpr = (uint64_t *)(((VerilatedDpiOpenVar *)r)->datap());
 }
 
 void update_cpu() {
   memcpy(&(cpu.gpr), cpu_gpr, 32 * sizeof(uint64_t));
   cpu.pc = cpu_gpr[32];
-  Log("updating cpu , pc is %lx", cpu.pc);
+  //TODO: ITRACE
+  // Log("updating cpu , pc is %lx", cpu.pc);
 }
 
 void one_step() {
@@ -78,17 +88,17 @@ void one_step() {
   tfp->flush();
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   parse_args(argc, argv);
   load_files();
   // TODO: 传参不对
   // Verilated::commandArgs(argc, argv);
-  VerilatedContext* contextp = new VerilatedContext;
+  VerilatedContext *contextp = new VerilatedContext;
   // TODO: 传参不对
 
   // contextp->commandArgs(argc, argv);
-  Verilated::traceEverOn(true);  // 导出vcd波形需要加此语句
-  tfp = new VerilatedVcdC();     // 导出vcd波形需要加此语句
+  Verilated::traceEverOn(true); // 导出vcd波形需要加此语句
+  tfp = new VerilatedVcdC();    // 导出vcd波形需要加此语句
   top = new VCPU{contextp};
   top->reset = false;
   init_npc();
@@ -98,10 +108,12 @@ int main(int argc, char* argv[]) {
   Log("init_done");
 
   tfp->dump(npc_clock++);
-  while (!is_halt && npc_clock < 50) {
+  while (!is_halt && npc_clock < 5000) {
     one_step();
   }
-
+  if (npc_clock == 5000) {
+    is_bad_halt = true;
+  }
   delete top;
   delete contextp;
   delete tfp;
