@@ -36,7 +36,7 @@ $(VSRCS): $(SCALAS)
 	make verilog
 	touch $(VSRCS)
 
-$(abspath ./playground/src/decode/InstructionDecodeUnit.scala): playground/scripts/codemap.csv playground/scripts/parsedecode.py
+$(abspath ./playground/src/decode/InstContorlDecoder.scala): playground/scripts/codemap.csv playground/scripts/parsedecode.py
 	python playground/scripts/parsedecode.py
 
 verilog: $(SCALAS)
