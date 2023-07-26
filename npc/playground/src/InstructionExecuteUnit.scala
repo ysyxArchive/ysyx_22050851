@@ -98,16 +98,17 @@ class InstructionExecuteUnit extends Module {
   memIO.isRead := controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   memIO.enable := controlIn.memmode =/= MemMode.no.asUInt
   // TODO
-  memIO.len := MuxLookup(
-    controlIn.memlen,
-    1.U,
-    Seq(
-      MemLen.one.asUInt -> 1.U,
-      MemLen.two.asUInt -> 2.U,
-      MemLen.four.asUInt -> 4.U,
-      MemLen.eight.asUInt -> 8.U
-    )
-  )
+  memIO.len := 1.U
+  // MuxLookup(
+  //   controlIn.memlen,
+  //   1.U,
+  //   Seq(
+  //     MemLen.one.asUInt -> 1.U,
+  //     MemLen.two.asUInt -> 2.U,
+  //     MemLen.four.asUInt -> 4.U,
+  //     MemLen.eight.asUInt -> 8.U
+  //   )
+  // )
   memIO.wdata := src2
 
   // val in       = IO(Flipped(Decoupled(Vec(2, Operation()))))
