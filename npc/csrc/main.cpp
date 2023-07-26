@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
   while (!is_halt && npc_clock < 5000) {
     one_step();
   }
-
+  if(npc_clock == 5000)
   delete top;
   delete contextp;
   delete tfp;
