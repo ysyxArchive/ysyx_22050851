@@ -12,7 +12,8 @@ class InstructionExecuteUnit extends Module {
   val memIO = IO(Flipped(new MemIO()))
   val regIO = IO(Flipped(new RegisterFileIO()))
 
-  val decodeIn = RegNext(in.bits, DecodeOut.default())
+  // val decodeIn = RegNext(in.bits, DecodeOut.default())
+  val decodeIn = in.bits
   val controlIn = decodeIn.control
   val dataIn    = decodeIn.data
 
