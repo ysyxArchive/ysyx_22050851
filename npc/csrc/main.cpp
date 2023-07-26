@@ -39,13 +39,13 @@ void init_npc() {
 extern "C" void mem_read(const svLogicVecVal *addr, const svLogicVecVal *len,
                          svLogicVecVal *ret) {
   uint64_t data = read_mem(*(uint64_t *)addr, *(uint8_t *)len);
-  if (length == 1) {
+  if (*(uint8_t *)len == 1) {
     data = (uint64_t)(int64_t)(int8_t)data;
-  } else if (length == 2) {
+  } else if (*(uint8_t *)len == 2) {
     data = (uint64_t)(int64_t)(int16_t)data;
-  } else if (length == 4) {
+  } else if (*(uint8_t *)len == 4) {
     data = (uint64_t)(int64_t)(int32_t)data;
-  } else if (length == 8) {
+  } else if (*(uint8_t *)len == 8) {
     data = (uint64_t)(int64_t)(int64_t)data;
   }
 
