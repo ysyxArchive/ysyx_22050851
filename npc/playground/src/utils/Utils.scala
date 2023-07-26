@@ -15,11 +15,11 @@ object Utils {
   }
 
   def zeroExtend(num: UInt, width: Int, targetWidth: Int): UInt = {
-    Cat(Fill(targetWidth - num.getWidth, 0.U), num)
+    Cat(Fill(targetWidth - num.getWidth, 0.U), num(width - 1, 0))
   }
 
   def signExtend(num: UInt, width: Int, targetWidth: Int = 64): UInt = {
-    Cat(Fill(targetWidth - width, num(width - 1)), num)
+    Cat(Fill(targetWidth - width, num(width - 1)), num(width - 1, 0))
   }
 
   def isRegType(source: Source): Bool =
