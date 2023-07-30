@@ -23,13 +23,7 @@ class DecodeOut extends Bundle {
 }
 
 object DecodeOut {
-  val default = new DecodeOut().Lit(_.
-  def default() = {
-    val defaultout = Wire(new DecodeOut)
-    defaultout.control := DecodeControlOut.default()
-    defaultout.data    := DecodeDataOut.default
-    defaultout
-  }
+  val default = new DecodeOut().Lit(_.control -> DecodeControlOut.default(), _.data -> DecodeDataOut.default)
 }
 
 class InstructionDecodeUnit extends Module {
