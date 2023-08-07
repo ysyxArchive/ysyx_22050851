@@ -6,13 +6,12 @@ size_t bin_file_size;
 void init_memory(char *bin_path) {
   FILE *bin_file = fopen(bin_path, "r");
   Assert(bin_file != NULL, "read bin file error");
-  int ptr = 0;
-  while (fread(mem + ptr, 4, 1, bin_file)) {
-    printf("%d ", ptr);
-    ptr += 4;
-  }
+  fseek(bin_file, 0L, SEEK_END);
+  uint64_t size = ftell(bin_file);
+  fseek(bin_file, 0L, SEEK_SET);
+  fread(mem, size, 1, bin_file);
   fclose(bin_file);
-  bin_file_size = ptr;
+  bin_file_size = size;
 }
 
 uint64_t read_mem(uint64_t addr, size_t length) {
