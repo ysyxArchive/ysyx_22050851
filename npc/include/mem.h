@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #define MEM_START 0x80000000
-#define MEM_LEN 0x10000
+#define MEM_LEN 0x100000
 #define DEVICE_BASE 0xa0000000
 #define MMIO_BASE 0xa0000000
 
