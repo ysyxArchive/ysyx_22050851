@@ -8,6 +8,7 @@ void init_memory(char *bin_path) {
   Assert(bin_file != NULL, "read bin file error");
   int ptr = 0;
   while (fread(mem + ptr, 4, 1, bin_file)) {
+    printf("%d ", ptr);
     ptr += 4;
   }
   fclose(bin_file);
