@@ -8,6 +8,7 @@ void init_memory(char *bin_path) {
   Assert(bin_file != NULL, "read bin file error");
   fseek(bin_file, 0L, SEEK_END);
   uint64_t size = ftell(bin_file);
+  Assert(size <= MEM_LEN, "file size %x larger than mem %x", size, MEM_LEN);
   fseek(bin_file, 0L, SEEK_SET);
   fread(mem, size, 1, bin_file);
   fclose(bin_file);
