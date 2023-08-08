@@ -15,6 +15,7 @@ NEMUFLAGS += -l $(shell dirname $(IMAGE).elf)/nemu-log.txt
 NEMUFLAGS += --elf=$(IMAGE).elf
 
 CFLAGS += -DMAINARGS=\"$(mainargs)\"
+
 CFLAGS += -I$(AM_HOME)/am/src/platform/nemu/include
 .PHONY: $(AM_HOME)/am/src/platform/nemu/trm.c
 
@@ -25,6 +26,7 @@ image: $(IMAGE).elf
 
 
 run: image
+
 	$(MAKE) -C $(NPC_HOME) run ARGS="$(NEMUFLAGS)" IMG=$(IMAGE).bin
 
 batch: image
