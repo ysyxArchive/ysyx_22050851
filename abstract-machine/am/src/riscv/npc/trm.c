@@ -24,8 +24,6 @@ void halt(int code) {
 }
 
 void _trm_init() {
-  // putstr(MAINARGS);
-  // putstr(mainargs);
-  // int ret = main(mainargs);
+  int ret = main(mainargs);
   halt(ret);
 }
