@@ -26,10 +26,6 @@ uint64_t read_mem(uint64_t addr, size_t length) {
 }
 uint64_t read_mem_nolog(uint64_t addr, size_t length) {
   uint64_t ret = 0;
-  Assert(addr >= MEM_START, "addr 0x%lx < MEM_START 0x%x", addr, MEM_START);
-  Assert(addr + length <= MEM_START + MEM_LEN,
-         "addr 0x%lx + 0x%lx > MEM_END 0x%x", addr, length,
-         MEM_START + MEM_LEN);
   if (addr == RTC_ADDR || addr == RTC_ADDR + 4) {
     Assert(length == 4, "read from RTC with length == %d not allowed", length);
     ret = (uint32_t)(gettime() >> ((addr - RTC_ADDR) * 8));
