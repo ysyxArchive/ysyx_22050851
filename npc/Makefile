@@ -74,8 +74,10 @@ test: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 
 run:
-	echo $(SCALAS)	
 	make sim
 
-.PHONY: test verilog help compile bsp reformat checkformat clean sim build
+gdb: $(BIN)
+	gdb -s $(BIN) --args $(BIN) $(IMG) $(ARGS) h 
+	
+.PHONY: test verilog help compile bsp reformat checkformat clean sim build gdb
 include ../Makefile
