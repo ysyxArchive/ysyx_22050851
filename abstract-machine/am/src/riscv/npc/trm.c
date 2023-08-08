@@ -25,6 +25,7 @@ void halt(int code) {
 
 void _trm_init() {
   putstr(mainargs);
+  putstr("123123");
   int ret = main(mainargs);
   halt(ret);
 }
