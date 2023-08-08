@@ -1,4 +1,5 @@
 #include "device.h"
+#include "difftest.h"
 #include <mem.h>
 uint8_t mem[MEM_LEN] = {0};
 size_t bin_file_size;
@@ -32,6 +33,7 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
   if (addr == RTC_ADDR || addr == RTC_ADDR + 4) {
     Assert(length == 4, "read from RTC with length == %d not allowed", length);
     ret = (uint32_t)(gettime() >> ((addr - RTC_ADDR) * 8));
+    difftest_skip();
   } else if (addr >= MEM_START && addr + length <= MEM_START + MEM_LEN) {
     if (length == 1) {
       ret = *((uint8_t *)(mem + (addr - MEM_START)));
@@ -55,6 +57,7 @@ void write_mem(uint64_t addr, size_t length, uint64_t data) {
     Assert(length == 1, "output to Serial Port with length == %d, not 1",
            length);
     printf("%c", data);
+    difftest_skip();
   } else if (addr >= MEM_START && addr + length <= MEM_START + MEM_LEN) {
     if (length == 1) {
       *((uint8_t *)(mem + (addr - MEM_START))) = (uint8_t)data;
