@@ -54,7 +54,12 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
 }
 
 void write_mem(uint64_t addr, size_t length, uint64_t data) {
-  if (addr == SERIAL_PORT) {
+  if (addr == SYNC_ADDR) {
+    Assert(length == 4, "output to FBCTL with length == %d, not 4",
+           length);
+    
+    difftest_skip();
+  } else if (addr == SERIAL_PORT) {
     Assert(length == 1, "output to Serial Port with length == %d, not 1",
            length);
     printf("%c", data);
@@ -72,7 +77,7 @@ void write_mem(uint64_t addr, size_t length, uint64_t data) {
       panic("length %d is not allowed, only allowed 1, 2, 4, 8", length);
     }
   } else {
-    panic("read from addr 0x%lx + 0x%lx out of range", addr, length);
+    panic("write to addr 0x%lx + 0x%lx out of range", addr, length);
   }
   return;
 }
