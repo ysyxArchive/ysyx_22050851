@@ -70,7 +70,7 @@ void update_cpu() {
   memcpy(&(cpu.gpr), cpu_gpr, 32 * sizeof(uint64_t));
   cpu.pc = cpu_gpr[32];
   //TODO: ITRACE
-  Log("updating cpu , pc is %lx", cpu.pc);
+  // Log("updating cpu , pc is %lx", cpu.pc);
 }
 
 void one_step() {
