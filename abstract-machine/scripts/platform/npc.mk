@@ -26,7 +26,7 @@ image: $(IMAGE).elf
 
 run: image
 
-	echo $(mainargs) && $(MAKE) -C $(NPC_HOME) run ARGS="$(NEMUFLAGS)" IMG=$(IMAGE).bin
+	echo 123123 $(mainargs) && $(MAKE) -C $(NPC_HOME) run ARGS="$(NEMUFLAGS)" IMG=$(IMAGE).bin
 
 batch: image
 	$(MAKE) -C $(NPC_HOME) ISA=$(ISA) batch ARGS="$(NEMUFLAGS)" IMG=$(IMAGE).bin
