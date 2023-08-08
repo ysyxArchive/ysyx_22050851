@@ -110,10 +110,9 @@ int main(int argc, char *argv[]) {
   Log("init_done");
 
   tfp->dump(npc_clock++);
-  while (!is_halt && npc_clock < MAX_INSTS) {
+  while (!is_halt) {
     one_step();
   }
-  Assert(npc_clock < MAX_INSTS, "Bad Trap caused by too much insts");
   delete top;
   delete contextp;
   delete tfp;
