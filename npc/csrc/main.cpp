@@ -111,10 +111,7 @@ int main(int argc, char *argv[]) {
   while (!is_halt && npc_clock < 5000) {
     one_step();
   }
-  printf("%d\n", npc_clock);
-  if (npc_clock == 5000) {
-    is_bad_halt = true;
-  }
+  Assert(npc_clock < 5000, "Bad Trap caused by too much insts");
   delete top;
   delete contextp;
   delete tfp;
