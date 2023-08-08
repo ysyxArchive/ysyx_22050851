@@ -7,6 +7,8 @@
 #include "verilated_dpi.h"
 #include "verilated_vcd_c.h"
 
+#define MAX_INSTS 10000
+
 bool is_halt = false;
 bool is_bad_halt = false;
 void haltop(unsigned char good_halt) {
@@ -108,10 +110,10 @@ int main(int argc, char *argv[]) {
   Log("init_done");
 
   tfp->dump(npc_clock++);
-  while (!is_halt && npc_clock < 5000) {
+  while (!is_halt && npc_clock < MAX_INSTS) {
     one_step();
   }
-  Assert(npc_clock < 5000, "Bad Trap caused by too much insts");
+  Assert(npc_clock < MAX_INSTS, "Bad Trap caused by too much insts");
   delete top;
   delete contextp;
   delete tfp;
