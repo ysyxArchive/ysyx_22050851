@@ -7,6 +7,8 @@
 #include "verilated_dpi.h"
 #include "verilated_vcd_c.h"
 
+#define MAX_INSTS 10000
+
 bool is_halt = false;
 bool is_bad_halt = false;
 void haltop(unsigned char good_halt) {
@@ -108,11 +110,8 @@ int main(int argc, char *argv[]) {
   Log("init_done");
 
   tfp->dump(npc_clock++);
-  while (!is_halt && npc_clock < 5000) {
+  while (!is_halt) {
     one_step();
-  }
-  if (npc_clock == 5000) {
-    is_bad_halt = true;
   }
   delete top;
   delete contextp;
