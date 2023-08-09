@@ -4,10 +4,10 @@
 #include "device.h"
 #include "difftest.h"
 #include "mem.h"
+#include "tools/lightsss.h"
 #include "verilated.h"
 #include "verilated_dpi.h"
 #include "verilated_vcd_c.h"
-#define MAX_INSTS 10000
 
 bool is_halt = false;
 bool is_bad_halt = false;
@@ -18,7 +18,8 @@ void haltop(unsigned char good_halt) {
 
 extern VCPU *top;
 CPU cpu;
-
+LightSSS lightSSS;
+int npc_clock = 0;
 uint64_t *cpu_gpr = NULL;
 uint64_t *cpu_pc = NULL;
 
@@ -78,6 +79,13 @@ void one_step() {
   difftest_check(&cpu);
   top->clock = 0;
   eval_trace();
+  if ((npc_clock / 2) % LIGHT_SSS_CYCLE_INTERVAL == 0) {
+    lightSSS.do_fork();
+  }
+  if (npc_clock > 12322333) {
+    is_halt = true;
+    is_bad_halt = true;
+  }
 }
 
 int main(int argc, char *argv[]) {
@@ -96,8 +104,15 @@ int main(int argc, char *argv[]) {
     one_step();
   }
 
-  Assert(!is_bad_halt, "bad halt! \npc=0x%lx inst=0x%08x", top->pcio_pc,
-         top->pcio_inst);
+  if (is_bad_halt) {
+    Log("bad halt! \npc=0x%lx inst=0x%08x", top->pcio_pc, top->pcio_inst);
+    if (!lightSSS.is_child()) {
+      lightSSS.wakeup_child(npc_clock);
+    }
+    Log("exit");
+    exit(-1);
+  }
   Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
+  lightSSS.do_clear();
   return 0;
 }
