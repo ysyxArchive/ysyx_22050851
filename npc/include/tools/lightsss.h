@@ -29,7 +29,7 @@
 #include <unistd.h>
 
 #define FAIL_EXIT exit(-1);
-#define WAIT_INTERVAL 100
+#define WAIT_INTERVAL 10
 #define SLOT_SIZE 2
 
 typedef struct shinfo {
