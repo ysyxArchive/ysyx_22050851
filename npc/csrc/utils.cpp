@@ -90,7 +90,8 @@ extern int npc_clock;
 
 void eval_trace() {
   top->eval();
-  if (lightSSS.is_not_good()) {
+  if (lightSSS.is_not_good() &&
+      lightSSS.get_end_cycles() - npc_clock < MAX_TRACE_CYCLES) {
     tfp->dump(npc_clock);
     tfp->flush();
   }
