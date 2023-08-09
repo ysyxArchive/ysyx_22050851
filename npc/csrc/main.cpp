@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
   if (is_bad_halt) {
     Log("bad halt! \npc=0x%lx inst=0x%08x", top->pcio_pc, top->pcio_inst);
     if (!lightSSS.is_child()) {
-      lightSSS.wakeup_child(npc_clock / 2);
+      lightSSS.wakeup_child(npc_clock);
     }
     Log("exit");
     exit(-1);
