@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "debug.h"
 #include "mem.h"
 #include "util.h"
 
@@ -19,5 +18,7 @@ typedef struct CPU {
   uint64_t gpr[32];
   uint64_t pc;
 } CPU;
+extern CPU cpu;
+void isa_reg_display();
 
 #endif
