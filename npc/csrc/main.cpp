@@ -82,7 +82,7 @@ void one_step() {
   if ((npc_clock / 2) % LIGHT_SSS_CYCLE_INTERVAL == 0) {
     lightSSS.do_fork();
   }
-  if (npc_clock > 123223323) {
+  if (npc_clock > 12322333) {
     is_halt = true;
     is_bad_halt = true;
   }
