@@ -63,6 +63,7 @@ void write_mem(uint64_t addr, size_t length, uint64_t data) {
   } else if (addr == SYNC_ADDR) {
     Assert(length == 4, "output to FBCTL with length == %d, not 4", length);
     Assert(data == 1, "data %d not valid for SYNC", data);
+    printf("trigger!\n");
     update_vga();
     difftest_skip();
   } else if (addr == SERIAL_PORT) {
