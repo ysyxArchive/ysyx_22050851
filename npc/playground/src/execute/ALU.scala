@@ -85,7 +85,7 @@ class ALU extends Module {
   val out = Wire(UInt(64.W))
 
   simpleAdder.io.inA := io.inA
-  simpleAdder.io.inB := Mux(io.opType === AluMode.sub, ~io.inB, io.inB)
+  simpleAdder.io.inB := Mux(io.opType === AluMode.sub || io.opType === AluMode.subu, ~io.inB, io.inB)
   simpleAdder.io.inC := io.opType === AluMode.sub
 
   val inANotZero = io.inA.orR;
