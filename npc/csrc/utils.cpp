@@ -78,7 +78,6 @@ void init_vcd_trace() {
   top = new VCPU{contextp};
   top->reset = false;
   top->trace(tfp, 0);
-  tfp->rolloverSize(1e4);
   tfp->open("wave.vcd"); // 打开vcd
 
   top->pcio_inst = 0x00000013; // 默认为 addi e0, 0;
@@ -88,12 +87,13 @@ int npc_clock = 0;
 
 void eval_trace() {
   top->eval();
-  tfp->dump((npc_clock++));
+  tfp->dump((npc_clock++) % 10000);
   tfp->flush();
-  // if (npc_clock % 10000 == 0) {
-  //   printf("%d\n", npc_clock);
-  //   tfp->openNext("wave.vcd"); // 打开vcd
-  // }
+  if (npc_clock % 10000 == 0) {
+    printf("%d\n", npc_clock);
+    tfp->close();
+    tfp->open("wave.vcd"); // 打开vcd
+  }
   if (npc_clock > 122128) {
     assert(0);
   }
