@@ -34,7 +34,7 @@ ForkShareMemory::~ForkShareMemory() {
   }
   shmctl(shm_id, IPC_RMID, NULL);
 }
-
+extern int npc_clock;
 void ForkShareMemory::shwait() {
   while (true) {
     if (info->flag) {
@@ -42,6 +42,7 @@ void ForkShareMemory::shwait() {
         break;
       else
         exit(0);
+      printf("starting from %d\n", npc_clock);
     } else {
       sleep(WAIT_INTERVAL);
     }
