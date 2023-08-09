@@ -33,10 +33,12 @@ class InstructionExecuteUnit extends Module {
     controlIn.pcaddrsrc,
     false.B,
     Seq(
-      PCAddrSrc.aluzero.asUInt -> ALUUtils.test(alu.io.signals, ALUUtils.isZero),
-      PCAddrSrc.aluneg.asUInt -> ALUUtils.test(alu.io.signals, ALUUtils.isNegative),
-      PCAddrSrc.alunotneg.asUInt -> ALUUtils.test(alu.io.signals, ALUUtils.notNegative),
-      PCAddrSrc.alunotzero.asUInt -> ALUUtils.test(alu.io.signals, ALUUtils.notZero),
+      PCAddrSrc.aluzero.asUInt -> alu.signalIO.isZero,
+      PCAddrSrc.aluneg.asUInt -> alu.signalIO.isNegative,
+      PCAddrSrc.alunotneg.asUInt -> !alu.signalIO.isNegative,
+      PCAddrSrc.alunotzero.asUInt -> !alu.signalIO.isZero,
+      PCAddrSrc.alunotcarryandnotzero.asUInt -> (!alu.signalIO.isCarry && !alu.signalIO.isZero),
+      PCAddrSrc.alucarryorzero.asUInt -> (alu.signalIO.isCarry || alu.signalIO.isZero),
       PCAddrSrc.zero.asUInt -> false.B,
       PCAddrSrc.one.asUInt -> true.B
     )
@@ -57,7 +59,8 @@ class InstructionExecuteUnit extends Module {
       RegWriteMux.alu.asUInt -> alu.io.out,
       RegWriteMux.snpc.asUInt -> snpc,
       RegWriteMux.mem.asUInt -> memIO.rdata,
-      RegWriteMux.aluneg.asUInt -> Utils.zeroExtend(ALUUtils.test(alu.io.signals, ALUUtils.isNegative), 1, 64)
+      RegWriteMux.aluneg.asUInt -> Utils.zeroExtend(alu.signalIO.isNegative, 1, 64),
+      RegWriteMux.alunotcarryandnotzero.asUInt -> Utils.zeroExtend(!alu.signalIO.isCarry && !alu.signalIO.isZero, 1, 64)
     )
   )
   regIO.wdata := Mux(controlIn.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)

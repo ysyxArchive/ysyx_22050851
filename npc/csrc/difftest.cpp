@@ -1,7 +1,6 @@
 #include "difftest.h"
-#include "common.h"
+#include "mem.h"
 #include <dlfcn.h>
-
 void (*difftest_memcpy)(paddr_t addr, void *buf, size_t n,
                         bool direction) = NULL;
 
@@ -68,15 +67,23 @@ void difftest_check(CPU *cpu) {
   CPU refcpu;
   difftest_step(cpu);
   difftest_regcpy(&refcpu, FROM_REF);
-
-  Assert(cpu->pc == refcpu.pc,
-         "Difftest Failed\n Expected pc: %llx, Actual pc: %llx ", refcpu.pc,
-         cpu->pc);
+  bool difftest_failed = false;
+  if (cpu->pc != refcpu.pc) {
+    printf("Difftest Failed\n Expected pc: %llx, Actual pc: %llx \n", refcpu.pc,
+           cpu->pc);
+    difftest_failed = true;
+  }
   for (int i = 0; i < 32; i++) {
-    Assert(cpu->gpr[i] == refcpu.gpr[i],
-           "Difftest Failed\ncheck reg[%d] failed before pc:%llx\nExpected: "
-           "%llx, Actual: %llx ",
-           i, cpu->pc, refcpu.gpr[i], cpu->gpr[i]);
+    if (cpu->gpr[i] != refcpu.gpr[i]) {
+      printf("Difftest Failed\ncheck reg[%d] failed before pc:%llx\nExpected: "
+             "%llx, Actual: %llx \n",
+             i, cpu->pc, refcpu.gpr[i], cpu->gpr[i]);
+      difftest_failed = true;
+    }
+  }
+  if (difftest_failed) {
+    isa_reg_display();
+    assert(0);
   }
   // TODO: difftest_checkmem
   // difftest_checkmem(cpu);

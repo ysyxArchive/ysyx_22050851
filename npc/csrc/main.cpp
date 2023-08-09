@@ -6,7 +6,7 @@
 #include "verilated.h"
 #include "verilated_dpi.h"
 #include "verilated_vcd_c.h"
-
+#include "device.h"
 #define MAX_INSTS 10000
 
 bool is_halt = false;
@@ -103,6 +103,7 @@ int main(int argc, char *argv[]) {
   tfp = new VerilatedVcdC();    // 导出vcd波形需要加此语句
   top = new VCPU{contextp};
   top->reset = false;
+  init_device();
   init_npc();
   update_cpu();
   difftest_initial(&cpu);
