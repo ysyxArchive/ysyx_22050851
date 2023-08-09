@@ -66,7 +66,7 @@ int LightSSS::do_fork() {
   }
   // the original process
   else if (pid != 0) {
-    printf("forked process %d\n", pid);
+    printf("forked process %d at npc == %d\n", pid, npc_clock);
     slotCnt++;
     pidSlot.insert(pidSlot.begin(), pid);
     return FORK_OK;
