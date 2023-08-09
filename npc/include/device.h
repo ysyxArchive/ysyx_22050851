@@ -6,4 +6,5 @@
 #define VGA_HEIGHT 300
 void init_device();
 uint64_t gettime();
+void update_vga();
 #endif
