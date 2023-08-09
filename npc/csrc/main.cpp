@@ -3,8 +3,8 @@
 #include "common.h"
 #include "device.h"
 #include "difftest.h"
-#include "tools/lightsss.h"
 #include "mem.h"
+#include "tools/lightsss.h"
 #include "verilated.h"
 #include "verilated_dpi.h"
 #include "verilated_vcd_c.h"
@@ -82,6 +82,10 @@ void one_step() {
   if ((npc_clock / 2) % LIGHT_SSS_CYCLE_INTERVAL == 0) {
     lightSSS.do_fork();
   }
+  if (npc_clock > 123223323) {
+    is_halt = true;
+    is_bad_halt = true;
+  }
 }
 
 int main(int argc, char *argv[]) {
@@ -99,10 +103,12 @@ int main(int argc, char *argv[]) {
   while (!is_halt) {
     one_step();
   }
-  
+
   if (is_bad_halt) {
     Log("bad halt! \npc=0x%lx inst=0x%08x", top->pcio_pc, top->pcio_inst);
-    lightSSS.wakeup_child(npc_clock / 2);
+    if (!lightSSS.is_child()) {
+      lightSSS.wakeup_child(npc_clock / 2);
+    }
     exit(-1);
   }
   Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
