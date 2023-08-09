@@ -92,12 +92,8 @@ void eval_trace() {
   tfp->dump(npc_clock++);
   tfp->flush();
   if (npc_clock % MAX_TRACE_CYCLES == 0) {
-    printf("%d\n", npc_clock);
     tfp->close();
     remove("wave.vcd");
     tfp->open("wave.vcd"); // 打开vcd
-  }
-  if (npc_clock > 1221280) {
-    assert(0);
   }
 }
