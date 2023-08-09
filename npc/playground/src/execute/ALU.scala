@@ -86,7 +86,7 @@ class ALU extends Module {
 
   simpleAdder.io.inA := io.inA
   simpleAdder.io.inB := Mux(io.opType === AluMode.sub || io.opType === AluMode.subu, ~io.inB, io.inB)
-  simpleAdder.io.inC := io.opType === AluMode.sub
+  simpleAdder.io.inC := io.opType === AluMode.sub || io.opType === AluMode.subu
 
   val inANotZero = io.inA.orR;
   val inBNotZero = io.inB.orR;
