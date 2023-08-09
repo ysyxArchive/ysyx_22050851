@@ -3,23 +3,25 @@
 #include <device.h>
 #include <sys/time.h>
 static uint64_t start = 0;
-SDL_Window *window;
+static SDL_Window *window;
+static SDL_Renderer *renderer = NULL;
+static SDL_Texture *texture = NULL;
+
 uint32_t vga_data[VGA_HEIGHT * VGA_WIDTH];
 
 void init_device() {
   SDL_Init(SDL_INIT_VIDEO);
-  window = SDL_CreateWindow("riscv-npc", SDL_WINDOWPOS_CENTERED,
-                            SDL_WINDOWPOS_CENTERED, VGA_WIDTH, VGA_HEIGHT,
-                            SDL_WINDOW_SHOWN);
+  SDL_CreateWindowAndRenderer(VGA_WIDTH, VGA_HEIGHT, 0, &window, &renderer);
+  SDL_SetWindowTitle(window, "riscv-npc");
+  texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
+                              SDL_TEXTUREACCESS_STATIC, VGA_WIDTH, VGA_HEIGHT);
 }
 
 void update_vga() {
-  SDL_Surface *surface = SDL_GetWindowSurface(window);
-  SDL_Surface *screen =
-      SDL_CreateRGBSurfaceFrom(vga_data, VGA_WIDTH, VGA_HEIGHT, 32, 4,
-                               0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
-  SDL_BlitSurface(screen, NULL, surface, NULL);
-  SDL_UpdateWindowSurface(window);
+  SDL_UpdateTexture(texture, NULL, vga_data, VGA_WIDTH * sizeof(uint32_t));
+  SDL_RenderClear(renderer);
+  SDL_RenderCopy(renderer, texture, NULL, NULL);
+  SDL_RenderPresent(renderer);
 }
 
 uint64_t gettime() {
