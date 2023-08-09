@@ -1,7 +1,7 @@
 
 #ifndef __COMMON_H__
 #define __COMMON_H__
-
+#include "config.h"
 #include <debug.h>
 #include <stdint.h>
 #include <stdio.h>
