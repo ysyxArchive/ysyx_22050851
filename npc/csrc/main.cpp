@@ -22,7 +22,6 @@ CPU cpu;
 
 uint64_t *cpu_gpr = NULL;
 uint64_t *cpu_pc = NULL;
-int npc_clock = 0;
 
 void init_npc() {
   for (int i = 0; i < 10; i++) {
