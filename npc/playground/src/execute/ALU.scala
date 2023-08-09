@@ -98,6 +98,7 @@ class ALU extends Module {
       AluMode.add.asUInt -> simpleAdder.io.out,
       AluMode.and.asUInt -> (io.inA & io.inB),
       AluMode.sub.asUInt -> simpleAdder.io.out,
+      AluMode.subu.asUInt -> simpleAdder.io.out,
       AluMode.div.asUInt -> (io.inA.asSInt / io.inB.asSInt).asUInt,
       AluMode.divu.asUInt -> io.inA / io.inB,
       AluMode.mul.asUInt -> io.inA * io.inB,
