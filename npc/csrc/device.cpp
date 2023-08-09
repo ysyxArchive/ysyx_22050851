@@ -3,7 +3,7 @@
 #include <device.h>
 #include <sys/time.h>
 static uint64_t start = 0;
-SDL_Window* window;
+SDL_Window *window;
 uint32_t vga_data[VGA_HEIGHT * VGA_WIDTH];
 
 void init_device() {
@@ -14,12 +14,12 @@ void init_device() {
 }
 
 void update_vga() {
-  SDL_Surface* surface = SDL_GetWindowSurface(window);
-
-  SDL_Surface* screen =
+  SDL_Surface *surface = SDL_GetWindowSurface(window);
+  SDL_Surface *screen =
       SDL_CreateRGBSurfaceFrom(vga_data, VGA_WIDTH, VGA_HEIGHT, 32, 4,
                                0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
   SDL_BlitSurface(screen, NULL, surface, NULL);
+  SDL_UpdateWindowSurface(window);
 }
 
 uint64_t gettime() {
