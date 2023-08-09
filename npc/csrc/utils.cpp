@@ -1,13 +1,12 @@
 #include "VCPU.h"
 #include "VCPU__Dpi.h"
+#include "tools/lightsss.h"
 #include "verilated.h"
 #include "verilated_dpi.h"
 #include "verilated_vcd_c.h"
 #include <common.h>
 #include <difftest.h>
 #include <getopt.h>
-
-#define MAX_TRACE_CYCLES 100000
 
 static char *diff_so_file;
 static char *img_file;
@@ -72,33 +71,27 @@ void load_files() {
 
 VerilatedVcdC *tfp;
 VCPU *top;
+extern LightSSS lightSSS;
 
 void init_vcd_trace() {
   VerilatedContext *contextp = new VerilatedContext;
-#ifdef WAVE_TRACE
   Verilated::traceEverOn(true); // 导出vcd波形需要加此语句
   tfp = new VerilatedVcdC();    // 导出vcd波形需要加此语句
-#endif
   top = new VCPU{contextp};
   top->reset = false;
-#ifdef WAVE_TRACE
   top->trace(tfp, 0);
-  tfp->open("wave.vcd"); // 打开vcd
-#endif
+  tfp->open("wave.vcd");       // 打开vcd
   top->pcio_inst = 0x00000013; // 默认为 addi e0, 0;
 }
 
-int npc_clock = 0;
+extern int npc_clock;
 
 void eval_trace() {
   top->eval();
-#ifdef WAVE_TRACE
-  tfp->dump(npc_clock++);
-  tfp->flush();
-  if (npc_clock % MAX_TRACE_CYCLES == 0) {
-    tfp->close();
-    remove("wave.vcd");
-    tfp->open("wave.vcd"); // 打开vcd
+  if (lightSSS.is_not_good() &&
+      lightSSS.get_end_cycles() - npc_clock < WAVE_TRACE_CLOCKS) {
+    tfp->dump(npc_clock);
+    tfp->flush();
   }
-#endif
+  npc_clock++;
 }
