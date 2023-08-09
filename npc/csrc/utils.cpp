@@ -86,7 +86,7 @@ int npc_clock = 0;
 
 void eval_trace() {
   top->eval();
-  tfp->dump(npc_clock++);
+  tfp->dump((npc_clock++) % 10000);
   tfp->flush();
   if (npc_clock % 10000 == 0) {
     printf("%d\n", npc_clock);
