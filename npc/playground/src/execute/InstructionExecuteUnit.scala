@@ -37,8 +37,8 @@ class InstructionExecuteUnit extends Module {
       PCAddrSrc.aluneg.asUInt -> alu.signalIO.isNegative,
       PCAddrSrc.alunotneg.asUInt -> !alu.signalIO.isNegative,
       PCAddrSrc.alunotzero.asUInt -> !alu.signalIO.isZero,
-      PCAddrSrc.alucarryandnotzero.asUInt -> alu.signalIO.isCarry && !alu.signalIO.isZero,
-      PCAddrSrc.alunotcarryorzero.asUInt -> !alu.signalIO.isCarry || alu.signalIO.isZero,
+      PCAddrSrc.alucarryandnotzero.asUInt -> (alu.signalIO.isCarry && !alu.signalIO.isZero),
+      PCAddrSrc.alunotcarryorzero.asUInt -> (!alu.signalIO.isCarry || alu.signalIO.isZero),
       PCAddrSrc.zero.asUInt -> false.B,
       PCAddrSrc.one.asUInt -> true.B
     )
