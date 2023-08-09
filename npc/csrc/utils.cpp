@@ -97,7 +97,7 @@ void eval_trace() {
     remove("wave.vcd");
     tfp->open("wave.vcd"); // 打开vcd
   }
-  if (npc_clock > 122128) {
+  if (npc_clock > 1221280) {
     assert(0);
   }
 }
