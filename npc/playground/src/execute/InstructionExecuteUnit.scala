@@ -37,8 +37,8 @@ class InstructionExecuteUnit extends Module {
       PCAddrSrc.aluneg.asUInt -> alu.signalIO.isNegative,
       PCAddrSrc.alunotneg.asUInt -> !alu.signalIO.isNegative,
       PCAddrSrc.alunotzero.asUInt -> !alu.signalIO.isZero,
-      PCAddrSrc.alucarry.asUInt -> alu.signalIO.isCarry,
-      PCAddrSrc.alunotcarry.asUInt -> !alu.signalIO.isCarry,
+      PCAddrSrc.alucarryandnotzero.asUInt -> alu.signalIO.isCarry && !alu.signalIO.isZero,
+      PCAddrSrc.alunotcarryorzero.asUInt -> !alu.signalIO.isCarry || alu.signalIO.isZero,
       PCAddrSrc.zero.asUInt -> false.B,
       PCAddrSrc.one.asUInt -> true.B
     )
@@ -60,7 +60,7 @@ class InstructionExecuteUnit extends Module {
       RegWriteMux.snpc.asUInt -> snpc,
       RegWriteMux.mem.asUInt -> memIO.rdata,
       RegWriteMux.aluneg.asUInt -> Utils.zeroExtend(alu.signalIO.isNegative, 1, 64),
-      RegWriteMux.alucarry.asUInt -> Utils.zeroExtend(alu.signalIO.isCarry, 1, 64)
+      RegWriteMux.alucarryandnotzero.asUInt -> Utils.zeroExtend(alu.signalIO.isCarry && !alu.signalIO.isZero, 1, 64)
     )
   )
   regIO.wdata := Mux(controlIn.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)

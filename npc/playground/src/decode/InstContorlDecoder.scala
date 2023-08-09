@@ -45,7 +45,7 @@ object RegWriteMux extends ChiselEnum {
 	val snpc = Value(1.U)
 	val mem = Value(2.U)
 	val aluneg = Value(3.U)
-	val alucarry = Value(4.U)
+	val alucarryandnotzero = Value(4.U)
 }
 object MemMode extends ChiselEnum {
 	val no = Value(0.U)
@@ -63,9 +63,9 @@ object PCAddrSrc extends ChiselEnum {
 	val zero = Value(0.U)
 	val aluzero = Value(1.U)
 	val alunotneg = Value(2.U)
-	val alunotcarry = Value(3.U)
+	val alunotcarrytorzero = Value(3.U)
 	val aluneg = Value(4.U)
-	val alucarry = Value(5.U)
+	val alucarryandnotzero = Value(5.U)
 	val alunotzero = Value(6.U)
 	val one = Value(7.U)
 }
