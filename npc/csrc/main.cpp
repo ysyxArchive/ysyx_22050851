@@ -109,6 +109,7 @@ int main(int argc, char *argv[]) {
     if (!lightSSS.is_child()) {
       lightSSS.wakeup_child(npc_clock / 2);
     }
+    Log("exit");
     exit(-1);
   }
   Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
