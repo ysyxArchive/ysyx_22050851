@@ -63,7 +63,7 @@ object PCAddrSrc extends ChiselEnum {
 	val zero = Value(0.U)
 	val aluzero = Value(1.U)
 	val alunotneg = Value(2.U)
-	val alunotcarrytorzero = Value(3.U)
+	val alunotcarryorzero = Value(3.U)
 	val aluneg = Value(4.U)
 	val alucarryandnotzero = Value(5.U)
 	val alunotzero = Value(6.U)
