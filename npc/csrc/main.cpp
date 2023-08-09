@@ -17,7 +17,6 @@ void haltop(unsigned char good_halt) {
 }
 
 extern VCPU *top;
-extern VerilatedVcdC *tfp;
 CPU cpu;
 
 uint64_t *cpu_gpr = NULL;

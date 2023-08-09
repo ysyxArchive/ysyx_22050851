@@ -81,8 +81,8 @@ void init_vcd_trace() {
 #endif
   top = new VCPU{contextp};
   top->reset = false;
-  top->trace(tfp, 0);
 #ifdef WAVE_TRACE
+  top->trace(tfp, 0);
   tfp->open("wave.vcd"); // 打开vcd
 #endif
   top->pcio_inst = 0x00000013; // 默认为 addi e0, 0;
