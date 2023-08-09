@@ -38,11 +38,11 @@ extern int npc_clock;
 void ForkShareMemory::shwait() {
   while (true) {
     if (info->flag) {
-      if (info->notgood)
+      if (info->notgood) {
+        printf("starting from %d\n", npc_clock);
         break;
-      else
+      } else
         exit(0);
-      printf("starting from %d\n", npc_clock);
     } else {
       sleep(WAIT_INTERVAL);
     }
