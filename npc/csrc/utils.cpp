@@ -7,6 +7,8 @@
 #include <difftest.h>
 #include <getopt.h>
 
+#define MAX_TRACE_CYCLES 1000000
+
 static char *diff_so_file;
 static char *img_file;
 static char *log_file;
@@ -89,7 +91,7 @@ void eval_trace() {
   top->eval();
   tfp->dump(npc_clock++);
   tfp->flush();
-  if (npc_clock % 10000 == 0) {
+  if (npc_clock % MAX_TRACE_CYCLES == 0) {
     printf("%d\n", npc_clock);
     tfp->close();
     remove("wave.vcd");
