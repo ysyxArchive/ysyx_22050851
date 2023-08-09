@@ -91,12 +91,8 @@ extern int npc_clock;
 void eval_trace() {
   top->eval();
   if (lightSSS.is_not_good()) {
-    tfp->dump(npc_clock++);
+    tfp->dump(npc_clock);
     tfp->flush();
-    if (npc_clock % MAX_TRACE_CYCLES == 0) {
-      tfp->close();
-      remove("wave.vcd");
-      tfp->open("wave.vcd"); // 打开vcd
-    }
   }
+  npc_clock++;
 }
