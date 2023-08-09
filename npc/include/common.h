@@ -19,5 +19,7 @@ typedef struct CPU {
   uint64_t gpr[32];
   uint64_t pc;
 } CPU;
+extern CPU cpu;
+void isa_reg_display();
 
 #endif
