@@ -1,5 +1,4 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
-
-// #define WAVE_TRACE
+#define LIGHT_SSS_CYCLE_INTERVAL 1000
 #endif
