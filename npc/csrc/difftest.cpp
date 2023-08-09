@@ -74,7 +74,7 @@ void difftest_check(CPU *cpu) {
     difftest_failed = true;
   }
   for (int i = 0; i < 32; i++) {
-    if (cpu->gpr[i] == refcpu.gpr[i]) {
+    if (cpu->gpr[i] != refcpu.gpr[i]) {
       printf("Difftest Failed\ncheck reg[%d] failed before pc:%llx\nExpected: "
              "%llx, Actual: %llx \n",
              i, cpu->pc, refcpu.gpr[i], cpu->gpr[i]);
