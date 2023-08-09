@@ -75,13 +75,16 @@ VCPU *top;
 
 void init_vcd_trace() {
   VerilatedContext *contextp = new VerilatedContext;
+#ifdef WAVE_TRACE
   Verilated::traceEverOn(true); // 导出vcd波形需要加此语句
   tfp = new VerilatedVcdC();    // 导出vcd波形需要加此语句
+#endif
   top = new VCPU{contextp};
   top->reset = false;
+#ifdef WAVE_TRACE
   top->trace(tfp, 0);
   tfp->open("wave.vcd"); // 打开vcd
-
+#endif
   top->pcio_inst = 0x00000013; // 默认为 addi e0, 0;
 }
 
@@ -89,6 +92,7 @@ int npc_clock = 0;
 
 void eval_trace() {
   top->eval();
+#ifdef WAVE_TRACE
   tfp->dump(npc_clock++);
   tfp->flush();
   if (npc_clock % MAX_TRACE_CYCLES == 0) {
@@ -96,4 +100,5 @@ void eval_trace() {
     remove("wave.vcd");
     tfp->open("wave.vcd"); // 打开vcd
   }
+#endif
 }
