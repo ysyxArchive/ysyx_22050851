@@ -7,7 +7,7 @@
 #include <difftest.h>
 #include <getopt.h>
 
-#define MAX_TRACE_CYCLES 1000000
+#define MAX_TRACE_CYCLES 100000
 
 static char *diff_so_file;
 static char *img_file;
