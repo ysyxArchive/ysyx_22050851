@@ -80,7 +80,8 @@ void one_step() {
   top->clock = 0;
   eval_trace();
   if ((npc_clock / 2) % LIGHT_SSS_CYCLE_INTERVAL == 0) {
-    lightSSS.do_fork();
+    printf("%d\n", npc_clock);
+    // lightSSS.do_fork();
   }
 }
 
