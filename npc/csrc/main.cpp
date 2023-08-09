@@ -1,12 +1,12 @@
 #include "VCPU.h"
 #include "VCPU__Dpi.h"
 #include "common.h"
+#include "device.h"
 #include "difftest.h"
 #include "mem.h"
 #include "verilated.h"
 #include "verilated_dpi.h"
 #include "verilated_vcd_c.h"
-#include "device.h"
 #define MAX_INSTS 10000
 
 bool is_halt = false;
@@ -16,24 +16,20 @@ void haltop(unsigned char good_halt) {
   is_bad_halt = !good_halt;
 }
 
-VCPU *top;
-VerilatedVcdC *tfp;
+extern VCPU *top;
+extern VerilatedVcdC *tfp;
 CPU cpu;
 
 uint64_t *cpu_gpr = NULL;
 uint64_t *cpu_pc = NULL;
-int npc_clock = 0;
 
 void init_npc() {
-  top->trace(tfp, 0);
-  tfp->open("wave.vcd");       // 打开vcd
-  top->pcio_inst = 0x00000013; // 默认为 addi e0, 0;
   for (int i = 0; i < 10; i++) {
     top->reset = true;
     top->clock = 1;
-    top->eval();
+    eval_trace();
     top->clock = 0;
-    top->eval();
+    eval_trace();
   }
   top->reset = false;
 }
@@ -69,39 +65,26 @@ extern "C" void set_gpr_ptr(const svOpenArrayHandle r) {
 void update_cpu() {
   memcpy(&(cpu.gpr), cpu_gpr, 32 * sizeof(uint64_t));
   cpu.pc = cpu_gpr[32];
-  //TODO: ITRACE
-  // Log("updating cpu , pc is %lx", cpu.pc);
+  // TODO: ITRACE
+  //  Log("updating cpu , pc is %lx", cpu.pc);
 }
 
 void one_step() {
   // 记录波形
   top->clock = 1;
-  top->eval();
-  tfp->dump(npc_clock++);
+  eval_trace();
   uint64_t npc = top->pcio_pc;
   top->pcio_inst = read_mem_nolog(npc, 4);
-  tfp->flush();
   update_cpu();
   difftest_check(&cpu);
   top->clock = 0;
-  top->eval();
-  tfp->dump(npc_clock++);
-  // 推动
-  tfp->flush();
+  eval_trace();
 }
 
 int main(int argc, char *argv[]) {
   parse_args(argc, argv);
   load_files();
-  // TODO: 传参不对
-  // Verilated::commandArgs(argc, argv);
-  VerilatedContext *contextp = new VerilatedContext;
-  // TODO: 传参不对
-
-  // contextp->commandArgs(argc, argv);
-  Verilated::traceEverOn(true); // 导出vcd波形需要加此语句
-  tfp = new VerilatedVcdC();    // 导出vcd波形需要加此语句
-  top = new VCPU{contextp};
+  init_vcd_trace();
   top->reset = false;
   init_device();
   init_npc();
@@ -110,13 +93,9 @@ int main(int argc, char *argv[]) {
 
   Log("init_done");
 
-  tfp->dump(npc_clock++);
   while (!is_halt) {
     one_step();
   }
-  delete top;
-  delete contextp;
-  delete tfp;
 
   Assert(!is_bad_halt, "bad halt! \npc=0x%lx inst=0x%08x", top->pcio_pc,
          top->pcio_inst);
