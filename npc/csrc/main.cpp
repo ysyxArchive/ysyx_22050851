@@ -13,6 +13,7 @@ bool is_halt = false;
 bool is_bad_halt = false;
 
 void haltop(unsigned char good_halt) {
+  Log("halt from npc, is %s halt", good_halt ? "good" : "bad");
   is_halt = true;
   is_bad_halt = !good_halt;
 }
