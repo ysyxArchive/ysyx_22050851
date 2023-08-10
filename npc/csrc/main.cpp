@@ -11,7 +11,9 @@
 
 bool is_halt = false;
 bool is_bad_halt = false;
+
 void haltop(unsigned char good_halt) {
+  Log("halt from npc, is %s halt", good_halt ? "good" : "bad");
   is_halt = true;
   is_bad_halt = !good_halt;
 }
@@ -79,12 +81,9 @@ void one_step() {
   difftest_check(&cpu);
   top->clock = 0;
   eval_trace();
+  update_device();
   if ((npc_clock / 2) % LIGHT_SSS_CYCLE_INTERVAL == 0) {
     lightSSS.do_fork();
-  }
-  if (npc_clock > 12322333) {
-    is_halt = true;
-    is_bad_halt = true;
   }
 }
 
@@ -97,7 +96,7 @@ int main(int argc, char *argv[]) {
   init_npc();
   update_cpu();
   difftest_initial(&cpu);
-
+  lightSSS.do_fork();
   Log("init_done");
 
   while (!is_halt) {
@@ -105,7 +104,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (is_bad_halt) {
-    Log("bad halt! \npc=0x%lx inst=0x%08x", top->pcio_pc, top->pcio_inst);
+    Log("bad halt! pc=0x%lx inst=0x%08x", top->pcio_pc, top->pcio_inst);
     if (!lightSSS.is_child()) {
       lightSSS.wakeup_child(npc_clock);
     }

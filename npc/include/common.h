@@ -21,4 +21,5 @@ typedef struct CPU {
 extern CPU cpu;
 void isa_reg_display();
 
+
 #endif
