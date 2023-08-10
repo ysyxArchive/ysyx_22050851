@@ -53,6 +53,7 @@ void update_device() {
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
     case SDL_QUIT:
+    case SDL_WINDOWEVENT_CLOSE:
       Log("SDL_QUIT");
       is_halt = true;
       is_bad_halt = true;
