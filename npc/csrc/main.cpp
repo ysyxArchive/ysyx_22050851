@@ -80,6 +80,7 @@ void one_step() {
   difftest_check(&cpu);
   top->clock = 0;
   eval_trace();
+  update_device();
   if ((npc_clock / 2) % LIGHT_SSS_CYCLE_INTERVAL == 0) {
     lightSSS.do_fork();
   }
