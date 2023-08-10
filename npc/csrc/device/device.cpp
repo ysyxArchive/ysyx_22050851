@@ -63,9 +63,6 @@ void update_device() {
       bool is_keydown = (event.key.type == SDL_KEYDOWN);
       send_key(k, is_keydown);
       break;
-
-    default:
-      break;
     }
   }
 }

@@ -49,7 +49,7 @@ static void key_enqueue(uint32_t am_scancode) {
   Assert(key_r != key_f, "key queue overflow!");
 }
 
-static uint32_t key_dequeue() {
+uint32_t get_key() {
   uint32_t key = _KEY_NONE;
   if (key_f != key_r) {
     key = key_queue[key_f];
