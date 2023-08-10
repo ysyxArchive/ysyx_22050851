@@ -37,7 +37,7 @@ uint64_t gettime() {
   return end - start;
 }
 
-#define DEVICE_UPDATE_INTERVAL 1000000
+#define DEVICE_UPDATE_INTERVAL 100000
 extern bool is_halt;
 extern bool is_bad_halt;
 
@@ -48,7 +48,6 @@ void update_device() {
     return;
   }
   last = now;
-  Log("processing");
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
