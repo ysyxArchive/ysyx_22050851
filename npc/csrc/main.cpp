@@ -11,6 +11,7 @@
 
 bool is_halt = false;
 bool is_bad_halt = false;
+
 void haltop(unsigned char good_halt) {
   is_halt = true;
   is_bad_halt = !good_halt;

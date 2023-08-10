@@ -38,10 +38,9 @@ extern int npc_clock;
 void ForkShareMemory::shwait() {
   while (true) {
     if (info->flag) {
-      if (info->notgood) {
-        printf("starting from %d\n", npc_clock);
+      if (info->notgood)
         break;
-      } else
+      else
         exit(0);
     } else {
       sleep(WAIT_INTERVAL);
@@ -66,7 +65,6 @@ int LightSSS::do_fork() {
   }
   // the original process
   else if (pid != 0) {
-    printf("forked process %d at npc == %d\n", pid, npc_clock);
     slotCnt++;
     pidSlot.insert(pidSlot.begin(), pid);
     return FORK_OK;
@@ -81,7 +79,6 @@ int LightSSS::do_fork() {
 }
 
 int LightSSS::wakeup_child(uint64_t cycles) {
-  Log("wakeing up child");
   forkshm.info->endCycles = cycles;
   forkshm.info->oldest = pidSlot.back();
   forkshm.info->notgood = true;

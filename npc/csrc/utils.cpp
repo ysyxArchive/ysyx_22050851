@@ -8,8 +8,6 @@
 #include <difftest.h>
 #include <getopt.h>
 
-#define MAX_TRACE_CYCLES 100000
-
 static char *diff_so_file;
 static char *img_file;
 static char *log_file;
@@ -92,7 +90,6 @@ void eval_trace() {
   top->eval();
   if (lightSSS.is_not_good() &&
       lightSSS.get_end_cycles() - npc_clock < WAVE_TRACE_CLOCKS) {
-    printf("%d\n", npc_clock);
     tfp->dump(npc_clock);
     tfp->flush();
   }

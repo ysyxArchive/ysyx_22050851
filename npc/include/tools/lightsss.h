@@ -30,6 +30,7 @@
 
 #define FAIL_EXIT exit(-1);
 #define WAIT_INTERVAL 1
+// MORE THAN ONE MAY CAUSE BUGS
 #define SLOT_SIZE 1
 
 typedef struct shinfo {
