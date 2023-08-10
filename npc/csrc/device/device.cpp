@@ -48,7 +48,7 @@ void update_device() {
     return;
   }
   last = now;
-
+  Log("processing");
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
