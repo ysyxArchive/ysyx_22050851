@@ -37,7 +37,6 @@ uint64_t gettime() {
   return end - start;
 }
 
-#define DEVICE_UPDATE_INTERVAL 100000
 extern bool is_halt;
 extern bool is_bad_halt;
 
