@@ -33,7 +33,9 @@ class ControlRegisterFile extends Module {
   val io = IO(new ControlRegisterFileIO())
 
   val registers = ControlRegisterList.list.map(info => RegInit(info.initVal.U(64.W)))
-  val indexMap  = ControlRegisterList.list.zipWithIndex.map { case (info, index) => info.id.U -> registers(index) }.toMap
+  val indexMapSeq = ControlRegisterList.list.zipWithIndex.map {
+    case (info, index) => info.id.U -> registers(index)
+  }.toSeq
   val mask = MuxLookup(
     io.control.csrsource,
     io.src1,
@@ -42,17 +44,22 @@ class ControlRegisterFile extends Module {
       CsrSource.uimm.asUInt -> io.uimm
     )
   )
+  val writeBack = Wire(UInt(64.W))
+  val outputVal = MuxLookup(io.csrIndex, 0.U, indexMapSeq)
+  for (i <- 0 to registers.length) {
+    registers(i) := Mux(io.csrIndex === ControlRegisterList.list(i).id.U, writeBack, registers(i))
+  }
 
-  indexMap(io.csrIndex) := MuxLookup(
+  writeBack := MuxLookup(
     io.control.csrsetmode,
-    indexMap(io.csrIndex),
+    outputVal,
     Seq(
-      CsrSetMode.clear.asUInt -> (indexMap(io.csrIndex) & ~mask),
-      CsrSetMode.set.asUInt -> (indexMap(io.csrIndex) | mask),
+      CsrSetMode.clear.asUInt -> (outputVal & ~mask),
+      CsrSetMode.set.asUInt -> (outputVal | mask),
       CsrSetMode.write.asUInt -> mask
     )
   )
 
-  io.output := indexMap(io.csrIndex)
+  io.output := outputVal
 
 }
