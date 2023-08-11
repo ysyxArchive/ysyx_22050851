@@ -46,7 +46,7 @@ class ControlRegisterFile extends Module {
   )
   val writeBack = Wire(UInt(64.W))
   val outputVal = MuxLookup(io.csrIndex, 0.U, indexMapSeq)
-  for (i <- 0 to registers.length) {
+  for (i <- 0 to registers.length - 1) {
     registers(i) := Mux(io.csrIndex === ControlRegisterList.list(i).id.U, writeBack, registers(i))
   }
 
