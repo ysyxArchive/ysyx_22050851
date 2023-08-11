@@ -15,7 +15,8 @@ class CPU extends Module {
     val pc   = Output(UInt(64.W))
   })
 
-  val regs    = Module(new RegisterFile);
+  val regs    = Module(new RegisterFile)
+  val csrregs = Module(new ControlRegisterFile)
   val decoder = Module(new InstructionDecodeUnit)
   val exe     = Module(new InstructionExecuteUnit)
   val mem     = Module(new BlackBoxMem)

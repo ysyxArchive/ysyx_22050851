@@ -48,3 +48,4 @@ class RegisterFile extends Module {
   io.pc   := pc
 
 }
+`

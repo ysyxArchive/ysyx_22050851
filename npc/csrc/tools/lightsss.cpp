@@ -38,10 +38,9 @@ extern int npc_clock;
 void ForkShareMemory::shwait() {
   while (true) {
     if (info->flag) {
-      if (info->notgood) {
-        Log("child running");
+      if (info->notgood)
         break;
-      } else
+      else
         exit(0);
     } else {
       sleep(WAIT_INTERVAL);
