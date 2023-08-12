@@ -35,7 +35,7 @@ class CPU extends Module {
   csrregs.io.decodeIn := decoder.decodeOut
   csrregs.io.src1Data := regs.io.out0
 
-  blackBoxOut.io.pc      := regs.pc;
+  blackBoxOut.io.pc      := regs.io.pc;
   blackBoxOut.io.regs    := regs.regs;
   blackBoxOut.io.csrregs := csrregs.registers;
 }
