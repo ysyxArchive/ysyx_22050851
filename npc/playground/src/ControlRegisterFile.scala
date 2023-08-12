@@ -7,6 +7,7 @@ import decode.AluMux1
 import firrtl.seqCat
 import decode.CsrSetMode
 import Chisel.debug
+import utils.Utils
 
 class ControlRegisterInfo(val name: String, val id: Int, val initVal: Int = 0)
 
@@ -20,6 +21,8 @@ object ControlRegisterList {
     new ControlRegisterInfo("satp", 0x180),
     new ControlRegisterInfo("mscratch", 0x340)
   )
+
+  def IndexOf(name: String) = list.indexWhere(info => { info.name == name })
 }
 
 class ControlRegisterFileIO extends Bundle {
@@ -51,7 +54,25 @@ class ControlRegisterFile extends Module {
   val writeBack = Wire(UInt(64.W))
   val outputVal = MuxLookup(csrIndex, 0.U, indexMapSeq)
   for (i <- 0 to registers.length - 1) {
-    registers(i) := Mux(csrIndex === ControlRegisterList.list(i).id.U, writeBack, registers(i))
+    ControlRegisterList.list(i).name match {
+      case "mstatus" => {}
+      case "mepc"    => {}
+      case "mcause" => {
+        val default =
+          Mux(csrIndex === ControlRegisterList.list(i).id.U, writeBack, registers(i))
+        registers(i) := MuxLookup(
+          io.decodeIn.control.csrbehave,
+          default,
+          Utils.enumSeq(
+            CsrBehave.no -> default
+          )
+        )
+
+      }
+      case _ => {
+        registers(i) := Mux(csrIndex === ControlRegisterList.list(i).id.U, writeBack, registers(i))
+      }
+    }
   }
 
   writeBack := MuxLookup(
