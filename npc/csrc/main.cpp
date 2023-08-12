@@ -22,7 +22,7 @@ extern VCPU *top;
 CPU cpu;
 LightSSS lightSSS;
 int npc_clock = 0;
-uint64_t *cpu_gpr = NULL;
+uint64_t *cpu_regs = NULL;
 uint64_t *cpu_pc = NULL;
 
 void init_npc() {
@@ -61,12 +61,13 @@ extern "C" void mem_write(const svLogicVecVal *addr, const svLogicVecVal *len,
 }
 
 extern "C" void set_gpr_ptr(const svOpenArrayHandle r) {
-  cpu_gpr = (uint64_t *)(((VerilatedDpiOpenVar *)r)->datap());
+  cpu_regs = (uint64_t *)(((VerilatedDpiOpenVar *)r)->datap());
 }
 
 void update_cpu() {
-  memcpy(&(cpu.gpr), cpu_gpr, 32 * sizeof(uint64_t));
-  cpu.pc = cpu_gpr[32];
+  memcpy(&(cpu.gpr), cpu_regs, 32 * sizeof(uint64_t));
+  cpu.pc = cpu_regs[32];
+  memcpy(&(cpu.csr), cpu_regs + 32 + 1, 6 * sizeof(uint64_t));
   // TODO: ITRACE
   //  Log("updating cpu , pc is %lx", cpu.pc);
 }
