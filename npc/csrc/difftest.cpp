@@ -87,7 +87,7 @@ void difftest_check(CPU *cpu) {
     if (cpu->csr[i] != refcpu.csr[i]) {
       printf("Difftest Failed\ncheck csr %s failed before pc:%llx\nExpected: "
              "%llx, Actual: %llx \n",
-             csrregs[i], cpu->pc, refcpu.gpr[i], cpu->gpr[i]);
+             csrregs[i], cpu->pc, refcpu.csr[i], cpu->csr[i]);
       difftest_failed = true;
     }
   }
