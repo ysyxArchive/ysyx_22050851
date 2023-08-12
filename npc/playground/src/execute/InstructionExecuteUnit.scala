@@ -51,6 +51,14 @@ class InstructionExecuteUnit extends Module {
       PcSrc.src1.asUInt -> src1
     )
   )
+  val dnpcAlter = MuxLookup(
+    controlIn.pccsr,
+    dnpcAddSrc,
+    Utils.chiselEnumSeq(
+      PcCsr.origin -> dnpcAddSrc,
+      PcCsr.csr -> csrIn
+    )
+  )
   regIO.dnpc := Mux(pcBranch, dnpcAddSrc + dataIn.imm, snpc)
   val regwdata = MuxLookup(
     controlIn.regwritemux,
