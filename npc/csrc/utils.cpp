@@ -1,5 +1,6 @@
 #include "VCPU.h"
 #include "VCPU__Dpi.h"
+#include "mem.h"
 #include "tools/lightsss.h"
 #include "verilated.h"
 #include "verilated_dpi.h"

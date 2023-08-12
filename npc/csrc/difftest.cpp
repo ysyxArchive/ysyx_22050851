@@ -1,6 +1,8 @@
 #include "difftest.h"
 #include "mem.h"
 #include <dlfcn.h>
+extern const char *csrregs[];
+
 void (*difftest_memcpy)(paddr_t addr, void *buf, size_t n,
                         bool direction) = NULL;
 
@@ -81,6 +83,15 @@ void difftest_check(CPU *cpu) {
       difftest_failed = true;
     }
   }
+  for (int i = 0; i < 6; i++) {
+    if (cpu->csr[i] != refcpu.csr[i]) {
+      printf("Difftest Failed\ncheck csr %s failed before pc:%llx\nExpected: "
+             "%llx, Actual: %llx \n",
+             csrregs[i], cpu->pc, refcpu.csr[i], cpu->csr[i]);
+      difftest_failed = true;
+    }
+  }
+
   if (difftest_failed) {
     isa_reg_display();
     assert(0);
