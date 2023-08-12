@@ -28,7 +28,6 @@ class RegisterFile extends Module {
   val io       = IO(new RegisterFileIO())
   val debugOut = IO(Output(Vec(32, UInt(64.W))))
   
-  
   val pc = Wire(UInt(64.W))
   
   val regs = RegInit(VecInit(Seq.fill(32)(0.U(64.W))))
