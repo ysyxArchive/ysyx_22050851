@@ -2,6 +2,7 @@
 // https://github.com/OpenXiangShan/difftest/src/test/csrc/common/lightsss.cpp
 
 #include "tools/lightsss.h"
+#include "common.h"
 
 ForkShareMemory::ForkShareMemory() {
   if ((key_n = ftok(".", 's') < 0)) {

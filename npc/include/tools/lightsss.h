@@ -19,15 +19,14 @@
 #ifndef __LIGHTSSS_H
 #define __LIGHTSSS_H
 
-#include "common.h"
 #include <list>
 #include <signal.h>
+#include <stdint.h>
 #include <sys/ipc.h>
 #include <sys/prctl.h>
 #include <sys/shm.h>
 #include <sys/wait.h>
 #include <unistd.h>
-
 #define FAIL_EXIT exit(-1);
 #define WAIT_INTERVAL 1
 // MORE THAN ONE MAY CAUSE BUGS
