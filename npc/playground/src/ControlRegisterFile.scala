@@ -6,6 +6,7 @@ import decode.CsrSource
 import decode.AluMux1
 import firrtl.seqCat
 import decode.CsrSetMode
+import Chisel.debug
 
 class ControlRegisterInfo(val name: String, val id: Int, val initVal: Int = 0)
 
@@ -28,12 +29,14 @@ class ControlRegisterFileIO extends Bundle {
 }
 
 class ControlRegisterFile extends Module {
-  val io = IO(new ControlRegisterFileIO())
+  val io       = IO(new ControlRegisterFileIO())
+  val debugOut = IO(Output(Vec(6, UInt(64.W))))
 
   val uimm     = io.decodeIn.data.src1
   val csrIndex = io.decodeIn.data.imm
 
   val registers = ControlRegisterList.list.map(info => RegInit(info.initVal.U(64.W)))
+  debugOut := registers
   val indexMapSeq = ControlRegisterList.list.zipWithIndex.map {
     case (info, index) => info.id.U -> registers(index)
   }.toSeq

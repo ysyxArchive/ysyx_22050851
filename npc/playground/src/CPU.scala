@@ -36,6 +36,6 @@ class CPU extends Module {
   csrregs.io.src1Data := regs.io.out0
 
   blackBoxOut.io.pc      := regs.io.pc;
-  blackBoxOut.io.regs    := regs.regs;
-  blackBoxOut.io.csrregs := csrregs.registers;
+  blackBoxOut.io.regs    := regs.debugOut;
+  blackBoxOut.io.csrregs := csrregs.debugOut;
 }
