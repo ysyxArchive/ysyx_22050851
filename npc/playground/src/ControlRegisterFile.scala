@@ -22,36 +22,37 @@ object ControlRegisterList {
 }
 
 class ControlRegisterFileIO extends Bundle {
-  val src1     = Input(UInt(64.W))
-  val csrIndex = Input(UInt(12.W))
-  val uimm     = Input(UInt(5.W))
-  val control  = Input(new DecodeControlOut())
+  val src1Data = Input(UInt(64.W))
+  val decodeIn = Flipped(new DecodeOut())
   val output   = Output(UInt(64.W))
 }
 
 class ControlRegisterFile extends Module {
   val io = IO(new ControlRegisterFileIO())
 
+  val uimm     = io.decodeIn.data.src1
+  val csrIndex = io.decodeIn.data.imm
+
   val registers = ControlRegisterList.list.map(info => RegInit(info.initVal.U(64.W)))
   val indexMapSeq = ControlRegisterList.list.zipWithIndex.map {
     case (info, index) => info.id.U -> registers(index)
   }.toSeq
   val mask = MuxLookup(
-    io.control.csrsource,
-    io.src1,
+    io.decodeIn.control.csrsource,
+    io.src1Data,
     Seq(
-      CsrSource.src1.asUInt -> io.src1,
-      CsrSource.uimm.asUInt -> io.uimm
+      CsrSource.src1.asUInt -> io.src1Data,
+      CsrSource.uimm.asUInt -> uimm
     )
   )
   val writeBack = Wire(UInt(64.W))
-  val outputVal = MuxLookup(io.csrIndex, 0.U, indexMapSeq)
+  val outputVal = MuxLookup(csrIndex, 0.U, indexMapSeq)
   for (i <- 0 to registers.length - 1) {
-    registers(i) := Mux(io.csrIndex === ControlRegisterList.list(i).id.U, writeBack, registers(i))
+    registers(i) := Mux(csrIndex === ControlRegisterList.list(i).id.U, writeBack, registers(i))
   }
 
   writeBack := MuxLookup(
-    io.control.csrsetmode,
+    io.decodeIn.control.csrsetmode,
     outputVal,
     Seq(
       CsrSetMode.clear.asUInt -> (outputVal & ~mask),

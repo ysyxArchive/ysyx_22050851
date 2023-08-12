@@ -32,8 +32,8 @@ class InstructionDecodeUnit extends Module {
     val inst   = Input(UInt(32.W))
     val ready  = Output(Bool())
   })
-  val output    = IO(Decoupled(new DecodeOut))
-  val decodeOut = Wire(new DecodeOut)
+  
+  val decodeOut = IO(new DecodeOut)
 
   val controlDecoder = Module(new InstContorlDecoder)
 
@@ -69,10 +69,10 @@ class InstructionDecodeUnit extends Module {
   decodeOut.data.src2 := rs2
   decodeOut.data.dst  := rd
 
-  when(output.ready) {
-    output.enq(decodeOut)
-  }.otherwise {
-    output.bits  := DontCare
-    output.valid := false.B
-  }
+  // when(output.ready) {
+  //   output.enq(decodeOut)
+  // }.otherwise {
+  //   output.bits  := DontCare
+  //   output.valid := false.B
+  // }
 }

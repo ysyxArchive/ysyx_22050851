@@ -26,8 +26,12 @@ class CPU extends Module {
   decoder.io.inst   := pcio.inst
   decoder.io.enable := true.B
 
-  exe.in <> decoder.output
+  exe.decodeIn := decoder.decodeOut
   exe.regIO <> regs.io
   exe.memIO <> mem.io
+  exe.csrIn := csrregs.io.output
+
+  csrregs.io.decodeIn := decoder.decodeOut
+  csrregs.io.src1Data := regs.io.out0
 
 }

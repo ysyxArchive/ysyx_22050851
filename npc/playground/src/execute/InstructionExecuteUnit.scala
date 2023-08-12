@@ -8,19 +8,19 @@ import utils._
 import firrtl.seqCat
 
 class InstructionExecuteUnit extends Module {
-  val in    = IO(Flipped(Decoupled(new DecodeOut())))
-  val memIO = IO(Flipped(new MemIO()))
-  val regIO = IO(Flipped(new RegisterFileIO()))
+  val decodeIn = IO(Flipped(new DecodeOut()))
+  val memIO    = IO(Flipped(new MemIO()))
+  val regIO    = IO(Flipped(new RegisterFileIO()))
+  val csrIn    = IO(Input(UInt(64.W)))
 
   // val decodeIn = RegNext(in.bits, DecodeOut.default)
-  val decodeIn  = in.bits
   val controlIn = decodeIn.control
   val dataIn    = decodeIn.data
 
   val alu = Module(new ALU)
 
   // TODO: impl this
-  in.ready := true.B
+  // in.ready := true.B
 
   // regIO
   val src1 = Wire(UInt(64.W))
