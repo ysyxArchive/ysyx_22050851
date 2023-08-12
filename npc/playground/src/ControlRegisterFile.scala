@@ -41,7 +41,7 @@ class ControlRegisterFileIO extends Bundle {
 class ControlRegisterFile extends Module {
   val io       = IO(new ControlRegisterFileIO())
   val debugOut = IO(Output(Vec(6, UInt(64.W))))
-  val regIn    = IO(Flipped(new RegisterFileIO()))
+  val regIn    = IO(Input(Flipped(new RegisterFileIO())))
 
   val uimm     = io.decodeIn.data.src1
   val csrIndex = io.decodeIn.data.imm
