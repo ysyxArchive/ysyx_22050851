@@ -11,14 +11,14 @@ import Chisel.debug
 class ControlRegisterInfo(val name: String, val id: Int, val initVal: Int = 0)
 
 object ControlRegisterList {
-
+  // 顺序和 csrc/regs.cpp 中 csrregs 相同
   val list = List(
-    new ControlRegisterInfo("satp", 0x180),
-    new ControlRegisterInfo("mstatus", 0x300),
-    new ControlRegisterInfo("mtvec", 0x305),
-    new ControlRegisterInfo("mscratch", 0x340),
     new ControlRegisterInfo("mepc", 0x341),
-    new ControlRegisterInfo("mcause", 0x342)
+    new ControlRegisterInfo("mstatus", 0x300),
+    new ControlRegisterInfo("mcause", 0x342),
+    new ControlRegisterInfo("mtvec", 0x305),
+    new ControlRegisterInfo("satp", 0x180),
+    new ControlRegisterInfo("mscratch", 0x340)
   )
 }
 
