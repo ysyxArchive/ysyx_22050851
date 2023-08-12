@@ -88,12 +88,12 @@ class BlackBoxRegs extends BlackBox with HasBlackBoxInline {
       |  assign regs[30] = waddr == 5'd30 ? wdata : regs_30;
       |  assign regs[31] = waddr == 5'd31 ? wdata : regs_31;
       |  assign regs[32] = pc;
-      |  assign regs[33] = csr_0;
-      |  assign regs[34] = csr_1;
-      |  assign regs[35] = csr_2;
-      |  assign regs[36] = csr_3;
-      |  assign regs[37] = csr_4;
-      |  assign regs[38] = csr_5;
+      |  assign regs[33] = csrregs_0;
+      |  assign regs[34] = csrregs_1;
+      |  assign regs[35] = csrregs_2;
+      |  assign regs[36] = csrregs_3;
+      |  assign regs[37] = csrregs_4;
+      |  assign regs[38] = csrregs_5;
       |  initial set_gpr_ptr(regs);  // regs为通用寄存器的二维数组变量
       |endmodule""".stripMargin
   )
