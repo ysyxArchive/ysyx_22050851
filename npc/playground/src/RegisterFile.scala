@@ -26,16 +26,10 @@ class RegisterFileIO extends Bundle {
 
 class RegisterFile extends Module {
   val io          = IO(new RegisterFileIO())
-  val blackBoxOut = Module(new BlackBoxRegs);
-
+  
   val pc = Wire(UInt(64.W))
 
   val regs = RegInit(VecInit(Seq.fill(32)(0.U(64.W))))
-
-  blackBoxOut.io.pc    := pc;
-  blackBoxOut.io.regs  := regs;
-  blackBoxOut.io.waddr := 0.U;
-  blackBoxOut.io.wdata := io.wdata;
 
   pc := RegNext(io.dnpc, "h80000000".asUInt(64.W))
 

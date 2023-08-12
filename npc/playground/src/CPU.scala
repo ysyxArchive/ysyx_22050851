@@ -15,11 +15,12 @@ class CPU extends Module {
     val pc   = Output(UInt(64.W))
   })
 
-  val regs    = Module(new RegisterFile)
-  val csrregs = Module(new ControlRegisterFile)
-  val decoder = Module(new InstructionDecodeUnit)
-  val exe     = Module(new InstructionExecuteUnit)
-  val mem     = Module(new BlackBoxMem)
+  val regs        = Module(new RegisterFile)
+  val csrregs     = Module(new ControlRegisterFile)
+  val decoder     = Module(new InstructionDecodeUnit)
+  val exe         = Module(new InstructionExecuteUnit)
+  val mem         = Module(new BlackBoxMem)
+  val blackBoxOut = Module(new BlackBoxRegs);
 
   pcio.pc := regs.io.pc
 
@@ -34,4 +35,7 @@ class CPU extends Module {
   csrregs.io.decodeIn := decoder.decodeOut
   csrregs.io.src1Data := regs.io.out0
 
+  blackBoxOut.io.pc      := regs.pc;
+  blackBoxOut.io.regs    := regs.regs;
+  blackBoxOut.io.csrregs := csrregs.registers;
 }
