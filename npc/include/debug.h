@@ -20,6 +20,7 @@ extern LightSSS lightSSS;
       printf(ANSI_FMT(format, ANSI_FG_RED) "\n", ##__VA_ARGS__);               \
       if (!lightSSS.is_child()) {                                              \
         lightSSS.wakeup_child(npc_clock);                                      \
+        isa_reg_display();                                                     \
         assert(cond);                                                          \
       }                                                                        \
     }                                                                          \
