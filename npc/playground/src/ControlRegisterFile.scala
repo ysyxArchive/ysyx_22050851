@@ -55,20 +55,20 @@ class Mstatus(val value: UInt) {
     "MIE" -> new OffsetWidth(3, 1),
     "SIE" -> new OffsetWidth(1, 1)
   )
-  def mask(name: String) = {
+  def getMask(name: String) = {
     val target = map(name)
     Utils.zeroExtend(Fill(target.width, 1.U) << target.offset, target.offsetFromBegin, 64)
   }
 
-  def set(name: String, v: UInt) = {
-    val target = map(name)
-    value := value & ~mask(name) | (v(target.width - 1, 0) << target.offset)
-    new Mstatus(value)
+  def set(pairs: (String, UInt)*) = {
+    val mask     = pairs.map(pair => ~getMask(pair._1)).reduce(_ & _)
+    val setValue = pairs.map(pair => (pair._2(map(pair._1).width - 1, 0) << map(pair._1).offset)).reduce(_ | _)
+    value := value & mask | setValue
   }
 
   def get(name: String) = {
     val target = map(name)
-    value & mask(name) >> target.offset
+    value & getMask(name) >> target.offset
   }
 
   def apply(name: String) = get(name)
