@@ -60,10 +60,10 @@ class Mstatus(val value: UInt) {
     Utils.zeroExtend(Fill(target.width, 1.U) << target.offset, target.offsetFromBegin, 64)
   }
 
-  def set(pairs: (String, UInt)*) = {
+  def getSettledValue(pairs: (String, UInt)*) = {
     val mask     = pairs.map(pair => ~getMask(pair._1)).reduce(_ & _)
     val setValue = pairs.map(pair => (pair._2(map(pair._1).width - 1, 0) << map(pair._1).offset)).reduce(_ | _)
-    value := value & mask | setValue
+    value & mask | setValue
   }
 
   def get(name: String) = {
@@ -127,8 +127,8 @@ class ControlRegisterFile extends Module {
           io.decodeIn.control.csrbehave,
           Mux(csrIndex === ControlRegisterList.list(i).id.U, writeBack, registers(i)),
           EnumSeq(
-            CsrBehave.ecall -> mstatus.set("MPP", currentMode).set("MPIE", mstatus("MIE")).set("MIE", 0.U).value,
-            CsrBehave.mret -> mstatus.set("MIE", mstatus("MPIE")).set("MPIE", 0.U).value
+            CsrBehave.ecall -> mstatus.getSettledValue("MPP" -> currentMode, "MPIE" -> mstatus("MIE"), "MIE" -> 0.U),
+            CsrBehave.mret -> mstatus.getSettledValue("MIE" -> mstatus("MPIE"), "MPIE" -> 0.U)
           )
         )
       }
