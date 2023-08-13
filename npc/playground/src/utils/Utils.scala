@@ -5,6 +5,11 @@ import chisel3.experimental.ChiselEnum
 import chisel3.experimental.EnumType
 import chisel3.util._
 import firrtl.seqCat
+import scala.collection.SeqFactory
+import scala.collection.SeqOps
+import chisel3.internal.Builder
+import scala.collection.IterableFactory
+import scala.annotation.unchecked.uncheckedVariance
 
 object Utils {
 
@@ -20,8 +25,15 @@ object Utils {
     Cat(Fill(targetWidth - width, num(width - 1)), num(width - 1, 0))
   }
 
+  /** @deprecated */
   def enumSeq(elems: (EnumType, UInt)*): Seq[(UInt, UInt)] = {
     elems.map { case (enumType, uint) => (enumType.asUInt, uint) }
   }
 
+}
+
+object EnumSeq {
+  def apply(elems: (EnumType, UInt)*) = elems.map {
+    case (enumType, uint) => (enumType.asUInt, uint)
+  }
 }

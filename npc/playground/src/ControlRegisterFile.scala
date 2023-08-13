@@ -7,7 +7,8 @@ import decode.AluMux1
 import firrtl.seqCat
 import decode._
 import Chisel.debug
-import utils.Utils
+import utils._
+import chisel3.util.Fill
 
 class ControlRegisterInfo(val name: String, val id: Int, val initVal: Int = 0)
 
@@ -23,6 +24,54 @@ object ControlRegisterList {
   )
 
   def IndexOf(name: String) = list.indexWhere(info => { info.name == name })
+}
+
+class Mstatus(val value: UInt) {
+  class OffsetWidth(val offset: Int, val width: Int) {
+    val offsetFromBegin = offset + width
+  }
+  val map = Map(
+    "SD" -> new OffsetWidth(63, 1),
+    "MPV" -> new OffsetWidth(39, 1),
+    "GVA" -> new OffsetWidth(38, 1),
+    "MBE" -> new OffsetWidth(37, 1),
+    "SBE" -> new OffsetWidth(36, 1),
+    "SXL" -> new OffsetWidth(34, 2),
+    "UXL" -> new OffsetWidth(32, 2),
+    "TSR" -> new OffsetWidth(22, 1),
+    "TW" -> new OffsetWidth(21, 1),
+    "TVM" -> new OffsetWidth(20, 1),
+    "MXR" -> new OffsetWidth(19, 1),
+    "SUM" -> new OffsetWidth(18, 1),
+    "MPRV" -> new OffsetWidth(17, 1),
+    "XS" -> new OffsetWidth(15, 2),
+    "FS" -> new OffsetWidth(13, 2),
+    "MPP" -> new OffsetWidth(11, 2),
+    "VS" -> new OffsetWidth(9, 2),
+    "SPP" -> new OffsetWidth(8, 1),
+    "MPIE" -> new OffsetWidth(7, 1),
+    "UBE" -> new OffsetWidth(6, 1),
+    "SPIE" -> new OffsetWidth(5, 1),
+    "MIE" -> new OffsetWidth(3, 1),
+    "SIE" -> new OffsetWidth(1, 1)
+  )
+  def mask(name: String) = {
+    val target = map(name)
+    Utils.zeroExtend(Fill(target.width, 1.U) << target.offset, target.offsetFromBegin, 64)
+  }
+
+  def set(name: String, v: UInt) = {
+    val target = map(name)
+    value := value & ~mask(name) | (v(target.width - 1, 0) << target.offset)
+    new Mstatus(value)
+  }
+
+  def get(name: String) = {
+    val target = map(name)
+    value & mask(name) >> target.offset
+  }
+
+  def apply(name: String) = get(name)
 }
 
 object PrivMode {
@@ -51,8 +100,15 @@ class ControlRegisterFile extends Module {
   val indexMapSeq = ControlRegisterList.list.zipWithIndex.map {
     case (info, index) => info.id.U -> registers(index)
   }.toSeq
-  // TODO:Impl
-  val privMode = 0.U(2.W)
+
+  val mstatus = new Mstatus(registers(ControlRegisterList.IndexOf("mstatus")))
+
+  val currentMode = RegInit(PrivMode.M)
+  currentMode := MuxLookup(
+    io.decodeIn.control.csrbehave,
+    currentMode,
+    EnumSeq(CsrBehave.ecall -> PrivMode.M, CsrBehave.mret -> mstatus("MPP"))
+  )
 
   val mask = MuxLookup(
     io.decodeIn.control.csrsource,
@@ -66,11 +122,16 @@ class ControlRegisterFile extends Module {
   val outputVal = MuxLookup(csrIndex, 0.U, indexMapSeq)
   for (i <- 0 to registers.length - 1) {
     ControlRegisterList.list(i).name match {
-      // case "mstatus" => {
-      //   registers(i) := Mux(
-
-      //   )
-      // }
+      case "mstatus" => {
+        registers(i) := MuxLookup(
+          io.decodeIn.control.csrbehave,
+          Mux(csrIndex === ControlRegisterList.list(i).id.U, writeBack, registers(i)),
+          EnumSeq(
+            CsrBehave.ecall -> mstatus.set("MPP", currentMode).set("MPIE", mstatus("MIE")).set("MIE", 0.U).value,
+            CsrBehave.mret -> mstatus.set("MIE", mstatus("MPIE")).set("MPIE", 0.U).value
+          )
+        )
+      }
       case "mepc" => {
         registers(i) := Mux(
           io.decodeIn.control.csrbehave === CsrBehave.ecall.asUInt,
@@ -81,7 +142,7 @@ class ControlRegisterFile extends Module {
       case "mcause" => {
         registers(i) := Mux(
           io.decodeIn.control.csrbehave === CsrBehave.ecall.asUInt,
-          Mux(privMode === PrivMode.U, 0x8.U, 0xb.U),
+          Mux(currentMode === PrivMode.U, 0x8.U, 0xb.U),
           Mux(csrIndex === ControlRegisterList.list(i).id.U, writeBack, registers(i))
         )
       }

@@ -23,7 +23,7 @@
 #define Csr(i) csr(i)
 #define Mr vaddr_read
 #define Mw vaddr_write
-extern uint8_t priv_status;
+extern uint8_t current_status;
 
 enum {
   TYPE_I, TYPE_U, TYPE_S, TYPE_J,
@@ -100,7 +100,7 @@ static int decode_exec(Decode *s) {
     word_t mstatus = csrs("mstatus"); 
     csrs("mstatus") = ((mstatus & 0xFFFFF0000) | 0x0080 | (BITS(mstatus, 7, 7) << 3)); 
     s->dnpc = csrs("mepc"); 
-    priv_status = ((mstatus >> 11) & 3); 
+    current_status = ((mstatus >> 11) & 3); 
     etrace(false, cpu.pc, mstatus);
   );
 
@@ -144,7 +144,7 @@ static int decode_exec(Decode *s) {
   INSTPAT("??????? ????? ????? 110 ????? 11000 11", bltu   , B, s->dnpc = src1 < src2 ? s->pc + imm : s->snpc);
   INSTPAT("??????? ????? ????? 111 ????? 11000 11", bgeu   , B, s->dnpc = src1 >= src2 ? s->pc + imm : s->snpc);
   
-  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, s->dnpc = isa_raise_intr(priv_status == PRIV_U ? 0x8 : 0xb, csrs("mtvec")));
+  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, s->dnpc = isa_raise_intr(current_status == PRIV_U ? 0x8 : 0xb, csrs("mtvec")));
   INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, NEMUTRAP(s->pc, Reg(10))); // R(10) is $a0
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    , N, INV(s->pc));
   INSTPAT_END();
