@@ -8,6 +8,7 @@ import chisel3.util.Fill
 import chisel3.experimental.ChiselEnum
 import decode.AluMode
 import firrtl.backends.experimental.smt.Signal
+import utils.EnumSeq
 
 object ALUSignalType extends ChiselEnum {
   val isZero, isNegative = Value
@@ -86,21 +87,21 @@ class ALU extends Module {
   out := MuxLookup(
     io.opType.asUInt,
     0.U,
-    Seq(
-      AluMode.add.asUInt -> simpleAdder.io.out,
-      AluMode.and.asUInt -> (io.inA & io.inB),
-      AluMode.sub.asUInt -> simpleAdder.io.out,
-      AluMode.div.asUInt -> (io.inA.asSInt / io.inB.asSInt).asUInt,
-      AluMode.divu.asUInt -> io.inA / io.inB,
-      AluMode.mul.asUInt -> io.inA * io.inB,
-      AluMode.or.asUInt -> (io.inA | io.inB),
-      AluMode.rem.asUInt -> (io.inA.asSInt % io.inB.asSInt).asUInt,
-      AluMode.remu.asUInt -> io.inA % io.inB,
-      AluMode.ll.asUInt -> (io.inA << io.inB(5, 0)),
-      AluMode.ra.asUInt -> (io.inA.asSInt >> io.inB(5, 0)).asUInt,
-      AluMode.rl.asUInt -> (io.inA >> io.inB(5, 0)),
-      AluMode.rlw.asUInt -> (io.inA(31, 0) >> io.inB(5, 0)),
-      AluMode.xor.asUInt -> (io.inA ^ io.inB)
+    EnumSeq(
+      AluMode.add -> simpleAdder.io.out,
+      AluMode.and -> (io.inA & io.inB),
+      AluMode.sub -> simpleAdder.io.out,
+      AluMode.div -> (io.inA.asSInt / io.inB.asSInt).asUInt,
+      AluMode.divu -> io.inA / io.inB,
+      AluMode.mul -> io.inA * io.inB,
+      AluMode.or -> (io.inA | io.inB),
+      AluMode.rem -> (io.inA.asSInt % io.inB.asSInt).asUInt,
+      AluMode.remu -> io.inA % io.inB,
+      AluMode.ll -> (io.inA << io.inB(5, 0)),
+      AluMode.ra -> (io.inA.asSInt >> io.inB(5, 0)).asUInt,
+      AluMode.rl -> (io.inA >> io.inB(5, 0)),
+      AluMode.rlw -> (io.inA(31, 0) >> io.inB(5, 0)),
+      AluMode.xor -> (io.inA ^ io.inB)
     )
   )
   io.out              := out
