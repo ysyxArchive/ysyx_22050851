@@ -60,11 +60,11 @@ uintptr_t loader(PCB *pcb, const char *filename) {
       continue;
     }
     fs_lseek(fd, prog_header_buf.p_offset, SEEK_SET);
-    fs_read(fd, (uint8_t*)0x80000000 + (prog_header_buf.p_vaddr - min_addr),
-            prog_header_buf.p_filesz);
-    memset((uint8_t*)(0x80000000) +
-               (prog_header_buf.p_filesz + prog_header_buf.p_vaddr - min_addr),
-           0, prog_header_buf.p_memsz - prog_header_buf.p_filesz);
+    printf("%lx %lx\n", prog_header_buf.p_paddr, prog_header_buf.p_vaddr);
+    // fs_read(fd, prog_header_buf.p_paddr, prog_header_buf.p_filesz);
+    // memset((uint8_t *)(0x80000000) +
+    //            (prog_header_buf.p_filesz + prog_header_buf.p_vaddr - min_addr),
+    //        0, prog_header_buf.p_memsz - prog_header_buf.p_filesz);
   }
   return elfHeader.e_entry;
 }
