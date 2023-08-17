@@ -1,37 +1,37 @@
 #include "VCPU.h"
 #include "VCPU__Dpi.h"
 #include "common.h"
+#include "device.h"
 #include "difftest.h"
 #include "mem.h"
+#include "tools/lightsss.h"
 #include "verilated.h"
 #include "verilated_dpi.h"
 #include "verilated_vcd_c.h"
 
 bool is_halt = false;
 bool is_bad_halt = false;
+
 void haltop(unsigned char good_halt) {
+  Log("halt from npc, is %s halt", good_halt ? "good" : "bad");
   is_halt = true;
   is_bad_halt = !good_halt;
 }
 
-VCPU *top;
-VerilatedVcdC *tfp;
+extern VCPU *top;
 CPU cpu;
-
-uint64_t *cpu_gpr = NULL;
-uint64_t *cpu_pc = NULL;
+LightSSS lightSSS;
 int npc_clock = 0;
+uint64_t *cpu_regs = NULL;
+uint64_t *cpu_pc = NULL;
 
 void init_npc() {
-  top->trace(tfp, 0);
-  tfp->open("wave.vcd");       // 打开vcd
-  top->pcio_inst = 0x00000013; // 默认为 addi e0, 0;
   for (int i = 0; i < 10; i++) {
     top->reset = true;
     top->clock = 1;
-    top->eval();
+    eval_trace();
     top->clock = 0;
-    top->eval();
+    eval_trace();
   }
   top->reset = false;
 }
@@ -61,66 +61,61 @@ extern "C" void mem_write(const svLogicVecVal *addr, const svLogicVecVal *len,
 }
 
 extern "C" void set_gpr_ptr(const svOpenArrayHandle r) {
-  cpu_gpr = (uint64_t *)(((VerilatedDpiOpenVar *)r)->datap());
+  cpu_regs = (uint64_t *)(((VerilatedDpiOpenVar *)r)->datap());
 }
 
 void update_cpu() {
-  memcpy(&(cpu.gpr), cpu_gpr, 32 * sizeof(uint64_t));
-  cpu.pc = cpu_gpr[32];
-  //TODO: ITRACE
-  // Log("updating cpu , pc is %lx", cpu.pc);
+  memcpy(&(cpu.gpr), cpu_regs, 32 * sizeof(uint64_t));
+  cpu.pc = cpu_regs[32];
+  memcpy(&(cpu.csr), cpu_regs + 32 + 1, 6 * sizeof(uint64_t));
+  // TODO: ITRACE
+  //  Log("updating cpu , pc is %lx", cpu.pc);
 }
 
 void one_step() {
   // 记录波形
   top->clock = 1;
-  top->eval();
-  tfp->dump(npc_clock++);
+  eval_trace();
   uint64_t npc = top->pcio_pc;
   top->pcio_inst = read_mem_nolog(npc, 4);
-  tfp->flush();
   update_cpu();
-  difftest_check(&cpu);
+  if (!difftest_check(&cpu)) {
+    is_halt = true;
+    is_bad_halt = true;
+  }
   top->clock = 0;
-  top->eval();
-  tfp->dump(npc_clock++);
-  // 推动
-  tfp->flush();
+  eval_trace();
+  update_device();
+  if ((npc_clock / 2) % LIGHT_SSS_CYCLE_INTERVAL == 0) {
+    lightSSS.do_fork();
+  }
 }
 
 int main(int argc, char *argv[]) {
   parse_args(argc, argv);
   load_files();
-  // TODO: 传参不对
-  // Verilated::commandArgs(argc, argv);
-  VerilatedContext *contextp = new VerilatedContext;
-  // TODO: 传参不对
-
-  // contextp->commandArgs(argc, argv);
-  Verilated::traceEverOn(true); // 导出vcd波形需要加此语句
-  tfp = new VerilatedVcdC();    // 导出vcd波形需要加此语句
-  top = new VCPU{contextp};
+  init_vcd_trace();
   top->reset = false;
-
+  init_device();
   init_npc();
   update_cpu();
   difftest_initial(&cpu);
-
+  lightSSS.do_fork();
   Log("init_done");
 
-  tfp->dump(npc_clock++);
-  while (!is_halt && npc_clock < 5000) {
+  while (!is_halt) {
     one_step();
   }
-  if (npc_clock == 5000) {
-    is_bad_halt = true;
-  }
-  delete top;
-  delete contextp;
-  delete tfp;
 
-  Assert(!is_bad_halt, "bad halt! \npc=0x%lx inst=0x%08x", top->pcio_pc,
-         top->pcio_inst);
+  if (is_bad_halt) {
+    Log("bad halt! pc=0x%lx inst=0x%08x", top->pcio_pc, top->pcio_inst);
+    if (!lightSSS.is_child()) {
+      lightSSS.wakeup_child(npc_clock);
+    }
+    Log("exit");
+    exit(-1);
+  }
   Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
+  lightSSS.do_clear();
   return 0;
 }

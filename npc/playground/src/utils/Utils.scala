@@ -2,11 +2,14 @@ package utils
 
 import chisel3._
 import chisel3.experimental.ChiselEnum
+import chisel3.experimental.EnumType
 import chisel3.util._
 import firrtl.seqCat
-import decode.Source
-import decode.SourceType
-import execute.ALUUtils
+import scala.collection.SeqFactory
+import scala.collection.SeqOps
+import chisel3.internal.Builder
+import scala.collection.IterableFactory
+import scala.annotation.unchecked.uncheckedVariance
 
 object Utils {
 
@@ -21,7 +24,10 @@ object Utils {
   def signExtend(num: UInt, width: Int, targetWidth: Int = 64): UInt = {
     Cat(Fill(targetWidth - width, num(width - 1)), num(width - 1, 0))
   }
-  def isRegType(source: Source): Bool =
-    source.stype === SourceType.reg.asUInt || source.stype === SourceType.regLow.asUInt
+}
 
+object EnumSeq {
+  def apply(elems: (EnumType, UInt)*) = elems.map {
+    case (enumType, uint) => (enumType.asUInt, uint)
+  }
 }

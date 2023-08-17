@@ -12,17 +12,29 @@
 *
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
+enum {
+  PRIV_U, PRIV_S,
+  PRIV_V, PRIV_M,
+};
 
 #include <isa.h>
 #include <tracers.h>
+uint8_t current_status = PRIV_M;
+
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   /* TODO: Trigger an interrupt/exception with ``NO''.
    * Then return the address of the interrupt/exception vector.
    */
+
   etrace(true, cpu.pc, NO, epc);
   csrs("mepc") = cpu.pc;
-  csrs("mstatus") = 0xa00001800;
+  csrs("mstatus") = ((csrs("mstatus") | (current_status << 11)) // set MPP to priv mode
+                    & (0xFFFFFFFFFFFFFF77))          // set MIE MPIE 0
+                    | (BITS(csrs("mstatus"), 3, 3) << 7)   // set MIE to MPIE
+                    ;
   csrs("mcause") = NO;
+  current_status = PRIV_M;
+  etrace(true, cpu.pc, csrs("mstatus"), 0x0);
   return epc;
 }
 

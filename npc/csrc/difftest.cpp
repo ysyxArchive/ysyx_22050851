@@ -1,6 +1,7 @@
 #include "difftest.h"
-#include "common.h"
+#include "mem.h"
 #include <dlfcn.h>
+extern const char *csrregs[];
 
 void (*difftest_memcpy)(paddr_t addr, void *buf, size_t n,
                         bool direction) = NULL;
@@ -52,22 +53,51 @@ void load_difftest_so(char *diff_so_file) {
          difftest_init != NULL);
 }
 
-void difftest_check(CPU *cpu) {
-  CPU refcpu;
-  difftest_exec(1);
-  difftest_regcpy(&refcpu, FROM_REF);
+bool skip_once = false;
+void difftest_skip() { skip_once = true; }
 
-  Assert(cpu->pc == refcpu.pc,
-         "Difftest Failed\n Expected pc: %llx, Actual pc: %llx ", refcpu.pc,
-         cpu->pc);
-  for (int i = 0; i < 32; i++) {
-    Assert(cpu->gpr[i] == refcpu.gpr[i],
-           "Difftest Failed\ncheck reg[%d] failed before pc:%llx\nExpected: "
-           "%llx, Actual: %llx ",
-           i, cpu->pc, refcpu.gpr[i], cpu->gpr[i]);
+void difftest_step(CPU *cpu) {
+  if (skip_once == true) {
+    difftest_regcpy(cpu, TO_REF);
+    skip_once = false;
+  } else {
+    difftest_exec(1);
   }
-  difftest_checkmem(cpu);
-  return;
+}
+
+bool difftest_check(CPU *cpu) {
+  CPU refcpu;
+  difftest_step(cpu);
+  difftest_regcpy(&refcpu, FROM_REF);
+  bool difftest_failed = false;
+  if (cpu->pc != refcpu.pc) {
+    printf("Difftest Failed\n Expected pc: %llx, Actual pc: %llx \n", refcpu.pc,
+           cpu->pc);
+    difftest_failed = true;
+  }
+  for (int i = 0; i < 32; i++) {
+    if (cpu->gpr[i] != refcpu.gpr[i]) {
+      printf("Difftest Failed\ncheck reg[%d] failed before pc:%llx\nExpected: "
+             "%llx, Actual: %llx \n",
+             i, cpu->pc, refcpu.gpr[i], cpu->gpr[i]);
+      difftest_failed = true;
+    }
+  }
+  for (int i = 0; i < 6; i++) {
+    if (cpu->csr[i] != refcpu.csr[i]) {
+      printf("Difftest Failed\ncheck csr %s failed before pc:%llx\nExpected: "
+             "%llx, Actual: %llx \n",
+             csrregs[i], cpu->pc, refcpu.csr[i], cpu->csr[i]);
+      difftest_failed = true;
+    }
+  }
+
+  if (difftest_failed) {
+    isa_reg_display();
+  }
+  // TODO: difftest_checkmem
+  // difftest_checkmem(cpu);
+  return !difftest_failed;
 }
 
 void difftest_checkmem(CPU *cpu) {

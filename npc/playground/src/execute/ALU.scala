@@ -2,26 +2,16 @@ package execute
 
 import chisel3._
 import chisel3.util.MuxLookup
-import decode.OperationType
 import chisel3.util.Cat
 import chisel3.util.Reverse
 import chisel3.util.Fill
+import chisel3.experimental.ChiselEnum
 import decode.AluMode
+import firrtl.backends.experimental.smt.Signal
+import utils.EnumSeq
 
-object ALUUtils {
-  val width = 2
-  // 顺序：isZero, isNegative
-  def ALUSignals(isZero: UInt, isNegative: UInt): UInt = VecInit(Seq(isZero, isNegative).reverse).asUInt
-  def test(aluSignal: UInt, checker: UInt): Bool = {
-    val posChecker = checker(width * 2 - 1, width)
-    val negChecker = checker(width - 1, 0)
-    ((aluSignal & ~negChecker) | (~aluSignal & ~posChecker)).andR
-  }
-  val isZero      = "b1000".U
-  val notZero     = "b0010".U
-  val isNegative  = "b0100".U
-  val notNegative = "b0001".U
-  val none        = 0.U((width * 2).W)
+object ALUSignalType extends ChiselEnum {
+  val isZero, isNegative = Value
 }
 
 class FullAdderIO extends Bundle {
@@ -37,10 +27,11 @@ class FullAdder extends Module {
   io.outC := (io.inA & (io.inB ^ io.inC)) | (io.inB & io.inC)
 }
 class SimpleAdderIO extends Bundle {
-  val inA = Input(UInt(64.W))
-  val inB = Input(UInt(64.W))
-  val inC = Input(Bool())
-  val out = Output(UInt(64.W))
+  val inA  = Input(UInt(64.W))
+  val inB  = Input(UInt(64.W))
+  val inC  = Input(Bool())
+  val out  = Output(UInt(64.W))
+  val outC = Output(Bool())
 }
 
 class SimpleAdder extends Module {
@@ -60,20 +51,26 @@ class SimpleAdder extends Module {
     adders(i).io.inA := io.inA(i)
     adders(i).io.inB := io.inB(i)
   }
-
-  io.out := VecInit(adders.map(adder => adder.io.out)).asUInt
+  io.outC := adders(63).io.outC
+  io.out  := VecInit(adders.map(adder => adder.io.out)).asUInt
 }
 
 class ALUIO extends Bundle {
-  val inA     = Input(UInt(64.W))
-  val inB     = Input(UInt(64.W))
-  val out     = Output(UInt(64.W))
-  val signals = Output(UInt(2.W))
-  val opType  = Input(AluMode())
+  val inA    = Input(UInt(64.W))
+  val inB    = Input(UInt(64.W))
+  val out    = Output(UInt(64.W))
+  val opType = Input(AluMode())
+}
+
+class SignalOut extends Bundle {
+  val isZero     = Output(Bool())
+  val isNegative = Output(Bool())
+  val isCarry    = Output(Bool())
 }
 
 class ALU extends Module {
-  val io = IO(new ALUIO())
+  val io       = IO(new ALUIO())
+  val signalIO = IO(new SignalOut())
 
   val simpleAdder = Module(new SimpleAdder())
   // add / sub
@@ -90,23 +87,25 @@ class ALU extends Module {
   out := MuxLookup(
     io.opType.asUInt,
     0.U,
-    Seq(
-      AluMode.add.asUInt -> simpleAdder.io.out,
-      AluMode.and.asUInt -> (io.inA & io.inB),
-      AluMode.sub.asUInt -> simpleAdder.io.out,
-      AluMode.div.asUInt -> (io.inA.asSInt / io.inB.asSInt).asUInt,
-      AluMode.divu.asUInt -> io.inA / io.inB,
-      AluMode.mul.asUInt -> io.inA * io.inB,
-      AluMode.or.asUInt -> (io.inA | io.inB),
-      AluMode.rem.asUInt -> (io.inA.asSInt % io.inB.asSInt).asUInt,
-      AluMode.remu.asUInt -> io.inA % io.inB,
-      AluMode.ll.asUInt -> (io.inA << io.inB(5, 0)),
-      AluMode.ra.asUInt -> (io.inA.asSInt >> io.inB(5, 0)).asUInt,
-      AluMode.rl.asUInt -> (io.inA >> io.inB(5, 0)),
-      AluMode.rlw.asUInt -> (io.inA(31, 0) >> io.inB(5, 0)),
-      AluMode.xor.asUInt -> (io.inA ^ io.inB)
+    EnumSeq(
+      AluMode.add -> simpleAdder.io.out,
+      AluMode.and -> (io.inA & io.inB),
+      AluMode.sub -> simpleAdder.io.out,
+      AluMode.div -> (io.inA.asSInt / io.inB.asSInt).asUInt,
+      AluMode.divu -> io.inA / io.inB,
+      AluMode.mul -> io.inA * io.inB,
+      AluMode.or -> (io.inA | io.inB),
+      AluMode.rem -> (io.inA.asSInt % io.inB.asSInt).asUInt,
+      AluMode.remu -> io.inA % io.inB,
+      AluMode.ll -> (io.inA << io.inB(5, 0)),
+      AluMode.ra -> (io.inA.asSInt >> io.inB(5, 0)).asUInt,
+      AluMode.rl -> (io.inA >> io.inB(5, 0)),
+      AluMode.rlw -> (io.inA(31, 0) >> io.inB(5, 0)),
+      AluMode.xor -> (io.inA ^ io.inB)
     )
   )
-  io.out     := out
-  io.signals := ALUUtils.ALUSignals(!out.orR, out(63))
+  io.out              := out
+  signalIO.isCarry    := simpleAdder.io.outC
+  signalIO.isNegative := out(63)
+  signalIO.isZero     := !out.orR
 }

@@ -1,3 +1,4 @@
+#include "fs.h"
 #include <loader.h>
 #include <proc.h>
 #define MAX_NR_PROC 4
