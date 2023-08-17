@@ -96,12 +96,12 @@ int main(int argc, char *argv[]) {
   VerilatedContext *contextp = new VerilatedContext;
   // TODO: 传参不对
 
+  Log("init_done");
   // contextp->commandArgs(argc, argv);
   Verilated::traceEverOn(true); // 导出vcd波形需要加此语句
   tfp = new VerilatedVcdC();    // 导出vcd波形需要加此语句
   top = new VCPU{contextp};
   top->reset = false;
-  Log("init_done");
 
   init_npc();
   update_cpu();
