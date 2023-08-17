@@ -93,9 +93,8 @@ void init_proc() {
   //   char *envp[] = {NULL};
   //   context_uload(getPCB(), target_program[i], args, envp);
   // }
-  naive_uload(getPCB(), "/bin/hello");
   switch_boot_pcb();
-  Assert(current, "current is NULL");
+  naive_uload(getPCB(), "/bin/hello");
 }
 
 Context *schedule(Context *prev) {
