@@ -33,10 +33,14 @@ static inline const char *reg_name(int idx, int width) {
 
 static inline const char *csr_name(int idx) {
   switch (idx) {
+  case 0x180:
+    return "satp";
   case 0x300:
     return "mstatus";
   case 0x305:
     return "mtvec";
+  case 0x340:
+    return "mscratch";
   case 0x341:
     return "mepc";
   case 0x342:
@@ -50,7 +54,7 @@ static inline int check_csr_idx(int idx) {
   IFDEF(CONFIG_RT_CHECK, assert(idx >= 0 && idx <= 0xfff));
   const char *name = csr_name(idx);
   extern const char *csrregs[];
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 6; i++) {
     if (strcmp(name, csrregs[i]) == 0) {
       return i;
     }

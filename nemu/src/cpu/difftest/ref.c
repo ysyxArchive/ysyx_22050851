@@ -20,7 +20,7 @@
 
 #define TO_REF 1
 #define FROM_REF 0
-#define CSR_CNT 4
+#define CSR_CNT 6
 typedef struct CPU_host {
   uint64_t gpr[32];
   uint64_t pc;
@@ -52,6 +52,9 @@ void difftest_regcpy(void *dut, bool direction) {
       cpu.gpr[i] = cpu_host->gpr[i];
     }
     cpu.pc = cpu_host->pc;
+    for (int i = 0; i < CSR_CNT; i++) {
+      cpu.csr[i] = cpu_host->csr[i];
+    }
   } else {
     for (int i = 0; i < 32; i++) {
       cpu_host->gpr[i] = cpu.gpr[i];
