@@ -1,7 +1,16 @@
-
 #define concat_temp(x, y) x ## y
 #define concat(x, y) concat_temp(x, y)
 #define MAP(c, f) c(f)
+
+#if __riscv_xlen == 32
+#define LOAD  lw
+#define STORE sw
+#define XLEN  4
+#else
+#define LOAD  ld
+#define STORE sd
+#define XLEN  8
+#endif
 
 #define REGS(f) \
       f( 1)       f( 3) f( 4) f( 5) f( 6) f( 7) f( 8) f( 9) \
@@ -9,43 +18,84 @@ f(10) f(11) f(12) f(13) f(14) f(15) f(16) f(17) f(18) f(19) \
 f(20) f(21) f(22) f(23) f(24) f(25) f(26) f(27) f(28) f(29) \
 f(30) f(31)
 
-#define PUSH(n) sd concat(x, n), (n * 8)(sp);
-#define POP(n)  ld concat(x, n), (n * 8)(sp);
+#define PUSH(n) STORE concat(x, n), (n * XLEN)(sp);
+#define POP(n)  LOAD  concat(x, n), (n * XLEN)(sp);
 
-#define CONTEXT_SIZE ((32 + 3) * 8)
-#define OFFSET_SP     ( 2 * 8)
-#define OFFSET_CAUSE  (32 * 8)
-#define OFFSET_STATUS (33 * 8)
-#define OFFSET_EPC    (34 * 8)
+#define CONTEXT_SIZE  ((32 + 5) * XLEN)
+#define OFFSET_SP     ( 2 * XLEN)
+#define OFFSET_CAUSE  (32 * XLEN)
+#define OFFSET_STATUS (33 * XLEN)
+#define OFFSET_EPC    (34 * XLEN)
+#define OFFSET_PDIR   (35 * XLEN)
+#define OFFSET_NP     (36 * XLEN)
+#define OFFSET_PP     (37 * XLEN)
 
+.align 3
 .globl __am_asm_trap
 __am_asm_trap:
+  csrrw sp, mscratch, sp   // (1) atomically exchange sp and mscratch
+  bnez sp, save_context    // (2) take the branch if we trapped from user
+  csrr sp, mscratch        // (3) if we trapped from kernel, restore the original sp
+
+save_context:
+  // now sp is pointing to the kernel stack
+  // save the context...
+  
   addi sp, sp, -CONTEXT_SIZE
 
   MAP(REGS, PUSH)
-
-  mv t0, sp
-  addi t0, t0, CONTEXT_SIZE
-  sd t0, OFFSET_SP(sp)
-
   csrr t0, mcause
   csrr t1, mstatus
   csrr t2, mepc
+  csrr t3, satp
+  csrr t4, mscratch
 
-  sd t0, OFFSET_CAUSE(sp)
-  sd t1, OFFSET_STATUS(sp)
-  sd t2, OFFSET_EPC(sp)
+  STORE t0, OFFSET_CAUSE(sp)
+  STORE t1, OFFSET_STATUS(sp) 
+  STORE t2, OFFSET_EPC(sp)
+  STORE t3, OFFSET_PDIR(sp)
+  STORE t4, OFFSET_SP(sp) // store sp
+
+  xor t0, t0, t0
+  csrw mscratch, t0 // clear mscratch
+
+  # set mstatus.MPRV to pass difftest
+  li a0, (1 << 17)
+  or t1, t1, a0
+  csrw mstatus, t1
 
   mv a0, sp
   jal __am_irq_handle
 
-  ld t1, OFFSET_STATUS(sp)
-  ld t2, OFFSET_EPC(sp)
+  mv sp, a0
+  LOAD t1, OFFSET_STATUS(sp)
+  LOAD t2, OFFSET_EPC(sp)
+  // LOAD t3, OFFSET_PDIR(sp)
+  LOAD t4, OFFSET_SP(sp) // load sp
+
   csrw mstatus, t1
   csrw mepc, t2
+  // csrw satp, t3
+  csrw mscratch, t4
 
+
+  // temperory use t1
+  LOAD t1, OFFSET_STATUS(sp)
+  srli t1, t1, 11
+  andi t1, t1, 3
+  // now t1 is next priviledge
+  beqz t1, returnuser   // (2) take the branch if we will return user
+  // if return to kernel, mscratch will be  0, sp is stack top
+  // means do nothing but restore
+  csrwi mscratch, 0
   MAP(REGS, POP)
-
   addi sp, sp, CONTEXT_SIZE
-
+  j handleout
+returnuser:
+  // if return to user, mscratch will be kernel stack head,
+  // sp will be user stack head
+  MAP(REGS, POP)
+  addi sp, sp, CONTEXT_SIZE
+  csrrw sp, mscratch, sp  
+handleout:
   mret
