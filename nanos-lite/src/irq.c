@@ -26,7 +26,7 @@ enum {
   SYS_times,
   SYS_gettimeofday
 };
-#define STRACE
+// #define STRACE
 #ifdef STRACE
 #define strace(format, ...)                                                    \
   do {                                                                         \
@@ -49,7 +49,9 @@ static Context *do_event(Event e, Context *c) {
     case SYS_exit:
       strace("syscall SYS_exit %d", c->GPR2);
       if (c->GPR2 == 0) {
-        context_uload(current, "/bin/nterm", NULLARR, NULLARR);
+        PCB *newpcb = getPCB();
+        context_uload(newpcb, "/bin/nterm", NULLARR, NULLARR);
+        replacePCB(newpcb);
         c =  schedule(c);
       } else {
         Log("exit with error number %d", c->GPR2);
@@ -101,8 +103,10 @@ static Context *do_event(Event e, Context *c) {
         c->GPRx = ret;
         break;
       }
-      context_uload(current, (char *)c->GPR2, (char **)c->GPR3,
+      PCB *newpcb = getPCB();
+      context_uload(newpcb, (char *)c->GPR2, (char **)c->GPR3,
                     (char **)c->GPR4);
+      replacePCB(newpcb);
       c = schedule(c);
       break;
     case -1:

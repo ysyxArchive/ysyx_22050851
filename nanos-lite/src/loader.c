@@ -44,14 +44,14 @@ uintptr_t loader(PCB *pcb, const char *filename) {
       max_addr + ((max_addr % PGSIZE) ? (PGSIZE - max_addr % PGSIZE) : 0);
   pcb->max_brk = max_addr;
   // alloc pages
-  // int pages_need = (max_addr - min_addr) / PGSIZE;
-  // uint8_t *pages =
-  //     (uint8_t *)((uint64_t)new_page(pages_need) - PGSIZE * pages_need);
-  // Log("alloc pages for addr from %x to %x", (uint32_t)min_addr,
-  //     (uint32_t)max_addr);
-  // for (int i = 0; i < pages_need; i++) {
-  //   map(&(pcb->as), (void *)(min_addr + i * PGSIZE), pages + i * PGSIZE, 1);
-  // }
+  int pages_need = (max_addr - min_addr) / PGSIZE;
+  uint8_t *pages =
+      (uint8_t *)((uint64_t)new_page(pages_need) - PGSIZE * pages_need);
+  Log("alloc pages for addr from %x to %x", (uint32_t)min_addr,
+      (uint32_t)max_addr);
+  for (int i = 0; i < pages_need; i++) {
+    map(&(pcb->as), (void *)(min_addr + i * PGSIZE), pages + i * PGSIZE, 1);
+  }
   // read data
   for (int i = 0; i < elfHeader.e_phnum; i++) {
     fs_lseek(fd, elfHeader.e_phoff + sizeof(prog_header_buf) * i, SEEK_SET);
@@ -60,10 +60,11 @@ uintptr_t loader(PCB *pcb, const char *filename) {
       continue;
     }
     fs_lseek(fd, prog_header_buf.p_offset, SEEK_SET);
-    printf("%x %x\n", (unsigned)prog_header_buf.p_vaddr,(unsigned)prog_header_buf.p_memsz);
-    fs_read(fd, (uint8_t *)prog_header_buf.p_vaddr, prog_header_buf.p_filesz);
-    memset((uint8_t *)prog_header_buf.p_vaddr + prog_header_buf.p_filesz, 0,
-           prog_header_buf.p_memsz - prog_header_buf.p_filesz);
+    fs_read(fd, (uint8_t *)pages + (prog_header_buf.p_vaddr - min_addr),
+            prog_header_buf.p_filesz);
+    memset((uint8_t *)pages +
+               (prog_header_buf.p_filesz + prog_header_buf.p_vaddr - min_addr),
+           0, prog_header_buf.p_memsz - prog_header_buf.p_filesz);
   }
   return elfHeader.e_entry;
 }

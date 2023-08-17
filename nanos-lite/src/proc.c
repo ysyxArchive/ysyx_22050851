@@ -6,10 +6,10 @@
 
 static PCB pcb[MAX_NR_PROC] __attribute__((used)) = {};
 static PCB *pcb_boot;
-int fppcb = 2;
 PCB *current = NULL;
 int pcbcount = 0;
 void switch_boot_pcb() { current = pcb_boot; }
+PCB *executing[2];
 void hello_fun(void *arg) {
   int j = 1;
   while (1) {
@@ -86,23 +86,30 @@ PCB *getPCB() { return &(pcb[pcbcount++]); }
 
 void init_proc() {
   Log("Initializing processes...");
-  // char *target_program[] = {"/bin/hello", "/bin/nterm", "/bin/pal"};
-  // pcb_boot = getPCB();
-  // for (int i = 0; i < MAX_NR_PROC - 1; i++) {
-  //   char *args[] = {target_program[i], NULL};
-  //   char *envp[] = {NULL};
-  //   context_uload(getPCB(), target_program[i], args, envp);
-  // }
-  naive_uload(getPCB(), "/bin/hello");
+  char target_program[] = "/bin/nterm";
+  // context_kload(executing[0], hello_fun, "p2");
+  char *args[] = {target_program, NULL};
+  char *envp[] = {NULL};
+  pcb_boot = getPCB();
+  executing[0] = getPCB();
+  executing[1] = getPCB();
+  context_uload(executing[0], "/bin/hello", args, envp);
+  context_uload(executing[1], target_program, args, envp);
   switch_boot_pcb();
+}
+
+void replacePCB(PCB *newone) {
+  for (int i = 0; i < 2; i++) {
+    if (executing[i] == current) {
+      executing[i] = newone;
+      return;
+    }
+  }
 }
 
 Context *schedule(Context *prev) {
   current->cp = prev;
-  // int currentidx = current == &(pcb[fppcb]) ? fppcb : 1;
-  // int nextidx = currentidx == 1 ? fppcb : 1;
-  int nextidx = 1;
-  Log("jump to proc %d", nextidx);
-  current = pcb + nextidx;
+  Log("jump to proc %d", current == executing[0]);
+  current = current == executing[0] ? executing[1] : executing[0];
   return current->cp;
 }
