@@ -95,6 +95,7 @@ void init_proc() {
   // }
   naive_uload(getPCB(), "/bin/hello");
   switch_boot_pcb();
+  Assert(current, "current is NULL");
 }
 
 Context *schedule(Context *prev) {
