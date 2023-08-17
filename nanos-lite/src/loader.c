@@ -60,7 +60,7 @@ uintptr_t loader(PCB *pcb, const char *filename) {
       continue;
     }
     fs_lseek(fd, prog_header_buf.p_offset, SEEK_SET);
-    printf("%x\n", (unsigned)prog_header_buf.p_vaddr);
+    printf("%x %x\n", (unsigned)prog_header_buf.p_vaddr,(unsigned)prog_header_buf.p_memsz);
     fs_read(fd, (uint8_t *)prog_header_buf.p_vaddr, prog_header_buf.p_filesz);
     memset((uint8_t *)prog_header_buf.p_vaddr + prog_header_buf.p_filesz, 0,
            prog_header_buf.p_memsz - prog_header_buf.p_filesz);
