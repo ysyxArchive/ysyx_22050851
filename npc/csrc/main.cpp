@@ -79,7 +79,10 @@ void one_step() {
   uint64_t npc = top->pcio_pc;
   top->pcio_inst = read_mem_nolog(npc, 4);
   update_cpu();
-  difftest_check(&cpu);
+  if (!difftest_check(&cpu)) {
+    is_halt = true;
+    is_bad_halt = true;
+  }
   top->clock = 0;
   eval_trace();
   update_device();
