@@ -98,12 +98,13 @@ void init_proc() {
 }
 
 Context *schedule(Context *prev) {
+  Assert(current, "current is NULL");
   current->cp = prev;
   // int currentidx = current == &(pcb[fppcb]) ? fppcb : 1;
   // int nextidx = currentidx == 1 ? fppcb : 1;
   int nextidx = 0;
   Log("jump to proc %d", nextidx);
   // current = pcb + nextidx;
-  Assert(0,"");
+  Assert(0, "");
   return current->cp;
 }
