@@ -103,6 +103,7 @@ Context *schedule(Context *prev) {
   // int nextidx = currentidx == 1 ? fppcb : 1;
   int nextidx = 0;
   Log("jump to proc %d", nextidx);
-  current = pcb + nextidx;
+  // current = pcb + nextidx;
+  Assert(0,"");
   return current->cp;
 }
