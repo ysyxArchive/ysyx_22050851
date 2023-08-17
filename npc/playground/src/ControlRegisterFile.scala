@@ -113,9 +113,9 @@ class ControlRegisterFile extends Module {
   val mask = MuxLookup(
     io.decodeIn.control.csrsource,
     io.src1Data,
-    Seq(
-      CsrSource.src1.asUInt -> io.src1Data,
-      CsrSource.uimm.asUInt -> uimm
+    EnumSeq(
+      CsrSource.src1 -> io.src1Data,
+      CsrSource.uimm -> uimm
     )
   )
   val writeBack = Wire(UInt(64.W))
@@ -155,17 +155,17 @@ class ControlRegisterFile extends Module {
   writeBack := MuxLookup(
     io.decodeIn.control.csrsetmode,
     outputVal,
-    Seq(
-      CsrSetMode.clear.asUInt -> (outputVal & ~mask),
-      CsrSetMode.set.asUInt -> (outputVal | mask),
-      CsrSetMode.write.asUInt -> mask
+    EnumSeq(
+      CsrSetMode.clear -> (outputVal & ~mask),
+      CsrSetMode.set -> (outputVal | mask),
+      CsrSetMode.write -> mask
     )
   )
 
   io.output := MuxLookup(
     io.decodeIn.control.csrbehave,
     outputVal,
-    Utils.enumSeq(
+    EnumSeq(
       CsrBehave.no -> outputVal,
       CsrBehave.ecall -> registers(ControlRegisterList.IndexOf("mtvec")),
       CsrBehave.mret -> registers(ControlRegisterList.IndexOf("mepc"))
