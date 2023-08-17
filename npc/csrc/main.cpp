@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
     Log("exit");
     exit(-1);
   }
-  Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
+  Log(ANSI_FMT("hit good trap!, ret value is %d", ANSI_FG_GREEN), cpu.gpr[10]);
   lightSSS.do_clear();
   return 0;
 }
