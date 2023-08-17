@@ -1,8 +1,7 @@
-#include "device/map.h"
 #include <common.h>
 #include <elf.h>
 #include <string.h>
-#include <tracers.h>
+#include "device/map.h"
 //  iringbuf -------------------------------------------------
 #define RING_SIZE 16
 
@@ -10,18 +9,20 @@ char iringbuf[RING_SIZE][50] = {0};
 unsigned char iringp = 0;
 
 // copy the source to the ringbuf
-void add_inst_to_ring(char *source) {
+void add_inst_to_ring(char* source) {
   strncpy(iringbuf[iringp], source, 49);
   iringp = (iringp + 1) % RING_SIZE;
 }
 
 void print_ring_buf() {
+#ifdef CONFIG_ITRACE
   int p = (iringp + 1) % RING_SIZE;
   printf("\nRecently executed instrucitons:\n");
   while (p != iringp) {
     printf("%s\n", iringbuf[p]);
     p = (p + 1) % RING_SIZE;
   }
+#endif
 }
 
 //  mtrace -------------------------------------------------
@@ -49,8 +50,11 @@ void mtrace(bool is_read, paddr_t addr, int len, word_t data) {
   return;
 }
 // dtrace -----------------------------------------------------
-void dtrace(bool is_read, paddr_t addr, int len, word_t data,
-            const IOMap *map) {
+void dtrace(bool is_read,
+            paddr_t addr,
+            int len,
+            word_t data,
+            const IOMap* map) {
 #ifdef CONFIG_DTRACE
   char buf[200];
   int p =
@@ -72,14 +76,11 @@ void dtrace(bool is_read, paddr_t addr, int len, word_t data,
   return;
 }
 // etrace -----------------------------------------------------
-void etrace(bool is_call, paddr_t source, word_t mstatus_old) {
+void etrace(bool is_call, paddr_t source, word_t NO, paddr_t target) {
 #ifdef CONFIG_ETRACE
   char buf[200];
-  sprintf(buf,
-          "detected exception %s at %x, mcause is %lx, mstatus "
-          "%lx -> %lx, mepc: %lx",
-          is_call ? "call" : "ret ", source, csrs("mcause"), mstatus_old,
-          csrs("mstatus"), csrs("mepc"));
+  sprintf(buf, "detected exception %s, from 0x%08x to 0x%08x, exception number is %ld",
+              is_call ? "call" : "ret ", source, target, NO);
   Log(ANSI_FMT("%s", ANSI_FG_WHITE), buf);
 #endif
   return;

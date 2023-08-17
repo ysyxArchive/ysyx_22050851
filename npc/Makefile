@@ -10,12 +10,10 @@ VERILATOR_CFLAGS += -MMD --build -cc \
 VERILATOR_CFLAGS += -Wno-WIDTH  # 记得删掉
 BIN = $(BUILD_DIR)/$(TOPNAME)
 
-GEN_SCALA = $(abspath ./playground/src/decode/InstContorlDecoder.scala)
-
 VSRCS = $(shell find $(abspath ./build) -name "*.v")
 CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
 INCLUDES = $(shell find $(abspath ./include) -name "*.h")
-SCALAS = $(shell find $(abspath ./playground/src) -name "*.scala") $(GEN_SCALA)
+SCALAS = $(shell find $(abspath ./playground/src) -name "*.scala")
 INC_PATH = $(abspath ./include)
 INCFLAGS = $(addprefix -I, $(INC_PATH))
 CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" 
@@ -33,12 +31,11 @@ $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
 
+test:
+	mill -i __.test
+
 $(VSRCS): $(SCALAS)
 	make verilog
-	touch $(VSRCS)
-
-$(GEN_SCALA): playground/scripts/codemap.csv playground/scripts/parsedecode.py
-	python playground/scripts/parsedecode.py
 
 verilog: $(SCALAS)
 	$(call git_commit, "generate verilog")
@@ -77,8 +74,5 @@ test: $(BIN)
 run:
 	make sim
 
-gdb: $(BIN)
-	gdb -s $(BIN) --args $(BIN) $(IMG) $(ARGS) h 
-	
-.PHONY: test verilog help compile bsp reformat checkformat clean sim build gdb
+.PHONY: test verilog help compile bsp reformat checkformat clean sim build
 include ../Makefile

@@ -153,13 +153,14 @@ void init_monitor(int argc, char *argv[]) {
 
   /* test expr method*/
   test_expr();
-#ifdef CONFIG_TARGET_NATIVE_ELF
-  init_disasm(MUXDEF(CONFIG_ISA_x86, "i686",
-                     MUXDEF(CONFIG_ISA_mips32, "mipsel",
-                            MUXDEF(CONFIG_ISA_riscv32, "riscv32",
-                                   MUXDEF(CONFIG_ISA_riscv64, "riscv64",
-                                          "bad")))) "-pc-linux-gnu");
-#endif
+
+  IFDEF(CONFIG_ITRACE,
+        init_disasm(MUXDEF(CONFIG_ISA_x86, "i686",
+                           MUXDEF(CONFIG_ISA_mips32, "mipsel",
+                                  MUXDEF(CONFIG_ISA_riscv32, "riscv32",
+                                         MUXDEF(CONFIG_ISA_riscv64, "riscv64",
+                                                "bad")))) "-pc-linux-gnu"));
+
   /* Display welcome message. */
   welcome();
 }

@@ -1,13 +1,12 @@
-#include <SDL.h>
 #include <nterm.h>
 #include <stdarg.h>
 #include <unistd.h>
-static char *buffer;
+#include <SDL.h>
+char buffer[50];
 char handle_key(SDL_Event *ev);
 
-static void sh_init() {
-  setenv("PATH", "/bin/:/usr/bin/", 1);
-  buffer = (char *)malloc(100 * sizeof(char));
+static void sh_init(){
+  setenv("PATH", "/bin/", 1);
 }
 static void sh_printf(const char *format, ...) {
   static char buf[256] = {};
@@ -22,25 +21,16 @@ static void sh_banner() {
   sh_printf("Built-in Shell in NTerm (NJU Terminal)\n\n");
 }
 
-static void sh_prompt() { sh_printf("sh> "); }
+static void sh_prompt() {
+  sh_printf("sh> ");
+}
 
 static void sh_handle_cmd(const char *cmd) {
   int len = strlen(cmd);
-  assert(len < 100);
-  strcpy(buffer, cmd);
-  buffer[len - 1] = 0; // clear the "\n"
-  char *argv[100];
-  int argc = 0;
-  char *p = strtok(buffer, " ");
-  char *program = p;
-  while (p != NULL) {
-    argv[argc++] = p;
-    assert(argc < 100);
-    p = strtok(NULL, " ");
-  }
-  argv[argc] = NULL;
-
-  execvp(program, argv);
+  assert(len < 50);
+  strncpy(buffer, cmd, len - 1);
+  printf("input %s\n", buffer);
+  execvp(buffer, NULL);
 }
 
 void builtin_sh_run() {

@@ -2,32 +2,40 @@ package utils
 
 import chisel3._
 import chisel3.experimental.ChiselEnum
-import chisel3.experimental.EnumType
 import chisel3.util._
 import firrtl.seqCat
-import scala.collection.SeqFactory
-import scala.collection.SeqOps
-import chisel3.internal.Builder
-import scala.collection.IterableFactory
-import scala.annotation.unchecked.uncheckedVariance
+import execute.ALUUtils
 
 object Utils {
-
-  def cast(num: UInt, castWidth: Int, outputWidth: Int): UInt = {
-    signExtend(num(castWidth - 1, 0), castWidth, outputWidth)
+  def signalExtend(num: UInt, length: Int): UInt = {
+    Cat(Fill(64 - length, num(length - 1, length - 1)), num)
   }
 
-  def zeroExtend(num: UInt, width: Int, targetWidth: Int): UInt = {
-    Cat(Fill(targetWidth - num.getWidth, 0.U), num(width - 1, 0))
+  def signalExtend(num: UInt, bytelength: UInt): UInt = {
+    val signal = MuxLookup(
+      bytelength,
+      false.B,
+      Seq(
+        (1.U) -> num(7),
+        (2.U) -> num(15),
+        (4.U) -> num(31),
+        (8.U) -> num(63)
+      )
+    )
+    val mask = Fill(8, signal)
+    Cat(
+      Mux(bytelength > 4.U, num(63, 56), mask),
+      Mux(bytelength > 4.U, num(55, 48), mask),
+      Mux(bytelength > 4.U, num(47, 40), mask),
+      Mux(bytelength > 4.U, num(39, 32), mask),
+      Mux(bytelength > 2.U, num(31, 24), mask),
+      Mux(bytelength > 2.U, num(23, 16), mask),
+      Mux(bytelength > 1.U, num(15, 8), mask),
+      num(7, 0)
+    )
   }
 
   def signExtend(num: UInt, width: Int, targetWidth: Int = 64): UInt = {
     Cat(Fill(targetWidth - width, num(width - 1)), num(width - 1, 0))
-  }
-}
-
-object EnumSeq {
-  def apply(elems: (EnumType, UInt)*) = elems.map {
-    case (enumType, uint) => (enumType.asUInt, uint)
   }
 }

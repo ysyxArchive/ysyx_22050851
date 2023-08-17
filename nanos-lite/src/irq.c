@@ -1,9 +1,6 @@
-#include "errno.h"
-#include "fs.h"
-#include "memory.h"
-#include "proc.h"
-#include <common.h>
 #include <loader.h>
+#include "fs.h"
+#include <common.h>
 enum {
   SYS_exit,
   SYS_yield,
@@ -26,6 +23,7 @@ enum {
   SYS_times,
   SYS_gettimeofday
 };
+static size_t sys_brk(void *addr) { return 0; }
 // #define STRACE
 #ifdef STRACE
 #define strace(format, ...)                                                    \
@@ -37,30 +35,22 @@ enum {
   do {                                                                         \
   } while (0)
 #endif
-char *NULLARR[] = {NULL};
+
 static Context *do_event(Event e, Context *c) {
   switch (e.event) {
-  case EVENT_IRQ_TIMER:
-    strace("syscall SYS_yield from irq timer");
-    c = schedule(c);
-    break;
   case EVENT_YIELD:
     switch (c->GPR1) {
     case SYS_exit:
       strace("syscall SYS_exit %d", c->GPR2);
-      if (c->GPR2 == 0) {
-        PCB *newpcb = getPCB();
-        context_uload(newpcb, "/bin/nterm", NULLARR, NULLARR);
-        replacePCB(newpcb);
-        c =  schedule(c);
-      } else {
-        Log("exit with error number %d", c->GPR2);
+      if(c->GPR2 == 0){
+        naive_uload(NULL, "/bin/menu");
+      } else { 
         halt(c->GPR2);
       }
       break;
     case SYS_yield:
       strace("syscall SYS_yield");
-      c = schedule(c);
+      yield();
       break;
     case SYS_write:
       strace("syscall SYS_write %s %x %x", get_file_name(c->GPR2), c->GPR3,
@@ -69,7 +59,7 @@ static Context *do_event(Event e, Context *c) {
       break;
     case SYS_brk:
       strace("syscall SYS_brk %x", c->GPR2);
-      c->GPRx = mm_brk(c->GPR2);
+      c->GPRx = sys_brk((void *)c->GPR2);
       break;
     case SYS_open:
       strace("syscall SYS_open %s %x %x", c->GPR2, c->GPR3, c->GPR4);
@@ -98,16 +88,7 @@ static Context *do_event(Event e, Context *c) {
       break;
     case SYS_execve:
       strace("syscall SYS_execve %s %x %x", c->GPR2, c->GPR3, c->GPR4);
-      int ret = fs_open((char *)c->GPR2, 0, 0);
-      if (ret == -ENOENT) {
-        c->GPRx = ret;
-        break;
-      }
-      PCB *newpcb = getPCB();
-      context_uload(newpcb, (char *)c->GPR2, (char **)c->GPR3,
-                    (char **)c->GPR4);
-      replacePCB(newpcb);
-      c = schedule(c);
+      naive_uload(NULL, (char*)c->GPR2);
       break;
     case -1:
       strace("syscall -1, do nothing");
@@ -121,6 +102,7 @@ static Context *do_event(Event e, Context *c) {
   default:
     Panic("Unhandled event ID = %d", e.event);
   }
+
   return c;
 }
 

@@ -13,7 +13,7 @@
 # See the Mulan PSL v2 for more details.
 #**************************************************************************************/
 
-ifdef CONFIG_TARGET_NATIVE_ELF
+ifdef CONFIG_ITRACE
 CXXSRC = src/utils/disasm.cc
 CXXFLAGS += $(shell llvm-config --cxxflags) -fPIE
 LIBS += $(shell llvm-config --libs)

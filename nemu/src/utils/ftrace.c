@@ -53,14 +53,10 @@ void init_ftrace(char *elflocation[], const int elfCount) {
         section_header_strtab = section_header_buf;
       }
     }
-    if (section_header_symtab.sh_type == SHT_NULL){
-      printf("not found symbol table in file %s\n", elflocation[i]);
-      continue;
-    }
-    if(section_header_strtab.sh_type == SHT_NULL){
-      printf("error not found string table in file %s\n", elflocation[i]);
-      continue;
-    }
+    Assert(section_header_symtab.sh_type != SHT_NULL,
+           "error not found symbol table");
+    Assert(section_header_strtab.sh_type != SHT_NULL,
+           "error not found string table");
     fseek(fp, section_header_symtab.sh_offset, SEEK_SET);
     Elf64_Sym symbuf;
     for (int i = 0;
