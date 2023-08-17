@@ -20,7 +20,6 @@ uint8_t current_status = PRIV_M;
 clock_t start = 0;
 
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
-  printf("ecall");     
   word_t mstatus = csrs("mstatus");
   csrs("mepc") = cpu.pc;
   csrs("mstatus") = ((mstatus | (current_status << 11)) // set MPP to priv mode
