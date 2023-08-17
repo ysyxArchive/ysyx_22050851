@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-void difftest_check(CPU *cpu);
+bool difftest_check(CPU *cpu);
 
 void difftest_checkmem(CPU *cpu);
 

@@ -65,7 +65,7 @@ void difftest_step(CPU *cpu) {
   }
 }
 
-void difftest_check(CPU *cpu) {
+bool difftest_check(CPU *cpu) {
   CPU refcpu;
   difftest_step(cpu);
   difftest_regcpy(&refcpu, FROM_REF);
@@ -94,11 +94,10 @@ void difftest_check(CPU *cpu) {
 
   if (difftest_failed) {
     isa_reg_display();
-    assert(0);
   }
   // TODO: difftest_checkmem
   // difftest_checkmem(cpu);
-  return;
+  return !difftest_failed;
 }
 
 void difftest_checkmem(CPU *cpu) {

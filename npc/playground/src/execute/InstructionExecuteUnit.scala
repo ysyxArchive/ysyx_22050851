@@ -51,16 +51,26 @@ class InstructionExecuteUnit extends Module {
       PcSrc.src1.asUInt -> src1
     )
   )
-  regIO.dnpc := Mux(pcBranch, dnpcAddSrc + dataIn.imm, snpc)
+  val dnpcAlter = MuxLookup(
+    controlIn.pccsr,
+    dnpcAddSrc,
+    Utils.enumSeq(
+      PcCsr.origin -> (dnpcAddSrc + dataIn.imm),
+      PcCsr.csr -> csrIn
+    )
+  )
+  regIO.dnpc := Mux(pcBranch, dnpcAlter, snpc)
   val regwdata = MuxLookup(
     controlIn.regwritemux,
     DontCare,
-    Seq(
-      RegWriteMux.alu.asUInt -> alu.io.out,
-      RegWriteMux.snpc.asUInt -> snpc,
-      RegWriteMux.mem.asUInt -> memIO.rdata,
-      RegWriteMux.aluneg.asUInt -> Utils.zeroExtend(alu.signalIO.isNegative, 1, 64),
-      RegWriteMux.alunotcarryandnotzero.asUInt -> Utils.zeroExtend(!alu.signalIO.isCarry && !alu.signalIO.isZero, 1, 64)
+    EnumSeq(
+      RegWriteMux.alu -> alu.io.out,
+      RegWriteMux.snpc -> snpc,
+      RegWriteMux.mem -> memIO.rdata,
+      RegWriteMux.aluneg -> Utils.zeroExtend(alu.signalIO.isNegative, 1, 64),
+      RegWriteMux.alunotcarryandnotzero -> Utils
+        .zeroExtend(!alu.signalIO.isCarry && !alu.signalIO.isZero, 1, 64),
+      RegWriteMux.csr -> csrIn
     )
   )
   regIO.wdata := Mux(controlIn.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)
