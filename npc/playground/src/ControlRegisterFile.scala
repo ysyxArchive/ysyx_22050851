@@ -128,7 +128,7 @@ class ControlRegisterFile extends Module {
           Mux(csrIndex === ControlRegisterList.list(i).id.U, writeBack, registers(i)),
           EnumSeq(
             CsrBehave.ecall -> mstatus.getSettledValue("MPP" -> currentMode, "MPIE" -> mstatus("MIE"), "MIE" -> 0.U),
-            CsrBehave.mret -> mstatus.getSettledValue("MIE" -> mstatus("MPIE"), "MPIE" -> 0.U)
+            CsrBehave.mret -> mstatus.getSettledValue("MIE" -> mstatus("MPIE"), "MPIE" -> 1.U, "MPP" -> PrivMode.U)
           )
         )
       }
