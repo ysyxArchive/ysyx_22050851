@@ -12,13 +12,13 @@
 *
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
+
+#include <isa.h>
+#include <tracers.h>
 enum {
   PRIV_U, PRIV_S,
   PRIV_V, PRIV_M,
 };
-
-#include <isa.h>
-#include <tracers.h>
 uint8_t current_status = PRIV_M;
 
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
