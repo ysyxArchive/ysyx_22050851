@@ -5,11 +5,11 @@
 #define MAX_NR_PROC 4
 
 static PCB pcb[MAX_NR_PROC] __attribute__((used)) = {};
-static PCB pcb_boot;
+static PCB *pcb_boot;
 int fppcb = 2;
 PCB *current = NULL;
 int pcbcount = 0;
-void switch_boot_pcb() { current = &pcb_boot; }
+void switch_boot_pcb() { current = pcb_boot; }
 void hello_fun(void *arg) {
   int j = 1;
   while (1) {
@@ -87,7 +87,7 @@ PCB *getPCB() { return &(pcb[pcbcount++]); }
 void init_proc() {
   Log("Initializing processes...");
   // char *target_program[] = {"/bin/hello", "/bin/nterm", "/bin/pal"};
-  // pcb_boot = getPCB();
+  pcb_boot = getPCB();
   // for (int i = 0; i < MAX_NR_PROC - 1; i++) {
   //   char *args[] = {target_program[i], NULL};
   //   char *envp[] = {NULL};
@@ -95,7 +95,6 @@ void init_proc() {
   // }
   naive_uload(getPCB(), "/bin/hello");
   switch_boot_pcb();
-  Assert(current, "current is NULL");
 }
 
 Context *schedule(Context *prev) {
@@ -103,9 +102,8 @@ Context *schedule(Context *prev) {
   current->cp = prev;
   // int currentidx = current == &(pcb[fppcb]) ? fppcb : 1;
   // int nextidx = currentidx == 1 ? fppcb : 1;
-  int nextidx = 0;
+  int nextidx = 1;
   Log("jump to proc %d", nextidx);
-  // current = pcb + nextidx;
-  Assert(0, "");
+  current = pcb + nextidx;
   return current->cp;
 }
