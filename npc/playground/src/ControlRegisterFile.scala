@@ -68,7 +68,7 @@ class Mstatus(val value: UInt) {
 
   def get(name: String) = {
     val target = map(name)
-    value & getMask(name) >> target.offset
+    (value & getMask(name)) >> target.offset
   }
 
   def apply(name: String) = get(name)
