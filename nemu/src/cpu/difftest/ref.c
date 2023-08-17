@@ -51,7 +51,10 @@ void difftest_regcpy(void *dut, bool direction) {
     for (int i = 1; i < 32; i++) {
       cpu.gpr[i] = cpu_host->gpr[i];
     }
-    cpu.pc = cpu_host->pc;
+    cpu_host->pc = cpu.pc;
+    for (int i = 0; i < CSR_CNT; i++) {
+      cpu.csr[i] = cpu_host->csr[i];
+    }
   } else {
     for (int i = 0; i < 32; i++) {
       cpu_host->gpr[i] = cpu.gpr[i];
