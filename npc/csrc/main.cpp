@@ -91,12 +91,12 @@ void one_step() {
 int main(int argc, char *argv[]) {
   parse_args(argc, argv);
   load_files();
+  Log("init_done");
   // TODO: 传参不对
   // Verilated::commandArgs(argc, argv);
   VerilatedContext *contextp = new VerilatedContext;
   // TODO: 传参不对
 
-  Log("init_done");
   // contextp->commandArgs(argc, argv);
   Verilated::traceEverOn(true); // 导出vcd波形需要加此语句
   tfp = new VerilatedVcdC();    // 导出vcd波形需要加此语句
