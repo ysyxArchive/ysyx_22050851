@@ -21,15 +21,14 @@ const char* regs[] = {"$0", "ra", "sp",  "gp",  "tp", "t0", "t1", "t2",
                       "a6", "a7", "s2",  "s3",  "s4", "s5", "s6", "s7",
                       "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"};
 
-const char* csrregs[] = {"mepc", "mstatus", "mcause", "mtvec", "satp", "mscratch", };
-const int CSRLEN = ARRLEN(csrregs);
+const char* csrregs[CSR_CNT] = {"mepc", "mstatus", "mcause", "mtvec", "satp", "mscratch"};
 void isa_reg_display() {
   printf("gpr:\n");
   for (int i = 0; i < 32; i++) {
     printf("%s: %16lX\t%s", regs[i], cpu.gpr[i], i % 4 == 3 ? "\n" : "");
   }
   printf("csr:\n");
-  for (int i = 0; i < CSRLEN; i++) {
+  for (int i = 0; i < CSR_CNT; i++) {
     printf("%s: %16lX\t", csrregs[i], cpu.csr[i]);
   }
   printf("\n");
@@ -49,7 +48,7 @@ word_t isa_reg_str2val(const char* s, bool* success) {
       ret = cpu.gpr[i];
     }
   }
-  for (int i = 0; !*success && i < CSRLEN; i++) {
+  for (int i = 0; !*success && i < CSR_CNT; i++) {
     if (strcmp(s, csrregs[i]) == 0) {
       *success = true;
       ret = cpu.csr[i];
@@ -64,7 +63,7 @@ int isa_reg_str2index(const char* s) {
       return i;
     }
   }
-  for (int i = 0; i < CSRLEN; i++) {
+  for (int i = 0; i < CSR_CNT; i++) {
     if (strcmp(s, csrregs[i]) == 0) {
       return i;
     }

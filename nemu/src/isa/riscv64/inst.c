@@ -24,10 +24,7 @@
 #define Mr vaddr_read
 #define Mw vaddr_write
 extern uint8_t current_status;
-enum {
-  PRIV_U, PRIV_S,
-  PRIV_V, PRIV_M,
-};
+
 enum {
   TYPE_I, TYPE_U, TYPE_S, TYPE_J,
   TYPE_R, TYPE_B, TYPE_N
@@ -104,7 +101,7 @@ static int decode_exec(Decode *s) {
     csrs("mstatus") = ((mstatus & 0xFFFFF0000) | 0x0080 | (BITS(mstatus, 7, 7) << 3)); 
     s->dnpc = csrs("mepc"); 
     current_status = ((mstatus >> 11) & 3); 
-    etrace(false, cpu.pc, mstatus, csrs("mepc"));
+    etrace(false, cpu.pc, mstatus);
   );
 
   INSTPAT("0000000 ????? ????? 000 ????? 01100 11", add    , R, Reg(dest) = src1 + src2);

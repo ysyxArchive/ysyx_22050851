@@ -32,6 +32,7 @@ enum {
   TK_NEGATIVE,
   TK_MUL,
   TK_DIV,
+  TK_MOD,
   TK_ADD,
   TK_MINUS,
   TK_EQ,
@@ -50,7 +51,7 @@ static struct {
     {.length = 3, .TKS = {TK_OCTNUMBER, TK_HEXNUMBER, TK_REG}},
     // 以上不参与分割
     {.length = 3, .TKS = {TK_POSITIVE, TK_NEGATIVE, TK_DEREF}},
-    {.length = 2, .TKS = {TK_MUL, TK_DIV}},
+    {.length = 3, .TKS = {TK_MUL, TK_DIV, TK_MOD}},
     {.length = 2, .TKS = {TK_ADD, TK_MINUS}},
     {.length = 3, .TKS = {TK_EQ, TK_NEQ, TK_AND}},
 };
@@ -65,6 +66,7 @@ static struct rule {
     {"-", '-'},
     {"\\*", '*'},
     {"/", TK_DIV},
+    {"\%", TK_MOD},
     {"==", TK_EQ},
     {"!=", TK_NEQ},
     {"&&", TK_AND},
@@ -110,6 +112,7 @@ static bool should_be_single() {
          tokens[nr_token - 1].type == TK_ADD ||
          tokens[nr_token - 1].type == TK_MUL ||
          tokens[nr_token - 1].type == TK_DIV ||
+         tokens[nr_token - 1].type == TK_MOD ||
          tokens[nr_token - 1].type == TK_KUOL ||
          tokens[nr_token - 1].type == TK_EQ ||
          tokens[nr_token - 1].type == TK_NEQ ||
@@ -276,6 +279,8 @@ uint32_t eval(int start, int end, bool* success) {
       return leftval * rightval;
     case TK_DIV:
       return leftval / rightval;
+    case TK_MOD:
+      return leftval % rightval;
     case TK_ADD:
       return leftval + rightval;
     case TK_MINUS:

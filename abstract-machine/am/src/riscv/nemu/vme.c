@@ -1,15 +1,19 @@
 #include <am.h>
-#include <nemu.h>
 #include <klib.h>
-
-static AddrSpace kas = {};
-static void* (*pgalloc_usr)(int) = NULL;
-static void (*pgfree_usr)(void*) = NULL;
+#include <nemu.h>
+#define BITMASK(bits) ((1ull << (bits)) - 1)
+#define BITS(x, hi, lo)                                                        \
+  (((x) >> (lo)) & BITMASK((hi) - (lo) + 1)) // similar to x[hi:lo] in verilog
+#define PTEVALID(x) BITS(x, 0, 0)
+#define PTEXWR(x) BITS(x, 3, 1)
+#define PTEPPN(x) (BITS(x, 53, 10) << 12)
+static AddrSpace kernel_addr_space = {};
+static void *(*pgalloc_usr)(int) = NULL;
+static void (*pgfree_usr)(void *) = NULL;
 static int vme_enable = 0;
 
-static Area segments[] = {      // Kernel memory mappings
-  NEMU_PADDR_SPACE
-};
+static Area segments[] = { // Kernel memory mappings
+    NEMU_PADDR_SPACE};
 
 #define USER_SPACE RANGE(0x40000000, 0x80000000)
 
@@ -24,53 +28,79 @@ static inline uintptr_t get_satp() {
   return satp << 12;
 }
 
-bool vme_init(void* (*pgalloc_f)(int), void (*pgfree_f)(void*)) {
+bool vme_init(void *(*pgalloc_f)(int), void (*pgfree_f)(void *)) {
   pgalloc_usr = pgalloc_f;
   pgfree_usr = pgfree_f;
 
-  kas.ptr = pgalloc_f(PGSIZE);
+  kernel_addr_space.ptr = pgalloc_f(1);
 
   int i;
-  for (i = 0; i < LENGTH(segments); i ++) {
+  for (i = 0; i < LENGTH(segments); i++) {
     void *va = segments[i].start;
     for (; va < segments[i].end; va += PGSIZE) {
-      map(&kas, va, va, 0);
+      map(&kernel_addr_space, va, va, 1);
     }
   }
 
-  set_satp(kas.ptr);
+  set_satp(kernel_addr_space.ptr);
+  printf("kernel addr dir %p\n", kernel_addr_space.ptr);
   vme_enable = 1;
 
   return true;
 }
 
 void protect(AddrSpace *as) {
-  PTE *updir = (PTE*)(pgalloc_usr(PGSIZE));
+  PTE *updir = (PTE *)(pgalloc_usr(1));
   as->ptr = updir;
   as->area = USER_SPACE;
   as->pgsize = PGSIZE;
   // map kernel space
-  memcpy(updir, kas.ptr, PGSIZE);
+  memcpy(updir, kernel_addr_space.ptr, PGSIZE);
+  map(as, updir, updir, 1);
 }
 
-void unprotect(AddrSpace *as) {
-}
+void unprotect(AddrSpace *as) {}
 
 void __am_get_cur_as(Context *c) {
-  c->pdir = (vme_enable ? (void *)get_satp() : NULL);
+  c->pdir = (uintptr_t)(vme_enable ? (void *)get_satp() : NULL);
 }
 
 void __am_switch(Context *c) {
-  if (vme_enable && c->pdir != NULL) {
-    set_satp(c->pdir);
+  if (vme_enable && c->pdir) {
+    set_satp((void *)c->pdir);
   }
 }
-
 void map(AddrSpace *as, void *va, void *pa, int prot) {
+  uint64_t vaint = (uint64_t)va;
+  // assert high position is equal
+  assert(((((uint64_t)vaint << 1) ^ ((uint64_t)vaint)) & 0xFFFFFF8000000000) ==
+         0);
+  uint64_t vpn[] = {
+      BITS(vaint, 20, 12),
+      BITS(vaint, 29, 21),
+      BITS(vaint, 38, 30),
+  };
+  // 二级页表
+  if (!PTEVALID(((PTE *)as->ptr)[vpn[2]])) {
+    uintptr_t newpage = (uintptr_t)pgalloc_usr(1);
+    ((PTE *)as->ptr)[vpn[2]] = (BITS(newpage, 55, 12) << 10) | 1;
+  }
+  PTE *table1 = (PTE *)PTEPPN(((PTE *)(as->ptr))[vpn[2]]);
+  // 三级页表
+  if (!PTEVALID(table1[vpn[1]])) {
+    uintptr_t newpage = (uintptr_t)pgalloc_usr(1);
+    table1[vpn[1]] = (BITS(newpage, 55, 12) << 10) | 1;
+  }
+  PTE *table2 = (PTE *)PTEPPN(table1[vpn[1]]);
+  table2[vpn[0]] = BITS((uintptr_t)pa, 55, 12) << 10 | 0xDF;
 }
 
 Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
-  Context c = {.mepc=(uint64_t)entry, .mstatus=0xa00001800};
-  memcpy(kstack.start, &c, sizeof(c));
-  return kstack.start;
+
+  Context c = {.mepc = (uint64_t)entry,
+               .mstatus = 0xa000c0080,
+               .pdir = (uintptr_t)as->ptr,
+               .gpr[2] = (uintptr_t)as->area.end};
+  memcpy(kstack.end - sizeof(c), &c, sizeof(c));
+  return kstack.end - sizeof(c);
 }

@@ -20,7 +20,7 @@
 
 #define TO_REF 1
 #define FROM_REF 0
-#define CSR_CNT 6
+
 typedef struct CPU_host {
   uint64_t gpr[32];
   uint64_t pc;
