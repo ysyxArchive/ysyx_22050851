@@ -2,15 +2,11 @@ package execute
 
 import chisel3._
 import chisel3.util.MuxLookup
+import decode.OperationType
 import chisel3.util.Cat
 import chisel3.util.Reverse
 import chisel3.util.Fill
-import chisel3.experimental.ChiselEnum
 import decode.AluMode
-
-object ALUSignalType extends ChiselEnum {
-  val isZero, isNegative = Value
-}
 
 object ALUUtils {
   val width = 2
@@ -73,7 +69,7 @@ class ALUIO extends Bundle {
   val inB     = Input(UInt(64.W))
   val out     = Output(UInt(64.W))
   val signals = Output(UInt(2.W))
-  val opType  = Input(ALUType())
+  val opType  = Input(AluMode())
 }
 
 class ALU extends Module {
@@ -85,8 +81,8 @@ class ALU extends Module {
   val out = Wire(UInt(64.W))
 
   simpleAdder.io.inA := io.inA
-  simpleAdder.io.inB := Mux(io.opType === ALUType.sub, ~io.inB, io.inB)
-  simpleAdder.io.inC := io.opType === ALUType.sub
+  simpleAdder.io.inB := Mux(io.opType === AluMode.sub, ~io.inB, io.inB)
+  simpleAdder.io.inC := io.opType === AluMode.sub
 
   val inANotZero = io.inA.orR;
   val inBNotZero = io.inB.orR;
@@ -95,14 +91,20 @@ class ALU extends Module {
     io.opType.asUInt,
     0.U,
     Seq(
-      ALUType.add.asUInt -> simpleAdder.io.out,
-      ALUType.sub.asUInt -> simpleAdder.io.out,
-      ALUType.and.asUInt -> (io.inA & io.inB),
-      ALUType.or.asUInt -> (io.inA | io.inB),
-      ALUType.xor.asUInt -> (io.inA ^ io.inB),
-      ALUType.shiftLeft.asUInt -> (io.inA << io.inB(5, 0)),
-      ALUType.shiftRightLogic.asUInt -> (io.inA >> io.inB(5, 0)),
-      ALUType.shiftRightArth.asUInt -> (io.inA.asSInt >> io.inB(5, 0)).asUInt
+      AluMode.add.asUInt -> simpleAdder.io.out,
+      AluMode.and.asUInt -> (io.inA & io.inB),
+      AluMode.sub.asUInt -> simpleAdder.io.out,
+      AluMode.div.asUInt -> (io.inA.asSInt / io.inB.asSInt).asUInt,
+      AluMode.divu.asUInt -> io.inA / io.inB,
+      AluMode.mul.asUInt -> io.inA * io.inB,
+      AluMode.or.asUInt -> (io.inA | io.inB),
+      AluMode.rem.asUInt -> (io.inA.asSInt % io.inB.asSInt).asUInt,
+      AluMode.remu.asUInt -> io.inA % io.inB,
+      AluMode.ll.asUInt -> (io.inA << io.inB(5, 0)),
+      AluMode.ra.asUInt -> (io.inA.asSInt >> io.inB(5, 0)).asUInt,
+      AluMode.rl.asUInt -> (io.inA >> io.inB(5, 0)),
+      AluMode.rlw.asUInt -> (io.inA(31, 0) >> io.inB(5, 0)),
+      AluMode.xor.asUInt -> (io.inA ^ io.inB)
     )
   )
   io.out     := out
