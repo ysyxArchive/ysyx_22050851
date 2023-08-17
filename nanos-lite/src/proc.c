@@ -94,7 +94,7 @@ void init_proc() {
   //   context_uload(getPCB(), target_program[i], args, envp);
   // }
   switch_boot_pcb();
-  naive_uload(getPCB(), "/bin/hello");
+  naive_uload(getPCB(), "/bin/pal");
 }
 
 Context *schedule(Context *prev) {
