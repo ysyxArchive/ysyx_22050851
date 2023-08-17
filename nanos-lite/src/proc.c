@@ -86,13 +86,14 @@ PCB *getPCB() { return &(pcb[pcbcount++]); }
 
 void init_proc() {
   Log("Initializing processes...");
-  char *target_program[] = {"/bin/hello", "/bin/nterm", "/bin/pal"};
-  pcb_boot = getPCB();
-  for (int i = 0; i < MAX_NR_PROC - 1; i++) {
-    char *args[] = {target_program[i], NULL};
-    char *envp[] = {NULL};
-    context_uload(getPCB(), target_program[i], args, envp);
-  }
+  // char *target_program[] = {"/bin/hello", "/bin/nterm", "/bin/pal"};
+  // pcb_boot = getPCB();
+  // for (int i = 0; i < MAX_NR_PROC - 1; i++) {
+  //   char *args[] = {target_program[i], NULL};
+  //   char *envp[] = {NULL};
+  //   context_uload(getPCB(), target_program[i], args, envp);
+  // }
+  naive_uload(getPCB(), "/bin/hello");
   switch_boot_pcb();
 }
 
