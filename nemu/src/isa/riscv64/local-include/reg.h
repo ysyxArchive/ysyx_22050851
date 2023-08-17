@@ -54,7 +54,7 @@ static inline int check_csr_idx(int idx) {
   IFDEF(CONFIG_RT_CHECK, assert(idx >= 0 && idx <= 0xfff));
   const char *name = csr_name(idx);
   extern const char *csrregs[];
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 6; i++) {
     if (strcmp(name, csrregs[i]) == 0) {
       return i;
     }
