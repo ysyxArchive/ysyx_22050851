@@ -34,7 +34,7 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
                     ;
   csrs("mcause") = NO;
   current_status = PRIV_M;
-  etrace(true, cpu.pc, csrs("mstatus"), 0x0);
+  etrace(true, cpu.pc, csrs("mstatus"), epc);
   return epc;
 }
 
