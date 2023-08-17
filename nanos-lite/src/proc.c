@@ -86,21 +86,24 @@ PCB *getPCB() { return &(pcb[pcbcount++]); }
 
 void init_proc() {
   Log("Initializing processes...");
-  char *target_program[] = {"/bin/hello", "/bin/nterm", "/bin/pal"};
+  // char *target_program[] = {"/bin/hello", "/bin/nterm", "/bin/pal"};
   pcb_boot = getPCB();
-  for (int i = 0; i < MAX_NR_PROC - 1; i++) {
-    char *args[] = {target_program[i], NULL};
-    char *envp[] = {NULL};
-    context_uload(getPCB(), target_program[i], args, envp);
-  }
+  // for (int i = 0; i < MAX_NR_PROC - 1; i++) {
+  //   char *args[] = {target_program[i], NULL};
+  //   char *envp[] = {NULL};
+  //   context_uload(getPCB(), target_program[i], args, envp);
+  // }
   switch_boot_pcb();
+  naive_uload(getPCB(), "/bin/pal");
 }
 
 Context *schedule(Context *prev) {
-  current->cp = prev;
-  int currentidx = current == &(pcb[fppcb]) ? fppcb : 1;
-  int nextidx = currentidx == 1 ? fppcb : 1;
-  Log("jump to proc %d", nextidx);
-  current = pcb + nextidx;
-  return current->cp;
+  // Assert(current, "current is NULL");
+  // current->cp = prev;
+  // int currentidx = current == &(pcb[fppcb]) ? fppcb : 1;
+  // int nextidx = currentidx == 1 ? fppcb : 1;
+  // int nextidx = 1;
+  // Log("jump to proc %d", nextidx);
+  // current = pcb + nextidx;
+  return prev;
 }
