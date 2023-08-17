@@ -58,7 +58,7 @@ void load_files() {
   Assert(img_file, "img file not found!");
   Log("detected img file: %s", img_file);
   init_memory(img_file);
-
+  Log("123");
   Assert(diff_so_file, "difftest ref file not found!");
   Log("detected so file: %s", diff_so_file);
   load_difftest_so(diff_so_file);
