@@ -96,8 +96,7 @@ static int decode_exec(Decode *s) {
   INSTPAT("??????? ????? ????? 101 ????? 11100 11", csrrwi , I, Reg(dest) = Csr(imm); Csr(imm) = uimm);
   INSTPAT("??????? ????? ????? 110 ????? 11100 11", csrrsi , I, Reg(dest) = Csr(imm); Csr(imm) |= uimm);
   INSTPAT("??????? ????? ????? 111 ????? 11100 11", csrrci , I, Reg(dest) = Csr(imm); Csr(imm) &= uimm);
-  INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , I,
-    printf("mret"); 
+  INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , I, 
     word_t mstatus = csrs("mstatus"); 
     csrs("mstatus") = ((mstatus & 0xFFFFF0000) | 0x0080 | (BITS(mstatus, 7, 7) << 3)); 
     s->dnpc = csrs("mepc"); 

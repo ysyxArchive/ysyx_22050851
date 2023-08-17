@@ -100,8 +100,8 @@ void init_proc() {
 Context *schedule(Context *prev) {
   // Assert(current, "current is NULL");
   // current->cp = prev;
-  // // int currentidx = current == &(pcb[fppcb]) ? fppcb : 1;
-  // // int nextidx = currentidx == 1 ? fppcb : 1;
+  // int currentidx = current == &(pcb[fppcb]) ? fppcb : 1;
+  // int nextidx = currentidx == 1 ? fppcb : 1;
   // int nextidx = 1;
   // Log("jump to proc %d", nextidx);
   // current = pcb + nextidx;
