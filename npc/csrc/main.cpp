@@ -106,16 +106,15 @@ int main(int argc, char *argv[]) {
   while (!is_halt) {
     one_step();
   }
-
-  if (is_bad_halt) {
+  int ret_value = cpu.gpr[10];
+  if (is_bad_halt || ret_value) {
     Log("bad halt! pc=0x%lx inst=0x%08x", top->pcio_pc, top->pcio_inst);
     if (!lightSSS.is_child()) {
       lightSSS.wakeup_child(npc_clock);
     }
-    Log("exit");
     exit(-1);
   }
-  Log(ANSI_FMT("hit good trap!, ret value is %d", ANSI_FG_GREEN), cpu.gpr[10]);
+  Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
   lightSSS.do_clear();
   return 0;
 }
