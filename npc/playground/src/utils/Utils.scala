@@ -24,12 +24,6 @@ object Utils {
   def signExtend(num: UInt, width: Int, targetWidth: Int = 64): UInt = {
     Cat(Fill(targetWidth - width, num(width - 1)), num(width - 1, 0))
   }
-
-  /** @deprecated */
-  def enumSeq(elems: (EnumType, UInt)*): Seq[(UInt, UInt)] = {
-    elems.map { case (enumType, uint) => (enumType.asUInt, uint) }
-  }
-
 }
 
 object EnumSeq {

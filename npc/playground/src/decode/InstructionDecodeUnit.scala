@@ -57,12 +57,12 @@ class InstructionDecodeUnit extends Module {
   decodeOut.data.imm := MuxLookup(
     controlDecoder.output.insttype,
     DontCare,
-    Seq(
-      InstType.I.asUInt -> immI,
-      InstType.S.asUInt -> immS,
-      InstType.U.asUInt -> immU,
-      InstType.B.asUInt -> immB,
-      InstType.J.asUInt -> immJ
+    EnumSeq(
+      InstType.I -> immI,
+      InstType.S -> immS,
+      InstType.U -> immU,
+      InstType.B -> immB,
+      InstType.J -> immJ
     )
   )
   decodeOut.data.src1 := rs1
