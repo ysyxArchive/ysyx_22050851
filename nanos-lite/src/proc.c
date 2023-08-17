@@ -5,11 +5,11 @@
 #define MAX_NR_PROC 4
 
 static PCB pcb[MAX_NR_PROC] __attribute__((used)) = {};
-static PCB *pcb_boot;
+static PCB pcb_boot;
 int fppcb = 2;
 PCB *current = NULL;
 int pcbcount = 0;
-void switch_boot_pcb() { current = pcb_boot; }
+void switch_boot_pcb() { current = &pcb_boot; }
 void hello_fun(void *arg) {
   int j = 1;
   while (1) {
@@ -95,6 +95,7 @@ void init_proc() {
   // }
   naive_uload(getPCB(), "/bin/hello");
   switch_boot_pcb();
+  Assert(current, "current is NULL");
 }
 
 Context *schedule(Context *prev) {
