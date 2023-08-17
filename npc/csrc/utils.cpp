@@ -92,7 +92,6 @@ void eval_trace() {
   if (lightSSS.is_not_good() &&
       lightSSS.get_end_cycles() - npc_clock < WAVE_TRACE_CLOCKS) {
     tfp->dump(tfp_clock++);
-    printf("recording\n");
     tfp->flush();
   }
   npc_clock++;
