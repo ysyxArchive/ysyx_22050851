@@ -13,6 +13,7 @@ bool is_halt = false;
 bool is_bad_halt = false;
 
 void haltop(unsigned char good_halt) {
+  Log("halt from npc, is %s halt", good_halt ? "good" : "bad");
   is_halt = true;
   is_bad_halt = !good_halt;
 }
@@ -105,12 +106,13 @@ int main(int argc, char *argv[]) {
   while (!is_halt) {
     one_step();
   }
-  int ret_value = cpu.gpr[10];
-  if (is_bad_halt || ret_value) {
+
+  if (is_bad_halt) {
     Log("bad halt! pc=0x%lx inst=0x%08x", top->pcio_pc, top->pcio_inst);
     if (!lightSSS.is_child()) {
       lightSSS.wakeup_child(npc_clock);
     }
+    Log("exit");
     exit(-1);
   }
   Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));

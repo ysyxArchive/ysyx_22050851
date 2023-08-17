@@ -1,12 +1,14 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdio.h>
 
 int main(int argc, char *argv[], char *envp[]);
 extern char **environ;
 void call_main(uintptr_t *args) {
-  char *empty[] =  {NULL };
-  environ = empty;
-  exit(main(0, empty, empty));
+  int argc = *((uint64_t*)args);
+  char **argv = ((uint64_t*)args + 1);
+  environ = (char**)((uint64_t*)args + argc + 2);
+  exit(main(argc, argv, environ));
   assert(0);
 }
