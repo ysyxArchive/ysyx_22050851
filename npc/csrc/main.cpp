@@ -101,6 +101,8 @@ int main(int argc, char *argv[]) {
   tfp = new VerilatedVcdC();    // 导出vcd波形需要加此语句
   top = new VCPU{contextp};
   top->reset = false;
+  Log("init_done");
+
   init_npc();
   update_cpu();
   difftest_initial(&cpu);
