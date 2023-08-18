@@ -38,10 +38,10 @@ void init_npc() {
 
 extern "C" void mem_read(const svLogicVecVal *addr, const svLogicVecVal *len,
                          svLogicVecVal *ret, unsigned char is_unsigned) {
-  printf("memread2\n");
   if (top->reset) {
     ret[0].aval = 0x13;
     ret[1].aval = 0;
+    printf("memread2\n");
     return;
   }
   printf("memread\n");
