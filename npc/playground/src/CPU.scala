@@ -22,9 +22,9 @@ class CPU extends Module {
   val mem         = Module(new BlackBoxMem)
   val blackBoxOut = Module(new BlackBoxRegs);
 
+  decoder.instIn <> ifu.instOut
+  decoder.regIO := regs.io
 
-  ifu.instOut <> decoder.instIn
-  
   exe.decodeIn := decoder.decodeOut
   exe.regIO <> regs.io
   exe.memIO <> mem.io
