@@ -13,7 +13,7 @@ class InstructionFetchUnit extends Module {
   val mem = Module(new BlackBoxMem)
 
   val instValid = RegInit(false.B)
-  val inst      = RegInit(UInt(32.W))
+  val inst      = RegInit(0.U(32.W))
 
   val outData = Wire(new FetchDecodeAxiIO().R.bits)
   outData.id   := 0.U
