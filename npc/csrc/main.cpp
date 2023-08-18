@@ -76,8 +76,6 @@ void one_step() {
   // 记录波形
   top->clock = 1;
   eval_trace();
-  uint64_t npc = top->pcio_pc;
-  top->pcio_inst = read_mem_nolog(npc, 4);
   update_cpu();
   if (!difftest_check(&cpu)) {
     is_halt = true;
@@ -108,7 +106,7 @@ int main(int argc, char *argv[]) {
   }
   int ret_value = cpu.gpr[10];
   if (is_bad_halt || ret_value) {
-    Log("bad halt! pc=0x%lx inst=0x%08x", top->pcio_pc, top->pcio_inst);
+    Log("bad halt! pc=0x%lx inst=0x%08x", cpu.pc, *(uint32_t *)&(mem[cpu.pc]));
     if (!lightSSS.is_child()) {
       lightSSS.wakeup_child(npc_clock);
     }

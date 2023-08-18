@@ -82,7 +82,6 @@ void init_vcd_trace() {
   top->reset = false;
   top->trace(tfp, 0);
   tfp->open("wave.vcd");       // 打开vcd
-  top->pcio_inst = 0x00000013; // 默认为 addi e0, 0;
 }
 
 extern int npc_clock;
