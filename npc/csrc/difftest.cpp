@@ -66,6 +66,7 @@ void difftest_step(CPU *cpu) {
 }
 static CPU lastcpu;
 bool difftest_check(CPU *cpu) {
+  printf("%lx %lx\n", cpu->pc, lastcpu.pc);
   if (cpu->pc != lastcpu.pc) {
     memcpy(&lastcpu, cpu, sizeof(CPU));
     return true;
