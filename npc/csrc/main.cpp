@@ -39,7 +39,8 @@ void init_npc() {
 extern "C" void mem_read(const svLogicVecVal *addr, const svLogicVecVal *len,
                          svLogicVecVal *ret, unsigned char is_unsigned) {
   if (top->reset) {
-    ret[0].aval = ret[1].aval = 0;
+    ret[0].aval = 0x13;
+    ret[1].aval = 0;
     return;
   }
   uint64_t data = read_mem(*(uint64_t *)addr, *(uint8_t *)len);
