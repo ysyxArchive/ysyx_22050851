@@ -97,10 +97,10 @@ int main(int argc, char *argv[]) {
   init_vcd_trace();
   top->reset = false;
   init_device();
+  lightSSS.do_fork();
   init_npc();
   update_cpu();
   difftest_initial(&cpu);
-  lightSSS.do_fork();
   Log("init_done");
 
   while (!is_halt) {
