@@ -67,11 +67,10 @@ void difftest_step(CPU *cpu) {
 static CPU lastcpu;
 bool difftest_check(CPU *cpu) {
   printf("%lx %lx\n", cpu->pc, lastcpu.pc);
-  if (cpu->pc == lastcpu.pc) {
+  if (cpu->pc != lastcpu.pc) {
     memcpy(&lastcpu, cpu, sizeof(CPU));
     return true;
   }
-  memcpy(&lastcpu, cpu, sizeof(CPU));
   difftest_step(cpu);
   CPU refcpu;
   difftest_regcpy(&refcpu, FROM_REF);
@@ -101,6 +100,7 @@ bool difftest_check(CPU *cpu) {
   if (difftest_failed) {
     isa_reg_display();
   }
+  memcpy(&lastcpu, cpu, sizeof(CPU));
   // TODO: difftest_checkmem
   // difftest_checkmem(cpu);
   return !difftest_failed;
