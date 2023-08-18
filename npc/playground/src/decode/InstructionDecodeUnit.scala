@@ -35,8 +35,11 @@ class InstructionDecodeUnit extends Module {
 
   val inst = instIn.R.bits.data
 
-  instIn.R.ready  := true.B
-  instIn.AR.valid := true.B
+  instIn.R.ready      := true.B
+  instIn.AR.valid     := true.B
+  instIn.AR.bits.id   := 0.U
+  instIn.AR.bits.prot := 0.U
+  instIn.AR.bits.addr := regIO.pc
 
   controlDecoder.input := inst
   decodeOut.control    := Mux(instIn.R.valid, controlDecoder.output, DecodeControlOut.default())
