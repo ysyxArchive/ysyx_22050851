@@ -125,5 +125,4 @@ void difftest_initial(CPU *cpu) {
   Log("difftest_memcpy, %d", difftest_memcpy);
   difftest_memcpy(MEM_START, mem, MEM_LEN, TO_REF);
   Log("difftest_init done");
-  memcpy(&lastcpu, cpu, sizeof(CPU));
 }
