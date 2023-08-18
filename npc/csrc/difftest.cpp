@@ -67,6 +67,7 @@ void difftest_step(CPU *cpu) {
 
 bool difftest_check(CPU *cpu) {
   static uint64_t last_pc = 0x80000000;
+  printf("%lx %lx\n", cpu->pc, last_pc);
   if (cpu->pc == last_pc) {
     return true;
   }
