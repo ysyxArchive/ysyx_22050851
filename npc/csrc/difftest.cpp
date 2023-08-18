@@ -66,10 +66,11 @@ void difftest_step(CPU *cpu) {
 }
 bool step = false;
 bool difftest_check(CPU *cpu) {
+  static CPU refcpu;
+  printf("%lx %lx\n", cpu->pc, refcpu.pc);
   step = !step;
   if (!step)
     return true;
-  CPU refcpu;
   difftest_step(cpu);
   difftest_regcpy(&refcpu, FROM_REF);
   bool difftest_failed = false;
