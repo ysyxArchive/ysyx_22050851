@@ -24,7 +24,7 @@ class InstructionFetchUnit extends Module {
   mem.io.isUnsigned := true.B
   mem.io.len        := 8.U
   mem.io.addr       := instOut.AR.bits.addr
-  mem.io.enable     := instOut.AR.fire
+  mem.io.enable     := false.B //instOut.AR.fire
 
   inst := Mux(instOut.AR.fire, mem.io.rdata, inst)
 
