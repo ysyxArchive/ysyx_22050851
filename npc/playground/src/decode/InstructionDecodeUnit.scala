@@ -27,7 +27,7 @@ object DecodeOut {
 }
 
 class InstructionDecodeUnit extends Module {
-  val regIO     = IO(Output(new RegisterFileIO()))
+  val regIO     = IO(Input(new RegisterFileIO()))
   val instIn    = IO(new FetchDecodeAxiIO())
   val decodeOut = IO(new DecodeOut)
 
