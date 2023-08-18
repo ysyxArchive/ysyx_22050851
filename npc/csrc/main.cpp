@@ -38,6 +38,7 @@ void init_npc() {
 
 extern "C" void mem_read(const svLogicVecVal *addr, const svLogicVecVal *len,
                          svLogicVecVal *ret, unsigned char is_unsigned) {
+  printf("read %x", addr);
   uint64_t data = read_mem(*(uint64_t *)addr, *(uint8_t *)len);
   if (!is_unsigned) {
     if (*(uint8_t *)len == 1) {
@@ -56,6 +57,7 @@ extern "C" void mem_read(const svLogicVecVal *addr, const svLogicVecVal *len,
 
 extern "C" void mem_write(const svLogicVecVal *addr, const svLogicVecVal *len,
                           const svLogicVecVal *data) {
+  printf("write %x", addr);
   uint64_t dataVal = (uint64_t)(data[1].aval) << 32 | data[0].aval;
   write_mem(*(uint64_t *)addr, *(uint8_t *)len, dataVal);
 }
