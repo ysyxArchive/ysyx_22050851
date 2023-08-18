@@ -28,6 +28,7 @@ uint64_t read_mem(uint64_t addr, size_t length) {
 }
 uint64_t read_mem_nolog(uint64_t addr, size_t length) {
   uint64_t ret = 0;
+  printf("%x\n", addr);
   if (addr == KBD_ADDR) {
     Assert(length == 4, "read KBD_ADDR with length == %d not allowed", length);
     ret = get_key();
@@ -53,8 +54,8 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
       panic("length %d is not allowed, only allowed 1, 2, 4, 8", length);
     }
   } else {
-    panic("writing to addr 0x%lx + 0x%lx out of range at pc == %x", addr,
-          length, cpu.pc);
+    panic("read from addr 0x%lx + 0x%lx out of range at pc == %x", addr, length,
+          cpu.pc);
   }
   return ret;
 }
