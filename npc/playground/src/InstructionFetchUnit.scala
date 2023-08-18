@@ -28,7 +28,7 @@ class InstructionFetchUnit extends Module {
 
   inst := Mux(instOut.AR.fire, mem.io.rdata, inst)
 
-  instValid := Mux(instValid, instOut.R.fire, instOut.AR.fire)
+  instValid := Mux(instValid, !instOut.R.fire, instOut.AR.fire)
 
   instOut.AR.ready := !instValid
   instOut.R.valid  := instValid
