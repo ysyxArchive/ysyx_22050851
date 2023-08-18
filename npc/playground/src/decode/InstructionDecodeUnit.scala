@@ -18,12 +18,14 @@ object DecodeDataOut {
 }
 
 class DecodeOut extends Bundle {
+  val valid   = Output(Bool())
   val data    = Output(new DecodeDataOut);
   val control = Output(new DecodeControlOut);
 }
 
 object DecodeOut {
-  val default = new DecodeOut().Lit(_.control -> DecodeControlOut.default(), _.data -> DecodeDataOut.default)
+  val default =
+    new DecodeOut().Lit(_.control -> DecodeControlOut.default(), _.data -> DecodeDataOut.default, _.valid -> false.B)
 }
 
 class InstructionDecodeUnit extends Module {
@@ -70,5 +72,7 @@ class InstructionDecodeUnit extends Module {
   decodeOut.data.src1 := rs1
   decodeOut.data.src2 := rs2
   decodeOut.data.dst  := rd
+
+  decodeOut.valid := instIn.R.fire
 
 }
