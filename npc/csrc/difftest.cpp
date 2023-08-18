@@ -66,10 +66,11 @@ void difftest_step(CPU *cpu) {
 }
 static CPU lastcpu;
 bool difftest_check(CPU *cpu) {
-  memcpy(&lastcpu, cpu, sizeof(CPU));
   if (cpu->pc != lastcpu.pc) {
+    memcpy(&lastcpu, cpu, sizeof(CPU));
     return true;
   }
+  memcpy(&lastcpu, cpu, sizeof(CPU));
   difftest_step(cpu);
   CPU refcpu;
   difftest_regcpy(&refcpu, FROM_REF);
