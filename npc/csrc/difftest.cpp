@@ -69,7 +69,8 @@ bool init = true;
 bool difftest_check(CPU *cpu) {
   printf("%lx %lx\n", cpu->pc, lastcpu.pc);
   if ((cpu->pc != lastcpu.pc) || init) {
-    init = false;
+    if (cpu->pc == lastcpu.pc)
+      init = false;
     memcpy(&lastcpu, cpu, sizeof(CPU));
     return true;
   }
