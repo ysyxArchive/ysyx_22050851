@@ -8,7 +8,7 @@ import dataclass.data
 class FetchDecodeAxiIO extends AxiLiteReadIO(32, 64) {}
 
 class InstructionFetchUnit extends Module {
-  val instOut = new FetchDecodeAxiIO()
+  val instOut = IO(new FetchDecodeAxiIO())
 
   val mem = Module(new BlackBoxMem)
 
