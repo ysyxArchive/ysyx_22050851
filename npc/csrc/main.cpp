@@ -44,7 +44,6 @@ extern "C" void mem_read(const svLogicVecVal *addr, const svLogicVecVal *len,
     temp = true;
     return;
   }
-  printf("memread\n");
   uint64_t data = read_mem(*(uint64_t *)addr, *(uint8_t *)len);
   if (!is_unsigned) {
     if (*(uint8_t *)len == 1) {
