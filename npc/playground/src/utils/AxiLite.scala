@@ -61,10 +61,14 @@ class AxiLiteIO(data_width: Int = 64, addr_width: Int = 64) extends Bundle {
   val R  = Flipped(DecoupledIO(new AxiLiteReadData(data_width)))
 }
 
-class AxiLiteReadIO(data_width: Int = 64, addr_width: Int = 64) extends AxiLiteIO {
+class AxiLiteReadIO(data_width: Int = 64, addr_width: Int = 64) extends Bundle {
+  val AR = DecoupledIO(new AxiLiteReadRequest(addr_width))
+  val R  = Flipped(DecoupledIO(new AxiLiteReadData(data_width)))
+
 }
 
-class AxiLiteWriteIO(data_width: Int = 64, addr_width: Int = 64) extends AxiLiteIO {
-  AR := DontCare
-  R  := DontCare
+class AxiLiteWriteIO(data_width: Int = 64, addr_width: Int = 64) extends Bundle {
+  val AW = DecoupledIO(new AxiLiteWriteRequest(addr_width))
+  val W  = DecoupledIO(new AxiLiteWriteData(data_width))
+  val B  = Flipped(DecoupledIO(new AxiLiteWriteResponse()))
 }
