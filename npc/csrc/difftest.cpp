@@ -66,13 +66,13 @@ void difftest_step(CPU *cpu) {
 }
 
 bool difftest_check(CPU *cpu) {
+  static CPU refcpu;
   static uint64_t last_pc = 0x80000000;
-  printf("%lx %lx\n", cpu->pc, last_pc);
-  if (cpu->pc == last_pc) {
+  printf("%lx %lx %lx\n", cpu->pc, last_pc, refcpu.pc);
+  if (cpu->pc == refcpu.pc) {
     return true;
   }
   last_pc = cpu->pc;
-  CPU refcpu;
   difftest_step(cpu);
   difftest_regcpy(&refcpu, FROM_REF);
   bool difftest_failed = false;
