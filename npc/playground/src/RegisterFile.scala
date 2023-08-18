@@ -41,7 +41,7 @@ class RegisterFile extends Module {
   }
 
   debugOut   := regs
-  debugPCOut := lastPCVal
+  debugPCOut := pc
 
   io.out0 := Mux(io.raddr0 === 0.U, 0.U, regs(io.raddr0))
   io.out1 := Mux(io.raddr1 === 0.U, 0.U, regs(io.raddr1))
