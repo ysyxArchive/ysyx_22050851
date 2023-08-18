@@ -72,10 +72,10 @@ bool difftest_check(CPU *cpu) {
   step = !step;
   if (step)
     return true;
-  if (pass) {
-    pass = false;
-    return true;
-  }
+  // if (pass) {
+  //   pass = false;
+  //   return true;
+  // }
   difftest_step(cpu);
   difftest_regcpy(&refcpu, FROM_REF);
   bool difftest_failed = false;
