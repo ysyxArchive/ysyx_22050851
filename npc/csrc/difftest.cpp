@@ -68,7 +68,7 @@ bool step = false;
 bool pass = true;
 bool difftest_check(CPU *cpu) {
   static CPU refcpu;
-  printf("%lx %lx\n", cpu->pc, refcpu.pc);
+  // printf("%lx %lx\n", cpu->pc, refcpu.pc);
   step = !step;
   if (step)
     return true;
