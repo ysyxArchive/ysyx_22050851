@@ -35,9 +35,16 @@ void init_npc() {
   }
   top->reset = false;
 }
-
+// skip when pc is 0x00
+static bool skip_once = false;
 extern "C" void mem_read(const svLogicVecVal *addr, const svLogicVecVal *len,
                          svLogicVecVal *ret, unsigned char is_unsigned) {
+  if (top->reset && !skip_once) {
+    ret[0].aval = 0x13;
+    ret[1].aval = 0;
+    skip_once = true;
+    return;
+  }
   uint64_t data = read_mem(*(uint64_t *)addr, *(uint8_t *)len);
   if (!is_unsigned) {
     if (*(uint8_t *)len == 1) {
@@ -56,6 +63,8 @@ extern "C" void mem_read(const svLogicVecVal *addr, const svLogicVecVal *len,
 
 extern "C" void mem_write(const svLogicVecVal *addr, const svLogicVecVal *len,
                           const svLogicVecVal *data) {
+  if (top->reset)
+    return;
   uint64_t dataVal = (uint64_t)(data[1].aval) << 32 | data[0].aval;
   write_mem(*(uint64_t *)addr, *(uint8_t *)len, dataVal);
 }
@@ -76,8 +85,6 @@ void one_step() {
   // 记录波形
   top->clock = 1;
   eval_trace();
-  uint64_t npc = top->pcio_pc;
-  top->pcio_inst = read_mem_nolog(npc, 4);
   update_cpu();
   if (!difftest_check(&cpu)) {
     is_halt = true;
@@ -97,18 +104,19 @@ int main(int argc, char *argv[]) {
   init_vcd_trace();
   top->reset = false;
   init_device();
+  lightSSS.do_fork();
   init_npc();
   update_cpu();
   difftest_initial(&cpu);
-  lightSSS.do_fork();
   Log("init_done");
 
   while (!is_halt) {
     one_step();
   }
   int ret_value = cpu.gpr[10];
-  if (is_bad_halt || ret_value) {
-    Log("bad halt! pc=0x%lx inst=0x%08x", top->pcio_pc, top->pcio_inst);
+  if (is_bad_halt || ret_value != 0) {
+    Log("bad halt! pc=0x%lx inst=0x%08x", cpu.pc,
+        *(uint32_t *)&(mem[cpu.pc - MEM_START]));
     if (!lightSSS.is_child()) {
       lightSSS.wakeup_child(npc_clock);
     }

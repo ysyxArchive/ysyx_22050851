@@ -53,8 +53,8 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
       panic("length %d is not allowed, only allowed 1, 2, 4, 8", length);
     }
   } else {
-    panic("writing to addr 0x%lx + 0x%lx out of range at pc == %x", addr,
-          length, cpu.pc);
+    panic("read from addr 0x%lx + 0x%lx out of range at pc == %x", addr, length,
+          cpu.pc);
   }
   return ret;
 }

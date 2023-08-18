@@ -59,7 +59,7 @@ class InstructionExecuteUnit extends Module {
       PcCsr.csr -> csrIn
     )
   )
-  regIO.dnpc := Mux(pcBranch.asBool, dnpcAlter, snpc)
+  regIO.dnpc := Mux(decodeIn.valid, Mux(pcBranch.asBool, dnpcAlter, snpc), regIO.pc)
   val regwdata = MuxLookup(
     controlIn.regwritemux,
     DontCare,
