@@ -64,9 +64,9 @@ void difftest_step(CPU *cpu) {
     difftest_exec(1);
   }
 }
-
+static CPU refcpu;
 bool difftest_check(CPU *cpu) {
-  static CPU refcpu;
+  
   static uint64_t last_pc = 0x80000000;
   printf("%lx %lx %lx\n", cpu->pc, last_pc, refcpu.pc);
   if (cpu->pc == refcpu.pc) {
@@ -125,4 +125,5 @@ void difftest_initial(CPU *cpu) {
   Log("difftest_memcpy, %d", difftest_memcpy);
   difftest_memcpy(MEM_START, mem, MEM_LEN, TO_REF);
   Log("difftest_init done");
+  difftest_regcpy(&refcpu, FROM_REF);
 }
