@@ -35,13 +35,13 @@ void init_npc() {
   }
   top->reset = false;
 }
-
+bool temp = false;
 extern "C" void mem_read(const svLogicVecVal *addr, const svLogicVecVal *len,
                          svLogicVecVal *ret, unsigned char is_unsigned) {
-  if (top->reset) {
+  if (top->reset && !temp) {
     ret[0].aval = 0x13;
     ret[1].aval = 0;
-    printf("memread2\n");
+    temp = true;
     return;
   }
   printf("memread\n");
