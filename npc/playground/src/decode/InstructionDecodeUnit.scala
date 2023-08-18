@@ -39,7 +39,7 @@ class InstructionDecodeUnit extends Module {
   instIn.AR.valid := true.B
 
   controlDecoder.input := inst
-  decodeOut.control    := Mux(instIn.R.valid, controlDecoder.output, DecodeOut.default)
+  decodeOut.control    := Mux(instIn.R.valid, controlDecoder.output, DecodeControlOut.default())
 
   val rs1  = inst(19, 15)
   val rs2  = inst(24, 20)
