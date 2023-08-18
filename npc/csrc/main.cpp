@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
     one_step();
   }
   int ret_value = cpu.gpr[10];
-  if (is_bad_halt || ret_value) {
+  if (is_bad_halt || ret_value != 0) {
     Log("bad halt! pc=0x%lx inst=0x%08x", cpu.pc, *(uint32_t *)&(mem[cpu.pc]));
     if (!lightSSS.is_child()) {
       lightSSS.wakeup_child(npc_clock);
