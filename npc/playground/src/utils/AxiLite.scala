@@ -62,7 +62,6 @@ class AxiLiteIO(data_width: Int = 64, addr_width: Int = 64) extends Bundle {
 }
 
 class AxiLiteReadIO(data_width: Int = 64, addr_width: Int = 64) extends AxiLiteIO {
-  AW.valid := false.B
 }
 
 class AxiLiteWriteIO(data_width: Int = 64, addr_width: Int = 64) extends AxiLiteIO {
