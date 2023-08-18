@@ -28,7 +28,6 @@ uint64_t read_mem(uint64_t addr, size_t length) {
 }
 uint64_t read_mem_nolog(uint64_t addr, size_t length) {
   uint64_t ret = 0;
-  printf("aaa %lx\n", addr);
   if (addr == KBD_ADDR) {
     Assert(length == 4, "read KBD_ADDR with length == %d not allowed", length);
     ret = get_key();
