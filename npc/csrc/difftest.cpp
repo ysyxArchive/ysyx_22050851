@@ -64,7 +64,7 @@ void difftest_step(CPU *cpu) {
     difftest_exec(1);
   }
 }
-bool step = true;
+bool step = false;
 bool difftest_check(CPU *cpu) {
   step = !step;
   if (!step)
