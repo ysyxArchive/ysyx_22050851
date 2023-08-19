@@ -83,7 +83,7 @@ object PrivMode {
 
 class ControlRegisterFileIO extends Bundle {
   val src1Data = Input(UInt(64.W))
-  val decodeIn = Flipped(new DecodeOut())
+  val decodeIn = Input(Flipped(new DecodeOut()))
   val output   = Output(UInt(64.W))
 }
 
