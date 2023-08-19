@@ -37,7 +37,7 @@ class InstructionDecodeUnit extends Module {
   val controlDecoder = Module(new InstContorlDecoder)
 
   val inst      = RegInit(0x13.U(64.W))
-  val instValid = RegInit(false.B)
+  val instValid = RegInit(true.B)
 
   memAxiM.R.ready      := decodeOut.done
   memAxiM.AR.valid     := decodeOut.done
