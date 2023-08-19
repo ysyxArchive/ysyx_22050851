@@ -139,7 +139,7 @@ class InstructionExecuteUnit extends Module {
   memStatus := FSM(
     memStatus,
     List(
-      (idle, shouldMemWork, waitReq),
+      (idle, firstValid && shouldMemWork, waitReq),
       (waitReq, Mux(memIsRead, memAxiM.AR.fire, memAxiM.AW.fire && memAxiM.W.fire), waitRes),
       (waitRes, Mux(memIsRead, memAxiM.R.fire, memAxiM.B.fire), idle)
     )
