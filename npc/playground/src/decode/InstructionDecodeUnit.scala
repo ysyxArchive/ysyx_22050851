@@ -37,7 +37,7 @@ class InstructionDecodeUnit extends Module {
 
   val waitAR :: waitR :: busy :: others = Enum(3)
 
-  val status = RegInit(busy)
+  val status = RegInit(waitAR)
   status := FSM(
     status,
     List(
