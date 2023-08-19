@@ -1,10 +1,12 @@
 #include "device.h"
 #include "difftest.h"
+#include "VCPU.h"
 #include <mem.h>
 uint8_t mem[MEM_LEN] = {0};
 size_t bin_file_size;
 extern CPU cpu;
 extern uint32_t vga_data[VGA_HEIGHT * VGA_WIDTH];
+extern VCPU *top;
 
 void init_memory(char *bin_path) {
   FILE *bin_file = fopen(bin_path, "r");
@@ -53,6 +55,8 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
       panic("length %d is not allowed, only allowed 1, 2, 4, 8", length);
     }
   } else {
+    if (top->reset)
+      return 0;
     panic("read from addr 0x%lx + 0x%lx out of range at pc == %x", addr, length,
           cpu.pc);
   }
