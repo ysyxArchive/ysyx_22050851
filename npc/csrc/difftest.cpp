@@ -64,7 +64,7 @@ void difftest_step(CPU *cpu) {
     difftest_exec(1);
   }
 }
-// when pc changed, pc pointered before 
+// when pc changed, last pc pointered 
 static CPU lastcpu;
 static CPU refcpu;
 bool difftest_check(CPU *cpu) {
