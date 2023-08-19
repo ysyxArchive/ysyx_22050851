@@ -68,6 +68,9 @@ class MemInterface extends Module {
   readResId  := Mux(busy, readResId, axiS.AR.bits.id)
   writeResId := Mux(busy, writeResId, axiS.AW.bits.id)
 
+  axiS.W.ready     := writeValid
+  axiS.AW.ready    := writeValid
+  axiS.AR.ready    := readValid
   axiS.B.valid     := Mux(isReading, false.B, backValid)
   axiS.B.bits.id   := writeResId
   axiS.R.valid     := Mux(isReading, backValid, false.B)
