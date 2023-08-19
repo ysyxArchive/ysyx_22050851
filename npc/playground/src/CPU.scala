@@ -4,6 +4,7 @@ import chisel3.util.Decoupled
 import decode._
 
 class CPU extends Module {
+  val mem2        = Module(new MemInterface)
   val regs        = Module(new RegisterFile)
   val csrregs     = Module(new ControlRegisterFile)
   val ifu         = Module(new InstructionFetchUnit)
@@ -12,7 +13,7 @@ class CPU extends Module {
   val mem         = Module(new BlackBoxMem)
   val blackBoxOut = Module(new BlackBoxRegs)
 
-  decoder.instIn <> ifu.instOut
+  decoder.instIn <> mem2.axiS
   decoder.regIO := regs.io
 
   exe.decodeIn := decoder.decodeOut

@@ -32,23 +32,45 @@ class MemInterface extends Module {
   val axiS = IO(Flipped(MemAxiLite()))
   val mem  = Module(new BlackBoxMem)
 
+  val dataRet    = RegInit(0.U(64.W))
+  val backValid  = RegInit(false.B)
+  val busy       = RegInit(false.B)
+  val isReading  = RegInit(false.B)
+  val readResId  = Reg(UInt(axiS.id_r_width.W))
+  val writeResId = Reg(UInt(axiS.id_w_width.W))
+
   // now rather read or write
-  val requestValid = axiS.AR.valid || axiS.AW.valid
-  val isRead       = axiS.AR.valid
+  val readValid    = axiS.AR.valid
+  val writeValid   = axiS.AW.valid && axiS.W.valid
+  val requestValid = readValid || writeValid
+
+  // ready until all requirment valid
+  val writeReady = writeValid && !readValid && !busy
+  val readReady  = readValid && !busy
+
+  // AW W always fire together
+  val writeReqFire = axiS.AW.fire || axiS.W.fire
+  val readReqFire  = axiS.AR.fire
+  val reqFire      = writeReqFire || readReqFire
 
   mem.io.clock  := clock
-  mem.io.isRead := isRead
+  mem.io.isRead := readReqFire
   mem.io.mask   := axiS.W.bits.strb
-  // mem.io.addr   := instOut.AR.bits.addr
-  // mem.io.enable := instOut.AR.fire
+  mem.io.wdata  := axiS.W.bits.data
+  mem.io.addr   := Mux(readReqFire, axiS.AR.bits.addr, axiS.AW.bits.addr)
+  mem.io.enable := reqFire
+  dataRet       := Mux(reqFire, mem.io.rdata, dataRet)
 
-  // inst := Mux(instOut.AR.fire, mem.io.rdata, inst)
+  // interface status
+  backValid  := Mux(backValid, !Mux(isReading, axiS.R.fire, axiS.B.fire), busy)
+  busy       := Mux(busy, !Mux(isReading, axiS.R.fire, axiS.B.fire), reqFire)
+  isReading  := Mux(busy, isReading, readReqFire)
+  readResId  := Mux(busy, readResId, axiS.AR.bits.id)
+  writeResId := Mux(busy, writeResId, axiS.AW.bits.id)
 
-  // instValid := Mux(instValid, !instOut.R.fire, instOut.AR.fire)
-
-  // instOut.AR.ready := !instValid
-  // instOut.R.valid  := instValid
-
-  // instOut.R.bits := outData
-
+  axiS.B.valid     := Mux(isReading, false.B, backValid)
+  axiS.B.bits.id   := writeResId
+  axiS.R.valid     := Mux(isReading, backValid, false.B)
+  axiS.R.bits.id   := readResId
+  axiS.R.bits.data := dataRet
 }
