@@ -19,8 +19,7 @@ class InstructionExecuteUnit extends Module {
 
   val alu = Module(new ALU)
 
-  val memOut   = Wire(UInt(64.W))
-  val memValid = Wire(Bool())
+  val memOut = Wire(UInt(64.W))
 
   val busy = false.B
 
@@ -31,11 +30,7 @@ class InstructionExecuteUnit extends Module {
   val src2 = Wire(UInt(64.W))
   regIO.raddr0 := dataIn.src1
   regIO.raddr1 := dataIn.src2
-  regIO.waddr := Mux(
-    controlIn.regwrite && !(controlIn.regwritemux === RegWriteMux.mem.asUInt && !memValid),
-    dataIn.dst,
-    0.U
-  )
+  regIO.waddr  := Mux(controlIn.regwrite, dataIn.dst, 0.U)
   val snpc = regIO.pc + 4.U
   val pcBranch = MuxLookup(
     controlIn.pcaddrsrc,
