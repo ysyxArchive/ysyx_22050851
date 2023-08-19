@@ -66,13 +66,26 @@ void update_cpu() {
   // TODO: ITRACE
   //  Log("updating cpu , pc is %lx", cpu.pc);
 }
-
 void one_step() {
-  printf("step\n");
   // 记录波形
   top->clock = 1;
   eval_trace();
   update_cpu();
+
+  static int latpcchange = 0;
+  static uint64_t lastpc = 0;
+  if (lastpc == cpu.pc) {
+    latpcchange++;
+    if (latpcchange > 10) {
+      Log("error pc not changed for 10 cycles");
+      is_bad_halt = true;
+      is_halt = true;
+    }
+  } else {
+    latpcchange = 0;
+  }
+  lastpc = cpu.pc;
+  
   if (!difftest_check(&cpu)) {
     is_halt = true;
     is_bad_halt = true;
