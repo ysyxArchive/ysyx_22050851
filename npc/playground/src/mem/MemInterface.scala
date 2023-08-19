@@ -2,6 +2,7 @@ import chisel3._
 import chisel3.experimental.IO
 import chisel3.util._
 import os.stat
+import utils.FSM
 object MemAxiLite {
   def apply() = AxiLiteIO(32, 64)
 }
@@ -36,6 +37,13 @@ class MemInterface extends Module {
   val waitReq :: writeBack :: others = Enum(3)
 
   val status = RegInit(waitReq)
+  status := FSM(
+    status,
+    List(
+      (waitReq, axiS.AR.fire || (axiS.AW.fire && axiS.W.fire), writeBack),
+      (writeBack, axiS.R.fire || axiS.B.fire, waitReq)
+    )
+  )
 
   val dataRet    = RegInit(0.U(64.W))
   val isReading  = RegInit(false.B)
