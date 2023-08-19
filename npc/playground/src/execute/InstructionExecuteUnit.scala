@@ -19,6 +19,8 @@ class InstructionExecuteUnit extends Module {
 
   val alu = Module(new ALU)
 
+  val memOut = Wire(UInt(64.W))
+
   // TODO: impl this
   // in.ready := true.B
 
@@ -66,7 +68,7 @@ class InstructionExecuteUnit extends Module {
     EnumSeq(
       RegWriteMux.alu -> alu.io.out,
       RegWriteMux.snpc -> snpc,
-      RegWriteMux.mem -> memIO.rdata,
+      RegWriteMux.mem -> memOut,
       RegWriteMux.aluneg -> Utils.zeroExtend(alu.signalIO.isNegative, 1, 64),
       RegWriteMux.alunotcarryandnotzero -> Utils
         .zeroExtend(!alu.signalIO.isCarry && !alu.signalIO.isZero, 1, 64),
@@ -109,13 +111,7 @@ class InstructionExecuteUnit extends Module {
   alu.io.opType := AluMode.apply(controlIn.alumode)
 
   // mem
-  memIO.clock      := clock
-  memIO.addr       := alu.io.out
-  memIO.isRead     := controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
-  memIO.isUnsigned := controlIn.memmode === MemMode.readu.asUInt
-  memIO.enable     := controlIn.memmode =/= MemMode.no.asUInt
-  // TODO
-  memIO.len := MuxLookup(
+  val memlen = MuxLookup(
     controlIn.memlen,
     1.U,
     EnumSeq(
@@ -124,6 +120,24 @@ class InstructionExecuteUnit extends Module {
       MemLen.four -> 4.U,
       MemLen.eight -> 8.U
     )
+  )
+
+  val memMask = Cat(
+    Fill(4, Mux(memlen > 4.U, 1.U, 0.U)),
+    Fill(2, Mux(memlen > 2.U, 1.U, 0.U)),
+    Fill(1, Mux(memlen > 1.U, 1.U, 0.U)),
+    1.U(1.W)
+  )
+  memIO.clock  := clock
+  memIO.addr   := alu.io.out
+  memIO.isRead := controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
+  memIO.enable := controlIn.memmode =/= MemMode.no.asUInt
+  memIO.mask   := memMask
+
+  memOut := Mux(
+    controlIn.memmode === MemMode.read.asUInt,
+    Utils.signExtend(memIO.rdata, memlen << 3),
+    Utils.zeroExtend(memIO.rdata, memlen <<3)
   )
   memIO.wdata := src2
   // blackBoxHalt

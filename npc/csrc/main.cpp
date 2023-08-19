@@ -37,36 +37,30 @@ void init_npc() {
 }
 // skip when pc is 0x00
 static bool skip_once = false;
-extern "C" void mem_read(const svLogicVecVal *addr, const svLogicVecVal *len,
-                         svLogicVecVal *ret, unsigned char is_unsigned) {
+extern "C" void mem_read(const svLogicVecVal *addr, svLogicVecVal *ret) {
   if (top->reset && !skip_once) {
     ret[0].aval = 0x13;
     ret[1].aval = 0;
     skip_once = true;
     return;
   }
-  uint64_t data = read_mem(*(uint64_t *)addr, *(uint8_t *)len);
-  if (!is_unsigned) {
-    if (*(uint8_t *)len == 1) {
-      data = (uint64_t)(int64_t)(int8_t)data;
-    } else if (*(uint8_t *)len == 2) {
-      data = (uint64_t)(int64_t)(int16_t)data;
-    } else if (*(uint8_t *)len == 4) {
-      data = (uint64_t)(int64_t)(int32_t)data;
-    } else if (*(uint8_t *)len == 8) {
-      data = (uint64_t)(int64_t)(int64_t)data;
-    }
-  }
+  uint64_t data = read_mem(*(uint64_t *)addr, 8);
   ret[0].aval = data;
   ret[1].aval = data >> 32;
 }
 
-extern "C" void mem_write(const svLogicVecVal *addr, const svLogicVecVal *len,
+extern "C" void mem_write(const svLogicVecVal *addr, const svLogicVecVal *mask,
                           const svLogicVecVal *data) {
   if (top->reset)
     return;
+  uint8_t len = 0;
+  auto val = *(uint8_t *)mask;
+  while (val) {
+    val >>= 1;
+    len++;
+  }
   uint64_t dataVal = (uint64_t)(data[1].aval) << 32 | data[0].aval;
-  write_mem(*(uint64_t *)addr, *(uint8_t *)len, dataVal);
+  write_mem(*(uint64_t *)addr, len, dataVal);
 }
 
 extern "C" void set_gpr_ptr(const svOpenArrayHandle r) {
