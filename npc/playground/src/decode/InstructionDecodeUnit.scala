@@ -35,7 +35,7 @@ class InstructionDecodeUnit extends Module {
   val decodeOut      = IO(new DecodeOut)
   val controlDecoder = Module(new InstContorlDecoder)
 
-  val waitSend  = RegInit(true.B)
+  val waitSend  = RegInit(false.B)
   val inst      = RegInit(0x13.U(64.W))
   val instValid = RegInit(false.B)
 
