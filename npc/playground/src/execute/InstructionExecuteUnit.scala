@@ -159,4 +159,6 @@ class InstructionExecuteUnit extends Module {
   val blackBox = Module(new BlackBoxHalt);
   blackBox.io.halt     := controlIn.goodtrap
   blackBox.io.bad_halt := controlIn.badtrap
+
+  decodeIn.done := true.B
 }
