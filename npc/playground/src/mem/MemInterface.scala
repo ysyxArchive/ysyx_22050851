@@ -56,7 +56,7 @@ class MemInterface extends Module {
   val requestValid = readValid || writeValid
 
   // AW W always fire together
-  val writeReqFire = axiS.AW.fire || axiS.W.fire
+  val writeReqFire = axiS.AW.fire && axiS.W.fire
   val readReqFire  = axiS.AR.fire
   val reqFire      = writeReqFire || readReqFire
 
