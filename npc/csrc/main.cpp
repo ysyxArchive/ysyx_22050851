@@ -35,13 +35,14 @@ void init_npc() {
   }
   top->reset = false;
 }
-bool temp = false;
+// skip when pc is 0x00
+static bool skip_once = false;
 extern "C" void mem_read(const svLogicVecVal *addr, const svLogicVecVal *len,
                          svLogicVecVal *ret, unsigned char is_unsigned) {
-  if (top->reset && !temp) {
+  if (top->reset && !skip_once) {
     ret[0].aval = 0x13;
     ret[1].aval = 0;
-    temp = true;
+    skip_once = true;
     return;
   }
   uint64_t data = read_mem(*(uint64_t *)addr, *(uint8_t *)len);

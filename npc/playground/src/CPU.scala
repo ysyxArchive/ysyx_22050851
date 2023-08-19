@@ -4,10 +4,6 @@ import chisel3.util.Decoupled
 import decode._
 
 class CPU extends Module {
-  // val pcio = IO(new Bundle {
-  //   val inst = Input(UInt(32.W))
-  //   val pc   = Output(UInt(64.W))
-  // })
   val regs        = Module(new RegisterFile)
   val csrregs     = Module(new ControlRegisterFile)
   val ifu         = Module(new InstructionFetchUnit)

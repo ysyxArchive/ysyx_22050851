@@ -29,10 +29,7 @@ class RegisterFile extends Module {
   val debugOut   = IO(Output(Vec(32, UInt(64.W))))
   val debugPCOut = IO(Output(UInt(64.W)))
 
-  val pc        = RegNext(io.dnpc, "h80000000".asUInt(64.W))
-  val lastPC    = RegNext(pc)
-  val lastPCVal = RegInit("h80000000".asUInt(64.W))
-  lastPCVal := Mux(lastPC === pc, lastPCVal, lastPC)
+  val pc = RegNext(io.dnpc, "h80000000".asUInt(64.W))
 
   val regs = RegInit(VecInit(Seq.fill(32)(0.U(64.W))))
 

@@ -64,34 +64,38 @@ void difftest_step(CPU *cpu) {
     difftest_exec(1);
   }
 }
+// TODO: NOT GOOD
 bool step = false;
-bool pass = true;
+static CPU lastcpu;
+static CPU refcpu;
 bool difftest_check(CPU *cpu) {
-  static CPU refcpu;
   step = !step;
-  if (step)
+  if (lastcpu.pc == cpu->pc) {
+    memcpy(&lastcpu, cpu, sizeof(CPU));
     return true;
+  }
+  memcpy(&lastcpu, cpu, sizeof(CPU));
   difftest_step(cpu);
   difftest_regcpy(&refcpu, FROM_REF);
   bool difftest_failed = false;
-  if (cpu->pc != refcpu.pc) {
+  if (lastcpu.pc != refcpu.pc) {
     printf("Difftest Failed\n Expected pc: %llx, Actual pc: %llx \n", refcpu.pc,
-           cpu->pc);
+           lastcpu.pc);
     difftest_failed = true;
   }
   for (int i = 0; i < 32; i++) {
-    if (cpu->gpr[i] != refcpu.gpr[i]) {
+    if (lastcpu.gpr[i] != refcpu.gpr[i]) {
       printf("Difftest Failed\ncheck reg[%d] failed before pc:%llx\nExpected: "
              "%llx, Actual: %llx \n",
-             i, cpu->pc, refcpu.gpr[i], cpu->gpr[i]);
+             i, lastcpu.pc, refcpu.gpr[i], lastcpu.gpr[i]);
       difftest_failed = true;
     }
   }
   for (int i = 0; i < 6; i++) {
-    if (cpu->csr[i] != refcpu.csr[i]) {
+    if (lastcpu.csr[i] != refcpu.csr[i]) {
       printf("Difftest Failed\ncheck csr %s failed before pc:%llx\nExpected: "
              "%llx, Actual: %llx \n",
-             csrregs[i], cpu->pc, refcpu.csr[i], cpu->csr[i]);
+             csrregs[i], lastcpu.pc, refcpu.csr[i], lastcpu.csr[i]);
       difftest_failed = true;
     }
   }
@@ -123,4 +127,5 @@ void difftest_initial(CPU *cpu) {
   Log("difftest_memcpy, %d", difftest_memcpy);
   difftest_memcpy(MEM_START, mem, MEM_LEN, TO_REF);
   Log("difftest_init done");
+  memcpy(&lastcpu, cpu, sizeof(CPU));
 }
