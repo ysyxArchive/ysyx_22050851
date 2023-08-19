@@ -62,8 +62,8 @@ class AxiLiteIO(dataType: Data, addr_width: Int) extends Bundle {
 }
 
 object AxiLiteIO {
-  def apply(dataWidth: Int, addr_width:  Int = 64) = new AxiLiteIO(UInt(dataWidth.W), addr_width)
-  def apply(dataType:  Data, addr_width: Int = 64) = new AxiLiteIO(dataType, addr_width)
+  def apply(dataWidth: Int, addr_width:  Int) = new AxiLiteIO(UInt(dataWidth.W), addr_width)
+  def apply(dataType:  Data, addr_width: Int) = new AxiLiteIO(dataType, addr_width)
 }
 
 // class AxiLiteReadIO(data_width: Int = 64, addr_width: Int = 64) extends Bundle {
