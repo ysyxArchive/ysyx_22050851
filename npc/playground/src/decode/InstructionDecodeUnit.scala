@@ -30,20 +30,22 @@ object DecodeOut {
 }
 
 class InstructionDecodeUnit extends Module {
-  val regIO     = IO(Input(new RegisterFileIO()))
-  val memAxiM   = MemReadOnlyAxiLiteIO.master()
-  val decodeOut = IO(new DecodeOut)
-
+  val regIO          = IO(Input(new RegisterFileIO()))
+  val memAxiM        = MemReadOnlyAxiLiteIO.master()
+  val decodeOut      = IO(new DecodeOut)
   val controlDecoder = Module(new InstContorlDecoder)
 
+  val waitSend  = RegInit(true.B)
   val inst      = RegInit(0x13.U(64.W))
   val instValid = RegInit(false.B)
 
-  memAxiM.R.ready      := decodeOut.done
-  memAxiM.AR.valid     := decodeOut.done
+  memAxiM.R.ready      := decodeOut.done && !waitSend
+  memAxiM.AR.valid     := waitSend
   memAxiM.AR.bits.id   := 0.U
   memAxiM.AR.bits.prot := 0.U
   memAxiM.AR.bits.addr := regIO.pc
+
+  waitSend := Mux(waitSend, !memAxiM.AR.fire, decodeOut.done)
 
   inst      := Mux(memAxiM.R.fire, memAxiM.R.bits.asUInt, inst)
   instValid := Mux(instValid, !decodeOut.done, memAxiM.R.fire)
