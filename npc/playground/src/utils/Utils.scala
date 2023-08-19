@@ -18,7 +18,7 @@ object Utils {
   }
 
   def zeroExtend(num: UInt, width: Int, targetWidth: Int): UInt = {
-    Cat(Fill(targetWidth - num.getWidth, 0.U), num(width - 1, 0))
+    Cat(Fill(targetWidth - width, 0.U), num(width - 1, 0))
   }
   def zeroExtend(num: UInt, width: UInt): UInt = {
     val ret = Wire(UInt(64.W))
