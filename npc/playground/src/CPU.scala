@@ -18,7 +18,7 @@ class CPU extends Module {
 
   exe.decodeIn := decoder.decodeOut
   exe.regIO <> regs.io
-  exe.memIO <> mem.axiS
+  exe.memAxiM <> mem.axiS
   exe.csrIn := csrregs.io.output
 
   csrregs.io.decodeIn := decoder.decodeOut
