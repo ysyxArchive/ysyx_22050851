@@ -145,12 +145,12 @@ class InstructionExecuteUnit extends Module {
     )
   )
 
-  memAxiM.AR.valid     := memStatus === waitReq && memIsRead
+  memAxiM.AR.valid     := memStatus === waitReq && memIsRead && shouldMemWork
   memAxiM.AR.bits.addr := alu.io.out
   memAxiM.AR.bits.id   := 0.U
   memAxiM.AR.bits.prot := 0.U
   memAxiM.R.ready      := memStatus === waitRes && memIsRead
-  memAxiM.AW.valid     := memStatus === waitReq && !memIsRead
+  memAxiM.AW.valid     := memStatus === waitReq && !memIsRead && shouldMemWork
   memAxiM.AW.bits.addr := alu.io.out
   memAxiM.AW.bits.id   := 0.U
   memAxiM.AW.bits.prot := 0.U
