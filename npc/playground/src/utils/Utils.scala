@@ -29,7 +29,7 @@ object Utils {
     }.elsewhen(width === 32.U) {
       ret := Utils.zeroExtend(num, 32, 64)
     }.elsewhen(width === 64.U) {
-      ret := Utils.zeroExtend(num, 64, 64)
+      ret := num
     }.otherwise {
       ret := 0.U(64.W)
       throw new Error("width not implemented")
@@ -48,9 +48,9 @@ object Utils {
     }.elsewhen(width === 32.U) {
       ret := Utils.signExtend(num, 32, 64)
     }.elsewhen(width === 64.U) {
-      ret := Utils.signExtend(num, 64, 64)
+      ret := num
     }.otherwise {
-      ret := 0.U(64.W)
+      ret := 0.U
       throw new Error("width not implemented")
     }
     ret
