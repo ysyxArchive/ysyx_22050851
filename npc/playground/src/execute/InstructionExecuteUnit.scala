@@ -138,10 +138,12 @@ class InstructionExecuteUnit extends Module {
   memAxiM.AR.valid     := !memWaiting && shouldMemWork && memIsRead
   memAxiM.AR.bits.addr := alu.io.out
   memAxiM.AR.bits.id   := 0.U
+  memAxiM.AR.bits.prot := 0.U
   memAxiM.R.ready      := memAxiM.R.valid
   memAxiM.AW.valid     := !memWaiting && shouldMemWork && !memIsRead
   memAxiM.AW.bits.addr := alu.io.out
   memAxiM.AW.bits.id   := 0.U
+  memAxiM.AW.bits.prot := 0.U
   memAxiM.W.valid      := !memWaiting && shouldMemWork && !memIsRead
   memAxiM.W.bits.data  := src2
   memAxiM.W.bits.strb  := memMask
