@@ -38,12 +38,12 @@ void init_npc() {
 // skip when pc is 0x00
 static bool skip_once = false;
 extern "C" void mem_read(const svLogicVecVal *addr, svLogicVecVal *ret) {
-  if (top->reset && !skip_once) {
-    ret[0].aval = 0x13;
-    ret[1].aval = 0;
-    skip_once = true;
-    return;
-  }
+  // if (!skip_once) {
+  //   ret[0].aval = 0x13;
+  //   ret[1].aval = 0;
+  //   skip_once = true;
+  //   return;
+  // }
   uint64_t data = read_mem(*(uint64_t *)addr, 8);
   ret[0].aval = data;
   ret[1].aval = data >> 32;
@@ -51,8 +51,6 @@ extern "C" void mem_read(const svLogicVecVal *addr, svLogicVecVal *ret) {
 
 extern "C" void mem_write(const svLogicVecVal *addr, const svLogicVecVal *mask,
                           const svLogicVecVal *data) {
-  if (top->reset)
-    return;
   uint8_t len = 0;
   auto val = *(uint8_t *)mask;
   while (val) {
