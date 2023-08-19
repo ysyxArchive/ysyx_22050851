@@ -31,8 +31,7 @@ object Utils {
     }.elsewhen(width === 64.U) {
       ret := num
     }.otherwise {
-      ret := 0.U(64.W)
-      throw new Error("width not implemented")
+      ret := 0.U
     }
     ret
   }
@@ -51,9 +50,6 @@ object Utils {
       ret := num
     }.otherwise {
       ret := 0.U
-    }
-    when(true.B === false.B){
-      throw new Error("width not implemented")
     }
     ret
   }
