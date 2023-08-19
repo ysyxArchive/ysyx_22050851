@@ -64,6 +64,7 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
 }
 
 void write_mem(uint64_t addr, size_t length, uint64_t data) {
+  printf("%lx, %d, %lx\n", addr, length, data);
   if (addr >= FB_ADDR && addr <= FB_ADDR + VGA_WIDTH * VGA_HEIGHT * 4) {
     Assert(length == 4, "output to FB with length == %d, not 4", length);
     vga_data[(addr - FB_ADDR) / 4] = data;
