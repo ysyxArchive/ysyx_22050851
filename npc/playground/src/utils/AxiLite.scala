@@ -15,9 +15,9 @@ class AxiLiteWriteRequest(addr_width: Int, id_w_width: Int = 1) extends Bundle {
 
 }
 
-class AxiLiteWriteData(data_width: Int) extends Bundle {
-  val data = Output(UInt(data_width.W)) // Y -
-  val strb = Output(UInt((data_width / 8).W)) // YS WSTRB_Present
+class AxiLiteWriteData(dataType: Data) extends Bundle {
+  val data = Output(dataType) // Y -
+  val strb = Output(UInt((dataType.getWidth / 8).W)) // YS WSTRB_Present
   //   val user      = Input(Bool()) // O USER_DATA_WIDTH > 0
   //   val poison    = Input(Bool()) // O Poison
   //   val trace     = Input(Bool()) // O Trace_Signals
@@ -43,9 +43,9 @@ class AxiLiteReadRequest(addr_width: Int, id_r_width: Int = 1) extends Bundle {
 
 }
 
-class AxiLiteReadData(data_width: Int, id_r_width: Int = 1) extends Bundle {
+class AxiLiteReadData(dataType: Data, id_r_width: Int = 1) extends Bundle {
   val id   = Output(UInt(id_r_width.W)) // YS ID_R_WIDTH > 0
-  val data = Output(UInt(data_width.W)) // Y -
+  val data = Output(dataType) // Y -
   //   val resp      = Input(Bool()) // O RRESP_WIDTH > 0
   //   val user      = Input(Bool()) // O USER_DATA_WIDTH > 0 orUSER_RESP_WIDTH >
   //   val poison    = Input(Bool()) // O Poison
@@ -53,22 +53,27 @@ class AxiLiteReadData(data_width: Int, id_r_width: Int = 1) extends Bundle {
   //   val idunq     = Input(Bool()) // O Unique_ID_Support
 
 }
-class AxiLiteIO(data_width: Int = 64, addr_width: Int = 64) extends Bundle {
+class AxiLiteIO(dataType: Data, addr_width: Int) extends Bundle {
   val AW = DecoupledIO(new AxiLiteWriteRequest(addr_width))
-  val W  = DecoupledIO(new AxiLiteWriteData(data_width))
+  val W  = DecoupledIO(new AxiLiteWriteData(dataType))
   val B  = Flipped(DecoupledIO(new AxiLiteWriteResponse()))
   val AR = DecoupledIO(new AxiLiteReadRequest(addr_width))
-  val R  = Flipped(DecoupledIO(new AxiLiteReadData(data_width)))
+  val R  = Flipped(DecoupledIO(new AxiLiteReadData(dataType)))
 }
 
-class AxiLiteReadIO(data_width: Int = 64, addr_width: Int = 64) extends Bundle {
-  val AR = DecoupledIO(new AxiLiteReadRequest(addr_width))
-  val R  = Flipped(DecoupledIO(new AxiLiteReadData(data_width)))
-
+object AxiLiteIO {
+  def apply(dataWidth: Int, addr_width:  Int = 64) = new AxiLiteIO(UInt(dataWidth.W), addr_width)
+  def apply(dataType:  Data, addr_width: Int = 64) = new AxiLiteIO(dataType, addr_width)
 }
 
-class AxiLiteWriteIO(data_width: Int = 64, addr_width: Int = 64) extends Bundle {
-  val AW = DecoupledIO(new AxiLiteWriteRequest(addr_width))
-  val W  = DecoupledIO(new AxiLiteWriteData(data_width))
-  val B  = Flipped(DecoupledIO(new AxiLiteWriteResponse()))
-}
+// class AxiLiteReadIO(data_width: Int = 64, addr_width: Int = 64) extends Bundle {
+//   val AR = DecoupledIO(new AxiLiteReadRequest(addr_width))
+//   val R  = Flipped(DecoupledIO(new AxiLiteReadData(data_width)))
+
+// }
+
+// class AxiLiteWriteIO(data_width: Int = 64, addr_width: Int = 64) extends Bundle {
+//   val AW = DecoupledIO(new AxiLiteWriteRequest(addr_width))
+//   val W  = DecoupledIO(new AxiLiteWriteData(data_width))
+//   val B  = Flipped(DecoupledIO(new AxiLiteWriteResponse()))
+// }

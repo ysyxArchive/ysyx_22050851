@@ -59,7 +59,7 @@ class InstructionDecodeUnit extends Module {
   );
 
   decodeOut.data.imm := MuxLookup(
-    controlDecoder.output.insttype,
+    controlDecoder.output.insttype, 
     DontCare,
     EnumSeq(
       InstType.I -> immI,
