@@ -51,7 +51,8 @@ object Utils {
       ret := num
     }.otherwise {
       ret := 0.U
-      print("width" + width)
+    }
+    when(true.B === false.B){
       throw new Error("width not implemented")
     }
     ret
