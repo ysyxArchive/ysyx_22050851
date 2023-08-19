@@ -136,8 +136,8 @@ class InstructionExecuteUnit extends Module {
 
   memOut := Mux(
     controlIn.memmode === MemMode.read.asUInt,
-    Utils.signExtend(memIO.rdata, memlen * 8.U),
-    Utils.zeroExtend(memIO.rdata, memlen * 8.U)
+    Utils.signExtend(memIO.rdata, memlen << 3),
+    Utils.zeroExtend(memIO.rdata, memlen << 3)
   )
   memIO.wdata := src2
   // blackBoxHalt
