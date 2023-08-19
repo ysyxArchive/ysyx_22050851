@@ -89,6 +89,6 @@ class InstructionDecodeUnit extends Module {
   decodeOut.data.src2 := rs2
   decodeOut.data.dst  := rd
 
-  decodeOut.valid := memAxiM.R.fire || instValid
+  decodeOut.valid := status === busy
 
 }
