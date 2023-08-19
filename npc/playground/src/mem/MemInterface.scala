@@ -16,7 +16,14 @@ object MemReadOnlyAxiLiteIO {
   }
   def master() = {
     val io = IO(MemAxiLite())
-    io.B.ready := false.B
+    io.B.ready      := false.B
+    io.W.bits.data  := DontCare
+    io.AW.bits.id   := DontCare
+    io.AW.bits.prot := DontCare
+    io.W.valid      := false.B
+    io.AW.valid     := false.B
+    io.W.bits.strb  := DontCare
+    io.W.bits.addr  := DontCare
     io
   }
 }
