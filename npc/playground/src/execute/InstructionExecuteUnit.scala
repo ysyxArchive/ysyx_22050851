@@ -27,7 +27,7 @@ class InstructionExecuteUnit extends Module {
   regIO.raddr0 := dataIn.src1
   regIO.raddr1 := dataIn.src2
   regIO.waddr := Mux(
-    controlIn.regwrite && (controlIn.regwritemux === RegWriteMux.mem.asUInt && !memValid),
+    controlIn.regwrite && !(controlIn.regwritemux === RegWriteMux.mem.asUInt && !memValid),
     dataIn.dst,
     0.U
   )
