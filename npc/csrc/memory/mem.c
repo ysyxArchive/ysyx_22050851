@@ -1,6 +1,6 @@
+#include "VCPU.h"
 #include "device.h"
 #include "difftest.h"
-#include "VCPU.h"
 #include <mem.h>
 uint8_t mem[MEM_LEN] = {0};
 size_t bin_file_size;
@@ -92,6 +92,8 @@ void write_mem(uint64_t addr, size_t length, uint64_t data) {
       panic("length %d is not allowed, only allowed 1, 2, 4, 8", length);
     }
   } else {
+    if (top->reset)
+      return;
     panic("write to addr 0x%lx + 0x%lx out of range", addr, length);
   }
   return;
