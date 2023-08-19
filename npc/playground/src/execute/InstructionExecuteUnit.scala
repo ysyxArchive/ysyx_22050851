@@ -30,7 +30,7 @@ class InstructionExecuteUnit extends Module {
   val src2 = Wire(UInt(64.W))
   regIO.raddr0 := dataIn.src1
   regIO.raddr1 := dataIn.src2
-  regIO.waddr  := Mux(controlIn.regwrite, dataIn.dst, 0.U)
+  regIO.waddr  := Mux(controlIn.regwrite && firstValid, dataIn.dst, 0.U)
   val snpc = regIO.pc + 4.U
   val pcBranch = MuxLookup(
     controlIn.pcaddrsrc,
