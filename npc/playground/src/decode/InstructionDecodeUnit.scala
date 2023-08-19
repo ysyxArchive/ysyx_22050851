@@ -5,6 +5,7 @@ import chisel3.util._
 import utils._
 import decode._
 import execute._
+import os.stat
 
 class DecodeDataOut extends Bundle {
   val src1 = Output(UInt(5.W))
@@ -60,7 +61,7 @@ class InstructionDecodeUnit extends Module {
   instValid := Mux(instValid, !decodeOut.done, memAxiM.R.fire)
 
   controlDecoder.input := inst
-  decodeOut.control    := Mux(memAxiM.R.valid, controlDecoder.output, DecodeControlOut.default())
+  decodeOut.control    := Mux(status === busy, controlDecoder.output, DecodeControlOut.default())
 
   val rs1  = inst(19, 15)
   val rs2  = inst(24, 20)
