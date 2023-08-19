@@ -4,6 +4,22 @@ object MemAxiLite {
   def apply() = AxiLiteIO(32, 64)
 }
 
+object MemReadOnlyAxiLite {
+  def slave() = {
+    val io = MemAxiLite()
+    io.B.valid   := false.B
+    io.B.bits.id := DontCare
+    io.W.ready   := false.B
+    io.AW.ready  := false.B
+    io
+  }
+  def master() = {
+    val io = Flipped(MemAxiLite())
+    io.B.ready := false.B
+    io
+  }
+}
+
 class MemInterface extends Module {
   val axiS = IO(Flipped(MemAxiLite()))
   val mem  = Module(new BlackBoxMem)

@@ -6,7 +6,7 @@ import chisel3.util.Enum
 import dataclass.data
 
 class InstructionFetchUnit extends Module {
-  val instOut = IO(Flipped(MemAxiLite()))
+  val instOut = IO(MemReadOnlyAxiLite.slave())
 
   val mem = Module(new BlackBoxMem)
 
