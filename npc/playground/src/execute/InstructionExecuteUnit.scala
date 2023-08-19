@@ -164,5 +164,5 @@ class InstructionExecuteUnit extends Module {
   blackBox.io.halt     := controlIn.goodtrap
   blackBox.io.bad_halt := controlIn.badtrap
 
-  decodeIn.done :=
+  decodeIn.done := idle
 }
