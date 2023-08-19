@@ -23,7 +23,7 @@ object MemReadOnlyAxiLiteIO {
     io.W.valid      := false.B
     io.AW.valid     := false.B
     io.W.bits.strb  := DontCare
-    io.W.bits.addr  := DontCare
+    io.AW.bits.addr := DontCare
     io
   }
 }
