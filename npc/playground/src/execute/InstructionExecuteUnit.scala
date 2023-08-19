@@ -21,6 +21,10 @@ class InstructionExecuteUnit extends Module {
   val memOut   = Wire(UInt(64.W))
   val memValid = Wire(Bool())
 
+  val idle = RegInit(false.B)
+
+  idle := Mux(idle, !decodeIn.valid, memValid)
+
   // regIO
   val src1 = Wire(UInt(64.W))
   val src2 = Wire(UInt(64.W))
@@ -160,5 +164,5 @@ class InstructionExecuteUnit extends Module {
   blackBox.io.halt     := controlIn.goodtrap
   blackBox.io.bad_halt := controlIn.badtrap
 
-  decodeIn.done := true.B
+  decodeIn.done :=
 }
