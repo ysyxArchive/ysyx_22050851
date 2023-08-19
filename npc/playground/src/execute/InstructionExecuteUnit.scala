@@ -9,27 +9,28 @@ import firrtl.seqCat
 
 class InstructionExecuteUnit extends Module {
   val decodeIn = IO(Flipped(new DecodeOut()))
-  val memIO    = IO(Flipped(new MemIO()))
+  val memAxiM  = IO(MemAxiLite())
   val regIO    = IO(Flipped(new RegisterFileIO()))
   val csrIn    = IO(Input(UInt(64.W)))
 
-  // val decodeIn = RegNext(in.bits, DecodeOut.default)
   val controlIn = decodeIn.control
   val dataIn    = decodeIn.data
 
   val alu = Module(new ALU)
 
-  val memOut = Wire(UInt(64.W))
-
-  // TODO: impl this
-  // in.ready := true.B
+  val memOut   = Wire(UInt(64.W))
+  val memValid = Wire(Bool())
 
   // regIO
   val src1 = Wire(UInt(64.W))
   val src2 = Wire(UInt(64.W))
   regIO.raddr0 := dataIn.src1
   regIO.raddr1 := dataIn.src2
-  regIO.waddr  := Mux(controlIn.regwrite, dataIn.dst, 0.U)
+  regIO.waddr := Mux(
+    controlIn.regwrite && (controlIn.regwritemux === RegWriteMux.mem.asUInt && !memValid),
+    dataIn.dst,
+    0.U
+  )
   val snpc = regIO.pc + 4.U
   val pcBranch = MuxLookup(
     controlIn.pcaddrsrc,
@@ -128,18 +129,30 @@ class InstructionExecuteUnit extends Module {
     Fill(1, Mux(memlen > 1.U, 1.U, 0.U)),
     1.U(1.W)
   )
-  memIO.clock  := clock
-  memIO.addr   := alu.io.out
-  memIO.isRead := controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
-  memIO.enable := controlIn.memmode =/= MemMode.no.asUInt
-  memIO.mask   := memMask
 
+  val memWaiting    = RegInit(false.B)
+  val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
+  val shouldMemWork = controlIn.memmode =/= MemMode.no.asUInt
+  memValid := !memWaiting
+
+  memAxiM.AR.valid     := !memWaiting && shouldMemWork && memIsRead
+  memAxiM.AR.bits.addr := alu.io.out
+  memAxiM.AR.bits.id   := 0.U
+  memAxiM.R.ready      := memAxiM.R.valid
+  memAxiM.AW.valid     := !memWaiting && shouldMemWork && !memIsRead
+  memAxiM.AW.bits.addr := alu.io.out
+  memAxiM.AW.bits.id   := 0.U
+  memAxiM.W.valid      := !memWaiting && shouldMemWork && !memIsRead
+  memAxiM.W.bits.data  := src2
+  memAxiM.W.bits.strb  := memMask
+  memAxiM.B.valid      := memAxiM.B.ready
   memOut := Mux(
     controlIn.memmode === MemMode.read.asUInt,
-    Utils.signExtend(memIO.rdata, memlen << 3),
-    Utils.zeroExtend(memIO.rdata, memlen <<3)
+    Utils.signExtend(memAxiM.R.bits.data.asUInt, memlen << 3),
+    Utils.zeroExtend(memAxiM.R.bits.data.asUInt, memlen << 3)
   )
-  memIO.wdata := src2
+
+  memWaiting := Mux(memWaiting, !Mux(memIsRead, memAxiM.R.fire, memAxiM.B.fire), shouldMemWork)
   // blackBoxHalt
   val blackBox = Module(new BlackBoxHalt);
   blackBox.io.halt     := controlIn.goodtrap
