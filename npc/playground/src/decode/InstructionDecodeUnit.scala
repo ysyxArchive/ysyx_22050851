@@ -21,6 +21,7 @@ class DecodeOut extends Bundle {
   val valid   = Output(Bool())
   val data    = Output(new DecodeDataOut);
   val control = Output(new DecodeControlOut);
+  val done    = Input(Bool())
 }
 
 object DecodeOut {
@@ -30,18 +31,22 @@ object DecodeOut {
 
 class InstructionDecodeUnit extends Module {
   val regIO     = IO(Input(new RegisterFileIO()))
-  val memAxiM    = MemReadOnlyAxiLiteIO.master()
+  val memAxiM   = MemReadOnlyAxiLiteIO.master()
   val decodeOut = IO(new DecodeOut)
 
   val controlDecoder = Module(new InstContorlDecoder)
 
-  val inst = memAxiM.R.bits.data.asUInt
+  val inst      = RegInit(0x13.U(64.W))
+  val instValid = RegInit(false.B)
 
-  memAxiM.R.ready      := true.B
-  memAxiM.AR.valid     := true.B
+  memAxiM.R.ready      := decodeOut.done
+  memAxiM.AR.valid     := decodeOut.done
   memAxiM.AR.bits.id   := 0.U
   memAxiM.AR.bits.prot := 0.U
   memAxiM.AR.bits.addr := regIO.pc
+
+  inst      := Mux(memAxiM.R.fire, memAxiM.R.bits.asUInt, inst)
+  instValid := Mux(instValid, !decodeOut.done, memAxiM.R.fire)
 
   controlDecoder.input := inst
   decodeOut.control    := Mux(memAxiM.R.valid, controlDecoder.output, DecodeControlOut.default())
@@ -73,6 +78,6 @@ class InstructionDecodeUnit extends Module {
   decodeOut.data.src2 := rs2
   decodeOut.data.dst  := rd
 
-  decodeOut.valid := memAxiM.R.fire
+  decodeOut.valid := instValid
 
 }
