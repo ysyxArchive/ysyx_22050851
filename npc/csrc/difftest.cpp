@@ -65,11 +65,9 @@ void difftest_step(CPU *cpu) {
   }
 }
 // TODO: NOT GOOD
-bool step = false;
 static CPU lastcpu;
 static CPU refcpu;
 bool difftest_check(CPU *cpu) {
-  step = !step;
   if (lastcpu.pc == cpu->pc) {
     memcpy(&lastcpu, cpu, sizeof(CPU));
     return true;
