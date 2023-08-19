@@ -6,6 +6,7 @@ import os.read
 import execute._
 import utils._
 import firrtl.seqCat
+import firrtl.transforms.MustDeduplicateTransform
 
 class InstructionExecuteUnit extends Module {
   val decodeIn = IO(Flipped(new DecodeOut()))
@@ -21,10 +22,10 @@ class InstructionExecuteUnit extends Module {
   val memOut   = Wire(UInt(64.W))
   val memValid = Wire(Bool())
 
-  val idle = RegInit(false.B)
+  val busy = false.B
 
-  idle := Mux(idle, !decodeIn.valid, memValid)
-
+  val postValid  = RegNext(decodeIn.valid)
+  val firstValid = decodeIn.valid && !postValid
   // regIO
   val src1 = Wire(UInt(64.W))
   val src2 = Wire(UInt(64.W))
@@ -66,7 +67,7 @@ class InstructionExecuteUnit extends Module {
       PcCsr.csr -> csrIn
     )
   )
-  regIO.dnpc := Mux(decodeIn.valid, Mux(pcBranch.asBool, dnpcAlter, snpc), regIO.pc)
+  regIO.dnpc := Mux(firstValid, Mux(pcBranch.asBool, dnpcAlter, snpc), regIO.pc)
   val regwdata = MuxLookup(
     controlIn.regwritemux,
     DontCare,
@@ -134,35 +135,45 @@ class InstructionExecuteUnit extends Module {
     1.U(1.W)
   )
 
-  val memWaiting    = RegInit(false.B)
   val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   val shouldMemWork = controlIn.memmode =/= MemMode.no.asUInt
-  memValid := !memWaiting
 
-  memAxiM.AR.valid     := !memWaiting && shouldMemWork && memIsRead
+  val waitReq :: waitRes :: idle :: memDone :: other = Enum(4)
+
+  val memStatus = RegInit(idle)
+  memStatus := FSM(
+    memStatus,
+    List(
+      (idle, shouldMemWork, waitReq),
+      (waitReq, Mux(memIsRead, memAxiM.AR.fire, memAxiM.AW.fire && memAxiM.W.fire), waitRes),
+      (waitRes, Mux(memIsRead, memAxiM.R.fire, memAxiM.B.fire), memDone),
+      (memDone, !decodeIn.valid, idle)
+    )
+  )
+
+  memAxiM.AR.valid     := memStatus === waitReq && memIsRead
   memAxiM.AR.bits.addr := alu.io.out
   memAxiM.AR.bits.id   := 0.U
   memAxiM.AR.bits.prot := 0.U
-  memAxiM.R.ready      := memAxiM.R.valid
-  memAxiM.AW.valid     := !memWaiting && shouldMemWork && !memIsRead
+  memAxiM.R.ready      := memStatus === waitRes && memIsRead
+  memAxiM.AW.valid     := memStatus === waitReq && !memIsRead
   memAxiM.AW.bits.addr := alu.io.out
   memAxiM.AW.bits.id   := 0.U
   memAxiM.AW.bits.prot := 0.U
-  memAxiM.W.valid      := !memWaiting && shouldMemWork && !memIsRead
+  memAxiM.W.valid      := memStatus === waitReq && !memIsRead
   memAxiM.W.bits.data  := src2
   memAxiM.W.bits.strb  := memMask
-  memAxiM.B.ready      := memAxiM.B.valid
+  memAxiM.B.ready      := memStatus === waitRes
   memOut := Mux(
     controlIn.memmode === MemMode.read.asUInt,
     Utils.signExtend(memAxiM.R.bits.data.asUInt, memlen << 3),
     Utils.zeroExtend(memAxiM.R.bits.data.asUInt, memlen << 3)
   )
 
-  memWaiting := Mux(memWaiting, !Mux(memIsRead, memAxiM.R.fire, memAxiM.B.fire), shouldMemWork)
   // blackBoxHalt
   val blackBox = Module(new BlackBoxHalt);
   blackBox.io.halt     := controlIn.goodtrap
   blackBox.io.bad_halt := controlIn.badtrap
 
-  decodeIn.done := idle
+  decodeIn.done := !firstValid && memStatus === idle
 }
