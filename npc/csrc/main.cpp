@@ -44,7 +44,7 @@ extern "C" void mem_read(const svLogicVecVal *addr, svLogicVecVal *ret) {
     skip_once = true;
     return;
   }
-  uint64_t data = read_mem(*(uint64_t *)addr, 64);
+  uint64_t data = read_mem(*(uint64_t *)addr, 8);
   ret[0].aval = data;
   ret[1].aval = data >> 32;
 }
