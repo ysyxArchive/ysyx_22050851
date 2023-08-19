@@ -12,20 +12,19 @@ class MemInterface extends Module {
   val requestValid = axiS.AR.valid || axiS.AW.valid
   val isRead       = axiS.AR.valid
 
-  mem.io.clock      := clock
-  mem.io.isRead     := isRead
-  mem.io.isUnsigned := true.B
-  mem.io.len        := Mux(isRead, 8.U, )
-  mem.io.addr       := instOut.AR.bits.addr
-  mem.io.enable     := instOut.AR.fire
+  mem.io.clock  := clock
+  mem.io.isRead := isRead
+  mem.io.mask   := axiS.W.bits.strb
+  // mem.io.addr   := instOut.AR.bits.addr
+  // mem.io.enable := instOut.AR.fire
 
-  inst := Mux(instOut.AR.fire, mem.io.rdata, inst)
+  // inst := Mux(instOut.AR.fire, mem.io.rdata, inst)
 
-  instValid := Mux(instValid, !instOut.R.fire, instOut.AR.fire)
+  // instValid := Mux(instValid, !instOut.R.fire, instOut.AR.fire)
 
-  instOut.AR.ready := !instValid
-  instOut.R.valid  := instValid
+  // instOut.AR.ready := !instValid
+  // instOut.R.valid  := instValid
 
-  instOut.R.bits := outData
+  // instOut.R.bits := outData
 
 }
