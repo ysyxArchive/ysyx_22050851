@@ -175,5 +175,5 @@ class InstructionExecuteUnit extends Module {
   blackBox.io.halt     := controlIn.goodtrap
   blackBox.io.bad_halt := controlIn.badtrap
 
-  decodeIn.done := !firstValid && memStatus === idle
+  decodeIn.done := !firstValid && memStatus === done
 }
