@@ -68,6 +68,7 @@ void update_cpu() {
 }
 
 void one_step() {
+  printf("step\n");
   // 记录波形
   top->clock = 1;
   eval_trace();
