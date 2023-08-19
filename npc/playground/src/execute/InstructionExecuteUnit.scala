@@ -145,7 +145,7 @@ class InstructionExecuteUnit extends Module {
   memAxiM.W.valid      := !memWaiting && shouldMemWork && !memIsRead
   memAxiM.W.bits.data  := src2
   memAxiM.W.bits.strb  := memMask
-  memAxiM.B.valid      := memAxiM.B.ready
+  memAxiM.B.ready      := memAxiM.B.valid
   memOut := Mux(
     controlIn.memmode === MemMode.read.asUInt,
     Utils.signExtend(memAxiM.R.bits.data.asUInt, memlen << 3),
