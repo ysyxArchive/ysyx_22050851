@@ -133,7 +133,7 @@ class InstructionExecuteUnit extends Module {
   val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   val shouldMemWork = controlIn.memmode =/= MemMode.no.asUInt
 
-  val waitReq :: waitRes :: idle :: memDone :: other = Enum(4)
+  val waitReq :: waitRes :: idle :: other = Enum(4)
 
   val memStatus = RegInit(idle)
   memStatus := FSM(
@@ -141,8 +141,7 @@ class InstructionExecuteUnit extends Module {
     List(
       (idle, shouldMemWork, waitReq),
       (waitReq, Mux(memIsRead, memAxiM.AR.fire, memAxiM.AW.fire && memAxiM.W.fire), waitRes),
-      (waitRes, Mux(memIsRead, memAxiM.R.fire, memAxiM.B.fire), memDone),
-      (memDone, !decodeIn.valid, idle)
+      (waitRes, Mux(memIsRead, memAxiM.R.fire, memAxiM.B.fire), idle)
     )
   )
 
@@ -170,5 +169,5 @@ class InstructionExecuteUnit extends Module {
   blackBox.io.halt     := controlIn.goodtrap
   blackBox.io.bad_halt := controlIn.badtrap
 
-  decodeIn.done := !firstValid && memStatus === memDone
+  decodeIn.done := !firstValid && memStatus === idle
 }
