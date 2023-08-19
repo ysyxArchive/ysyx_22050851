@@ -5,7 +5,7 @@ object MemAxiLite {
   def apply() = AxiLiteIO(32, 64)
 }
 
-object MemReadOnlyAxiLite {
+object MemReadOnlyAxiLiteIO {
   def slave() = {
     val io = IO(Flipped(MemAxiLite()))
     io.B.valid   := false.B

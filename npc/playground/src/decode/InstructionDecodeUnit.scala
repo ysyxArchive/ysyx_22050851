@@ -30,7 +30,7 @@ object DecodeOut {
 
 class InstructionDecodeUnit extends Module {
   val regIO     = IO(Input(new RegisterFileIO()))
-  val instIn    = IO(MemReadOnlyAxiLite.master())
+  val instIn    = MemReadOnlyAxiLiteIO.master()
   val decodeOut = IO(new DecodeOut)
 
   val controlDecoder = Module(new InstContorlDecoder)
