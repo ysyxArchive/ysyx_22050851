@@ -154,7 +154,7 @@ class InstructionExecuteUnit extends Module {
     Utils.zeroExtend(memAxiM.R.bits.data.asUInt, memlen << 3)
   )
 
-  memWaiting := Mux(memWaiting, !Mux(memIsRead, memAxiM.R.fire, memAxiM.B.fire), shouldMemWork)
+  memWaiting := Mux(  , !Mux(memIsRead, memAxiM.R.fire, memAxiM.B.fire), shouldMemWork)
   // blackBoxHalt
   val blackBox = Module(new BlackBoxHalt);
   blackBox.io.halt     := controlIn.goodtrap
