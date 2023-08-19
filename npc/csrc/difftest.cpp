@@ -64,7 +64,6 @@ void difftest_step(CPU *cpu) {
     difftest_exec(1);
   }
 }
-// TODO: NOT GOOD
 static CPU lastcpu;
 static CPU refcpu;
 bool difftest_check(CPU *cpu) {
