@@ -7,7 +7,7 @@ object MemAxiLite {
 
 object MemReadOnlyAxiLite {
   def slave() = {
-    val io = IO(MemAxiLite())
+    val io = IO(Flipped(MemAxiLite()))
     io.B.valid   := false.B
     io.B.bits.id := DontCare
     io.W.ready   := false.B
@@ -15,7 +15,7 @@ object MemReadOnlyAxiLite {
     io
   }
   def master() = {
-    val io = IO(Flipped(MemAxiLite()))
+    val io = IO(MemAxiLite())
     io.B.ready := false.B
     io
   }
