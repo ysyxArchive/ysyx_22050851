@@ -35,17 +35,19 @@ class InstructionDecodeUnit extends Module {
   val decodeOut      = IO(new DecodeOut)
   val controlDecoder = Module(new InstContorlDecoder)
 
-  val waitSend  = RegInit(false.B)
+  val waitAR    = RegInit(false.B)
+  val waitR     = RegInit(false.B)
   val inst      = RegInit(0x13.U(64.W))
   val instValid = RegInit(false.B)
 
-  memAxiM.R.ready      := decodeOut.done && !waitSend
-  memAxiM.AR.valid     := waitSend
+  memAxiM.R.ready      := waitR
+  memAxiM.AR.valid     := waitAR
   memAxiM.AR.bits.id   := 0.U
   memAxiM.AR.bits.prot := 0.U
   memAxiM.AR.bits.addr := regIO.pc
 
-  waitSend := Mux(waitSend, !memAxiM.AR.fire, decodeOut.done)
+  waitAR := Mux(waitAR, !memAxiM.AR.fire, decodeOut.done)
+  waitR  := Mux(waitR, !memAxiM.R.fire, memAxiM.AR.fire)
 
   inst      := Mux(memAxiM.R.fire, memAxiM.R.bits.asUInt, inst)
   instValid := Mux(instValid, !decodeOut.done, memAxiM.R.fire)
