@@ -35,14 +35,14 @@ class MemInterface extends Module {
 
   val waitReq :: writeBack :: others = Enum(3)
 
-  val status = RegInit(waitReq)
-  status := FSM(
-    status, 
+  val memInterfaceFSM = new FSM(
+    waitReq,
     List(
       (waitReq, axiS.AR.fire || (axiS.AW.fire && axiS.W.fire), writeBack),
       (writeBack, axiS.R.fire || axiS.B.fire, waitReq)
     )
   )
+  val status = memInterfaceFSM.status
 
   val dataRet    = RegInit(0.U(64.W))
   val isReading  = RegInit(false.B)
