@@ -4,7 +4,7 @@ import chisel3.util._
 import os.stat
 import utils.FSM
 object MemAxiLite {
-  def apply() = AxiLiteIO(32, 64)
+  def apply() = AxiLiteIO(64, 64)
 }
 
 object MemReadOnlyAxiLiteIO {
