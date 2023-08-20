@@ -38,21 +38,21 @@ class InstructionDecodeUnit extends Module {
 
   val busy :: waitAR :: waitR :: others = Enum(3)
 
-  val status = RegInit(waitAR)
-  status := FSM(
-    status,
+  val decodeFSM = new FSM(
+    waitAR,
     List(
       (waitAR, memAxiM.AR.fire, waitR),
       (waitR, memAxiM.R.fire, busy),
-      (busy, decodeOut.done && decodeOut.valid, waitAR)
+      (busy, decodeOut.done, waitAR)
     )
   )
+  val decodeStatus = decodeFSM.status
 
   val inst      = RegInit(0x13.U(64.W))
   val instValid = RegInit(false.B)
 
-  memAxiM.R.ready      := status === waitR
-  memAxiM.AR.valid     := status === waitAR
+  memAxiM.R.ready      := decodeFSM.willChangeTo(waitR)
+  memAxiM.AR.valid     := decodeFSM.willChangeTo(waitAR)
   memAxiM.AR.bits.id   := 0.U
   memAxiM.AR.bits.prot := 0.U
   memAxiM.AR.bits.addr := regIO.pc
@@ -61,7 +61,7 @@ class InstructionDecodeUnit extends Module {
   instValid := Mux(instValid, !decodeOut.done, memAxiM.R.fire)
 
   controlDecoder.input := inst
-  decodeOut.control    := Mux(status === busy, controlDecoder.output, DecodeControlOut.default())
+  decodeOut.control    := controlDecoder.output
 
   val rs1  = inst(19, 15)
   val rs2  = inst(24, 20)
@@ -90,6 +90,6 @@ class InstructionDecodeUnit extends Module {
   decodeOut.data.src2 := rs2
   decodeOut.data.dst  := rd
 
-  decodeOut.valid := status === busy
+  decodeOut.valid := decodeFSM.willChangeTo(busy)
 
 }
