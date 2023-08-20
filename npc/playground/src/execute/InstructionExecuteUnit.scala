@@ -26,6 +26,17 @@ class InstructionExecuteUnit extends Module {
   val postValid  = RegNext(decodeIn.valid)
   val firstValid = decodeIn.valid && !postValid
 
+  val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
+  val shouldMemWork = controlIn.memmode =/= MemMode.no.asUInt
+
+  val memIdle :: waitReq :: waitRes :: other = Enum(4)
+
+  val memStatus = RegInit(memIdle)
+
+  val pcUpdated   = RegInit(true.B)
+  val canUpdatePC = memStatus === memIdle
+  pcUpdated := Mux(pcUpdated, decodeIn.valid, canUpdatePC)
+
   // regIO
   val src1 = Wire(UInt(64.W))
   val src2 = Wire(UInt(64.W))
@@ -63,7 +74,7 @@ class InstructionExecuteUnit extends Module {
       PcCsr.csr -> csrIn
     )
   )
-  regIO.dnpc := Mux(firstValid, Mux(pcBranch.asBool, dnpcAlter, snpc), regIO.pc)
+  regIO.dnpc := Mux(canUpdatePC && !pcUpdated, Mux(pcBranch.asBool, dnpcAlter, snpc), regIO.pc)
   val regwdata = MuxLookup(
     controlIn.regwritemux,
     DontCare,
@@ -131,12 +142,6 @@ class InstructionExecuteUnit extends Module {
     1.U(1.W)
   )
 
-  val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
-  val shouldMemWork = controlIn.memmode =/= MemMode.no.asUInt
-
-  val memIdle :: waitReq :: waitRes :: other = Enum(4)
-
-  val memStatus = RegInit(memIdle)
   memStatus := FSM(
     memStatus,
     List(
