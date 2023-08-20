@@ -1,3 +1,4 @@
+#include "VCPU.h"
 #include "device.h"
 #include "difftest.h"
 #include <mem.h>
@@ -5,6 +6,7 @@ uint8_t mem[MEM_LEN] = {0};
 size_t bin_file_size;
 extern CPU cpu;
 extern uint32_t vga_data[VGA_HEIGHT * VGA_WIDTH];
+extern VCPU *top;
 
 void init_memory(char *bin_path) {
   FILE *bin_file = fopen(bin_path, "r");
@@ -53,6 +55,8 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
       panic("length %d is not allowed, only allowed 1, 2, 4, 8", length);
     }
   } else {
+    if (top->reset)
+      return 0;
     panic("read from addr 0x%lx + 0x%lx out of range at pc == %x", addr, length,
           cpu.pc);
   }
@@ -60,6 +64,7 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
 }
 
 void write_mem(uint64_t addr, size_t length, uint64_t data) {
+  // printf("%lx, %d, %lx\n", addr, length, data);
   if (addr >= FB_ADDR && addr <= FB_ADDR + VGA_WIDTH * VGA_HEIGHT * 4) {
     Assert(length == 4, "output to FB with length == %d, not 4", length);
     vga_data[(addr - FB_ADDR) / 4] = data;
@@ -88,6 +93,8 @@ void write_mem(uint64_t addr, size_t length, uint64_t data) {
       panic("length %d is not allowed, only allowed 1, 2, 4, 8", length);
     }
   } else {
+    if (top->reset)
+      return;
     panic("write to addr 0x%lx + 0x%lx out of range", addr, length);
   }
   return;

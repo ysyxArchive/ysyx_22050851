@@ -12,18 +12,21 @@
 bool is_halt = false;
 bool is_bad_halt = false;
 
-void haltop(unsigned char good_halt) {
-  Log("halt from npc, is %s halt", good_halt ? "good" : "bad");
-  is_halt = true;
-  is_bad_halt = !good_halt;
-}
-
 extern VCPU *top;
 CPU cpu;
 LightSSS lightSSS;
 int npc_clock = 0;
 uint64_t *cpu_regs = NULL;
 uint64_t *cpu_pc = NULL;
+
+void haltop(unsigned char good_halt) {
+  if (top->reset)
+    return;
+  Log("halt from npc, is %s halt", good_halt ? "good" : "bad");
+  is_halt = true;
+  is_bad_halt = !good_halt;
+}
+
 
 void init_npc() {
   for (int i = 0; i < 10; i++) {
@@ -38,12 +41,6 @@ void init_npc() {
 // skip when pc is 0x00
 static bool skip_once = false;
 extern "C" void mem_read(const svLogicVecVal *addr, svLogicVecVal *ret) {
-  if (top->reset && !skip_once) {
-    ret[0].aval = 0x13;
-    ret[1].aval = 0;
-    skip_once = true;
-    return;
-  }
   uint64_t data = read_mem(*(uint64_t *)addr, 8);
   ret[0].aval = data;
   ret[1].aval = data >> 32;
@@ -51,8 +48,6 @@ extern "C" void mem_read(const svLogicVecVal *addr, svLogicVecVal *ret) {
 
 extern "C" void mem_write(const svLogicVecVal *addr, const svLogicVecVal *mask,
                           const svLogicVecVal *data) {
-  if (top->reset)
-    return;
   uint8_t len = 0;
   auto val = *(uint8_t *)mask;
   while (val) {
@@ -74,12 +69,26 @@ void update_cpu() {
   // TODO: ITRACE
   //  Log("updating cpu , pc is %lx", cpu.pc);
 }
-
 void one_step() {
   // 记录波形
   top->clock = 1;
   eval_trace();
   update_cpu();
+
+  static int latpcchange = 0;
+  static uint64_t lastpc = 0;
+  if (lastpc == cpu.pc) {
+    latpcchange++;
+    if (latpcchange > 10) {
+      Log("error pc not changed for 10 cycles");
+      is_bad_halt = true;
+      is_halt = true;
+    }
+  } else {
+    latpcchange = 0;
+  }
+  lastpc = cpu.pc;
+
   if (!difftest_check(&cpu)) {
     is_halt = true;
     is_bad_halt = true;

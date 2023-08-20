@@ -1,8 +1,9 @@
 import chisel3._
 import chisel3.experimental.IO
-
+import chisel3.util._
+import utils.FSM
 object MemAxiLite {
-  def apply() = AxiLiteIO(32, 64)
+  def apply() = AxiLiteIO(64, 64)
 }
 
 object MemReadOnlyAxiLiteIO {
@@ -32,9 +33,18 @@ class MemInterface extends Module {
   val axiS = IO(Flipped(MemAxiLite()))
   val mem  = Module(new BlackBoxMem)
 
+  val waitReq :: writeBack :: others = Enum(3)
+
+  val status = RegInit(waitReq)
+  status := FSM(
+    status, 
+    List(
+      (waitReq, axiS.AR.fire || (axiS.AW.fire && axiS.W.fire), writeBack),
+      (writeBack, axiS.R.fire || axiS.B.fire, waitReq)
+    )
+  )
+
   val dataRet    = RegInit(0.U(64.W))
-  val backValid  = RegInit(false.B)
-  val busy       = RegInit(false.B)
   val isReading  = RegInit(false.B)
   val readResId  = Reg(UInt(axiS.id_r_width.W))
   val writeResId = Reg(UInt(axiS.id_w_width.W))
@@ -44,12 +54,8 @@ class MemInterface extends Module {
   val writeValid   = axiS.AW.valid && axiS.W.valid
   val requestValid = readValid || writeValid
 
-  // ready until all requirment valid
-  val writeReady = writeValid && !readValid && !busy
-  val readReady  = readValid && !busy
-
   // AW W always fire together
-  val writeReqFire = axiS.AW.fire || axiS.W.fire
+  val writeReqFire = axiS.AW.fire && axiS.W.fire
   val readReqFire  = axiS.AR.fire
   val reqFire      = writeReqFire || readReqFire
 
@@ -62,18 +68,16 @@ class MemInterface extends Module {
   dataRet       := Mux(reqFire, mem.io.rdata, dataRet)
 
   // interface status
-  backValid  := Mux(backValid, !Mux(isReading, axiS.R.fire, axiS.B.fire), busy)
-  busy       := Mux(busy, !Mux(isReading, axiS.R.fire, axiS.B.fire), reqFire)
-  isReading  := Mux(busy, isReading, readReqFire)
-  readResId  := Mux(busy, readResId, axiS.AR.bits.id)
-  writeResId := Mux(busy, writeResId, axiS.AW.bits.id)
+  isReading  := Mux(status === writeBack, isReading, axiS.AR.valid)
+  readResId  := Mux(status === writeBack, readResId, axiS.AR.bits.id)
+  writeResId := Mux(status === writeBack, writeResId, axiS.AW.bits.id)
 
-  axiS.W.ready     := writeValid
-  axiS.AW.ready    := writeValid
-  axiS.AR.ready    := readValid
-  axiS.B.valid     := Mux(isReading, false.B, backValid)
+  axiS.W.ready     := status === waitReq && !axiS.AR.valid && axiS.W.valid
+  axiS.AW.ready    := status === waitReq && !axiS.AR.valid && axiS.AW.valid
+  axiS.AR.ready    := status === waitReq && axiS.AR.valid
+  axiS.B.valid     := status === writeBack && !isReading
   axiS.B.bits.id   := writeResId
-  axiS.R.valid     := Mux(isReading, backValid, false.B)
+  axiS.R.valid     := status === writeBack && isReading
   axiS.R.bits.id   := readResId
   axiS.R.bits.data := dataRet
 }

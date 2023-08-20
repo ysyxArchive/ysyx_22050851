@@ -60,3 +60,34 @@ object EnumSeq {
     case (enumType, uint) => (enumType.asUInt, uint)
   }
 }
+
+/**
+  * @deprecated
+  */
+object FSM {
+  def apply(current: UInt, elems: List[(UInt, Bool, UInt)]) = {
+    val table = elems.map({ case tri => (tri._1 === current && tri._2) -> tri._3 })
+    MuxCase(current, table)
+  }
+}
+
+class FSM(val initState: UInt, val elems: List[(UInt, Bool, UInt)]) {
+  val status = RegInit(initState)
+  status := nextState(status)
+
+  def nextState(current: UInt): UInt = {
+    val table = elems.map({ case tri => (tri._1 === current && tri._2) -> tri._3 })
+    MuxCase(current, table)
+  }
+
+  def trigger(from: UInt, to: UInt): Bool = {
+    val table = elems.map({ case tri => (tri._1 === from && tri._3 === to) -> tri._2 })
+    return status === from && MuxCase(false.B, table)
+  }
+
+  def willChangeTo(to: UInt): Bool = {
+    val table = elems.map({ case tri => (tri._1 === status && tri._3 === to) -> tri._2 })
+    return MuxCase(false.B, table)
+
+  }
+}

@@ -21,8 +21,8 @@ extern LightSSS lightSSS;
       if (!lightSSS.is_child()) {                                              \
         lightSSS.wakeup_child(npc_clock);                                      \
         isa_reg_display();                                                     \
-        assert(cond);                                                          \
       }                                                                        \
+      assert(cond);                                                            \
     }                                                                          \
   } while (0)
 

@@ -21,6 +21,7 @@ class DecodeOut extends Bundle {
   val valid   = Output(Bool())
   val data    = Output(new DecodeDataOut);
   val control = Output(new DecodeControlOut);
+  val done    = Input(Bool())
 }
 
 object DecodeOut {
@@ -29,22 +30,38 @@ object DecodeOut {
 }
 
 class InstructionDecodeUnit extends Module {
-  val regIO     = IO(Input(new RegisterFileIO()))
-  val instIn    = MemReadOnlyAxiLiteIO.master()
-  val decodeOut = IO(new DecodeOut)
-
+  val regIO          = IO(Input(new RegisterFileIO()))
+  val memAxiM        = MemReadOnlyAxiLiteIO.master()
+  val decodeOut      = IO(new DecodeOut)
   val controlDecoder = Module(new InstContorlDecoder)
 
-  val inst = instIn.R.bits.data.asUInt
+  val busy :: waitAR :: waitR :: waitSend :: others = Enum(4)
 
-  instIn.R.ready      := true.B
-  instIn.AR.valid     := true.B
-  instIn.AR.bits.id   := 0.U
-  instIn.AR.bits.prot := 0.U
-  instIn.AR.bits.addr := regIO.pc
+  val decodeFSM = new FSM(
+    waitAR,
+    List(
+      (waitAR, memAxiM.AR.fire, waitR),
+      (waitR, memAxiM.R.fire, waitSend),
+      (waitSend, true.B, busy),
+      (busy, decodeOut.done, waitAR)
+    )
+  )
+  val decodeStatus = decodeFSM.status
+
+  val inst      = RegInit(0x13.U(64.W))
+  val instValid = RegInit(false.B)
+
+  memAxiM.R.ready      := decodeStatus === waitR
+  memAxiM.AR.valid     := decodeStatus === waitAR
+  memAxiM.AR.bits.id   := 0.U
+  memAxiM.AR.bits.prot := 0.U
+  memAxiM.AR.bits.addr := regIO.pc
+
+  inst      := Mux(memAxiM.R.fire, memAxiM.R.bits.asUInt, inst)
+  instValid := Mux(instValid, !decodeOut.done, memAxiM.R.fire)
 
   controlDecoder.input := inst
-  decodeOut.control    := Mux(instIn.R.valid, controlDecoder.output, DecodeControlOut.default())
+  decodeOut.control    := controlDecoder.output
 
   val rs1  = inst(19, 15)
   val rs2  = inst(24, 20)
@@ -73,6 +90,6 @@ class InstructionDecodeUnit extends Module {
   decodeOut.data.src2 := rs2
   decodeOut.data.dst  := rd
 
-  decodeOut.valid := instIn.R.fire
+  decodeOut.valid := decodeStatus === waitSend
 
 }
