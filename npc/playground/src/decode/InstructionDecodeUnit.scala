@@ -36,7 +36,7 @@ class InstructionDecodeUnit extends Module {
   val decodeOut      = IO(new DecodeOut)
   val controlDecoder = Module(new InstContorlDecoder)
 
-  val busy :: waitAR :: waitR :: waitSend :: others = Enum(3)
+  val busy :: waitAR :: waitR :: waitSend :: others = Enum(4)
 
   val decodeFSM = new FSM(
     waitAR,
