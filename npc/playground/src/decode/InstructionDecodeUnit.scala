@@ -90,6 +90,6 @@ class InstructionDecodeUnit extends Module {
   decodeOut.data.src2 := rs2
   decodeOut.data.dst  := rd
 
-  decodeOut.valid := decodeFSM.willChangeTo(busy)
+  decodeOut.valid := decodeStatus === busy
 
 }
