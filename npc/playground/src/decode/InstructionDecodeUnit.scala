@@ -91,6 +91,6 @@ class InstructionDecodeUnit extends Module {
   decodeOut.data.src2 := rs2
   decodeOut.data.dst  := rd
 
-  decodeOut.valid := decodeStatus === busy
+  decodeOut.valid := decodeStatus === waitSend
 
 }
