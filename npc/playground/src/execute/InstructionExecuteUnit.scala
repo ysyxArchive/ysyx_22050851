@@ -29,8 +29,8 @@ class InstructionExecuteUnit extends Module {
   val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   val shouldMemWork = controlIn.memmode =/= MemMode.no.asUInt
 
-  val memIdle :: waitReq :: waitRes :: other    = Enum(4)
-  val exeIdle :: exeWaitMem :: exewaitPC :: Nil = Enum(4)
+  val memIdle :: waitReq :: waitRes :: other       = Enum(4)
+  val exeIdle :: exeWaitMem :: exewaitPC :: other2 = Enum(4)
 
   val memStatus = RegInit(memIdle)
   val exeStatus = RegInit(exeIdle)
