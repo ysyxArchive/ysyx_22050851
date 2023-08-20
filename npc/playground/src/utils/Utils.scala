@@ -67,3 +67,18 @@ object FSM {
     MuxCase(current, table)
   }
 }
+
+class FSM(val initState: UInt, val elems: List[(UInt, Bool, UInt)]) {
+  val status = RegInit(initState)
+  status := nextState(status)
+
+  def nextState(current: UInt) = {
+    val table = elems.map({ case tri => (tri._1 === current && tri._2) -> tri._3 })
+    MuxCase(current, table)
+  }
+
+  def trigger(from: UInt, to: UInt) = {
+    val table = elems.map({ case tri => (tri._1 === from && tri._3 === to) -> tri._2 })
+    MuxCase(true.B, table)
+  }
+}
