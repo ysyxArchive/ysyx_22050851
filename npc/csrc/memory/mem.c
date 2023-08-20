@@ -23,9 +23,9 @@ void init_memory(char *bin_path) {
 uint64_t read_mem(uint64_t addr, size_t length) {
   uint64_t ret = read_mem_nolog(addr, length);
   // TODO:mtrace
-  //  Log(ANSI_FMT("Reading %d bytes, starts with %lx, data is %lx",
-  //               ANSI_FG_YELLOW),
-  //      length, addr, ret);
+   Log(ANSI_FMT("Reading %d bytes, starts with %lx, data is %lx",
+                ANSI_FG_YELLOW),
+       length, addr, ret);
   return ret;
 }
 uint64_t read_mem_nolog(uint64_t addr, size_t length) {
