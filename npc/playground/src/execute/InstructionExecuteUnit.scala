@@ -79,7 +79,7 @@ class InstructionExecuteUnit extends Module {
       PcCsr.csr -> csrIn
     )
   )
-  regIO.dnpc := Mux(exeStatus === exewaitPC, Mux(pcBranch.asBool, dnpcAlter, snpc), regIO.pc)
+  regIO.dnpc := Mux(exeFSM.trigger(exeWaitMem, exewaitPC), Mux(pcBranch.asBool, dnpcAlter, snpc), regIO.pc)
   val regwdata = MuxLookup(
     controlIn.regwritemux,
     DontCare,
