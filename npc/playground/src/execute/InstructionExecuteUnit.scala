@@ -25,6 +25,8 @@ class InstructionExecuteUnit extends Module {
 
   val postValid  = RegNext(decodeIn.valid)
   val firstValid = decodeIn.valid && !postValid
+  
+  val idle = !firstValid && memStatus === memIdle
   // regIO
   val src1 = Wire(UInt(64.W))
   val src2 = Wire(UInt(64.W))
@@ -62,7 +64,7 @@ class InstructionExecuteUnit extends Module {
       PcCsr.csr -> csrIn
     )
   )
-  regIO.dnpc := Mux(firstValid, Mux(pcBranch.asBool, dnpcAlter, snpc), regIO.pc)
+  regIO.dnpc := Mux(idle, Mux(pcBranch.asBool, dnpcAlter, snpc), regIO.pc)
   val regwdata = MuxLookup(
     controlIn.regwritemux,
     DontCare,
@@ -133,15 +135,15 @@ class InstructionExecuteUnit extends Module {
   val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   val shouldMemWork = controlIn.memmode =/= MemMode.no.asUInt
 
-  val waitReq :: waitRes :: idle :: other = Enum(4)
+  val waitReq :: waitRes :: memIdle :: other = Enum(4)
 
-  val memStatus = RegInit(idle)
+  val memStatus = RegInit(memIdle)
   memStatus := FSM(
     memStatus,
     List(
-      (idle, firstValid && shouldMemWork, waitReq),
+      (memIdle, firstValid && shouldMemWork, waitReq),
       (waitReq, Mux(memIsRead, memAxiM.AR.fire, memAxiM.AW.fire && memAxiM.W.fire), waitRes),
-      (waitRes, Mux(memIsRead, memAxiM.R.fire, memAxiM.B.fire), idle)
+      (waitRes, Mux(memIsRead, memAxiM.R.fire, memAxiM.B.fire), memIdle)
     )
   )
 
@@ -179,5 +181,5 @@ class InstructionExecuteUnit extends Module {
   blackBox.io.halt     := controlIn.goodtrap
   blackBox.io.bad_halt := controlIn.badtrap
 
-  decodeIn.done := !firstValid && memStatus === idle
+  decodeIn.done := !firstValid && memStatus === memIdle
 }
