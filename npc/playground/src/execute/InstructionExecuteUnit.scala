@@ -190,5 +190,5 @@ class InstructionExecuteUnit extends Module {
   blackBox.io.halt     := controlIn.goodtrap
   blackBox.io.bad_halt := controlIn.badtrap
 
-  decodeIn.done := exeFSM.willChangeTo(exeIdle) || exeFSM.
+  decodeIn.done := exeFSM.willChangeTo(exeIdle) || exeStatus === exeIdle
 }
