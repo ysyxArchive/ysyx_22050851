@@ -162,9 +162,9 @@ class InstructionExecuteUnit extends Module {
     controlIn.memlen,
     memAxiM.R.bits.data.asUInt,
     EnumSeq(
-      MemLen.one -> memAxiM.R.bits.data.asUInt(63, 56),
-      MemLen.two -> memAxiM.R.bits.data.asUInt(63, 48),
-      MemLen.four -> memAxiM.R.bits.data.asUInt(63, 32),
+      MemLen.one -> memAxiM.R.bits.data.asUInt(7, 0),
+      MemLen.two -> memAxiM.R.bits.data.asUInt(15, 0),
+      MemLen.four -> memAxiM.R.bits.data.asUInt(31, 0),
       MemLen.eight -> memAxiM.R.bits.data.asUInt
     )
   )
