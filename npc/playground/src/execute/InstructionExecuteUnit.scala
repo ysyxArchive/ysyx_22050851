@@ -158,10 +158,20 @@ class InstructionExecuteUnit extends Module {
   memAxiM.W.bits.data  := src2
   memAxiM.W.bits.strb  := memMask
   memAxiM.B.ready      := memStatus === waitRes
+  val memOutRaw = MuxLookup(
+    controlIn.memlen,
+    memAxiM.R.bits.data.asUInt,
+    EnumSeq(
+      MemLen.one -> memAxiM.R.bits.data.asUInt(63, 56),
+      MemLen.two -> memAxiM.R.bits.data.asUInt(63, 48),
+      MemLen.four -> memAxiM.R.bits.data.asUInt(63, 32),
+      MemLen.eight -> memAxiM.R.bits.data.asUInt
+    )
+  )
   memOut := Mux(
     controlIn.memmode === MemMode.read.asUInt,
-    Utils.signExtend(memAxiM.R.bits.data.asUInt, memlen << 3),
-    Utils.zeroExtend(memAxiM.R.bits.data.asUInt, memlen << 3)
+    Utils.signExtend(memOutRaw, memlen << 3),
+    Utils.zeroExtend(memOutRaw, memlen << 3)
   )
 
   // blackBoxHalt
