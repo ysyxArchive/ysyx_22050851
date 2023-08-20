@@ -44,7 +44,7 @@ class InstructionDecodeUnit extends Module {
     List(
       (waitAR, memAxiM.AR.fire, waitR),
       (waitR, memAxiM.R.fire, busy),
-      (busy, decodeOut.done, waitAR)
+      (busy, decodeOut.done && decodeOut.valid, waitAR)
     )
   )
 
