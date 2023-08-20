@@ -12,18 +12,21 @@
 bool is_halt = false;
 bool is_bad_halt = false;
 
-void haltop(unsigned char good_halt) {
-  Log("halt from npc, is %s halt", good_halt ? "good" : "bad");
-  is_halt = true;
-  is_bad_halt = !good_halt;
-}
-
 extern VCPU *top;
 CPU cpu;
 LightSSS lightSSS;
 int npc_clock = 0;
 uint64_t *cpu_regs = NULL;
 uint64_t *cpu_pc = NULL;
+
+void haltop(unsigned char good_halt) {
+  if (top->reset)
+    return;
+  Log("halt from npc, is %s halt", good_halt ? "good" : "bad");
+  is_halt = true;
+  is_bad_halt = !good_halt;
+}
+
 
 void init_npc() {
   for (int i = 0; i < 10; i++) {
@@ -85,7 +88,7 @@ void one_step() {
     latpcchange = 0;
   }
   lastpc = cpu.pc;
-  
+
   if (!difftest_check(&cpu)) {
     is_halt = true;
     is_bad_halt = true;
