@@ -6,7 +6,6 @@ import os.read
 import execute._
 import utils._
 import firrtl.seqCat
-import firrtl.transforms.MustDeduplicateTransform
 
 class InstructionExecuteUnit extends Module {
   val decodeIn = IO(Flipped(new DecodeOut()))
@@ -21,8 +20,7 @@ class InstructionExecuteUnit extends Module {
 
   val memOut = Wire(UInt(64.W))
 
-  val postValid  = RegNext(decodeIn.valid)
-  val firstValid = decodeIn.valid && !postValid
+  val postValid = RegNext(decodeIn.valid)
 
   val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   val shouldMemWork = controlIn.memmode =/= MemMode.no.asUInt
@@ -30,7 +28,15 @@ class InstructionExecuteUnit extends Module {
   val memIdle :: waitReq :: waitRes :: other       = Enum(4)
   val exeIdle :: exeWaitMem :: exewaitPC :: other2 = Enum(4)
 
-  val memStatus = RegInit(memIdle)
+  val memFSM = new FSM(
+    memIdle,
+    List(
+      (memIdle, decodeIn.valid && !postValid && shouldMemWork, waitReq),
+      (waitReq, Mux(memIsRead, memAxiM.AR.fire, memAxiM.AW.fire && memAxiM.W.fire), waitRes),
+      (waitRes, Mux(memIsRead, memAxiM.R.fire, memAxiM.B.fire), memIdle)
+    )
+  )
+  val memStatus = memFSM.status
 
   val exeFSM = new FSM(
     exeIdle,
@@ -145,15 +151,6 @@ class InstructionExecuteUnit extends Module {
     Fill(2, Mux(memlen > 2.U, 1.U, 0.U)),
     Fill(1, Mux(memlen > 1.U, 1.U, 0.U)),
     1.U(1.W)
-  )
-
-  memStatus := FSM(
-    memStatus,
-    List(
-      (memIdle, firstValid && shouldMemWork, waitReq),
-      (waitReq, Mux(memIsRead, memAxiM.AR.fire, memAxiM.AW.fire && memAxiM.W.fire), waitRes),
-      (waitRes, Mux(memIsRead, memAxiM.R.fire, memAxiM.B.fire), memIdle)
-    )
   )
 
   memAxiM.AR.valid     := memStatus === waitReq && memIsRead && shouldMemWork

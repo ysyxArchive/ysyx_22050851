@@ -61,13 +61,6 @@ object EnumSeq {
   }
 }
 
-object FSM {
-  def apply(current: UInt, elems: List[(UInt, Bool, UInt)]) = {
-    val table = elems.map({ case tri => (tri._1 === current && tri._2) -> tri._3 })
-    MuxCase(current, table)
-  }
-}
-
 class FSM(val initState: UInt, val elems: List[(UInt, Bool, UInt)]) {
   val status = RegInit(initState)
   status := nextState(status)
