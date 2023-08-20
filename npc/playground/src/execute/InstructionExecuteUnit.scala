@@ -25,7 +25,11 @@ class InstructionExecuteUnit extends Module {
 
   val postValid  = RegNext(decodeIn.valid)
   val firstValid = decodeIn.valid && !postValid
-  
+
+  val waitReq :: waitRes :: memIdle :: other = Enum(4)
+
+  val memStatus = RegInit(memIdle)
+
   val idle = !firstValid && memStatus === memIdle
   // regIO
   val src1 = Wire(UInt(64.W))
@@ -135,9 +139,6 @@ class InstructionExecuteUnit extends Module {
   val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   val shouldMemWork = controlIn.memmode =/= MemMode.no.asUInt
 
-  val waitReq :: waitRes :: memIdle :: other = Enum(4)
-
-  val memStatus = RegInit(memIdle)
   memStatus := FSM(
     memStatus,
     List(
