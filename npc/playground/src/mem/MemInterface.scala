@@ -38,7 +38,7 @@ class MemInterface extends Module {
 
   val status = RegInit(waitReq)
   status := FSM(
-    status,
+    status, 
     List(
       (waitReq, axiS.AR.fire || (axiS.AW.fire && axiS.W.fire), writeBack),
       (writeBack, axiS.R.fire || axiS.B.fire, waitReq)

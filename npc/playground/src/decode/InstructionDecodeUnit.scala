@@ -51,8 +51,8 @@ class InstructionDecodeUnit extends Module {
   val inst      = RegInit(0x13.U(64.W))
   val instValid = RegInit(false.B)
 
-  memAxiM.R.ready      := decodeFSM.willChangeTo(waitR)
-  memAxiM.AR.valid     := decodeFSM.willChangeTo(waitAR)
+  memAxiM.R.ready      := decodeFSM === waitR
+  memAxiM.AR.valid     := decodeStatus === waitAR
   memAxiM.AR.bits.id   := 0.U
   memAxiM.AR.bits.prot := 0.U
   memAxiM.AR.bits.addr := regIO.pc
