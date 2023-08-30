@@ -181,10 +181,14 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
     case (elem, idx) =>
       when(idx.U =/= chosenReq) {
         elem.B.valid  := false.B
+        elem.B.bits   := DontCare
         elem.R.valid  := false.B
+        elem.R.bits   := DontCare
         elem.AW.ready := false.B
         elem.AR.ready := false.B
         elem.W.ready  := false.B
+      }.otherwise {
+        elem := DontCare
       }
   }
 
