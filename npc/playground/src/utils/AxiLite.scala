@@ -2,6 +2,7 @@ import chisel3._
 import chisel3.util._
 import utils.FSM
 import scala.math._
+import decode.CsrSetMode
 // AXI5-Lite
 
 class AxiLiteWriteRequest(addr_width: Int, id_w_width: Int) extends Bundle {
@@ -158,11 +159,17 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
   masterIO.W.valid  := arbiterStatus === reqSlave && !isRead
   masterIO.W.bits   := wbits
   // when waitSlaveRes
-  val resData = Reg(new AxiLiteReadData(UInt(64.W), 1))
+  val resData   = Reg(new AxiLiteReadData(UInt(64.W), 1))
+  val writeBack = Reg(new AxiLiteWriteResponse(1))
   resData := Mux(
     slaveResFire && arbiterStatus === waitSlaveRes,
     masterIO.R.bits,
     resData
+  )
+  writeBack := Mux(
+    slaveResFire && arbiterStatus === waitSlaveRes,
+    masterIO.B.bits,
+    writeBack
   )
   // when resMaster
   chosenMaster.R.bits  := resData
