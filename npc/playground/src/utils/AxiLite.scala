@@ -144,21 +144,19 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
   chosenMaster.AR.ready := haveValidRequest && arbiterStatus === waitMasterReq && isRead // change status
   chosenMaster.AW.ready := haveValidRequest && arbiterStatus === waitMasterReq && !isRead
   chosenMaster.W.ready  := haveValidRequest && arbiterStatus === waitMasterReq && !isRead
-  val reqAddr = Reg(UInt(64.W))
-  val reqData = Reg(UInt(64.W))
-  reqAddr := Mux(
-    masterReqFire(chosenReq) && arbiterStatus === waitMasterReq,
-    Mux(isRead, chosenMaster.AR.bits.addr, chosenMaster.AW.bits.addr),
-    reqAddr
-  )
-  reqData := Mux(arbiterStatus === waitMasterReq, chosenMaster.W.bits.data, reqAddr)
+  val awbits = Reg(new AxiLiteWriteRequest(64, 1))
+  val arbits = Reg(new AxiLiteReadRequest(64, 1))
+  val wbits  = Reg(UInt(64.W))
+  awbits := Mux(masterReqFire(chosenReq) && arbiterStatus === waitMasterReq, chosenMaster.AW.bits, awbits)
+  wbits  := Mux(masterReqFire(chosenReq) && arbiterStatus === waitMasterReq, chosenMaster.W.bits, wbits)
+  arbits := Mux(masterReqFire(chosenReq) && arbiterStatus === waitMasterReq, chosenMaster.AR.bits, arbits)
   // when reqSlave
   masterIO.AR.valid := arbiterStatus === reqSlave && isRead
-  masterIO.AR.bits  := reqAddr
+  masterIO.AR.bits  := arbits
   masterIO.AW.valid := arbiterStatus === reqSlave && !isRead
-  masterIO.AW.bits  := reqAddr
+  masterIO.AW.bits  := awbits
   masterIO.W.valid  := arbiterStatus === reqSlave && !isRead
-  masterIO.W.bits   := reqData
+  masterIO.W.bits   := wbits
   // when waitSlaveRes
   val resData = Reg(UInt(64.W))
   resData := Mux(
