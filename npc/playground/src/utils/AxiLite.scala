@@ -87,7 +87,7 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
 
   val workingMaster     = Reg(UInt(log2Up(masterPort).W))
   val isRead            = Reg(Bool())
-  val masterRequestMask = Vec(masterPort, RegInit(false.B))
+  val masterRequestMask = VecInit(masterPort, RegInit(false.B))
   val arbiterStatus     = arbiterFSM.status
 
   val masterRequestValid = VecInit(slaveIO.map({
