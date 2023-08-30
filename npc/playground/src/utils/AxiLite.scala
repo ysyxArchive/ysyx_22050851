@@ -151,7 +151,7 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
     Mux(isRead, chosenMaster.AR.bits.addr, chosenMaster.AW.bits.addr),
     reqAddr
   )
-  reqData := Mux(arbiterStatus === waitMasterReq, chosenMaster.W.bits, reqAddr)
+  reqData := Mux(arbiterStatus === waitMasterReq, chosenMaster.W.bits.data, reqAddr)
   // when reqSlave
   masterIO.AR.valid := arbiterStatus === reqSlave && isRead
   masterIO.AR.bits  := reqAddr
