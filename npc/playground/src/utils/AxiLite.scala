@@ -173,6 +173,7 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
   )
   // when resMaster
   chosenMaster.R.bits  := resData
+  chosenMaster.B.bits  := writeBack
   chosenMaster.R.valid := arbiterStatus === resMaster && isRead
   chosenMaster.B.valid := arbiterStatus === resMaster && !isRead
 }
