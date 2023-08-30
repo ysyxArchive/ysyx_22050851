@@ -1,5 +1,7 @@
 import chisel3._
-import chisel3.util.DecoupledIO
+import chisel3.util._
+import utils.FSM
+import scala.math._
 // AXI5-Lite
 
 class AxiLiteWriteRequest(addr_width: Int, id_w_width: Int) extends Bundle {
@@ -77,3 +79,94 @@ object AxiLiteIO {
 //   val W  = DecoupledIO(new AxiLiteWriteData(data_width))
 //   val B  = Flipped(DecoupledIO(new AxiLiteWriteResponse()))
 // }
+
+class AxiLiteArbiter(val masterPort: Int) extends Module {
+  val masterIO = IO(Vec(masterPort, AxiLiteIO(64, 64)))
+  // now just one slave
+  val slaveIO = IO(AxiLiteIO(64, 64))
+
+  val workingMaster     = Reg(UInt(log2Up(masterPort).W))
+  val isRead            = Reg(Bool())
+  val masterRequestMask = Vec(masterPort, RegInit(false.B))
+  val arbiterStatus     = arbiterFSM.status
+
+  val masterRequestValid = VecInit(masterIO.map({
+    case axiliteIO => axiliteIO.AR.valid || (axiliteIO.AW.valid && axiliteIO.W.valid)
+  }))
+  val unMaskedMasterRequestValid = VecInit(
+    masterRequestValid.zip(masterRequestMask).map { case (valid, mask) => valid & !mask }
+  )
+  val maskedMasterRequestValid = VecInit(
+    masterRequestValid.zip(masterRequestMask).map { case (valid, mask) => valid & mask }
+  )
+  val haveValidUnMaskedRequest = unMaskedMasterRequestValid.reduce(_ | _)
+  val haveValidMaskedRequest   = maskedMasterRequestValid.reduce(_ | _)
+  val haveValidRequest         = haveValidUnMaskedRequest || haveValidMaskedRequest
+  val chosenUnMaskedReq        = PriorityEncoder(unMaskedMasterRequestValid)
+  val chosenMaskedReq          = PriorityEncoder(maskedMasterRequestValid)
+
+  val masterReqFire = VecInit(masterIO.map(io => io.AR.fire || (io.AW.fire && io.W.fire)))
+  val masterResFire = VecInit(masterIO.map(io => io.R.fire || io.B.fire))
+  val slaveReqFire  = slaveIO.AR.fire || (slaveIO.AW.fire && slaveIO.W.fire)
+  val slaveResFire  = slaveIO.R.fire || slaveIO.B.fire
+
+  // if have Valid Masked req, choose unmasked, else masked
+  val chosenReq = Mux(haveValidUnMaskedRequest, chosenUnMaskedReq, chosenMaskedReq)
+
+  val waitMasterReq :: reqSlave :: waitSlaveRes :: resMaster :: others = Enum(4)
+  val arbiterFSM = new FSM(
+    waitMasterReq,
+    List(
+      (waitMasterReq, haveValidRequest, reqSlave),
+      (reqSlave, masterReqFire(chosenReq), waitSlaveRes),
+      (waitSlaveRes, slaveReqFire, resMaster),
+      (resMaster, masterResFire(chosenReq), waitMasterReq)
+    )
+  )
+  val chosenMaster = masterIO(chosenReq)
+  // when waitMasterReq
+  workingMaster := Mux(
+    arbiterStatus === waitMasterReq && haveValidRequest,
+    chosenReq,
+    workingMaster
+  ) // choose the chosen master
+  isRead := Mux(
+    arbiterStatus === waitMasterReq && haveValidRequest,
+    chosenMaster.AR.valid,
+    isRead
+  ) // check if chosen master is reading
+  masterRequestMask(chosenReq) := Mux(
+    arbiterStatus === waitMasterReq,
+    true.B,
+    masterRequestMask(chosenReq)
+  ) // if chosen is unmasked, mask it
+  chosenMaster.AR.ready := haveValidRequest && arbiterStatus === waitMasterReq && isRead // change status
+  chosenMaster.AW.ready := haveValidRequest && arbiterStatus === waitMasterReq && !isRead
+  chosenMaster.W.ready  := haveValidRequest && arbiterStatus === waitMasterReq && !isRead
+  val reqAddr = Reg(UInt(64.W))
+  val reqData = Reg(UInt(64.W))
+  reqAddr := Mux(
+    masterReqFire(chosenReq) && arbiterStatus === waitMasterReq,
+    Mux(isRead, chosenMaster.AR.bits, chosenMaster.AW.bits),
+    reqAddr
+  )
+  reqData := Mux(arbiterStatus === waitMasterReq, chosenMaster.W.bits, reqAddr)
+  // when reqSlave
+  slaveIO.AR.valid := arbiterStatus === reqSlave && isRead
+  slaveIO.AR.bits  := reqAddr
+  slaveIO.AW.valid := arbiterStatus === reqSlave && !isRead
+  slaveIO.AW.bits  := reqAddr
+  slaveIO.W.valid  := arbiterStatus === reqSlave && !isRead
+  slaveIO.W.bits   := reqData
+  // when waitSlaveRes
+  val resData = Reg(UInt(64.W))
+  resData := Mux(
+    slaveResFire && arbiterStatus === waitSlaveRes,
+    slaveIO.R.bits,
+    resData
+  )
+  // when resMaster
+  chosenMaster.R.bits  := resData
+  chosenMaster.R.valid := arbiterStatus === resMaster && isRead
+  chosenMaster.B.valid := arbiterStatus === resMaster && !isRead
+}
