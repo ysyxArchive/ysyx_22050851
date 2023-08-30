@@ -148,7 +148,7 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
   val reqData = Reg(UInt(64.W))
   reqAddr := Mux(
     masterReqFire(chosenReq) && arbiterStatus === waitMasterReq,
-    Mux(isRead, chosenMaster.AR.bits, chosenMaster.AW.bits),
+    Mux(isRead, chosenMaster.AR.bits.addr, chosenMaster.AW.bits.addr),
     reqAddr
   )
   reqData := Mux(arbiterStatus === waitMasterReq, chosenMaster.W.bits, reqAddr)
