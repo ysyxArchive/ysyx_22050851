@@ -5,7 +5,6 @@ import decode._
 
 class CPU extends Module {
   val mem     = Module(new MemInterface)
-  val mem2    = Module(new MemInterface)
   val regs    = Module(new RegisterFile)
   val csrregs = Module(new ControlRegisterFile)
   // val ifu         = Module(new InstructionFetchUnit)
