@@ -171,6 +171,9 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
     masterIO.B.bits,
     writeBack
   )
+  masterIO.B.ready := arbiterStatus === waitSlaveRes && !isRead
+  masterIO.R.ready := arbiterStatus === waitSlaveRes && isRead
+
   // when resMaster
   chosenMaster.R.bits  := resData
   chosenMaster.B.bits  := writeBack
