@@ -179,7 +179,7 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
   // unchosen ports
   slaveIO.zipWithIndex.foreach {
     case (elem, idx) =>
-      when(idx.U === chosenReq) {
+      when(idx.U =/= chosenReq) {
         elem.B.valid  := false.B
         elem.R.valid  := false.B
         elem.AW.ready := false.B
