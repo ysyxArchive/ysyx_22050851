@@ -81,7 +81,7 @@ object AxiLiteIO {
 // }
 
 class AxiLiteArbiter(val masterPort: Int) extends Module {
-  val slaveIO = IO(Vec(masterPort, AxiLiteIO(64, 64)))
+  val slaveIO = IO(Vec(masterPort, Flipped(AxiLiteIO(64, 64))))
   // now just one master port
   val masterIO = IO(AxiLiteIO(64, 64))
 
