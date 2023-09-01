@@ -90,7 +90,7 @@ void write_mem(uint64_t addr, size_t length, uint64_t data) {
     } else if (length == 8) {
       *((uint64_t *)(mem + (addr - MEM_START))) = (uint64_t)data;
     } else {
-      panic("length %d is not allowed, only allowed 1, 2, 4, 8", length);
+      panic("length %ld is not allowed, only allowed 1, 2, 4, 8", length);
     }
   } else {
     if (top->reset)
