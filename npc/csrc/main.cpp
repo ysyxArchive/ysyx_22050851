@@ -79,8 +79,8 @@ void one_step() {
   static uint64_t lastpc = 0;
   if (lastpc == cpu.pc) {
     latpcchange++;
-    if (latpcchange > 10) {
-      Log("error pc not changed for 10 cycles");
+    if (latpcchange > 20) {
+      Log("error pc not changed for 20 cycles");
       is_bad_halt = true;
       is_halt = true;
     }
