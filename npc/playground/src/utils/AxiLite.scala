@@ -138,7 +138,7 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
         elem.AR.ready := false.B
         elem.W.ready  := false.B
       }.otherwise {
-        chosenMaster := elem
+        chosenMaster <> elem
       }
   }
   // when waitMasterReq
