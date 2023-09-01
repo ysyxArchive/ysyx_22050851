@@ -125,8 +125,8 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
   )
   val arbiterStatus = arbiterFSM.status
 
-  val chosenMaster = slaveIO(chosenReq)
-
+  val chosenMaster = Wire(Flipped(AxiLiteIO(64, 64)))
+  chosenMaster := slaveIO(chosenReq)
   // unchosen ports
   slaveIO.zipWithIndex.foreach {
     case (elem, idx) =>
@@ -138,6 +138,8 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
         elem.AW.ready := false.B
         elem.AR.ready := false.B
         elem.W.ready  := false.B
+      }.otherwise {
+        elem := chosenMaster
       }
   }
   // when waitMasterReq
