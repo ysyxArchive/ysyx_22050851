@@ -117,7 +117,7 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
   val arbiterFSM = new FSM(
     waitMasterReq,
     List(
-      (waitMasterReq, haveValidRequest, reqSlave),
+      (waitMasterReq, slaveReqFire(workingMaster), reqSlave),
       (reqSlave, masterReqFire, waitSlaveRes),
       (waitSlaveRes, masterResFire, resMaster),
       (resMaster, slaveResFire(workingMaster), waitMasterReq)
