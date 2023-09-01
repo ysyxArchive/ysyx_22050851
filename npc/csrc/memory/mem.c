@@ -78,7 +78,7 @@ void write_mem(uint64_t addr, size_t length, uint64_t data) {
   } else if (addr == SERIAL_PORT) {
     Assert(length == 1, "output to Serial Port with length == %ld, not 1",
            length);
-    printf("%c", data);
+    printf("%c", (char)data);
     difftest_skip();
   } else if (addr >= MEM_START && addr + length <= MEM_START + MEM_LEN) {
     if (length == 1) {
