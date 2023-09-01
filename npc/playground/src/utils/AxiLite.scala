@@ -160,9 +160,9 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
   val awbits = Reg(new AxiLiteWriteRequest(64, 1))
   val arbits = Reg(new AxiLiteReadRequest(64, 1))
   val wbits  = Reg(new AxiLiteWriteData(UInt(64.W)))
-  awbits := Mux(masterReqFire(chosenReq) && arbiterStatus === waitMasterReq, chosenMaster.AW.bits, awbits)
-  wbits  := Mux(masterReqFire(chosenReq) && arbiterStatus === waitMasterReq, chosenMaster.W.bits, wbits)
-  arbits := Mux(masterReqFire(chosenReq) && arbiterStatus === waitMasterReq, chosenMaster.AR.bits, arbits)
+  awbits := Mux(slaveReqFire(chosenReq) && arbiterStatus === waitMasterReq, chosenMaster.AW.bits, awbits)
+  wbits  := Mux(slaveReqFire(chosenReq) && arbiterStatus === waitMasterReq, chosenMaster.W.bits, wbits)
+  arbits := Mux(slaveReqFire(chosenReq) && arbiterStatus === waitMasterReq, chosenMaster.AR.bits, arbits)
   // when reqSlave
   masterIO.AR.valid := arbiterStatus === reqSlave && isRead
   masterIO.AR.bits  := arbits
