@@ -105,10 +105,10 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
   val chosenUnMaskedReq        = PriorityEncoder(unMaskedMasterRequestValid)
   val chosenMaskedReq          = PriorityEncoder(maskedMasterRequestValid)
 
-  val masterReqFire = VecInit(slaveIO.map(io => io.AR.fire || (io.AW.fire && io.W.fire)))
-  val masterResFire = VecInit(slaveIO.map(io => io.R.fire || io.B.fire))
-  val slaveReqFire  = masterIO.AR.fire || (masterIO.AW.fire && masterIO.W.fire)
-  val slaveResFire  = masterIO.R.fire || masterIO.B.fire
+  val slaveReqFire  = VecInit(slaveIO.map(io => io.AR.fire || (io.AW.fire && io.W.fire)))
+  val slaveResFire  = VecInit(slaveIO.map(io => io.R.fire || io.B.fire))
+  val masterReqFire = masterIO.AR.fire || (masterIO.AW.fire && masterIO.W.fire)
+  val masterResFire = masterIO.R.fire || masterIO.B.fire
 
   // if have Valid Masked req, choose unmasked, else masked
   val chosenReq = Mux(haveValidUnMaskedRequest, chosenUnMaskedReq, chosenMaskedReq)
@@ -118,9 +118,9 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
     waitMasterReq,
     List(
       (waitMasterReq, haveValidRequest, reqSlave),
-      (reqSlave, masterReqFire(chosenReq), waitSlaveRes),
-      (waitSlaveRes, slaveReqFire, resMaster),
-      (resMaster, masterResFire(chosenReq), waitMasterReq)
+      (reqSlave, masterReqFire, waitSlaveRes),
+      (waitSlaveRes, masterResFire, resMaster),
+      (resMaster, slaveResFire(chosenReq), waitMasterReq)
     )
   )
   val arbiterStatus = arbiterFSM.status
@@ -174,12 +174,12 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
   val resData   = Reg(new AxiLiteReadData(UInt(64.W), 1))
   val writeBack = Reg(new AxiLiteWriteResponse(1))
   resData := Mux(
-    slaveResFire && arbiterStatus === waitSlaveRes,
+    masterResFire && arbiterStatus === waitSlaveRes,
     masterIO.R.bits,
     resData
   )
   writeBack := Mux(
-    slaveResFire && arbiterStatus === waitSlaveRes,
+    masterResFire && arbiterStatus === waitSlaveRes,
     masterIO.B.bits,
     writeBack
   )
