@@ -130,17 +130,13 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
   // unchosen ports
   slaveIO.zipWithIndex.foreach {
     case (elem, idx) =>
-      when(idx.U =/= chosenReq) {
-        elem.B.valid  := false.B
-        elem.B.bits   := DontCare
-        elem.R.valid  := false.B
-        elem.R.bits   := DontCare
-        elem.AW.ready := false.B
-        elem.AR.ready := false.B
-        elem.W.ready  := false.B
-      }.otherwise {
-        elem := chosenMaster
-      }
+      elem.B.valid  := Mux(idx.U === chosenReq, chosenMaster.B.valid, false.B)
+      elem.B.bits   := Mux(idx.U === chosenReq, chosenMaster.B.bits, DontCare)
+      elem.R.valid  := Mux(idx.U === chosenReq, chosenMaster.R.valid, false.B)
+      elem.R.bits   := Mux(idx.U === chosenReq, chosenMaster.R.bits, DontCare)
+      elem.AW.ready := Mux(idx.U === chosenReq, chosenMaster.AW.ready, false.B)
+      elem.AR.ready := Mux(idx.U === chosenReq, chosenMaster.AR.ready, false.B)
+      elem.W.ready  := Mux(idx.U === chosenReq, chosenMaster.W.ready, false.B)
   }
   // when waitMasterReq
   workingMaster := Mux(
