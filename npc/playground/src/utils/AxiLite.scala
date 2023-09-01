@@ -111,7 +111,8 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
   val masterResFire = masterIO.R.fire || masterIO.B.fire
 
   // if have Valid Masked req, choose unmasked, else masked
-  val chosenReq                                                        = Mux(haveValidUnMaskedRequest, chosenUnMaskedReq, chosenMaskedReq)
+  val chosenReq = Mux(haveValidUnMaskedRequest, chosenUnMaskedReq, chosenMaskedReq)
+
   val waitMasterReq :: reqSlave :: waitSlaveRes :: resMaster :: others = Enum(4)
   val arbiterFSM = new FSM(
     waitMasterReq,
