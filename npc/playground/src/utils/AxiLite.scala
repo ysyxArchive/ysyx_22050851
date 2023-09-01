@@ -111,8 +111,8 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
   val masterResFire = masterIO.R.fire || masterIO.B.fire
 
   // if have Valid Masked req, choose unmasked, else masked
-  val chosenReq = Reg(UInt(log2Up(masterPort).W))
-  
+  val chosenReq = Mux(haveValidUnMaskedRequest, chosenUnMaskedReq, chosenMaskedReq)
+  val workingReq = Reg()
   val waitMasterReq :: reqSlave :: waitSlaveRes :: resMaster :: others = Enum(4)
   val arbiterFSM = new FSM(
     waitMasterReq,
@@ -126,17 +126,16 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
   val arbiterStatus = arbiterFSM.status
 
   val chosenMaster = Wire(Flipped(AxiLiteIO(64, 64)))
-  chosenMaster := slaveIO(chosenReq)
   // unchosen ports
   slaveIO.zipWithIndex.foreach {
     case (elem, idx) =>
-      elem.B.valid  := Mux(idx.U === chosenReq, chosenMaster.B.valid, false.B)
-      elem.B.bits   := Mux(idx.U === chosenReq, chosenMaster.B.bits, DontCare)
-      elem.R.valid  := Mux(idx.U === chosenReq, chosenMaster.R.valid, false.B)
-      elem.R.bits   := Mux(idx.U === chosenReq, chosenMaster.R.bits, DontCare)
-      elem.AW.ready := Mux(idx.U === chosenReq, chosenMaster.AW.ready, false.B)
-      elem.AR.ready := Mux(idx.U === chosenReq, chosenMaster.AR.ready, false.B)
-      elem.W.ready  := Mux(idx.U === chosenReq, chosenMaster.W.ready, false.B)
+      elem.B.valid  := Mux(idx.U === workingMaster, chosenMaster.B.valid, false.B)
+      elem.B.bits   := Mux(idx.U === workingMaster, chosenMaster.B.bits, DontCare)
+      elem.R.valid  := Mux(idx.U === workingMaster, chosenMaster.R.valid, false.B)
+      elem.R.bits   := Mux(idx.U === workingMaster, chosenMaster.R.bits, DontCare)
+      elem.AW.ready := Mux(idx.U === workingMaster, chosenMaster.AW.ready, false.B)
+      elem.AR.ready := Mux(idx.U === workingMaster, chosenMaster.AR.ready, false.B)
+      elem.W.ready  := Mux(idx.U === workingMaster, chosenMaster.W.ready, false.B)
   }
   // when waitMasterReq
   workingMaster := Mux(
@@ -160,11 +159,9 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
   val awbits = Reg(new AxiLiteWriteRequest(64, 1))
   val arbits = Reg(new AxiLiteReadRequest(64, 1))
   val wbits  = Reg(new AxiLiteWriteData(UInt(64.W)))
-  awbits := Mux(slaveReqFire(chosenReq) && arbiterStatus === waitMasterReq, chosenMaster.AW.bits, awbits)
-  wbits  := Mux(slaveReqFire(chosenReq) && arbiterStatus === waitMasterReq, chosenMaster.W.bits, wbits)
-  arbits := Mux(slaveReqFire(chosenReq) && arbiterStatus === waitMasterReq, chosenMaster.AR.bits, arbits)
-  chosenReq:= Mux(arbiterStatus === waitMasterReq, Mux(haveValidUnMaskedRequest, chosenUnMaskedReq, chosenMaskedReq), chosenReq)
-
+  awbits := Mux(slaveReqFire(workingMaster) && arbiterStatus === waitMasterReq, chosenMaster.AW.bits, awbits)
+  wbits  := Mux(slaveReqFire(workingMaster) && arbiterStatus === waitMasterReq, chosenMaster.W.bits, wbits)
+  arbits := Mux(slaveReqFire(workingMaster) && arbiterStatus === waitMasterReq, chosenMaster.AR.bits, arbits)
   // when reqSlave
   masterIO.AR.valid := arbiterStatus === reqSlave && isRead
   masterIO.AR.bits  := arbits
