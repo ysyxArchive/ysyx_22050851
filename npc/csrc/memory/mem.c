@@ -35,7 +35,7 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
     ret = get_key();
     difftest_skip();
   } else if (addr == VGACTL_ADDR) {
-    Assert(length == 4, "read CGACTL with length == %ld not allowed", length);
+    Assert(length == 4 || length == 8, "read VGACTL with length == %ld not allowed", length);
     ret = VGA_WIDTH << 16 | VGA_HEIGHT;
     difftest_skip();
   } else if (addr == RTC_ADDR || addr == RTC_ADDR + 4) {
