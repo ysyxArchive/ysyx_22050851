@@ -49,7 +49,7 @@ extern "C" void mem_write(const svLogicVecVal* addr,
                           const svLogicVecVal* mask,
                           const svLogicVecVal* data) {
   uint8_t len = 0;
-  auto val = *(uint8_t*)mask;
+  auto val = mask->aval;
   printf("mask is %d\n", val);
   while (val) {
     val >>= 1;
