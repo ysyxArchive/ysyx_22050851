@@ -39,7 +39,7 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
     ret = VGA_WIDTH << 16 | VGA_HEIGHT;
     difftest_skip();
   } else if (addr == RTC_ADDR || addr == RTC_ADDR + 4) {
-    Assert(length == 4, "read from RTC with length == %ld not allowed", length);
+    Assert(length == 4 || length == 8, "read from RTC with length == %ld not allowed", length);
     ret = (uint32_t)(gettime() >> ((addr - RTC_ADDR) * 8));
     difftest_skip();
   } else if (addr >= MEM_START && addr + length <= MEM_START + MEM_LEN) {
