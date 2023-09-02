@@ -16,10 +16,6 @@ Context *__am_irq_handle(Context *c) {
       c->mepc += 4;
       c = user_handler(ev, c);
       break;
-    case 0x8000000000000007:
-      ev.event = EVENT_IRQ_TIMER;
-      c = user_handler(ev, c);
-      break;
     default:
       printf("unkown error code %x", c->mcause);
       halt(1);
@@ -27,7 +23,6 @@ Context *__am_irq_handle(Context *c) {
       break;
     }
   }
-  __am_switch(c);
   return c;
 }
 
@@ -44,10 +39,10 @@ bool cte_init(Context *(*handler)(Event, Context *)) {
 }
 
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
-  Context c = {.mepc = (uint64_t)entry, .mstatus = 0xa00001880};
-  c.GPR2 = (uint64_t)arg;
-  memcpy(kstack.end - sizeof(c), &c, sizeof(c));
-  return kstack.end - sizeof(c);
+  Context c = {.mepc=(uint64_t)entry, .mstatus=0xa00001800};
+  c.GPR2=(uint64_t)arg;
+  memcpy(kstack.start, &c, sizeof(c));
+  return kstack.start;
 }
 
 void yield() { asm volatile("li a7, 1; ecall"); }

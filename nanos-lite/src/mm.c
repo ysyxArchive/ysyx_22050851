@@ -1,13 +1,10 @@
-#include "memory.h"
-#include <common.h>
-#include <proc.h>
+#include <memory.h>
 #include <stdint.h>
 #include <stdio.h>
-extern AddrSpace kernel_addr_space;
 void *pf = NULL;
-uint8_t *page_end = NULL;
-void *new_page(size_t nr_page) {
-  uint8_t *ret = page_end;
+uint8_t* page_end = NULL;
+void *new_page(size_t nr_page) { 
+  uint8_t* ret = page_end;
   page_end -= nr_page * PGSIZE;
   return ret;
 }
