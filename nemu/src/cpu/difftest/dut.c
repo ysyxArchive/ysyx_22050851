@@ -145,7 +145,7 @@ void difftest_attach(){
 }
 
 void difftest_detach(){
-  difftest_working = false;
+  difftest_working = true;
 }
 #else
 void init_difftest(char *ref_so_file, long img_size, int port) {}

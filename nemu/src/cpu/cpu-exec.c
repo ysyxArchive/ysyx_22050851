@@ -18,6 +18,7 @@
 #include <cpu/difftest.h>
 #include <locale.h>
 #include <sdb.h>
+#include <tracers.h>
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
  * This is useful when you use the `si' command.
@@ -61,7 +62,7 @@ static void exec_once(Decode* s, vaddr_t pc) {
   // update pc
   cpu.pc = s->dnpc;
 
-#ifdef CONFIG_ITRACE
+#ifdef CONFIG_TARGET_NATIVE_ELF
   char* p = s->logbuf;
   p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
   int ilen = s->snpc - s->pc;

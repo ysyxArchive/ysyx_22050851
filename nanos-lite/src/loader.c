@@ -11,8 +11,9 @@
 #define Elf_Ehdr Elf32_Ehdr
 #define Elf_Phdr Elf32_Phdr
 #endif
-#define ADDR_BEGIN 0x83000000
-uintptr_t loader(PCB *pcb, const char *filename) {
+uintptr_t loader(PCB* pcb, const char* filename) {
+  protect(&(pcb->as));
+  Log("new page dir %p", pcb->as.ptr);
   int fd = fs_open(filename, 0, 0);
   fs_lseek(fd, 0, SEEK_SET);
   Elf_Ehdr elfHeader;
@@ -66,7 +67,7 @@ uintptr_t loader(PCB *pcb, const char *filename) {
   return elfHeader.e_entry;
 }
 
-void naive_uload(PCB *pcb, const char *filename) {
+void naive_uload(PCB* pcb, const char* filename) {
   reset_fs();
   uintptr_t entry = loader(pcb, filename);
   Log("Jump to entry = %p", (void*)entry);
