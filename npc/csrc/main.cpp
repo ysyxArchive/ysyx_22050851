@@ -50,7 +50,6 @@ extern "C" void mem_write(const svLogicVecVal* addr,
                           const svLogicVecVal* data) {
   uint8_t len = 0;
   auto val = mask->aval;
-  printf("mask is %d\n", val);
   while (val) {
     val >>= 1;
     len++;

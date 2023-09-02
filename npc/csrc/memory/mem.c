@@ -1,15 +1,15 @@
-#include <mem.h>
 #include "VCPU.h"
 #include "device.h"
 #include "difftest.h"
+#include <mem.h>
 uint8_t mem[MEM_LEN] = {0};
 size_t bin_file_size;
 extern CPU cpu;
 extern uint32_t vga_data[VGA_HEIGHT * VGA_WIDTH];
-extern VCPU* top;
+extern VCPU *top;
 
-void init_memory(char* bin_path) {
-  FILE* bin_file = fopen(bin_path, "r");
+void init_memory(char *bin_path) {
+  FILE *bin_file = fopen(bin_path, "r");
   Assert(bin_file != NULL, "read bin file error");
   fseek(bin_file, 0L, SEEK_END);
   uint64_t size = ftell(bin_file);
@@ -23,9 +23,9 @@ void init_memory(char* bin_path) {
 uint64_t read_mem(uint64_t addr, size_t length) {
   uint64_t ret = read_mem_nolog(addr, length);
   // TODO:mtrace
-  Log(ANSI_FMT("Reading %d bytes, starts with %lx, data is %lx",
-               ANSI_FG_YELLOW),
-      length, addr, ret);
+  //  Log(ANSI_FMT("Reading %d bytes, starts with %lx, data is %lx",
+  //               ANSI_FG_YELLOW),
+  //      length, addr, ret);
   return ret;
 }
 uint64_t read_mem_nolog(uint64_t addr, size_t length) {
@@ -35,41 +35,36 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
     ret = get_key();
     difftest_skip();
   } else if (addr == VGACTL_ADDR) {
-    Assert(length == 4 || length == 8,
-           "read VGACTL with length == %ld not allowed", length);
+    Assert(length == 4, "read CGACTL with length == %ld not allowed", length);
     ret = VGA_WIDTH << 16 | VGA_HEIGHT;
     difftest_skip();
   } else if (addr == RTC_ADDR || addr == RTC_ADDR + 4) {
-    Assert(length == 4 || length == 8,
-           "read from RTC with length == %ld not allowed", length);
+    Assert(length == 4, "read from RTC with length == %ld not allowed", length);
     ret = (uint32_t)(gettime() >> ((addr - RTC_ADDR) * 8));
     difftest_skip();
   } else if (addr >= MEM_START && addr + length <= MEM_START + MEM_LEN) {
     if (length == 1) {
-      ret = *((uint8_t*)(mem + (addr - MEM_START)));
+      ret = *((uint8_t *)(mem + (addr - MEM_START)));
     } else if (length == 2) {
-      ret = *((uint16_t*)(mem + (addr - MEM_START)));
+      ret = *((uint16_t *)(mem + (addr - MEM_START)));
     } else if (length == 4) {
-      ret = *((uint32_t*)(mem + (addr - MEM_START)));
+      ret = *((uint32_t *)(mem + (addr - MEM_START)));
     } else if (length == 8) {
-      ret = *((uint64_t*)(mem + (addr - MEM_START)));
+      ret = *((uint64_t *)(mem + (addr - MEM_START)));
     } else {
       panic("length %ld is not allowed, only allowed 1, 2, 4, 8", length);
     }
   } else {
     if (top->reset)
       return 0;
-    panic("read from addr 0x%lx + 0x%lx out of range at pc == %lx", addr,
-          length, cpu.pc);
+    panic("read from addr 0x%lx + 0x%lx out of range at pc == %lx", addr, length,
+          cpu.pc);
   }
   return ret;
 }
 
 void write_mem(uint64_t addr, size_t length, uint64_t data) {
   // printf("%lx, %d, %lx\n", addr, length, data);
-  Log(ANSI_FMT("writing %d bytes, pc is %lx, data is %lx, addr is %lx",
-               ANSI_FG_YELLOW),
-      length, cpu.pc, data, addr);
   if (addr >= FB_ADDR && addr <= FB_ADDR + VGA_WIDTH * VGA_HEIGHT * 4) {
     Assert(length == 4, "output to FB with length == %ld, not 4", length);
     vga_data[(addr - FB_ADDR) / 4] = data;
@@ -87,13 +82,13 @@ void write_mem(uint64_t addr, size_t length, uint64_t data) {
     difftest_skip();
   } else if (addr >= MEM_START && addr + length <= MEM_START + MEM_LEN) {
     if (length == 1) {
-      *((uint8_t*)(mem + (addr - MEM_START))) = (uint8_t)data;
+      *((uint8_t *)(mem + (addr - MEM_START))) = (uint8_t)data;
     } else if (length == 2) {
-      *((uint16_t*)(mem + (addr - MEM_START))) = (uint16_t)data;
+      *((uint16_t *)(mem + (addr - MEM_START))) = (uint16_t)data;
     } else if (length == 4) {
-      *((uint32_t*)(mem + (addr - MEM_START))) = (uint32_t)data;
+      *((uint32_t *)(mem + (addr - MEM_START))) = (uint32_t)data;
     } else if (length == 8) {
-      *((uint64_t*)(mem + (addr - MEM_START))) = (uint64_t)data;
+      *((uint64_t *)(mem + (addr - MEM_START))) = (uint64_t)data;
     } else {
       panic("length %ld is not allowed, only allowed 1, 2, 4, 8", length);
     }
