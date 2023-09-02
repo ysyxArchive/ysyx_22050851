@@ -23,9 +23,9 @@ void init_memory(char *bin_path) {
 uint64_t read_mem(uint64_t addr, size_t length) {
   uint64_t ret = read_mem_nolog(addr, length);
   // TODO:mtrace
-  //  Log(ANSI_FMT("Reading %d bytes, starts with %lx, data is %lx",
-  //               ANSI_FG_YELLOW),
-  //      length, addr, ret);
+   Log(ANSI_FMT("Reading %d bytes, starts with %lx, data is %lx",
+                ANSI_FG_YELLOW),
+       length, addr, ret);
   return ret;
 }
 uint64_t read_mem_nolog(uint64_t addr, size_t length) {
@@ -65,6 +65,9 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
 
 void write_mem(uint64_t addr, size_t length, uint64_t data) {
   // printf("%lx, %d, %lx\n", addr, length, data);
+  Log(ANSI_FMT("writing %d bytes, pc is %lx, data is %lx, addr is %lx",
+                ANSI_FG_YELLOW),
+       length, cpu.pc, data, addr);
   if (addr >= FB_ADDR && addr <= FB_ADDR + VGA_WIDTH * VGA_HEIGHT * 4) {
     Assert(length == 4, "output to FB with length == %ld, not 4", length);
     vga_data[(addr - FB_ADDR) / 4] = data;
