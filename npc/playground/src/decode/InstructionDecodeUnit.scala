@@ -56,7 +56,7 @@ class InstructionDecodeUnit extends Module {
   memAxiM.AR.bits.addr := regIO.pc
 
   inst := Mux(memAxiM.R.fire, memAxiM.R.bits.asUInt, inst)
-  
+
   // decodeout.control
   controlDecoder.input := inst
   decodeOut.control    := controlDecoder.output
