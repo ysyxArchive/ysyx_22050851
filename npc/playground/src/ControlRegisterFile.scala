@@ -114,8 +114,8 @@ class ControlRegisterFile extends Module {
   val uimm  = io.decodeIn.data.src1
   val csrId = io.decodeIn.data.imm
 
-  val registers = ControlRegisterList.list.map(info => RegInit(info.initVal.U(64.W)))
-  val register  = new ControlRegisters()
+  // val registers = ControlRegisterList.list.map(info => RegInit(info.initVal.U(64.W)))
+  val register = new ControlRegisters()
 
   debugOut := register.registers
 
@@ -139,12 +139,13 @@ class ControlRegisterFile extends Module {
   val writeBack = Wire(UInt(64.W))
   val outputVal = register(csrId)
 
-  for (i <- 0 to registers.length - 1) {
-    ControlRegisterList.list(i).name match {
+  for (i <- 0 to register.registers.length - 1) {
+    val name = ControlRegisterList.list(i).name
+    name match {
       case "mstatus" => {
-        registers(i) := MuxLookup(
+        register(name) := MuxLookup(
           io.decodeIn.control.csrbehave,
-          Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, registers(i)),
+          Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, register("mstatus")),
           EnumSeq(
             CsrBehave.ecall -> mstatus.getSettledValue("MPP" -> currentMode, "MPIE" -> mstatus("MIE"), "MIE" -> 0.U),
             CsrBehave.mret -> mstatus.getSettledValue("MIE" -> mstatus("MPIE"), "MPIE" -> 1.U, "MPP" -> PrivMode.U)
@@ -152,21 +153,21 @@ class ControlRegisterFile extends Module {
         )
       }
       case "mepc" => {
-        registers(i) := Mux(
+        register(name) := Mux(
           io.decodeIn.control.csrbehave === CsrBehave.ecall.asUInt,
           regIn.pc,
-          Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, registers(i))
+          Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, register(name))
         )
       }
       case "mcause" => {
-        registers(i) := Mux(
+        register(name) := Mux(
           io.decodeIn.control.csrbehave === CsrBehave.ecall.asUInt,
           Mux(currentMode === PrivMode.U, 0x8.U, 0xb.U),
-          Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, registers(i))
+          Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, register(name))
         )
       }
       case _ => {
-        registers(i) := Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, registers(i))
+        register(name) := Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, register(name))
       }
     }
   }
