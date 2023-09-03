@@ -143,7 +143,7 @@ class ControlRegisterFile extends Module {
     val name = ControlRegisterList.list(i).name
     name match {
       case "mstatus" => {
-        register(name) := MuxLookup(
+        register("mstatus") := MuxLookup(
           io.decodeIn.control.csrbehave,
           Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, register("mstatus")),
           EnumSeq(
@@ -153,17 +153,17 @@ class ControlRegisterFile extends Module {
         )
       }
       case "mepc" => {
-        register(name) := Mux(
+        register("mepc") := Mux(
           io.decodeIn.control.csrbehave === CsrBehave.ecall.asUInt,
           regIn.pc,
-          Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, register(name))
+          Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, register("mepc"))
         )
       }
       case "mcause" => {
-        register(name) := Mux(
+        register("mcause") := Mux(
           io.decodeIn.control.csrbehave === CsrBehave.ecall.asUInt,
           Mux(currentMode === PrivMode.U, 0x8.U, 0xb.U),
-          Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, register(name))
+          Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, register("mcause"))
         )
       }
       case _ => {
