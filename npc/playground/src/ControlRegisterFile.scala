@@ -91,6 +91,12 @@ class ControlRegisters {
 
   def apply(name: String): UInt = apply(ControlRegisterList.getIdfromName(name).U)
 
+  def set(name: String, value: UInt): UInt = {
+    val index = ControlRegisterList.IndexOf(name)
+    registers(index) := value
+    value
+  }
+
 }
 
 object PrivMode {
@@ -143,31 +149,40 @@ class ControlRegisterFile extends Module {
     val name = ControlRegisterList.list(i).name
     name match {
       case "mstatus" => {
-        register("mstatus") := MuxLookup(
-          io.decodeIn.control.csrbehave,
-          Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, register("mstatus")),
-          EnumSeq(
-            CsrBehave.ecall -> mstatus.getSettledValue("MPP" -> currentMode, "MPIE" -> mstatus("MIE"), "MIE" -> 0.U),
-            CsrBehave.mret -> mstatus.getSettledValue("MIE" -> mstatus("MPIE"), "MPIE" -> 1.U, "MPP" -> PrivMode.U)
+        register.set(
+          "mstatus",
+          MuxLookup(
+            io.decodeIn.control.csrbehave,
+            Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, register("mstatus")),
+            EnumSeq(
+              CsrBehave.ecall -> mstatus.getSettledValue("MPP" -> currentMode, "MPIE" -> mstatus("MIE"), "MIE" -> 0.U),
+              CsrBehave.mret -> mstatus.getSettledValue("MIE" -> mstatus("MPIE"), "MPIE" -> 1.U, "MPP" -> PrivMode.U)
+            )
           )
         )
       }
       case "mepc" => {
-        register("mepc") := Mux(
-          io.decodeIn.control.csrbehave === CsrBehave.ecall.asUInt,
-          regIn.pc,
-          Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, register("mepc"))
+        register.set(
+          "mepc",
+          Mux(
+            io.decodeIn.control.csrbehave === CsrBehave.ecall.asUInt,
+            regIn.pc,
+            Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, register("mepc"))
+          )
         )
       }
       case "mcause" => {
-        register("mcause") := Mux(
-          io.decodeIn.control.csrbehave === CsrBehave.ecall.asUInt,
-          Mux(currentMode === PrivMode.U, 0x8.U, 0xb.U),
-          Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, register("mcause"))
+        register.set(
+          "mcause",
+          Mux(
+            io.decodeIn.control.csrbehave === CsrBehave.ecall.asUInt,
+            Mux(currentMode === PrivMode.U, 0x8.U, 0xb.U),
+            Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, register("mcause"))
+          )
         )
       }
       case _ => {
-        register(name) := Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, register(name))
+        register.set(name, Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, register(name)))
       }
     }
   }
