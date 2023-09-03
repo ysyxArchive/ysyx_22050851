@@ -88,7 +88,7 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
 
   val workingMaster     = Reg(UInt(log2Up(masterPort).W))
   val isRead            = Reg(Bool())
-  val masterRequestMask = RegInit(VecInit(Seq.fill(32)(false.B)))
+  val masterRequestMask = RegInit(VecInit(Seq.fill(masterPort)(false.B)))
 
   val masterRequestValid = VecInit(slaveIO.map({
     case axiliteIO => axiliteIO.AR.valid || (axiliteIO.AW.valid && axiliteIO.W.valid)
