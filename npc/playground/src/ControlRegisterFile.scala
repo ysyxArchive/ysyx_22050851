@@ -80,7 +80,7 @@ class ControlRegisters {
 
   def apply(id: UInt) =
     MuxLookup(
-      csrIndex,
+      id,
       0.U,
       ControlRegisterList.list.zipWithIndex.map {
         case (info, index) => info.id.U -> registers(index)
