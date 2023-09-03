@@ -136,7 +136,7 @@ class InstructionExecuteUnit extends Module {
   alu.io.opType := AluMode.apply(controlIn.alumode)
 
   // csr
-  csrControl.csrBehave  := decodeIn.control.csrbehave
+  csrControl.csrBehave  := Mux(exeFSM.willChangeTo(exewaitPC), decodeIn.control.csrbehave, CsrBehave.no.asUInt)
   csrControl.csrSetmode := Mux(exeFSM.willChangeTo(exewaitPC), decodeIn.control.csrsetmode, CsrSetMode.origin.asUInt)
   csrControl.csrSource  := decodeIn.control.csrsource
 
