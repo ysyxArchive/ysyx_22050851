@@ -137,7 +137,7 @@ class InstructionExecuteUnit extends Module {
 
   // csr
   csrControl.csrBehave  := decodeIn.control.csrbehave
-  csrControl.csrSetmode := Mux(exeFSM.willChangeTo(exewaitPC), decodeIn.control.csrsetmode, CsrSetMode.origin)
+  csrControl.csrSetmode := Mux(exeFSM.willChangeTo(exewaitPC), decodeIn.control.csrsetmode, CsrSetMode.origin.asUInt)
   csrControl.csrSource  := decodeIn.control.csrsource
 
   // mem
