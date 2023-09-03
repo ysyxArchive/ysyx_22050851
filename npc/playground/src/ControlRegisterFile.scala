@@ -24,6 +24,7 @@ object ControlRegisterList {
   )
 
   def IndexOf(name: String) = list.indexWhere(info => { info.name == name })
+
 }
 
 class Mstatus(val value: UInt) {
@@ -74,6 +75,11 @@ class Mstatus(val value: UInt) {
   def apply(name: String) = get(name)
 }
 
+class ControlRegisters { 
+  val registers = ControlRegisterList.list.map(info => RegInit(info.initVal.U(64.W)))
+
+}
+
 object PrivMode {
   val U = 0.U
   val S = 1.U
@@ -95,7 +101,7 @@ class ControlRegisterFile extends Module {
   val uimm     = io.decodeIn.data.src1
   val csrIndex = io.decodeIn.data.imm
 
-  val registers = ControlRegisterList.list.map(info => RegInit(info.initVal.U(64.W)))
+  val registers = new ControlRegisters()
   debugOut := registers
   val indexMapSeq = ControlRegisterList.list.zipWithIndex.map {
     case (info, index) => info.id.U -> registers(index)
@@ -120,6 +126,7 @@ class ControlRegisterFile extends Module {
   )
   val writeBack = Wire(UInt(64.W))
   val outputVal = MuxLookup(csrIndex, 0.U, indexMapSeq)
+
   for (i <- 0 to registers.length - 1) {
     ControlRegisterList.list(i).name match {
       case "mstatus" => {
