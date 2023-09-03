@@ -25,6 +25,8 @@ object ControlRegisterList {
 
   def IndexOf(name: String) = list.indexWhere(info => { info.name == name })
 
+  def getIdfromName(name: String) = list(list.indexWhere(info => { info.name == name })).id
+
 }
 
 class Mstatus(val value: UInt) {
@@ -78,7 +80,7 @@ class Mstatus(val value: UInt) {
 class ControlRegisters {
   val registers = ControlRegisterList.list.map(info => RegInit(info.initVal.U(64.W)))
 
-  def apply(id: UInt) =
+  def apply(id: UInt): UInt =
     MuxLookup(
       id,
       0.U,
@@ -86,6 +88,8 @@ class ControlRegisters {
         case (info, index) => info.id.U -> registers(index)
       }.toSeq
     )
+
+  def apply(name: String): UInt = apply(ControlRegisterList.getIdfromName(name).U)
 
 }
 
@@ -111,7 +115,8 @@ class ControlRegisterFile extends Module {
   val csrId = io.decodeIn.data.imm
 
   val registers = ControlRegisterList.list.map(info => RegInit(info.initVal.U(64.W)))
-  val register = new ControlRegisters()
+  val register  = new ControlRegisters()
+
   debugOut := register.registers
 
   val mstatus = new Mstatus(registers(ControlRegisterList.IndexOf("mstatus")))
