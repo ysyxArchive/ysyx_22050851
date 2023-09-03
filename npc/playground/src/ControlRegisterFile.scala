@@ -77,7 +77,6 @@ class Mstatus(val value: UInt) {
 
 class ControlRegisters { 
   val registers = ControlRegisterList.list.map(info => RegInit(info.initVal.U(64.W)))
-
 }
 
 object PrivMode {
@@ -101,7 +100,8 @@ class ControlRegisterFile extends Module {
   val uimm     = io.decodeIn.data.src1
   val csrIndex = io.decodeIn.data.imm
 
-  val registers = new ControlRegisters()
+  val registers = ControlRegisterList.list.map(info => RegInit(info.initVal.U(64.W)))
+  val register =new ControlRegisters()
   debugOut := registers
   val indexMapSeq = ControlRegisterList.list.zipWithIndex.map {
     case (info, index) => info.id.U -> registers(index)
