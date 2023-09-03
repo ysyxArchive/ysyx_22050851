@@ -110,7 +110,7 @@ class ControlRegisterFile extends Module {
   val uimm  = io.decodeIn.data.src1
   val csrId = io.decodeIn.data.imm
 
-  // val registers = ControlRegisterList.list.map(info => RegInit(info.initVal.U(64.W)))
+  val registers = ControlRegisterList.list.map(info => RegInit(info.initVal.U(64.W)))
   val register = new ControlRegisters()
   debugOut := register.registers
 
