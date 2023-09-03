@@ -139,7 +139,7 @@ class ControlRegisterFile extends Module {
       case "mstatus" => {
         registers(i) := MuxLookup(
           io.decodeIn.control.csrbehave,
-          Mux(csrIndex === ControlRegisterList.list(i).id.U, writeBack, registers(i)),
+          Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, registers(i)),
           EnumSeq(
             CsrBehave.ecall -> mstatus.getSettledValue("MPP" -> currentMode, "MPIE" -> mstatus("MIE"), "MIE" -> 0.U),
             CsrBehave.mret -> mstatus.getSettledValue("MIE" -> mstatus("MPIE"), "MPIE" -> 1.U, "MPP" -> PrivMode.U)
@@ -150,18 +150,18 @@ class ControlRegisterFile extends Module {
         registers(i) := Mux(
           io.decodeIn.control.csrbehave === CsrBehave.ecall.asUInt,
           regIn.pc,
-          Mux(csrIndex === ControlRegisterList.list(i).id.U, writeBack, registers(i))
+          Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, registers(i))
         )
       }
       case "mcause" => {
         registers(i) := Mux(
           io.decodeIn.control.csrbehave === CsrBehave.ecall.asUInt,
           Mux(currentMode === PrivMode.U, 0x8.U, 0xb.U),
-          Mux(csrIndex === ControlRegisterList.list(i).id.U, writeBack, registers(i))
+          Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, registers(i))
         )
       }
       case _ => {
-        registers(i) := Mux(csrIndex === ControlRegisterList.list(i).id.U, writeBack, registers(i))
+        registers(i) := Mux(csrId === ControlRegisterList.list(i).id.U, writeBack, registers(i))
       }
     }
   }
