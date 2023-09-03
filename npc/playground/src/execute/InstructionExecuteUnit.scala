@@ -8,10 +8,11 @@ import utils._
 import firrtl.seqCat
 
 class InstructionExecuteUnit extends Module {
-  val decodeIn = IO(Flipped(new DecodeOut()))
-  val memAxiM  = IO(MemAxiLite())
-  val regIO    = IO(Flipped(new RegisterFileIO()))
-  val csrIn    = IO(Input(UInt(64.W)))
+  val decodeIn   = IO(Flipped(new DecodeOut()))
+  val memAxiM    = IO(MemAxiLite())
+  val regIO      = IO(Flipped(new RegisterFileIO()))
+  val csrIn      = IO(Input(UInt(64.W)))
+  val csrControl = IO(Flipped(new CSRFileControl()))
 
   val controlIn = decodeIn.control
   val dataIn    = decodeIn.data
@@ -133,6 +134,11 @@ class InstructionExecuteUnit extends Module {
     )
   )
   alu.io.opType := AluMode.apply(controlIn.alumode)
+
+  // csr
+  csrControl.csrBehave  := decodeIn.control.csrbehave
+  csrControl.csrSetmode := Mux(exeFSM.willChangeTo(exewaitPC), decodeIn.control.csrsetmode, CsrSetMode.origin)
+  csrControl.csrSource  := decodeIn.control.csrsource
 
   // mem
   val memlen = MuxLookup(
