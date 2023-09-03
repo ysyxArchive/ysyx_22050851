@@ -11,8 +11,6 @@ import utils._
 import chisel3.util.Fill
 import chisel3.internal.firrtl.Index
 
-class ControlRegisterInfo(val name: String, val id: Int, val initVal: Int = 0)
-
 class Mstatus(val value: UInt) {
   class OffsetWidth(val offset: Int, val width: Int) {
     val offsetFromBegin = offset + width
@@ -62,6 +60,7 @@ class Mstatus(val value: UInt) {
 }
 
 class ControlRegisters {
+  class ControlRegisterInfo(val name: String, val id: Int, val initVal: Int = 0)
   val list = List(
     new ControlRegisterInfo("mepc", 0x341),
     new ControlRegisterInfo("mstatus", 0x300, 0x1800),
@@ -73,10 +72,10 @@ class ControlRegisters {
 
   val registers = list.map(info => RegInit(info.initVal.U(64.W)))
 
-  def IndexOf(name: String) = list.indexWhere(info => { info.name == name })
+  def getIndexByName(name: String) = list.indexWhere(info => { info.name == name })
 
-  def getIdfromName(name: String) = list(list.indexWhere(info => { info.name == name })).id
-  
+  def getInfoByName(name: String) = list(getIndexByName(name))
+
   def apply(id: UInt): UInt =
     MuxLookup(
       id,
@@ -86,14 +85,12 @@ class ControlRegisters {
       }.toSeq
     )
 
-  def apply(name: String): UInt = apply(getIdfromName(name).U)
+  def apply(name: String): UInt = apply(getInfoByName(name).id.U)
 
-  def set(name: String, value: UInt): UInt = {
-    val index = IndexOf(name)
+  def set(name: String, value: UInt) = {
+    val index = getIndexByName(name)
     registers(index) := value
-    value
   }
-
 }
 
 object PrivMode {
