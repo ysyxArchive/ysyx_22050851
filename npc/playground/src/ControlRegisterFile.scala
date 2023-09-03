@@ -119,7 +119,7 @@ class ControlRegisterFile extends Module {
 
   debugOut := register.registers
 
-  val mstatus = new Mstatus(registers(ControlRegisterList.IndexOf("mstatus")))
+  val mstatus = new Mstatus(register("mstatus"))
 
   val currentMode = RegInit(PrivMode.M)
   currentMode := MuxLookup(
@@ -186,8 +186,8 @@ class ControlRegisterFile extends Module {
     outputVal,
     EnumSeq(
       CsrBehave.no -> outputVal,
-      CsrBehave.ecall -> registers(ControlRegisterList.IndexOf("mtvec")),
-      CsrBehave.mret -> registers(ControlRegisterList.IndexOf("mepc"))
+      CsrBehave.ecall -> register("mtvec"),
+      CsrBehave.mret -> register("mepc")
     )
   )
 
