@@ -75,8 +75,18 @@ class Mstatus(val value: UInt) {
   def apply(name: String) = get(name)
 }
 
-class ControlRegisters { 
+class ControlRegisters {
   val registers = ControlRegisterList.list.map(info => RegInit(info.initVal.U(64.W)))
+
+  def apply(id: UInt) =
+    MuxLookup(
+      csrIndex,
+      0.U,
+      ControlRegisterList.list.zipWithIndex.map {
+        case (info, index) => info.id.U -> registers(index)
+      }.toSeq
+    )
+
 }
 
 object PrivMode {
@@ -97,15 +107,12 @@ class ControlRegisterFile extends Module {
   val debugOut = IO(Output(Vec(6, UInt(64.W))))
   val regIn    = IO(Input(Flipped(new RegisterFileIO())))
 
-  val uimm     = io.decodeIn.data.src1
-  val csrIndex = io.decodeIn.data.imm
+  val uimm  = io.decodeIn.data.src1
+  val csrId = io.decodeIn.data.imm
 
-  val registers = ControlRegisterList.list.map(info => RegInit(info.initVal.U(64.W)))
-  val register =new ControlRegisters()
-  debugOut := registers
-  val indexMapSeq = ControlRegisterList.list.zipWithIndex.map {
-    case (info, index) => info.id.U -> registers(index)
-  }.toSeq
+  // val registers = ControlRegisterList.list.map(info => RegInit(info.initVal.U(64.W)))
+  val register = new ControlRegisters()
+  debugOut := register.registers
 
   val mstatus = new Mstatus(registers(ControlRegisterList.IndexOf("mstatus")))
 
@@ -125,7 +132,7 @@ class ControlRegisterFile extends Module {
     )
   )
   val writeBack = Wire(UInt(64.W))
-  val outputVal = MuxLookup(csrIndex, 0.U, indexMapSeq)
+  val outputVal = register(csrId)
 
   for (i <- 0 to registers.length - 1) {
     ControlRegisterList.list(i).name match {
