@@ -45,7 +45,7 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
            "read from RTC with length == %ld not allowed", length);
     ret = (uint32_t)(gettime() >> ((addr - RTC_ADDR) * 8));
     difftest_skip();
-  } else if (addr >= MEM_START && addr + length <= MEM_START + MEM_LEN) {
+  } else if (addr >= MEM_START && addr <= MEM_START + MEM_LEN) {
     if (length == 1) {
       ret = *((uint8_t*)(mem + (addr - MEM_START)));
     } else if (length == 2) {
