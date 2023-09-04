@@ -26,7 +26,7 @@ export PATH := $(PATH):$(abspath ./utils)
 default: $(BIN)
 
 $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
-	$(VERILATOR) $(VERILATOR_CFLAGS) -sv\
+	$(VERILATOR) $(VERILATOR_CFLAGS) \
 		--top-module $(TOPNAME) $(CSRCS) $(VSRCS) \
 		$(addprefix -CFLAGS , $(CFLAGS))   \
 		$(addprefix -LDFLAGS , $(LDFLAGS)) \
@@ -42,7 +42,7 @@ $(GEN_SCALA): playground/scripts/codemap.csv playground/scripts/parsedecode.py
 
 verilog: $(SCALAS)
 	$(call git_commit, "generate verilog")
-	mill -i __.test.runMain Elaborate -td $(BUILD_DIR) --no-dce -gmv full
+	mill -i __.test.runMain Elaborate -td $(BUILD_DIR) --no-dce 
 
 help:
 	mill -i __.test.runMain Elaborate --help
