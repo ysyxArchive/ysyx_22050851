@@ -4,9 +4,7 @@ import chisel3.util.Decoupled
 import decode.DecodeControlOut
 import decode.CsrSource
 import decode.AluMux1
-import firrtl.seqCat
 import decode._
-import Chisel.debug
 import utils._
 import chisel3.util.Fill
 import chisel3.internal.firrtl.Index
