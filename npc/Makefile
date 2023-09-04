@@ -42,7 +42,7 @@ $(GEN_SCALA): playground/scripts/codemap.csv playground/scripts/parsedecode.py
 
 verilog: $(SCALAS)
 	$(call git_commit, "generate verilog")
-	mill -i __.test.runMain Elaborate -td $(BUILD_DIR) --emission-options=disableMemRandomization,disableRegisterRandomization --no-dce --no-cse
+	mill -i __.test.runMain Elaborate -td $(BUILD_DIR) --no-dce --no-cse
 
 help:
 	mill -i __.test.runMain Elaborate --help
