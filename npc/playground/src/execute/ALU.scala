@@ -6,7 +6,6 @@ import chisel3.util.Cat
 import chisel3.util.Reverse
 import chisel3.util.Fill
 import decode.AluMode
-import firrtl.backends.experimental.smt.Signal
 import utils.EnumSeq
 
 object ALUSignalType extends ChiselEnum {
