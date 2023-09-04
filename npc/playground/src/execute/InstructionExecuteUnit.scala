@@ -5,7 +5,6 @@ import decode._
 import os.read
 import execute._
 import utils._
-import firrtl.seqCat
 
 class InstructionExecuteUnit extends Module {
   val decodeIn   = IO(Flipped(new DecodeOut()))
