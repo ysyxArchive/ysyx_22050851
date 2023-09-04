@@ -17,7 +17,7 @@ object playground extends ScalaModule with ScalafmtModule { m =>
   )
   override def ivyDeps = Agg(
     ivy"edu.berkeley.cs::chisel3:3.5.6",
-    ivy"com.sifive::chisel-circt:0.6.0",
+    ivy"com.sifive::chisel-circt:0.6.0"
   )
   override def scalacPluginIvyDeps = Agg(
     ivy"edu.berkeley.cs:::chisel3-plugin:3.5.6"
@@ -27,5 +27,11 @@ object playground extends ScalaModule with ScalafmtModule { m =>
       ivy"com.lihaoyi::utest:0.7.10",
       ivy"edu.berkeley.cs::chiseltest:0.5.6"
     )
+  }
+  def repositoriesTask = T.task {
+    Seq(
+      coursier.MavenRepository("https://maven.aliyun.com/repository/central"),
+      coursier.MavenRepository("https://repo.scala-sbt.org/scalasbt/maven-releases")
+    ) ++ super.repositoriesTask()
   }
 }
