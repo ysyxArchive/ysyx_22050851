@@ -5,7 +5,6 @@ import chisel3.util.MuxLookup
 import chisel3.util.Cat
 import chisel3.util.Reverse
 import chisel3.util.Fill
-import chisel3.experimental.ChiselEnum
 import decode.AluMode
 import firrtl.backends.experimental.smt.Signal
 import utils.EnumSeq
