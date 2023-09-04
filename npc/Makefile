@@ -27,7 +27,7 @@ default: $(BIN)
 
 $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 	$(VERILATOR) $(VERILATOR_CFLAGS) \
-		--top-module $(TOPNAME) $(CSRCS) $(VSRCS) \
+		--top-module $(TOPNAME) $(CSRCS) $(VSRCS) -sv\
 		$(addprefix -CFLAGS , $(CFLAGS))   \
 		$(addprefix -LDFLAGS , $(LDFLAGS)) \
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
@@ -42,6 +42,7 @@ $(GEN_SCALA): playground/scripts/codemap.csv playground/scripts/parsedecode.py
 
 verilog: $(SCALAS)
 	$(call git_commit, "generate verilog")
+	mkdir -p $(BUILD_DIR)
 	mill -i __.test.runMain Elaborate -td $(BUILD_DIR)
 
 help:
