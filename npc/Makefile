@@ -12,7 +12,7 @@ BIN = $(BUILD_DIR)/$(TOPNAME)
 
 GEN_SCALA = $(abspath ./playground/src/decode/InstContorlDecoder.scala)
 
-VSRCS = $(shell find $(abspath ./build) -name "*.v"-or -name "*.sv")
+VSRCS = $(shell find $(abspath ./build) -name "*.v" -or -name "*.sv")
 CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
 INCLUDES = $(shell find $(abspath ./include) -name "*.h")
 SCALAS = $(shell find $(abspath ./playground/src) -name "*.scala") $(GEN_SCALA)
