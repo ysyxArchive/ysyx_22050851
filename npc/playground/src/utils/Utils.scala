@@ -54,7 +54,7 @@ object Utils {
 }
 
 object EnumSeq {
-  def apply(elems: (EnumType, UInt)*) = elems.map {
+  def apply[T <: Data](elems: (EnumType, T)*) = elems.map {
     case (enumType, uint) => (enumType.asUInt, uint)
   }
 }
