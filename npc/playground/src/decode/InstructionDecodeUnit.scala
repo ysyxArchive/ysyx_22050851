@@ -40,19 +40,19 @@ class InstructionDecodeUnit extends Module {
   val decodeFSM = new FSM(
     waitAR,
     List(
-      (waitAR, iCacheIO.readReq.fire, waitR),
-      (waitR, iCacheIO.data.fire, waitSend),
+      (waitAR, iCacheIO.data.fire, waitR),
+      (waitR, iCacheIO.readReq.fire, waitSend),
       (waitSend, true.B, busy),
       (busy, decodeOut.done, waitAR)
     )
   )
   val decodeStatus = decodeFSM.status
 
-  iCacheIO.readReq.valid := decodeStatus === waitR
-  iCacheIO.data.ready    := decodeStatus === waitAR
-  iCacheIO.data.bits     := regIO.pc
+  iCacheIO.data.ready    := decodeStatus === waitR
+  iCacheIO.readReq.valid := decodeStatus === waitAR
+  iCacheIO.readReq.bits  := regIO.pc
 
-  inst := Mux(iCacheIO.readReq.fire, iCacheIO.readReq.bits.asUInt, inst)
+  inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits.asUInt, inst)
 
   // decodeout.control
   controlDecoder.input := inst
