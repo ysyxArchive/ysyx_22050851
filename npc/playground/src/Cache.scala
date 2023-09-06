@@ -61,7 +61,7 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
 
   // when idle
   val addr = Reg(UInt(addrWidth.W))
-  addr          := Mux(cacheFSM.is(idle), io.readReq.bits, addr)
+  addr             := Mux(cacheFSM.is(idle), io.readReq.bits, addr)
   io.readReq.ready := cacheFSM.is(idle) && io.readReq.valid
   // when sendRes
   val data = Mux1H(wayValid, cacheMem(index)).data
@@ -69,8 +69,10 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
   io.data.bits  := PriorityMux(s)
   io.data.valid := true.B
   // when sendReq
-  axiIO.AR.bits  := io.readReq.bits
-  axiIO.AR.valid := Mux(cacheFSM.is(sendReq), io.data.bits, addr)
+  axiIO.AR.bits.addr := io.readReq.bits
+  axiIO.AR.bits.id   := 0.U
+  axiIO.AR.bits.prot := 0.U
+  axiIO.AR.valid     := Mux(cacheFSM.is(sendReq), io.data.bits, addr)
   // when waitRes
   for (i <- 0 to waycnt) {
     when(cacheFSM.is(waitRes) && index === i.U && axiIO.R.fire) {
