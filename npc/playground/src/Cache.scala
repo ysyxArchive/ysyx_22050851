@@ -30,7 +30,6 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
 
   val io    = IO(new CacheIO())
   val axiIO = IO(new AxiLiteIO(UInt(64.W), 64))
-  // val cacheMem = Vec(waycnt, Vec(groupSize, Wire(new CacheLine(addrWidth - tagOffset, cellByte))))
   val cacheMem = RegInit(
     VecInit(
       Seq.fill(waycnt)(VecInit(Seq.fill(groupSize)(0.U.asTypeOf(new CacheLine(addrWidth - tagOffset, cellByte)))))
