@@ -48,8 +48,8 @@ class InstructionDecodeUnit extends Module {
   )
   val decodeStatus = decodeFSM.status
 
-  iCacheIO.readReq.ready := decodeStatus === waitR
-  iCacheIO.data.valid    := decodeStatus === waitAR
+  iCacheIO.readReq.valid := decodeStatus === waitR
+  iCacheIO.data.ready    := decodeStatus === waitAR
   iCacheIO.data.bits     := regIO.pc
 
   inst := Mux(iCacheIO.readReq.fire, iCacheIO.readReq.bits.asUInt, inst)
