@@ -74,9 +74,7 @@ class ControlRegisters {
 
   def getInfoByName(name: String) = list(getIndexByName(name))
 
-  def apply(id: UInt): UInt = MuxLookup(
-    id,
-    0.U,
+  def apply(id: UInt): UInt = MuxLookup(id, 0.U)(
     list.zipWithIndex.map {
       case (info, index) => info.id.U -> registers(index)
     }.toSeq
