@@ -26,7 +26,7 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
   assert(cellCnt % groupSize == 0)
   val waycnt      = cellCnt / groupSize
   val indexOffset = log2Up(cellByte / 8)
-  val tagOffset   = log2Up(cellByte) + log2Up(groupSize)
+  val tagOffset   = log2Up(cellByte / 8) + log2Up(groupSize)
 
   val io    = IO(new CacheIO())
   val axiIO = IO(new AxiLiteIO(UInt(64.W), 64))
