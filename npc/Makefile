@@ -43,7 +43,7 @@ $(GEN_SCALA): playground/scripts/codemap.csv playground/scripts/parsedecode.py
 verilog: $(SCALAS)
 	$(call git_commit, "generate verilog")
 	mkdir -p $(BUILD_DIR)
-	mill -i __.test.runMain Elaborate -td $(BUILD_DIR) --split-verilog --target=verilog
+	mill -i __.test.runMain Elaborate -td $(BUILD_DIR) --split-verilog
 
 help:
 	mill -i __.test.runMain Elaborate --help
