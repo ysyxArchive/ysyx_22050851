@@ -8,7 +8,7 @@ class CacheIO extends Bundle {
   val data    = Flipped(Decoupled(UInt(32.W)))
 }
 
-class CacheLine(tagWidth: Int, dataByte: Int) {
+class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
   val valid = RegInit(false.B)
   val tag   = Reg(UInt(tagWidth.W))
   val data  = Reg(UInt((dataByte * 8).W))
@@ -29,9 +29,12 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
   val indexOffset = log2Up(cellByte)
   val tagOffset   = log2Up(cellByte) + log2Up(groupSize)
 
-  val io       = IO(new CacheIO())
-  val axiIO    = IO(new AxiLiteIO(UInt(64.W), 64))
-  val cacheMem = Vec(waycnt, Vec(groupSize, new CacheLine(addrWidth - tagOffset, cellByte)))
+  val io    = IO(new CacheIO())
+  val axiIO = IO(new AxiLiteIO(UInt(64.W), 64))
+  // val cacheMem = Vec(waycnt, Vec(groupSize, new CacheLine(addrWidth - tagOffset, cellByte)))
+  val cacheMem = VecInit(
+    Seq.fill(waycnt)(Wire(VecInit(Seq.fill(groupSize)(Wire(new CacheLine(addrWidth - tagOffset, cellByte))))))
+  )
 
   val hit = Wire(Bool())
 
