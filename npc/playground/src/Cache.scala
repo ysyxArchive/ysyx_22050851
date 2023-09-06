@@ -76,7 +76,7 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
   // when waitRes
   for (i <- 0 to waycnt) {
     when(cacheFSM.is(waitRes) && index === i.U && axiIO.R.fire) {
-      cacheMem(i)(0).data  := axiIO.R.bits
+      cacheMem(i)(0).data  := axiIO.R.bits.data
       cacheMem(i)(0).tag   := tag
       cacheMem(i)(0).valid := true.B
     }
