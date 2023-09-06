@@ -55,9 +55,7 @@ class InstructionExecuteUnit extends Module {
   regIO.raddr1 := dataIn.src2
   regIO.waddr  := Mux(controlIn.regwrite && exeFSM.willChangeTo(exewaitPC), dataIn.dst, 0.U)
   val snpc = regIO.pc + 4.U
-  val pcBranch = MuxLookup(
-    controlIn.pcaddrsrc,
-    false.B,
+  val pcBranch = MuxLookup(controlIn.pcaddrsrc, false.B)(
     EnumSeq(
       PCAddrSrc.aluzero -> alu.signalIO.isZero,
       PCAddrSrc.aluneg -> alu.signalIO.isNegative,
@@ -69,17 +67,13 @@ class InstructionExecuteUnit extends Module {
       PCAddrSrc.one -> true.B
     )
   )
-  val dnpcAddSrc = MuxLookup(
-    controlIn.pcsrc,
-    regIO.pc,
+  val dnpcAddSrc = MuxLookup(controlIn.pcsrc, regIO.pc)(
     EnumSeq(
       PcSrc.pc -> regIO.pc,
       PcSrc.src1 -> src1
     )
   )
-  val dnpcAlter = MuxLookup(
-    controlIn.pccsr,
-    dnpcAddSrc,
+  val dnpcAlter = MuxLookup(controlIn.pccsr, dnpcAddSrc)(
     EnumSeq(
       PcCsr.origin -> (dnpcAddSrc + dataIn.imm),
       PcCsr.csr -> csrIn
@@ -115,18 +109,14 @@ class InstructionExecuteUnit extends Module {
     )
 
   // alu
-  alu.io.inA := MuxLookup(
-    controlIn.alumux1,
-    DontCare,
+  alu.io.inA := MuxLookup(controlIn.alumux1, DontCare)(
     EnumSeq(
       AluMux1.pc -> regIO.pc,
       AluMux1.src1 -> src1,
       AluMux1.zero -> 0.U
     )
   )
-  alu.io.inB := MuxLookup(
-    controlIn.alumux2,
-    DontCare,
+  alu.io.inB := MuxLookup(controlIn.alumux2, DontCare)(
     EnumSeq(
       AluMux2.imm -> dataIn.imm,
       AluMux2.src2 -> src2
