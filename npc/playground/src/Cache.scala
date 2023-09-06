@@ -43,9 +43,9 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
   val cacheFSM = new FSM(
     idle,
     List(
-      (idle, io.readReq.fire && hit, sendRes),
+      (idle, io.readReq.fire , sendRes),
       (sendRes, io.data.fire, idle),
-      (idle, io.readReq.fire && !hit, sendReq),
+      (idle, io.readReq.fire , sendReq),
       (sendReq, false.B, waitRes),
       (waitRes, false.B, sendRes)
     )
