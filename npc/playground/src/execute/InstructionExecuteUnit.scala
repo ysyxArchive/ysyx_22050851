@@ -132,11 +132,9 @@ class InstructionExecuteUnit extends Module {
       AluMux2.src2 -> src2
     )
   )
-  val (t, w) = AluMode.safe(controlIn.alumode)
-  if(! w){
-    error("123123")
-  }
-  alu.io.opType := t
+  val res = AluMode.safe(controlIn.alumode)
+  assert(res._2 == true.B)
+  alu.io.opType := res._1
 
   // csr
   csrControl.csrBehave  := Mux(exeFSM.willChangeTo(exewaitPC), decodeIn.control.csrbehave, CsrBehave.no.asUInt)
