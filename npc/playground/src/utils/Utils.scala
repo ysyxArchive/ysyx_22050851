@@ -75,6 +75,9 @@ class FSM(val initState: UInt, val elems: List[(UInt, Bool, UInt)]) {
   def willChangeTo(to: UInt): Bool = {
     val table = elems.map({ case tri => (tri._1 === status && tri._3 === to) -> tri._2 })
     return MuxCase(false.B, table)
+  }
 
+  def is(s: UInt): Bool = {
+    return s === status
   }
 }

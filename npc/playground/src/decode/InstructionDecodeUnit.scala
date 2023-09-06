@@ -30,7 +30,7 @@ object DecodeOut {
 
 class InstructionDecodeUnit extends Module {
   val regIO          = IO(Input(new RegisterFileIO()))
-  val memAxiM        = MemReadOnlyAxiLiteIO.master()
+  val iCacheIO       = IO(Flipped(new CacheIO()))
   val decodeOut      = IO(new DecodeOut)
   val controlDecoder = Module(new InstContorlDecoder)
 
@@ -40,21 +40,19 @@ class InstructionDecodeUnit extends Module {
   val decodeFSM = new FSM(
     waitAR,
     List(
-      (waitAR, memAxiM.AR.fire, waitR),
-      (waitR, memAxiM.R.fire, waitSend),
+      (waitAR, iCacheIO.readReq.fire, waitR),
+      (waitR, iCacheIO.data.fire, waitSend),
       (waitSend, true.B, busy),
       (busy, decodeOut.done, waitAR)
     )
   )
   val decodeStatus = decodeFSM.status
 
-  memAxiM.R.ready      := decodeStatus === waitR
-  memAxiM.AR.valid     := decodeStatus === waitAR
-  memAxiM.AR.bits.id   := 0.U
-  memAxiM.AR.bits.prot := 0.U
-  memAxiM.AR.bits.addr := regIO.pc
+  iCacheIO.data.ready    := decodeStatus === waitR
+  iCacheIO.readReq.valid := decodeStatus === waitAR
+  iCacheIO.readReq.bits  := regIO.pc
 
-  inst := Mux(memAxiM.R.fire, memAxiM.R.bits.asUInt, inst)
+  inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits.asUInt, inst)
 
   // decodeout.control
   controlDecoder.input := inst
@@ -72,9 +70,7 @@ class InstructionDecodeUnit extends Module {
     Cat(inst(31), inst(19, 12), inst(20), inst(30, 21), 0.U(1.W)),
     20
   );
-  decodeOut.data.imm := MuxLookup(
-    controlDecoder.output.insttype,
-    DontCare,
+  decodeOut.data.imm := MuxLookup(controlDecoder.output.insttype, immI)(
     EnumSeq(
       InstType.I -> immI,
       InstType.S -> immS,
