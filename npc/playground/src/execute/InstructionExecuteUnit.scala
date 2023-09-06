@@ -133,7 +133,6 @@ class InstructionExecuteUnit extends Module {
     )
   )
   val res = AluMode.safe(controlIn.alumode)
-  assert(res._2 === true.B)
   alu.io.opType := res._1
 
   // csr
@@ -192,7 +191,7 @@ class InstructionExecuteUnit extends Module {
   // blackBoxHalt
   val blackBox = Module(new BlackBoxHalt);
   blackBox.io.halt     := controlIn.goodtrap
-  blackBox.io.bad_halt := controlIn.badtrap
+  blackBox.io.bad_halt := controlIn.badtrap || res._2 === false.B
 
   decodeIn.done := exeStatus === exeIdle
 }
