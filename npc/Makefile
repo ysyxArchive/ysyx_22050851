@@ -27,7 +27,7 @@ default: $(BIN)
 
 $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 	$(VERILATOR) $(VERILATOR_CFLAGS) \
-		--top-module $(TOPNAME) $(CSRCS)  -sv $(VSRCS)\
+		--top-module $(TOPNAME) $(CSRCS) -sv $(VSRCS)\
 		$(addprefix -CFLAGS , $(CFLAGS))   \
 		$(addprefix -LDFLAGS , $(LDFLAGS)) \
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))

@@ -177,9 +177,7 @@ class ControlRegisterFile extends Module {
     }
   }
 
-  writeBack := MuxLookup(
-    io.control.csrSetmode,
-    outputVal)(
+  writeBack := MuxLookup(io.control.csrSetmode, outputVal)(
     EnumSeq(
       CsrSetMode.clear -> (outputVal & ~mask),
       CsrSetMode.set -> (outputVal | mask),
@@ -187,9 +185,7 @@ class ControlRegisterFile extends Module {
     )
   )
 
-  io.output := MuxLookup(
-    io.control.csrBehave,
-    outputVal)(
+  io.output := MuxLookup(io.control.csrBehave, outputVal)(
     EnumSeq(
       CsrBehave.no -> outputVal,
       CsrBehave.ecall -> register("mtvec"),
