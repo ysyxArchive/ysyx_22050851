@@ -46,8 +46,8 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
       (idle, io.readReq.fire && hit, sendRes),
       (sendRes, io.data.fire, idle),
       (idle, io.readReq.fire && !hit, sendReq),
-      (sendReq, false.B, waitRes),
-      (waitRes, false.B, sendRes)
+      (sendReq, axiIO.AR.fire, waitRes),
+      (waitRes, axiIO.R.fire, sendRes)
     )
   )
   val d      = cacheFSM.trigger(idle, sendRes)
@@ -81,14 +81,14 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
       cacheMem(i)(0).valid := true.B
     }
   }
+  axiIO.R.ready := cacheFSM.is(waitRes)
 
-  axiIO.AW.valid     := DontCare
+  axiIO.AW.valid     := false.B
+  axiIO.W.valid      := false.B
+  axiIO.B.ready      := false.B
   axiIO.AW.bits.id   := DontCare
   axiIO.AW.bits.addr := DontCare
   axiIO.AW.bits.prot := DontCare
-  axiIO.W.valid      := DontCare
   axiIO.W.bits.data  := DontCare
   axiIO.W.bits.strb  := DontCare
-  axiIO.B.ready      := DontCare
-  axiIO.R.ready      := DontCare
 }
