@@ -65,7 +65,7 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
   io.readReq.ready := cacheFSM.is(idle) && io.readReq.valid
   // when sendRes
   val data = Mux1H(wayValid, cacheMem(index)).data
-  val s    = Seq.tabulate(cellByte)(o => ((o.U === offset) -> data(o * 8 - 1, 0)))
+  val s    = Seq.tabulate(cellByte - 1)(o => (((o + 1).U === offset) -> data((o + 1) * 8 - 1, 0)))
   io.data.bits  := PriorityMux(s)
   io.data.valid := true.B
   // when sendReq
