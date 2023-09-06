@@ -133,7 +133,7 @@ class InstructionExecuteUnit extends Module {
     )
   )
   val res = AluMode.safe(controlIn.alumode)
-  assert(res._2 == true.B)
+  assert(res._2 === true.B)
   alu.io.opType := res._1
 
   // csr
