@@ -29,9 +29,8 @@ object DecodeOut {
 }
 
 class InstructionDecodeUnit extends Module {
-  val regIO = IO(Input(new RegisterFileIO()))
-  // val memAxiM        = MemReadOnlyAxiLiteIO.master()
-  val iCacheIO       = IO(new CacheIO())
+  val regIO          = IO(Input(new RegisterFileIO()))
+  val iCacheIO       = IO(Flipped(new CacheIO()))
   val decodeOut      = IO(new DecodeOut)
   val controlDecoder = Module(new InstContorlDecoder)
 
