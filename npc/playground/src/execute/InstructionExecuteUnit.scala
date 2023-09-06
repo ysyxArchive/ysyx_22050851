@@ -80,9 +80,7 @@ class InstructionExecuteUnit extends Module {
     )
   )
   regIO.dnpc := Mux(exeFSM.willChangeTo(exewaitPC), Mux(pcBranch.asBool, dnpcAlter, snpc), regIO.pc)
-  val regwdata = MuxLookup(
-    controlIn.regwritemux,
-    DontCare,
+  val regwdata = MuxLookup(controlIn.regwritemux, alu.io.out)(
     EnumSeq(
       RegWriteMux.alu -> alu.io.out,
       RegWriteMux.snpc -> snpc,
@@ -131,9 +129,7 @@ class InstructionExecuteUnit extends Module {
   csrControl.csrSource  := decodeIn.control.csrsource
 
   // mem
-  val memlen = MuxLookup(
-    controlIn.memlen,
-    1.U,
+  val memlen = MuxLookup(controlIn.memlen, 1.U)(
     EnumSeq(
       MemLen.one -> 1.U,
       MemLen.two -> 2.U,
@@ -162,9 +158,7 @@ class InstructionExecuteUnit extends Module {
   memAxiM.W.bits.data  := src2
   memAxiM.W.bits.strb  := memMask
   memAxiM.B.ready      := memStatus === waitRes
-  val memOutRaw = MuxLookup(
-    controlIn.memlen,
-    memAxiM.R.bits.data.asUInt,
+  val memOutRaw = MuxLookup(controlIn.memlen, memAxiM.R.bits.data.asUInt)(
     EnumSeq(
       MemLen.one -> memAxiM.R.bits.data.asUInt(7, 0),
       MemLen.two -> memAxiM.R.bits.data.asUInt(15, 0),
