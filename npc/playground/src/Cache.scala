@@ -61,7 +61,7 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
 
   // when idle
   val addr = Reg(UInt(addrWidth.W))
-  addr          := Mux(cacheFSM.is(idle), io.data.bits, addr)
+  addr          := Mux(cacheFSM.is(idle), io.readReq.bits, addr)
   io.readReq.ready := cacheFSM.is(idle) && io.readReq.valid
   // when sendRes
   val data = Mux1H(wayValid, cacheMem(index)).data
