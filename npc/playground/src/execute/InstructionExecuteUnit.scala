@@ -36,17 +36,15 @@ class InstructionExecuteUnit extends Module {
       (waitRes, Mux(memIsRead, memAxiM.R.fire, memAxiM.B.fire), memIdle)
     )
   )
-  val memStatus = memFSM.status
 
   val exeFSM = new FSM(
     exeIdle,
     List(
       (exeIdle, decodeIn.valid, exeWaitMem),
-      (exeWaitMem, memStatus === memIdle, exewaitPC),
+      (exeWaitMem, memFSM.is(memIdle), exewaitPC),
       (exewaitPC, true.B, exeIdle)
     )
   )
-  val exeStatus = exeFSM.status
 
   // regIO
   val src1 = Wire(UInt(64.W))
@@ -145,19 +143,19 @@ class InstructionExecuteUnit extends Module {
     1.U(1.W)
   )
 
-  memAxiM.AR.valid     := memStatus === waitReq && memIsRead && shouldMemWork
+  memAxiM.AR.valid     := memFSM.is(waitReq) && memIsRead && shouldMemWork
   memAxiM.AR.bits.addr := alu.io.out
   memAxiM.AR.bits.id   := 0.U
   memAxiM.AR.bits.prot := 0.U
-  memAxiM.R.ready      := memStatus === waitRes && memIsRead
-  memAxiM.AW.valid     := memStatus === waitReq && !memIsRead && shouldMemWork
+  memAxiM.R.ready      := memFSM.is(waitRes) && memIsRead
+  memAxiM.AW.valid     := memFSM.is(waitReq) && !memIsRead && shouldMemWork
   memAxiM.AW.bits.addr := alu.io.out
   memAxiM.AW.bits.id   := 0.U
   memAxiM.AW.bits.prot := 0.U
-  memAxiM.W.valid      := memStatus === waitReq && !memIsRead && shouldMemWork
+  memAxiM.W.valid      := memFSM.is(waitReq) && !memIsRead && shouldMemWork
   memAxiM.W.bits.data  := src2
   memAxiM.W.bits.strb  := memMask
-  memAxiM.B.ready      := memStatus === waitRes
+  memAxiM.B.ready      := memFSM.is(waitRes)
   val memOutRaw = MuxLookup(controlIn.memlen, memAxiM.R.bits.data.asUInt)(
     EnumSeq(
       MemLen.one -> memAxiM.R.bits.data.asUInt(7, 0),
@@ -177,5 +175,5 @@ class InstructionExecuteUnit extends Module {
   blackBox.io.halt     := controlIn.goodtrap
   blackBox.io.bad_halt := controlIn.badtrap || res._2 === false.B
 
-  decodeIn.done := exeStatus === exeIdle 
+  decodeIn.done := exeFSM.is(exeIdle)
 }
