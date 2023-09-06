@@ -1,7 +1,6 @@
 package utils
 
 import chisel3._
-import chisel3.experimental.EnumType
 import chisel3.util._
 import scala.collection.SeqFactory
 import scala.collection.SeqOps
