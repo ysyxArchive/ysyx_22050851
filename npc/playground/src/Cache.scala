@@ -67,7 +67,7 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
   val data = Mux1H(wayValid, cacheMem(index)).data
   val s    = Seq.tabulate(cellByte - 1)(o => (((o + 1).U === offset) -> data((o + 1) * 8 - 1, 0)))
   io.data.bits  := PriorityMux(s)
-  io.data.valid := true.B
+  io.data.valid := cacheFSM.is(sendRes)
   // when sendReq
   axiIO.AR.bits.addr := io.readReq.bits
   axiIO.AR.bits.id   := 0.U
