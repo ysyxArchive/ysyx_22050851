@@ -5,7 +5,7 @@ import decode.AluMode
 
 class CacheIO extends Bundle {
   val readReq = Decoupled(UInt(64.W))
-  val data    = Flipped(Decoupled(UInt(32.W)))
+  val data    = Decoupled(UInt(32.W))
 }
 
 class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
