@@ -109,14 +109,14 @@ class InstructionExecuteUnit extends Module {
     )
 
   // alu
-  alu.io.inA := MuxLookup(controlIn.alumux1, DontCare.asUInt)(
+  alu.io.inA := MuxLookup(controlIn.alumux1, 0.U)(
     EnumSeq(
       AluMux1.pc -> regIO.pc,
       AluMux1.src1 -> src1,
       AluMux1.zero -> 0.U
     )
   )
-  alu.io.inB := MuxLookup(controlIn.alumux2, DontCare.asUInt)(
+  alu.io.inB := MuxLookup(controlIn.alumux2, 0.U)(
     EnumSeq(
       AluMux2.imm -> dataIn.imm,
       AluMux2.src2 -> src2
