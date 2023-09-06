@@ -45,9 +45,9 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
     List(
       (idle, true.B, sendRes),
       (sendRes, io.data.fire, idle),
-      (idle, io.readReq.fire && !hit, sendReq),
-      (sendReq, false.B, waitRes),
-      (waitRes, false.B, sendRes)
+      // (idle, io.readReq.fire && !hit, sendReq),
+      // (sendReq, false.B, waitRes),
+      // (waitRes, false.B, sendRes)
     )
   )
   val d      = cacheFSM.trigger(idle, sendRes)
