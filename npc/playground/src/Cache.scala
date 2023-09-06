@@ -62,7 +62,7 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
   // when idle
   val addr = Reg(UInt(addrWidth.W))
   addr          := Mux(cacheFSM.is(idle), io.data.bits, addr)
-  io.data.ready := cacheFSM.is(idle) && io.data.valid
+  io.readReq.ready := cacheFSM.is(idle) && io.readReq.valid
   // when sendRes
   val data = Mux1H(wayValid, cacheMem(index)).data
   val s    = Seq.tabulate(cellByte)(o => ((o.U === offset) -> data(o * 8 - 1, 0)))
