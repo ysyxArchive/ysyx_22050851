@@ -4,7 +4,7 @@ import utils.FSM
 import decode.AluMode
 
 class CacheIO extends Bundle {
-  val readReq = Decoupled(UInt(64.W))
+  val readReq = Flipped(Decoupled(UInt(64.W)))
   val data    = Decoupled(UInt(32.W))
 }
 
