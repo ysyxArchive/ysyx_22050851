@@ -72,7 +72,7 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
   axiIO.AR.bits.addr := io.readReq.bits
   axiIO.AR.bits.id   := 0.U
   axiIO.AR.bits.prot := 0.U
-  axiIO.AR.valid     := Mux(cacheFSM.is(sendReq), io.data.bits, addr)
+  axiIO.AR.valid     := cacheFSM.is(sendReq)
   // when waitRes
   for (i <- 0 until waycnt) {
     when(cacheFSM.is(waitRes) && index === i.U && axiIO.R.fire) {
