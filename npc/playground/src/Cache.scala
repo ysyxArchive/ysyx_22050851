@@ -25,7 +25,7 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
   val cellCnt = totalByte / cellByte
   assert(cellCnt % groupSize == 0)
   val waycnt      = cellCnt / groupSize
-  val indexOffset = log2Up(cellByte)
+  val indexOffset = log2Up(cellByte / 8)
   val tagOffset   = log2Up(cellByte) + log2Up(groupSize)
 
   val io    = IO(new CacheIO())
@@ -50,7 +50,6 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
       (waitRes, axiIO.R.fire, sendRes)
     )
   )
-  val d      = cacheFSM.trigger(idle, sendRes)
   val tag    = io.readReq.bits(addrWidth - 1, tagOffset)
   val index  = io.readReq.bits(tagOffset - 1, indexOffset)
   val offset = io.readReq.bits(indexOffset - 1, 0)
