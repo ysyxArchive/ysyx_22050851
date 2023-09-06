@@ -8,7 +8,7 @@ class CacheIO extends Bundle {
   val data    = Flipped(Decoupled(UInt(32.W)))
 }
 
-class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
+class CacheLine(tagWidth: Int, dataByte: Int) {
   val valid = RegInit(false.B)
   val tag   = Reg(UInt(tagWidth.W))
   val data  = Reg(UInt((dataByte * 8).W))
