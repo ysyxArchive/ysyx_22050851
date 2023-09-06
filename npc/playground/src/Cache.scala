@@ -50,7 +50,7 @@ class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module 
       (waitRes, false.B, sendRes)
     )
   )
-
+  val d      = cacheFSM.trigger(idle, sendRes)
   val tag    = io.readReq.bits(addrWidth - 1, tagOffset)
   val index  = io.readReq.bits(tagOffset - 1, indexOffset)
   val offset = io.readReq.bits(indexOffset - 1, 0)
