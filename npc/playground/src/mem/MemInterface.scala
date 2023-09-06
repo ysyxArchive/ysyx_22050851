@@ -1,5 +1,4 @@
 import chisel3._
-import chisel3.experimental.IO
 import chisel3.util._
 import utils.FSM
 object MemAxiLite {

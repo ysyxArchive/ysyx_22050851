@@ -5,7 +5,6 @@ import decode._
 import os.read
 import execute._
 import utils._
-import firrtl.seqCat
 
 class InstructionExecuteUnit extends Module {
   val decodeIn   = IO(Flipped(new DecodeOut()))
@@ -56,9 +55,7 @@ class InstructionExecuteUnit extends Module {
   regIO.raddr1 := dataIn.src2
   regIO.waddr  := Mux(controlIn.regwrite && exeFSM.willChangeTo(exewaitPC), dataIn.dst, 0.U)
   val snpc = regIO.pc + 4.U
-  val pcBranch = MuxLookup(
-    controlIn.pcaddrsrc,
-    false.B,
+  val pcBranch = MuxLookup(controlIn.pcaddrsrc, false.B)(
     EnumSeq(
       PCAddrSrc.aluzero -> alu.signalIO.isZero,
       PCAddrSrc.aluneg -> alu.signalIO.isNegative,
@@ -70,17 +67,13 @@ class InstructionExecuteUnit extends Module {
       PCAddrSrc.one -> true.B
     )
   )
-  val dnpcAddSrc = MuxLookup(
-    controlIn.pcsrc,
-    regIO.pc,
+  val dnpcAddSrc = MuxLookup(controlIn.pcsrc, regIO.pc)(
     EnumSeq(
       PcSrc.pc -> regIO.pc,
       PcSrc.src1 -> src1
     )
   )
-  val dnpcAlter = MuxLookup(
-    controlIn.pccsr,
-    dnpcAddSrc,
+  val dnpcAlter = MuxLookup(controlIn.pccsr, dnpcAddSrc)(
     EnumSeq(
       PcCsr.origin -> (dnpcAddSrc + dataIn.imm),
       PcCsr.csr -> csrIn
@@ -116,24 +109,21 @@ class InstructionExecuteUnit extends Module {
     )
 
   // alu
-  alu.io.inA := MuxLookup(
-    controlIn.alumux1,
-    DontCare,
+  alu.io.inA := MuxLookup(controlIn.alumux1, 0.U)(
     EnumSeq(
       AluMux1.pc -> regIO.pc,
       AluMux1.src1 -> src1,
       AluMux1.zero -> 0.U
     )
   )
-  alu.io.inB := MuxLookup(
-    controlIn.alumux2,
-    DontCare,
+  alu.io.inB := MuxLookup(controlIn.alumux2, 0.U)(
     EnumSeq(
       AluMux2.imm -> dataIn.imm,
       AluMux2.src2 -> src2
     )
   )
-  alu.io.opType := AluMode.apply(controlIn.alumode)
+  val res = AluMode.safe(controlIn.alumode)
+  alu.io.opType := res._1
 
   // csr
   csrControl.csrBehave  := Mux(exeFSM.willChangeTo(exewaitPC), decodeIn.control.csrbehave, CsrBehave.no.asUInt)
@@ -191,7 +181,7 @@ class InstructionExecuteUnit extends Module {
   // blackBoxHalt
   val blackBox = Module(new BlackBoxHalt);
   blackBox.io.halt     := controlIn.goodtrap
-  blackBox.io.bad_halt := controlIn.badtrap
+  blackBox.io.bad_halt := controlIn.badtrap || res._2 === false.B
 
   decodeIn.done := exeStatus === exeIdle
 }

@@ -4,9 +4,7 @@ import chisel3.util.Decoupled
 import decode.DecodeControlOut
 import decode.CsrSource
 import decode.AluMux1
-import firrtl.seqCat
 import decode._
-import Chisel.debug
 import utils._
 import chisel3.util.Fill
 import chisel3.internal.firrtl.Index
@@ -76,9 +74,7 @@ class ControlRegisters {
 
   def getInfoByName(name: String) = list(getIndexByName(name))
 
-  def apply(id: UInt): UInt = MuxLookup(
-    id,
-    0.U,
+  def apply(id: UInt): UInt = MuxLookup(id, 0.U)(
     list.zipWithIndex.map {
       case (info, index) => info.id.U -> registers(index)
     }.toSeq
@@ -124,15 +120,11 @@ class ControlRegisterFile extends Module {
   val mstatus = new Mstatus(register("mstatus"))
 
   val currentMode = RegInit(PrivMode.M)
-  currentMode := MuxLookup(
-    io.control.csrBehave,
-    currentMode,
+  currentMode := MuxLookup(io.control.csrBehave, currentMode)(
     EnumSeq(CsrBehave.ecall -> PrivMode.M, CsrBehave.mret -> mstatus("MPP"))
   )
 
-  val mask = MuxLookup(
-    io.control.csrSource,
-    io.src1Data,
+  val mask = MuxLookup(io.control.csrSource, io.src1Data)(
     EnumSeq(
       CsrSource.src1 -> io.src1Data,
       CsrSource.uimm -> uimm
@@ -150,7 +142,8 @@ class ControlRegisterFile extends Module {
           "mstatus",
           MuxLookup(
             io.control.csrBehave,
-            Mux(csrId === id.U, writeBack, register("mstatus")),
+            Mux(csrId === id.U, writeBack, register("mstatus"))
+          )(
             EnumSeq(
               CsrBehave.ecall -> mstatus.getSettledValue("MPP" -> currentMode, "MPIE" -> mstatus("MIE"), "MIE" -> 0.U),
               CsrBehave.mret -> mstatus.getSettledValue("MIE" -> mstatus("MPIE"), "MPIE" -> 1.U, "MPP" -> PrivMode.U)
@@ -184,9 +177,7 @@ class ControlRegisterFile extends Module {
     }
   }
 
-  writeBack := MuxLookup(
-    io.control.csrSetmode,
-    outputVal,
+  writeBack := MuxLookup(io.control.csrSetmode, outputVal)(
     EnumSeq(
       CsrSetMode.clear -> (outputVal & ~mask),
       CsrSetMode.set -> (outputVal | mask),
@@ -194,9 +185,7 @@ class ControlRegisterFile extends Module {
     )
   )
 
-  io.output := MuxLookup(
-    io.control.csrBehave,
-    outputVal,
+  io.output := MuxLookup(io.control.csrBehave, outputVal)(
     EnumSeq(
       CsrBehave.no -> outputVal,
       CsrBehave.ecall -> register("mtvec"),
