@@ -132,7 +132,7 @@ class InstructionExecuteUnit extends Module {
       AluMux2.src2 -> src2
     )
   )
-  alu.io.opType := AluMode.apply(controlIn.alumode)
+  alu.io.opType := AluMode.safe(controlIn.alumode)
 
   // csr
   csrControl.csrBehave  := Mux(exeFSM.willChangeTo(exewaitPC), decodeIn.control.csrbehave, CsrBehave.no.asUInt)
