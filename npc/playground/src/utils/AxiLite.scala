@@ -9,7 +9,7 @@ class AxiLiteWriteRequest(addr_width: Int, id_w_width: Int, lenPresent: Boolean)
   val id   = Output(UInt(id_w_width.W)) // YS ID_W_WIDTH > 0
   val addr = Output(UInt(addr_width.W)) // Y -
   val prot = Output(UInt(3.W)) // YM PROT_Present
-  val len  = if (lenPresent) Output(UInt(8.W)) else 0.U
+  val len  = if (lenPresent) Output(UInt(8.W)) else 0.U(8.W)
   //   val size     = Input(Bool()) // O SIZE_Present
   //   val user     = Input(Bool()) // O USER_REQ_WIDTH > 0
   //   val trace    = Input(Bool()) // O Trace_Signals
