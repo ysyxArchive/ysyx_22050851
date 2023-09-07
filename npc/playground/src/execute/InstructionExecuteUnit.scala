@@ -176,7 +176,4 @@ class InstructionExecuteUnit extends Module {
   blackBox.io.bad_halt := controlIn.badtrap || res._2 === false.B
 
   decodeIn.done := exeFSM.is(exeIdle)
-
-  memAxiM.AR.bits.len := 0.U
-  memAxiM.AW.bits.len := 0.U
 }

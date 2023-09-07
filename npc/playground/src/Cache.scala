@@ -90,6 +90,4 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
   axiIO.AW.bits.prot := DontCare
   axiIO.W.bits.data  := DontCare
   axiIO.W.bits.strb  := DontCare
-  axiIO.AR.bits.len  := 0.U
-  axiIO.AW.bits.len  := 0.U
 }

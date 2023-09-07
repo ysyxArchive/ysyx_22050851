@@ -9,13 +9,13 @@ class AxiLiteWriteRequest(addr_width: Int, id_w_width: Int) extends Bundle {
   val id   = Output(UInt(id_w_width.W)) // YS ID_W_WIDTH > 0
   val addr = Output(UInt(addr_width.W)) // Y -
   val prot = Output(UInt(3.W)) // YM PROT_Present
-  val len  = Output(UInt(8.W))
   //   val size     = Input(Bool()) // O SIZE_Present
   //   val user     = Input(Bool()) // O USER_REQ_WIDTH > 0
   //   val trace    = Input(Bool()) // O Trace_Signals
   //   val subsysid = Input(Bool()) // O SUBSYSID_WIDTH > 0
   //   val idunq    = Input(Bool()) // O Unique_ID_Support
   //   val akeup    = Input(Bool()) // O Wakeup_Signals
+
 }
 
 class AxiLiteWriteData(dataType: Data) extends Bundle {
@@ -38,7 +38,6 @@ class AxiLiteReadRequest(addr_width: Int, id_r_width: Int) extends Bundle {
   val id   = Output(UInt(id_r_width.W)) // YS ID_R_WIDTH > 0
   val addr = Output(UInt(addr_width.W)) // Y -
   val prot = Output(UInt(3.W)) // YM PROT_Present
-  val len  = Output(UInt(8.W))
   //   val size     = Input(Bool()) // O SIZE_Present
   //   val user     = Input(Bool()) // O USER_REQ_WIDTH > 0
   //   val trace    = Input(Bool()) // O Trace_Signals
@@ -57,12 +56,7 @@ class AxiLiteReadData(dataType: Data, id_r_width: Int) extends Bundle {
   //   val idunq     = Input(Bool()) // O Unique_ID_Support
 
 }
-class AxiLiteIO(
-  dataType:       Data,
-  addr_width:     Int,
-  val id_r_width: Int = 1,
-  val id_w_width: Int = 1)
-    extends Bundle {
+class AxiLiteIO(dataType: Data, addr_width: Int, val id_r_width: Int = 1, val id_w_width: Int = 1) extends Bundle {
   val AW = DecoupledIO(new AxiLiteWriteRequest(addr_width, id_w_width))
   val W  = DecoupledIO(new AxiLiteWriteData(dataType))
   val B  = Flipped(DecoupledIO(new AxiLiteWriteResponse(id_w_width)))
@@ -71,12 +65,8 @@ class AxiLiteIO(
 }
 
 object AxiLiteIO {
-  def apply(dataType: Data, addr_width: Int) =
-    new AxiLiteIO(dataType, addr_width)
-
-  def apply(dataWidth: Int, addr_width: Int): AxiLiteIO =
-    AxiLiteIO(UInt(dataWidth.W), addr_width)
-
+  def apply(dataWidth: Int, addr_width:  Int) = new AxiLiteIO(UInt(dataWidth.W), addr_width)
+  def apply(dataType:  Data, addr_width: Int) = new AxiLiteIO(dataType, addr_width)
 }
 
 // class AxiLiteReadIO(data_width: Int = 64, addr_width: Int = 64) extends Bundle {
