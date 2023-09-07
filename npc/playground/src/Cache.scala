@@ -32,7 +32,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
   val axiIO = IO(new AxiLiteIO(UInt(64.W), 64))
 
   // 从axi更新cache需要的请求次数
-  val updateTimes = cellByte / axiIO.dataWidth
+  val updateTimes = cellByte * 8 / axiIO.dataWidth
 
   val cacheMem = RegInit(
     VecInit(
