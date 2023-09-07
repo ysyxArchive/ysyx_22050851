@@ -29,13 +29,14 @@ class InstructionDecodeUnit extends Module {
 
   val inst = RegInit(0x13.U(64.W))
 
-  val waitAR :: waitR :: waitSend :: others = Enum(4)
+  val idle :: waitAR :: waitR :: waitSend :: others = Enum(4)
   val decodeFSM = new FSM(
     waitAR,
     List(
       (waitAR, iCacheIO.readReq.fire, waitR),
       (waitR, iCacheIO.data.fire, waitSend),
-      (waitSend, decodeOut.ready, waitAR)
+      (waitSend, decodeOut.fire, idle),
+      (idle, decodeOut.ready, waitAR)
     )
   )
 
