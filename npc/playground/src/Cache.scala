@@ -78,7 +78,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
   io.readReq.ready := cacheFSM.is(idle) && io.readReq.valid
   // when sendRes
   val data = Mux1H(wayValid, cacheMem(index)).data
-  val s    = Seq.tabulate(cellByte - 1)(o => (((o + 1).U === offset) -> data((o + 1) * 8 - 1, 0)))
+  val s    = Seq.tabulate(cellByte - 1)(o => ((o.U === offset) -> data(data.getWidth - 1, (o + 1) * 8)))
   io.data.bits  := PriorityMux(s)
   io.data.valid := cacheFSM.is(sendRes)
   // when sendReq
