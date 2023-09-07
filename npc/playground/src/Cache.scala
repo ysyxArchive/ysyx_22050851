@@ -87,8 +87,8 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
   axiIO.AR.bits.prot := 0.U
   axiIO.AR.valid     := cacheFSM.is(sendReq)
   // when waitRes
-  val mask       = Reverse(Cat(Seq.tabulate(updateTimes)(index => Fill(axiIO.getWidth, UIntToOH(counter)(index)))))
-  val maskedData = Fill(updateTimes, axiIO.getWidth.U) & mask
+  val mask       = Reverse(Cat(Seq.tabulate(updateTimes)(index => Fill(axiIO.dataWidth, UIntToOH(counter - 1.U)(index)))))
+  val maskedData = Fill(updateTimes, axiIO.dataWidth.U) & mask
   for (i <- 0 until waycnt) {
     when(cacheFSM.is(waitRes) && index === i.U && axiIO.R.fire) {
       cacheMem(i)(0).data  := maskedData & (cacheMem(i)(0).data & ~mask)
