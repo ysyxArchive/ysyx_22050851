@@ -60,8 +60,8 @@ class Cache(cellByte: Int = 8, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: I
       (sendRes, io.data.fire, idle),
       (idle, io.readReq.fire && !hit, sendReq),
       (sendReq, axiIO.AR.fire, waitRes),
-      (waitRes, axiIO.R.fire && (counter =/= (updateTimes - 1).U), sendReq),
-      (waitRes, axiIO.R.fire && (counter === (updateTimes - 1).U), sendRes)
+      (waitRes, axiIO.R.fire && (counter =/= (updateTimes).U), sendReq),
+      (waitRes, axiIO.R.fire && (counter === (updateTimes).U), sendRes)
     )
   )
   val tag    = io.readReq.bits(addrWidth - 1, tagOffset)
