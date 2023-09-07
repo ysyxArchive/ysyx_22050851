@@ -23,8 +23,6 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
 class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: Int = 64) extends Module {
   val totalByte = cellByte * groupSize * wayCnt
   val cellCnt   = totalByte / cellByte
-  // 从axi更新cache需要的请求次数
-  val updateTimes = cellByte / axiIO.dataWidth
   assert(cellCnt % groupSize == 0)
   val waycnt      = cellCnt / groupSize
   val indexOffset = log2Up(cellByte / 8)
@@ -32,6 +30,10 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
 
   val io    = IO(new CacheIO())
   val axiIO = IO(new AxiLiteIO(UInt(64.W), 64))
+  
+  // 从axi更新cache需要的请求次数
+  val updateTimes = cellByte / axiIO.dataWidth
+  
   val cacheMem = RegInit(
     VecInit(
       Seq.fill(waycnt)(VecInit(Seq.fill(groupSize)(0.U.asTypeOf(new CacheLine(addrWidth - tagOffset, cellByte)))))
