@@ -13,7 +13,7 @@ class InstructionExecuteUnit extends Module {
   val csrIn      = IO(Input(UInt(64.W)))
   val csrControl = IO(Flipped(new CSRFileControl()))
 
-  val decodeReg = RegInit(DecodeOut.default)
+  val decodeReg = RegInit(new DecodeOut(), DecodeOut.default)
   val controlIn = decodeReg.control
   val dataIn    = decodeReg.data
 
