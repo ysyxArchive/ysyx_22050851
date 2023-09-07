@@ -72,7 +72,7 @@ class AxiLiteIO(
 
 object AxiLiteIO {
   def apply(dataWidth: Int, addr_width: Int): AxiLiteIO =
-    AxiLiteIO(UInt(dataWidth.W), addr_width, lenPresent)
+    AxiLiteIO(UInt(dataWidth.W), addr_width)
   def apply(dataType: Data, addr_width: Int) = {
     val io = new AxiLiteIO(dataType, addr_width)
   }
