@@ -80,7 +80,7 @@ void one_step() {
   if (lastpc == cpu.pc) {
     latpcchange++;
     if (latpcchange > 20) {
-      Log("error pc not changed for 500 cycles");
+      Log("error pc not changed for 50 cycles");
       is_bad_halt = true;
       is_halt = true;
     }
