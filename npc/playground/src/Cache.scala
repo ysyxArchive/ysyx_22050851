@@ -2,7 +2,6 @@ import chisel3._
 import chisel3.util._
 import utils.FSM
 import decode.AluMode
-import java.util.AbstractSequentialList
 
 class CacheIO extends Bundle {
   val readReq = Flipped(Decoupled(UInt(64.W)))
@@ -21,9 +20,11 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
   * @param groupSize 单路单元数
   * @param addrWidth 地址宽度
   */
-class Cache(cellByte: Int = 8, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: Int = 64) extends Module {
+class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: Int = 64) extends Module {
   val totalByte = cellByte * groupSize * wayCnt
   val cellCnt   = totalByte / cellByte
+  // 从axi更新cache需要的请求次数
+  val updateTimes = cellByte / axiIO.dataWidth
   assert(cellCnt % groupSize == 0)
   val waycnt      = cellCnt / groupSize
   val indexOffset = log2Up(cellByte / 8)
@@ -41,6 +42,15 @@ class Cache(cellByte: Int = 8, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: I
 
   val idle :: sendRes :: sendReq :: waitRes :: others = Enum(5)
 
+  val counter = RegInit(0.U(log2Up(updateTimes).W))
+  counter := PriorityMux(
+    Seq(
+      (counter === updateTimes.U) -> 0.U,
+      axiIO.R.fire -> (counter + 1.U),
+      true.B -> counter
+    )
+  )
+
   val cacheFSM = new FSM(
     idle,
     List(
@@ -48,7 +58,8 @@ class Cache(cellByte: Int = 8, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: I
       (sendRes, io.data.fire, idle),
       (idle, io.readReq.fire && !hit, sendReq),
       (sendReq, axiIO.AR.fire, waitRes),
-      (waitRes, axiIO.R.fire, sendRes)
+      (waitRes, axiIO.R.fire && (counter =/= updateTimes.U), sendReq),
+      (waitRes, axiIO.R.fire && (counter === updateTimes.U), sendRes)
     )
   )
   val tag    = io.readReq.bits(addrWidth - 1, tagOffset)
@@ -69,16 +80,6 @@ class Cache(cellByte: Int = 8, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: I
   io.data.bits  := PriorityMux(s)
   io.data.valid := cacheFSM.is(sendRes)
   // when sendReq
-  val axiIdle :: axiSendReq :: axiWaitRes :: _ = Enum(4)
-
-  val axiFSM = new FSM(
-    axiIdle,
-    List(
-      (idle, cacheFSM.willChangeTo(sendReq), axiSendReq),
-      (axiSendReq, axiIO.AR.fire, axiWaitRes),
-      (axiWaitRes, false.B, axiIdle)
-    )
-  )
   axiIO.AR.bits.addr := io.readReq.bits
   axiIO.AR.bits.id   := 0.U
   axiIO.AR.bits.prot := 0.U
