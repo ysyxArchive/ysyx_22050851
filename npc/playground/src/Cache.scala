@@ -25,8 +25,8 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
   val cellCnt   = totalByte / cellByte
   assert(cellCnt % groupSize == 0)
   val waycnt      = cellCnt / groupSize
-  val indexOffset = log2Up(cellByte / 8)
-  val tagOffset   = log2Up(cellByte / 8) + log2Up(groupSize)
+  val indexOffset = log2Up(cellByte)
+  val tagOffset   = log2Up(cellByte) + log2Up(groupSize)
 
   val io    = IO(new CacheIO())
   val axiIO = IO(new AxiLiteIO(UInt(64.W), 64))
@@ -87,7 +87,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
   axiIO.AR.bits.prot := 0.U
   axiIO.AR.valid     := cacheFSM.is(sendReq)
   // when waitRes
-  val mask       = Reverse(Cat(Seq.tabulate(updateTimes)(index => Fill(axiIO.dataWidth, UIntToOH(counter - 1.U)(index)))))
+  val mask       = Reverse(Cat(Seq.tabulate(updateTimes)(index => Fill(axiIO.dataWidth, UIntToOH(counter)(index)))))
   val maskedData = Fill(updateTimes, axiIO.R.bits.data.asUInt) & mask
   for (i <- 0 until waycnt) {
     when(cacheFSM.is(waitRes) && index === i.U && axiIO.R.fire) {
