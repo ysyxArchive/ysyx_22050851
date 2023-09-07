@@ -17,33 +17,26 @@ object DecodeDataOut {
 }
 
 class DecodeOut extends Bundle {
-  val valid   = Output(Bool())
   val data    = Output(new DecodeDataOut);
   val control = Output(new DecodeControlOut);
-  val done    = Input(Bool())
-}
-
-object DecodeOut {
-  val default =
-    new DecodeOut().Lit(_.control -> DecodeControlOut.default(), _.data -> DecodeDataOut.default, _.valid -> false.B)
 }
 
 class InstructionDecodeUnit extends Module {
   val regIO          = IO(Input(new RegisterFileIO()))
   val iCacheIO       = IO(Flipped(new CacheIO()))
-  val decodeOut      = IO(new DecodeOut)
+  val decodeOut      = IO(Decoupled(new DecodeOut))
   val controlDecoder = Module(new InstContorlDecoder)
 
   val inst = RegInit(0x13.U(64.W))
 
-  val busy :: waitAR :: waitR :: waitSend :: others = Enum(4)
+  val idle :: waitAR :: waitR :: waitSend :: others = Enum(4)
   val decodeFSM = new FSM(
     waitAR,
     List(
       (waitAR, iCacheIO.readReq.fire, waitR),
       (waitR, iCacheIO.data.fire, waitSend),
-      (waitSend, true.B, busy),
-      (busy, decodeOut.done, waitAR)
+      (waitSend, decodeOut.fire, idle),
+      (idle, decodeOut.ready, waitAR)
     )
   )
 
@@ -54,8 +47,8 @@ class InstructionDecodeUnit extends Module {
   inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits.asUInt, inst)
 
   // decodeout.control
-  controlDecoder.input := inst
-  decodeOut.control    := controlDecoder.output
+  controlDecoder.input   := inst
+  decodeOut.bits.control := controlDecoder.output
 
   // decodeout.data
   val rs1  = inst(19, 15)
@@ -69,7 +62,7 @@ class InstructionDecodeUnit extends Module {
     Cat(inst(31), inst(19, 12), inst(20), inst(30, 21), 0.U(1.W)),
     20
   );
-  decodeOut.data.imm := MuxLookup(controlDecoder.output.insttype, immI)(
+  decodeOut.bits.data.imm := MuxLookup(controlDecoder.output.insttype, immI)(
     EnumSeq(
       InstType.I -> immI,
       InstType.S -> immS,
@@ -78,9 +71,9 @@ class InstructionDecodeUnit extends Module {
       InstType.J -> immJ
     )
   )
-  decodeOut.data.src1 := rs1
-  decodeOut.data.src2 := rs2
-  decodeOut.data.dst  := rd
+  decodeOut.bits.data.src1 := rs1
+  decodeOut.bits.data.src2 := rs2
+  decodeOut.bits.data.dst  := rd
 
   // decodeout.valid
   decodeOut.valid := decodeFSM.is(waitSend)

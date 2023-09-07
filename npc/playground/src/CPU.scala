@@ -13,7 +13,7 @@ class CPU extends Module {
   val blackBoxOut = Module(new BlackBoxRegs)
   val arbiter     = Module(new AxiLiteArbiter(2))
 
-  val iCache = Module(new Cache(16, 1))
+  val iCache = Module(new Cache())
   decoder.iCacheIO <> iCache.io
   iCache.axiIO <> arbiter.slaveIO(0)
   decoder.regIO := regs.io
@@ -25,7 +25,7 @@ class CPU extends Module {
 
   mem.axiS <> arbiter.masterIO
 
-  csrregs.io.data     := decoder.decodeOut.data
+  csrregs.io.data     := decoder.decodeOut.bits.data
   csrregs.io.src1Data := regs.io.out0
   csrregs.io.control  := exe.csrControl
   csrregs.regIn       := regs.io
