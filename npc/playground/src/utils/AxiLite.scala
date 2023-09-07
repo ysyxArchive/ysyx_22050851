@@ -57,8 +57,6 @@ class AxiLiteReadData(dataType: Data, id_r_width: Int) extends Bundle {
 
 }
 class AxiLiteIO(dataType: Data, addr_width: Int, val id_r_width: Int = 1, val id_w_width: Int = 1) extends Bundle {
-  val dataWidth = dataType.getWidth
-
   val AW = DecoupledIO(new AxiLiteWriteRequest(addr_width, id_w_width))
   val W  = DecoupledIO(new AxiLiteWriteData(dataType))
   val B  = Flipped(DecoupledIO(new AxiLiteWriteResponse(id_w_width)))
