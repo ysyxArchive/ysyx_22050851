@@ -13,14 +13,15 @@ class InstructionExecuteUnit extends Module {
   val csrIn      = IO(Input(UInt(64.W)))
   val csrControl = IO(Flipped(new CSRFileControl()))
 
-  val controlIn = decodeIn.control
-  val dataIn    = decodeIn.data
+  val decodeReg = RegInit(DecodeOut.default)
+  val controlIn = decodeReg.control
+  val dataIn    = decodeReg.data
 
   val alu = Module(new ALU)
 
   val memOut = Wire(UInt(64.W))
 
-  val postValid = RegNext(decodeIn.valid)
+  val postValid = RegNext(decodeReg.valid)
 
   val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   val shouldMemWork = controlIn.memmode =/= MemMode.no.asUInt
@@ -31,7 +32,7 @@ class InstructionExecuteUnit extends Module {
   val memFSM = new FSM(
     memIdle,
     List(
-      (memIdle, decodeIn.valid && !postValid && shouldMemWork, waitReq),
+      (memIdle, decodeReg.valid && !postValid && shouldMemWork, waitReq),
       (waitReq, Mux(memIsRead, memAxiM.AR.fire, memAxiM.AW.fire && memAxiM.W.fire), waitRes),
       (waitRes, Mux(memIsRead, memAxiM.R.fire, memAxiM.B.fire), memIdle)
     )
@@ -40,12 +41,13 @@ class InstructionExecuteUnit extends Module {
   val exeFSM = new FSM(
     exeIdle,
     List(
-      (exeIdle, decodeIn.valid, exeWaitMem),
+      (exeIdle, decodeReg.valid, exeWaitMem),
       (exeWaitMem, memFSM.is(memIdle), exewaitPC),
       (exewaitPC, true.B, exeIdle)
     )
   )
 
+  decodeReg := Mux(exeFSM.willChangeTo(exeWaitMem), decodeIn, decodeReg)
   // regIO
   val src1 = Wire(UInt(64.W))
   val src2 = Wire(UInt(64.W))
@@ -122,9 +124,9 @@ class InstructionExecuteUnit extends Module {
   alu.io.opType := res._1
 
   // csr
-  csrControl.csrBehave  := Mux(exeFSM.willChangeTo(exewaitPC), decodeIn.control.csrbehave, CsrBehave.no.asUInt)
-  csrControl.csrSetmode := Mux(exeFSM.willChangeTo(exewaitPC), decodeIn.control.csrsetmode, CsrSetMode.origin.asUInt)
-  csrControl.csrSource  := decodeIn.control.csrsource
+  csrControl.csrBehave  := Mux(exeFSM.willChangeTo(exewaitPC), decodeReg.control.csrbehave, CsrBehave.no.asUInt)
+  csrControl.csrSetmode := Mux(exeFSM.willChangeTo(exewaitPC), decodeReg.control.csrsetmode, CsrSetMode.origin.asUInt)
+  csrControl.csrSource  := decodeReg.control.csrsource
 
   // mem
   val memlen = MuxLookup(controlIn.memlen, 1.U)(
@@ -175,5 +177,5 @@ class InstructionExecuteUnit extends Module {
   blackBox.io.halt     := controlIn.goodtrap
   blackBox.io.bad_halt := controlIn.badtrap || res._2 === false.B
 
-  decodeIn.done := exeFSM.is(exeIdle)
+  decodeReg.done := exeFSM.is(exeIdle)
 }
