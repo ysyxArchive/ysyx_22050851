@@ -15,13 +15,14 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
 }
 
 /**
-  * @param totalByte 整个Cache字节数
-  * @param cellByte 单个cell字节数
-  * @param groupSize 单组有多少个cell
+  * @param cellByte 单个cache存储大小
+  * @param wayCnt 路数
+  * @param groupSize 单路单元数
+  * @param addrWidth 地址宽度
   */
-class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64, cellByte: Int = 8) extends Module {
-  assert(totalByte % cellByte == 0)
-  val cellCnt = totalByte / cellByte
+class Cache(cellByte: Int = 8, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: Int = 64) extends Module {
+  val totalByte = cellByte * groupSize * wayCnt
+  val cellCnt   = totalByte / cellByte
   assert(cellCnt % groupSize == 0)
   val waycnt      = cellCnt / groupSize
   val indexOffset = log2Up(cellByte / 8)
