@@ -13,10 +13,10 @@ class InstructionExecuteUnit extends Module {
   val csrIn      = IO(Input(UInt(64.W)))
   val csrControl = IO(Flipped(new CSRFileControl()))
 
-  val controlIn = RegInit(DecodeControlOut.default())
-  val dataIn    = RegInit(DecodeDataOut.default)
-  dataIn    := Mux(decodeIn.fire, decodeIn.bits.data, dataIn)
-  controlIn := Mux(decodeIn.fire, decodeIn.bits.control, controlIn)
+  val controlReg = RegInit(DecodeControlOut.default())
+  val dataReg    = RegInit(DecodeDataOut.default)
+  dataReg    := Mux(decodeIn.fire, decodeIn.bits.data, dataReg)
+  controlReg := Mux(decodeIn.fire, decodeIn.bits.control, controlReg)
 
   val alu = Module(new ALU)
 
@@ -38,6 +38,8 @@ class InstructionExecuteUnit extends Module {
     )
   )
 
+  val controlIn = Mux(exeFSM.is(idle), decodeIn.bits.control, controlReg)
+  val dataIn    = Mux(exeFSM.is(idle), decodeIn.bits.data, dataReg)
   // regIO
   val src1 = Wire(UInt(64.W))
   val src2 = Wire(UInt(64.W))
