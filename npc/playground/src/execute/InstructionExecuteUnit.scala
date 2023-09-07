@@ -124,9 +124,9 @@ class InstructionExecuteUnit extends Module {
   alu.io.opType := res._1
 
   // csr
-  csrControl.csrBehave  := Mux(exeFSM.willChangeTo(exewaitPC), decodeReg.control.csrbehave, CsrBehave.no.asUInt)
-  csrControl.csrSetmode := Mux(exeFSM.willChangeTo(exewaitPC), decodeReg.control.csrsetmode, CsrSetMode.origin.asUInt)
-  csrControl.csrSource  := decodeReg.control.csrsource
+  csrControl.csrBehave  := Mux(exeFSM.willChangeTo(exewaitPC), controlIn.csrbehave, CsrBehave.no.asUInt)
+  csrControl.csrSetmode := Mux(exeFSM.willChangeTo(exewaitPC), controlIn.csrsetmode, CsrSetMode.origin.asUInt)
+  csrControl.csrSource  := controlIn.csrsource
 
   // mem
   val memlen = MuxLookup(controlIn.memlen, 1.U)(
@@ -177,5 +177,5 @@ class InstructionExecuteUnit extends Module {
   blackBox.io.halt     := controlIn.goodtrap
   blackBox.io.bad_halt := controlIn.badtrap || res._2 === false.B
 
-  decodeReg.done := exeFSM.is(exeIdle)
+  decodeIn.done := exeFSM.is(exeIdle)
 }
