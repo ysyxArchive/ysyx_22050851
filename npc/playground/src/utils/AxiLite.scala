@@ -65,10 +65,10 @@ class AxiLiteIO(
   val id_w_width: Int     = 1,
   val lenPresent: Boolean = false)
     extends Bundle {
-  val AW = DecoupledIO(new AxiLiteWriteRequest(addr_width, id_w_width))
+  val AW = DecoupledIO(new AxiLiteWriteRequest(addr_width, id_w_width, lenPresent))
   val W  = DecoupledIO(new AxiLiteWriteData(dataType))
   val B  = Flipped(DecoupledIO(new AxiLiteWriteResponse(id_w_width)))
-  val AR = DecoupledIO(new AxiLiteReadRequest(addr_width, id_r_width))
+  val AR = DecoupledIO(new AxiLiteReadRequest(addr_width, id_r_width, lenPresent))
   val R  = Flipped(DecoupledIO(new AxiLiteReadData(dataType, id_r_width)))
 }
 
