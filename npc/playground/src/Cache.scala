@@ -82,7 +82,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
   io.data.bits  := PriorityMux(s)
   io.data.valid := cacheFSM.is(sendRes)
   // when sendReq
-  axiIO.AR.bits.addr := Cat(Seq(tag, counter << log2Up(axiIO.dataWidth / 8)))
+  axiIO.AR.bits.addr := Cat(Seq(tag, index, counter << log2Up(axiIO.dataWidth / 8)))
   axiIO.AR.bits.id   := 0.U
   axiIO.AR.bits.prot := 0.U
   axiIO.AR.valid     := cacheFSM.is(sendReq)
