@@ -30,10 +30,10 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
 
   val io    = IO(new CacheIO())
   val axiIO = IO(new AxiLiteIO(UInt(64.W), 64))
-  
+
   // 从axi更新cache需要的请求次数
   val updateTimes = cellByte / axiIO.dataWidth
-  
+
   val cacheMem = RegInit(
     VecInit(
       Seq.fill(waycnt)(VecInit(Seq.fill(groupSize)(0.U.asTypeOf(new CacheLine(addrWidth - tagOffset, cellByte)))))
@@ -60,8 +60,8 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
       (sendRes, io.data.fire, idle),
       (idle, io.readReq.fire && !hit, sendReq),
       (sendReq, axiIO.AR.fire, waitRes),
-      (waitRes, axiIO.R.fire && (counter =/= updateTimes.U), sendReq),
-      (waitRes, axiIO.R.fire && (counter === updateTimes.U), sendRes)
+      (waitRes, axiIO.R.fire && (counter =/= updateTimes.U - 1), sendReq),
+      (waitRes, axiIO.R.fire && (counter === updateTimes.U - 1), sendRes)
     )
   )
   val tag    = io.readReq.bits(addrWidth - 1, tagOffset)
