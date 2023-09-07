@@ -71,12 +71,10 @@ class AxiLiteIO(
 }
 
 object AxiLiteIO {
-  def apply(dataWidth: Int, addr_width: Int) =
-    new AxiLiteIO(UInt(dataWidth.W), addr_width)
-  def apply(dataType: Data, addr_width: Int) =
-    new AxiLiteIO(dataType, addr_width)
-  def flipped(dataWidth: Int, addr_width: Int, lenPresent: Boolean = false) = {
-    val io = Flipped(new AxiLiteIO(UInt(dataWidth.W), addr_width))
+  def apply(dataWidth: Int, addr_width: Int, lenPresent: Boolean): AxiLiteIO =
+    AxiLiteIO(UInt(dataWidth.W), addr_width, lenPresent)
+  def apply(dataType: Data, addr_width: Int, lenPresent: Boolean) = {
+    val io = new AxiLiteIO(dataType, addr_width)
     if (!lenPresent) {
       io.AR.bits.len := 0.U
       io.AW.bits.len := 0.U
