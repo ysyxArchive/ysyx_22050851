@@ -6,4 +6,6 @@
 #define WAVE_TRACE_CLOCKS 300
 // sdl事件处理间隔
 #define DEVICE_UPDATE_INTERVAL 100000
+// 最大pc变化间隔周期，超过会触发bad halt
+#define MAX_WAIT_ROUND 100
 #endif

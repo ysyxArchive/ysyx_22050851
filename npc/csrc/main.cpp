@@ -12,12 +12,12 @@
 bool is_halt = false;
 bool is_bad_halt = false;
 
-extern VCPU* top;
+extern VCPU *top;
 CPU cpu;
 LightSSS lightSSS;
 int npc_clock = 0;
-uint64_t* cpu_regs = NULL;
-uint64_t* cpu_pc = NULL;
+uint64_t *cpu_regs = NULL;
+uint64_t *cpu_pc = NULL;
 
 void haltop(unsigned char good_halt) {
   if (top->reset)
@@ -39,15 +39,14 @@ void init_npc() {
 }
 // skip when pc is 0x00
 static bool skip_once = false;
-extern "C" void mem_read(const svLogicVecVal* addr, svLogicVecVal* ret) {
-  uint64_t data = read_mem(*(uint64_t*)addr, 8);
+extern "C" void mem_read(const svLogicVecVal *addr, svLogicVecVal *ret) {
+  uint64_t data = read_mem(*(uint64_t *)addr, 8);
   ret[0].aval = data;
   ret[1].aval = data >> 32;
 }
 
-extern "C" void mem_write(const svLogicVecVal* addr,
-                          const svLogicVecVal* mask,
-                          const svLogicVecVal* data) {
+extern "C" void mem_write(const svLogicVecVal *addr, const svLogicVecVal *mask,
+                          const svLogicVecVal *data) {
   uint8_t len = 0;
   auto val = mask->aval;
   while (val) {
@@ -55,11 +54,11 @@ extern "C" void mem_write(const svLogicVecVal* addr,
     len++;
   }
   uint64_t dataVal = (uint64_t)(data[1].aval) << 32 | data[0].aval;
-  write_mem(*(uint64_t*)addr, len, dataVal);
+  write_mem(*(uint64_t *)addr, len, dataVal);
 }
 
 extern "C" void set_gpr_ptr(const svOpenArrayHandle r) {
-  cpu_regs = (uint64_t*)(((VerilatedDpiOpenVar*)r)->datap());
+  cpu_regs = (uint64_t *)(((VerilatedDpiOpenVar *)r)->datap());
 }
 
 void update_cpu() {
@@ -79,8 +78,8 @@ void one_step() {
   static uint64_t lastpc = 0;
   if (lastpc == cpu.pc) {
     latpcchange++;
-    if (latpcchange > 20) {
-      Log("error pc not changed for 50 cycles");
+    if (latpcchange > MAX_WAIT_ROUND) {
+      Log("error pc not changed for %d cycles", MAX_WAIT_ROUND);
       is_bad_halt = true;
       is_halt = true;
     }
@@ -101,7 +100,7 @@ void one_step() {
   }
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   parse_args(argc, argv);
   load_files();
   init_vcd_trace();
@@ -119,7 +118,7 @@ int main(int argc, char* argv[]) {
   int ret_value = cpu.gpr[10];
   if (is_bad_halt || ret_value != 0) {
     Log("bad halt! pc=0x%lx inst=0x%08x", cpu.pc,
-        *(uint32_t*)&(mem[cpu.pc - MEM_START]));
+        *(uint32_t *)&(mem[cpu.pc - MEM_START]));
     if (!lightSSS.is_child()) {
       lightSSS.wakeup_child(npc_clock);
     }
