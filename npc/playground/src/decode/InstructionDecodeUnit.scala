@@ -46,10 +46,9 @@ class InstructionDecodeUnit extends Module {
       (busy, decodeOut.done, waitAR)
     )
   )
-  val decodeStatus = decodeFSM.status
 
-  iCacheIO.data.ready    := decodeStatus === waitR
-  iCacheIO.readReq.valid := decodeStatus === waitAR
+  iCacheIO.data.ready    := decodeFSM.is(waitR)
+  iCacheIO.readReq.valid := decodeFSM.is(waitAR)
   iCacheIO.readReq.bits  := regIO.pc
 
   inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits.asUInt, inst)
@@ -84,6 +83,6 @@ class InstructionDecodeUnit extends Module {
   decodeOut.data.dst  := rd
 
   // decodeout.valid
-  decodeOut.valid := decodeStatus === waitSend
+  decodeOut.valid := decodeFSM.is(waitSend)
 
 }

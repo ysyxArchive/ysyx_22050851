@@ -140,56 +140,56 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
   }
   // when waitMasterReq
   workingMaster := Mux(
-    arbiterStatus === waitMasterReq && haveValidRequest,
+    arbiterFSM.is(waitMasterReq) && haveValidRequest,
     chosenReq,
     workingMaster
   ) // choose the chosen master
   isRead := Mux(
-    arbiterStatus === waitMasterReq && haveValidRequest,
+    arbiterFSM.is(waitMasterReq) && haveValidRequest,
     chosenMaster.AR.valid,
     isRead
   ) // check if chosen master is reading
   masterRequestMask(chosenReq) := Mux(
-    arbiterStatus === waitMasterReq,
+    arbiterFSM.is(waitMasterReq),
     true.B,
     masterRequestMask(chosenReq)
   ) // if chosen is unmasked, mask it
-  chosenMaster.AR.ready := haveValidRequest && arbiterStatus === waitMasterReq && isRead // change status
-  chosenMaster.AW.ready := haveValidRequest && arbiterStatus === waitMasterReq && !isRead
-  chosenMaster.W.ready  := haveValidRequest && arbiterStatus === waitMasterReq && !isRead
+  chosenMaster.AR.ready := haveValidRequest && arbiterFSM.is(waitMasterReq) && isRead // change status
+  chosenMaster.AW.ready := haveValidRequest && arbiterFSM.is(waitMasterReq) && !isRead
+  chosenMaster.W.ready  := haveValidRequest && arbiterFSM.is(waitMasterReq) && !isRead
   val awbits = Reg(new AxiLiteWriteRequest(64, 1))
   val arbits = Reg(new AxiLiteReadRequest(64, 1))
   val wbits  = Reg(new AxiLiteWriteData(UInt(64.W)))
-  awbits := Mux(slaveReqFire(workingMaster) && arbiterStatus === waitMasterReq, chosenMaster.AW.bits, awbits)
-  wbits  := Mux(slaveReqFire(workingMaster) && arbiterStatus === waitMasterReq, chosenMaster.W.bits, wbits)
-  arbits := Mux(slaveReqFire(workingMaster) && arbiterStatus === waitMasterReq, chosenMaster.AR.bits, arbits)
+  awbits := Mux(slaveReqFire(workingMaster) && arbiterFSM.is(waitMasterReq), chosenMaster.AW.bits, awbits)
+  wbits  := Mux(slaveReqFire(workingMaster) && arbiterFSM.is(waitMasterReq), chosenMaster.W.bits, wbits)
+  arbits := Mux(slaveReqFire(workingMaster) && arbiterFSM.is(waitMasterReq), chosenMaster.AR.bits, arbits)
   // when reqSlave
-  masterIO.AR.valid := arbiterStatus === reqSlave && isRead
+  masterIO.AR.valid := arbiterFSM.is(reqSlave) && isRead
   masterIO.AR.bits  := arbits
-  masterIO.AW.valid := arbiterStatus === reqSlave && !isRead
+  masterIO.AW.valid := arbiterFSM.is(reqSlave) && !isRead
   masterIO.AW.bits  := awbits
-  masterIO.W.valid  := arbiterStatus === reqSlave && !isRead
+  masterIO.W.valid  := arbiterFSM.is(reqSlave) && !isRead
   masterIO.W.bits   := wbits
   // when waitSlaveRes
   val resData   = Reg(new AxiLiteReadData(UInt(64.W), 1))
   val writeBack = Reg(new AxiLiteWriteResponse(1))
   resData := Mux(
-    masterResFire && arbiterStatus === waitSlaveRes,
+    masterResFire && arbiterFSM.is(waitSlaveRes),
     masterIO.R.bits,
     resData
   )
   writeBack := Mux(
-    masterResFire && arbiterStatus === waitSlaveRes,
+    masterResFire && arbiterFSM.is(waitSlaveRes),
     masterIO.B.bits,
     writeBack
   )
-  masterIO.B.ready := arbiterStatus === waitSlaveRes && !isRead
-  masterIO.R.ready := arbiterStatus === waitSlaveRes && isRead
+  masterIO.B.ready := arbiterFSM.is(waitSlaveRes) && !isRead
+  masterIO.R.ready := arbiterFSM.is(waitSlaveRes) && isRead
 
   // when resMaster
   chosenMaster.R.bits  := resData
   chosenMaster.B.bits  := writeBack
-  chosenMaster.R.valid := arbiterStatus === resMaster && isRead
-  chosenMaster.B.valid := arbiterStatus === resMaster && !isRead
+  chosenMaster.R.valid := arbiterFSM.is(resMaster) && isRead
+  chosenMaster.B.valid := arbiterFSM.is(resMaster) && !isRead
 
 }

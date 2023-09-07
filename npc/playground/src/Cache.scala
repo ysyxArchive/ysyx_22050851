@@ -20,7 +20,7 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
   * @param groupSize 单组有多少个cell
   */
 class Cache(totalByte: Int, groupSize: Int, addrWidth: Int = 64) extends Module {
-  val cellByte = 8
+  val cellByte = 64
   assert(totalByte % cellByte == 0)
   val cellCnt = totalByte / cellByte
   assert(cellCnt % groupSize == 0)

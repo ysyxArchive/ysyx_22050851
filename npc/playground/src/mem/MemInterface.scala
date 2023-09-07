@@ -41,7 +41,6 @@ class MemInterface extends Module {
       (writeBack, axiS.R.fire || axiS.B.fire, waitReq)
     )
   )
-  val status = memInterfaceFSM.status
 
   val dataRet    = RegInit(0.U(64.W))
   val isReading  = RegInit(false.B)
@@ -67,16 +66,16 @@ class MemInterface extends Module {
   dataRet       := Mux(reqFire, mem.io.rdata, dataRet)
 
   // interface status
-  isReading  := Mux(status === writeBack, isReading, axiS.AR.valid)
-  readResId  := Mux(status === writeBack, readResId, axiS.AR.bits.id)
-  writeResId := Mux(status === writeBack, writeResId, axiS.AW.bits.id)
+  isReading  := Mux(memInterfaceFSM.is(writeBack), isReading, axiS.AR.valid)
+  readResId  := Mux(memInterfaceFSM.is(writeBack), readResId, axiS.AR.bits.id)
+  writeResId := Mux(memInterfaceFSM.is(writeBack), writeResId, axiS.AW.bits.id)
 
-  axiS.W.ready     := status === waitReq && !axiS.AR.valid && axiS.W.valid
-  axiS.AW.ready    := status === waitReq && !axiS.AR.valid && axiS.AW.valid
-  axiS.AR.ready    := status === waitReq && axiS.AR.valid
-  axiS.B.valid     := status === writeBack && !isReading
+  axiS.W.ready     := memInterfaceFSM.is(waitReq) && !axiS.AR.valid && axiS.W.valid
+  axiS.AW.ready    := memInterfaceFSM.is(waitReq) && !axiS.AR.valid && axiS.AW.valid
+  axiS.AR.ready    := memInterfaceFSM.is(waitReq) && axiS.AR.valid
+  axiS.B.valid     := memInterfaceFSM.is(writeBack) && !isReading
   axiS.B.bits.id   := writeResId
-  axiS.R.valid     := status === writeBack && isReading
+  axiS.R.valid     := memInterfaceFSM.is(writeBack) && isReading
   axiS.R.bits.id   := readResId
   axiS.R.bits.data := dataRet
 }
