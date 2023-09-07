@@ -2,6 +2,7 @@ import chisel3._
 import chisel3.util._
 import utils.FSM
 import decode.AluMode
+import java.util.AbstractSequentialList
 
 class CacheIO extends Bundle {
   val readReq = Flipped(Decoupled(UInt(64.W)))
@@ -20,7 +21,7 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
   * @param groupSize 单路单元数
   * @param addrWidth 地址宽度
   */
-class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: Int = 64) extends Module {
+class Cache(cellByte: Int = 4, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: Int = 64) extends Module {
   val totalByte = cellByte * groupSize * wayCnt
   val cellCnt   = totalByte / cellByte
   assert(cellCnt % groupSize == 0)
@@ -68,6 +69,16 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
   io.data.bits  := PriorityMux(s)
   io.data.valid := cacheFSM.is(sendRes)
   // when sendReq
+  val axiIdle :: axiSendReq :: axiWaitRes :: _ = Enum(4)
+
+  val axiFSM = new FSM(
+    axiIdle,
+    List(
+      (idle, cacheFSM.willChangeTo(sendReq), axiSendReq),
+      (axiSendReq, axiIO.AR.fire, axiWaitRes),
+      (axiWaitRes, false.B, axiIdle)
+    )
+  )
   axiIO.AR.bits.addr := io.readReq.bits
   axiIO.AR.bits.id   := 0.U
   axiIO.AR.bits.prot := 0.U
