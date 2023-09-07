@@ -13,15 +13,14 @@ class InstructionExecuteUnit extends Module {
   val csrIn      = IO(Input(UInt(64.W)))
   val csrControl = IO(Flipped(new CSRFileControl()))
 
-  val decodeReg = RegInit(new DecodeOut(), DecodeOut.default)
-  val controlIn = decodeReg.control
-  val dataIn    = decodeReg.data
+  val controlIn = RegInit(DecodeControlOut.default())
+  val dataIn    = RegInit(DecodeDataOut.default)
 
   val alu = Module(new ALU)
 
   val memOut = Wire(UInt(64.W))
 
-  val postValid = RegNext(decodeReg.valid)
+  val postValid = RegNext(decodeIn.valid)
 
   val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   val shouldMemWork = controlIn.memmode =/= MemMode.no.asUInt
@@ -32,7 +31,7 @@ class InstructionExecuteUnit extends Module {
   val memFSM = new FSM(
     memIdle,
     List(
-      (memIdle, decodeReg.valid && !postValid && shouldMemWork, waitReq),
+      (memIdle, decodeIn.valid && !postValid && shouldMemWork, waitReq),
       (waitReq, Mux(memIsRead, memAxiM.AR.fire, memAxiM.AW.fire && memAxiM.W.fire), waitRes),
       (waitRes, Mux(memIsRead, memAxiM.R.fire, memAxiM.B.fire), memIdle)
     )
@@ -41,13 +40,14 @@ class InstructionExecuteUnit extends Module {
   val exeFSM = new FSM(
     exeIdle,
     List(
-      (exeIdle, decodeReg.valid, exeWaitMem),
+      (exeIdle, decodeIn.valid, exeWaitMem),
       (exeWaitMem, memFSM.is(memIdle), exewaitPC),
       (exewaitPC, true.B, exeIdle)
     )
   )
 
-  decodeReg := Mux(exeFSM.willChangeTo(exeWaitMem), decodeIn, decodeReg)
+  dataIn    := Mux(exeFSM.willChangeTo(exeWaitMem), decodeIn.data, dataIn)
+  controlIn := Mux(exeFSM.willChangeTo(exeWaitMem), decodeIn.control, controlIn)
   // regIO
   val src1 = Wire(UInt(64.W))
   val src2 = Wire(UInt(64.W))
