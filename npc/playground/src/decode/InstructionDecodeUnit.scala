@@ -35,7 +35,7 @@ class InstructionDecodeUnit extends Module {
     List(
       (waitAR, iCacheIO.readReq.fire, waitR),
       (waitR, iCacheIO.data.fire, waitSend),
-      (waitSend, decodeOut.fire, waitAR)
+      (waitSend, decodeOut.ready, waitAR)
     )
   )
 
