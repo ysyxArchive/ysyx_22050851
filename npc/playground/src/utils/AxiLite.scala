@@ -71,7 +71,7 @@ class AxiLiteIO(
 }
 
 object AxiLiteIO {
-  def apply(dataWidth: Int, addr_width: Int, lenPresent: Boolean): AxiLiteIO =
+  def apply(dataWidth: Int, addr_width: Int, lenPresent: Boolean = false): AxiLiteIO =
     AxiLiteIO(UInt(dataWidth.W), addr_width, lenPresent)
   def apply(dataType: Data, addr_width: Int, lenPresent: Boolean) = {
     val io = new AxiLiteIO(dataType, addr_width)
@@ -97,7 +97,7 @@ object AxiLiteIO {
 // }
 
 class AxiLiteArbiter(val masterPort: Int) extends Module {
-  val slaveIO = IO(Vec(masterPort, Flipped(AxiLiteIO(64, 64))))
+  val slaveIO = IO(Vec(masterPort, Flipped(AxiLiteIO(64, 64, false))))
   // now just one master port
   val masterIO = IO(AxiLiteIO(64, 64))
 
