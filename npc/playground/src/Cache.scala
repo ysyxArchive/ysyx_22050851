@@ -26,8 +26,8 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
   assert(1 << log2Ceil(wayCnt) == wayCnt)
   assert(1 << log2Ceil(groupSize) == groupSize)
   val totalByte   = cellByte * groupSize * wayCnt
-  val indexOffset = log2Ceil(cellByte)
-  val tagOffset   = log2Ceil(cellByte) + log2Ceil(groupSize)
+  val indexOffset = log2Up(cellByte)
+  val tagOffset   = log2Up(cellByte) + log2Up(groupSize)
 
   val io    = IO(new CacheIO())
   val axiIO = IO(new AxiLiteIO(UInt(64.W), 64))
