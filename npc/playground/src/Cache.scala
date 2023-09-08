@@ -74,15 +74,14 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 2, addrWidth: 
 
   val wayValid = cacheMem(index).map(line => line.valid && line.tag === tag)
 
-  hit := wayValid.reduce(_ & _)
-
   // when idle
   val addr = Reg(UInt(addrWidth.W))
   addr             := Mux(cacheFSM.is(idle), io.readReq.bits, addr)
   io.readReq.ready := cacheFSM.is(idle) && io.readReq.valid
   replaceIndex     := Mux(cacheFSM.is(idle), Mux(replaceIndex === (groupSize - 1).U, 0.U, replaceIndex + 1.U), replaceIndex)
   // when sendRes
-  val data = Mux1H(wayValid, cacheMem(index)).data
+  val line = Mux1H(wayValid, cacheMem(index))
+  val data = line.data
   val s    = Seq.tabulate(cellByte - 1)(o => ((o.U === offset) -> data(data.getWidth - 1, o * 8)))
   io.data.bits  := PriorityMux(s)
   io.data.valid := cacheFSM.is(sendRes)
