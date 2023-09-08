@@ -83,7 +83,7 @@ class InstructionExecuteUnit extends Module {
       RegWriteMux.alunotcarryandnotzero -> Utils
         .zeroExtend(!alu.signalIO.isCarry && !alu.signalIO.isZero, 1, 64),
       RegWriteMux.csr -> csrIn
-    )
+i    )
   )
   regIO.wdata := Mux(controlIn.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)
 

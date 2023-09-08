@@ -52,6 +52,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   val isDirty = Wire(Bool())
 
   val isRead = Reg(Bool())
+  val addr   = Reg(UInt(addrWidth.W))
 
   val idle :: sendRes :: sendReq :: waitRes :: writeData :: sendWReq :: waitWRes :: others = Enum(10)
 
@@ -88,9 +89,9 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
 
   val replaceIndex = RegInit(0.U(log2Ceil(groupSize).W))
 
-  val tag    = io.addr(addrWidth - 1, tagOffset)
-  val index  = io.addr(tagOffset - 1, indexOffset)
-  val offset = io.addr(indexOffset - 1, 0)
+  val tag    = Mux(cacheFSM.is(idle), io.addr, addr)(addrWidth - 1, tagOffset)
+  val index  = Mux(cacheFSM.is(idle), io.addr, addr)(tagOffset - 1, indexOffset)
+  val offset = Mux(cacheFSM.is(idle), io.addr, addr)(indexOffset - 1, 0)
 
   val wayValid    = cacheMem(index).map(line => line.valid && line.tag === tag)
   val targetIndex = Mux1H(wayValid, Seq.tabulate(groupSize)(index => index.U))
@@ -100,7 +101,6 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   isDirty := cacheMem(index)(replaceIndex).dirty
 
   // when idle
-  val addr = Reg(UInt(addrWidth.W))
   addr              := Mux(io.readReq.fire || io.writeReq.fire, io.addr, addr)
   io.readReq.ready  := cacheFSM.is(idle) && io.readReq.valid
   io.writeReq.ready := cacheFSM.is(idle) && io.writeReq.valid
