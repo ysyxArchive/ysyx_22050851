@@ -7,11 +7,17 @@ import os.group
 class CacheIO extends Bundle {
   val readReq = Flipped(Decoupled(UInt(64.W)))
   val data    = Decoupled(UInt(32.W))
+  val writeReq = Flipped(Decoupled(new Bundle {
+    val addr = UInt(64.W)
+    val data = UInt(64.W)
+  }))
+  val writeRes = Decoupled()
 }
 
 class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
   val valid = Bool()
   val tag   = UInt(tagWidth.W)
+  val dirty = Bool()
   val data  = UInt((dataByte * 8).W)
 }
 
@@ -41,9 +47,10 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
     )
   )
 
-  val hit = Wire(Bool())
+  val hit     = Wire(Bool())
+  val isDirty = Wire(Bool())
 
-  val idle :: sendRes :: sendReq :: waitRes :: others = Enum(5)
+  val idle :: sendRes :: sendReq :: waitRes :: writeData :: sendWReq :: waitWRes :: others = Enum(5)
 
   val counter = RegInit(0.U(log2Ceil(updateTimes).W))
   counter := PriorityMux(
@@ -58,11 +65,16 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
     idle,
     List(
       (idle, io.readReq.fire && hit, sendRes),
-      (sendRes, io.data.fire, idle),
-      (idle, io.readReq.fire && !hit, sendReq),
+      (idle, io.writeReq.fire, writeData),
+      (idle, io.readReq.fire && !hit && !isDirty, sendReq),
+      (idle, io.readReq.fire && !hit && isDirty, sendWReq),
+      (sendWReq, axiIO.AW.fire && axiIO.W.fire, waitWRes),
+      (waitWRes, axiIO.B.fire && (counter =/= (updateTimes - 1).U), sendWReq),
+      (waitWRes, axiIO.B.fire && (counter === (updateTimes - 1).U), sendReq),
       (sendReq, axiIO.AR.fire, waitRes),
       (waitRes, axiIO.R.fire && (counter =/= (updateTimes - 1).U), sendReq),
-      (waitRes, axiIO.R.fire && (counter === (updateTimes - 1).U), sendRes)
+      (waitRes, axiIO.R.fire && (counter === (updateTimes - 1).U), sendRes),
+      (sendRes, io.data.fire, idle)
     )
   )
 
@@ -72,19 +84,24 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   val index  = io.readReq.bits(tagOffset - 1, indexOffset)
   val offset = io.readReq.bits(indexOffset - 1, 0)
 
-  val wayValid = cacheMem(index).map(line => line.valid && line.tag === tag)
+  val wayValid    = cacheMem(index).map(line => line.valid && line.tag === tag)
+  val targetIndex = Mux1H(wayValid, Seq.tabulate(groupSize)(index => index.U))
+  val data        = cacheMem(index)(targetIndex).data
 
-  hit := wayValid.reduce(_ & _)
-  
+  hit     := wayValid.reduce(_ || _)
+  isDirty := wayValid(index)(replaceIndex).dirty
+
   // when idle
   val addr = Reg(UInt(addrWidth.W))
   addr             := Mux(cacheFSM.is(idle), io.readReq.bits, addr)
   io.readReq.ready := cacheFSM.is(idle) && io.readReq.valid
-  replaceIndex     := Mux(cacheFSM.willChangeTo(idle), Mux(replaceIndex === (groupSize - 1).U, 0.U, replaceIndex + 1.U), replaceIndex)
+  replaceIndex := Mux(
+    cacheFSM.willChangeTo(idle),
+    Mux(replaceIndex === (groupSize - 1).U, 0.U, replaceIndex + 1.U),
+    replaceIndex
+  )
   // when sendRes
-  val line = Mux1H(wayValid, cacheMem(index))
-  val data = line.data
-  val s    = Seq.tabulate(cellByte)(o => ((o.U === offset) -> data(data.getWidth - 1, o * 8)))
+  val s = Seq.tabulate(cellByte)(o => ((o.U === offset) -> data(data.getWidth - 1, o * 8)))
   io.data.bits  := PriorityMux(s)
   io.data.valid := cacheFSM.is(sendRes)
   // when sendReq
@@ -105,6 +122,8 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
     }
   }
   axiIO.R.ready := cacheFSM.is(waitRes)
+
+  // when sendWReq
 
   axiIO.AW.valid     := false.B
   axiIO.W.valid      := false.B
