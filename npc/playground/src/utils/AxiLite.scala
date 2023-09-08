@@ -142,7 +142,7 @@ class AxiLiteArbiter(val masterPort: Int) extends Module {
   }
   // when waitMasterReq
   workingMaster := Mux(
-    arbiterFSM.is(waitMasterReq) && !haveValidRequest,
+    arbiterFSM.is(waitMasterReq) && haveValidRequest && !arbiterFSM.willChange(),
     chosenReq,
     workingMaster
   ) // choose the chosen master
