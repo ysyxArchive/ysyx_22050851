@@ -89,7 +89,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   val data        = cacheMem(index)(targetIndex).data
 
   hit     := wayValid.reduce(_ || _)
-  isDirty := wayValid(index)(replaceIndex).dirty
+  isDirty := cacheMem(index)(replaceIndex).dirty
 
   // when idle
   val addr = Reg(UInt(addrWidth.W))
