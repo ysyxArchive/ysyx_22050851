@@ -2,6 +2,7 @@ import chisel3._
 import chisel3.util._
 import utils.FSM
 import decode.AluMode
+import os.group
 
 class CacheIO extends Bundle {
   val readReq = Flipped(Decoupled(UInt(64.W)))
@@ -21,10 +22,10 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
   * @param addrWidth 地址宽度
   */
 class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: Int = 64) extends Module {
-  val totalByte = cellByte * groupSize * wayCnt
-  val cellCnt   = totalByte / cellByte
-  assert(cellCnt % groupSize == 0)
-  val waycnt      = cellCnt / groupSize
+  assert(2 ** log2Up(cellByte) === cellByte)
+  assert(2 ** log2Up(wayCnt) === wayCnt)
+  assert(2 ** log2Up(groupSize) === groupSize)
+  val totalByte   = cellByte * groupSize * wayCnt
   val indexOffset = log2Up(cellByte)
   val tagOffset   = log2Up(cellByte) + log2Up(groupSize)
 
@@ -36,7 +37,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
 
   val cacheMem = RegInit(
     VecInit(
-      Seq.fill(waycnt)(VecInit(Seq.fill(groupSize)(0.U.asTypeOf(new CacheLine(addrWidth - tagOffset, cellByte)))))
+      Seq.fill(wayCnt)(VecInit(Seq.fill(groupSize)(0.U.asTypeOf(new CacheLine(addrWidth - tagOffset, cellByte)))))
     )
   )
 
@@ -64,6 +65,9 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
       (waitRes, axiIO.R.fire && (counter === (updateTimes - 1).U), sendRes)
     )
   )
+
+  val replaceIndex = RegInit(0.U(log2Up(groupSize).W))
+
   val tag    = io.readReq.bits(addrWidth - 1, tagOffset)
   val index  = io.readReq.bits(tagOffset - 1, indexOffset)
   val offset = io.readReq.bits(indexOffset - 1, 0)
@@ -76,6 +80,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
   val addr = Reg(UInt(addrWidth.W))
   addr             := Mux(cacheFSM.is(idle), io.readReq.bits, addr)
   io.readReq.ready := cacheFSM.is(idle) && io.readReq.valid
+  replaceIndex     := Mux(cacheFSM.is(idle), Mux(replaceIndex === (groupSize - 1).U, 0.U, replaceIndex + 1.U), replaceIndex)
   // when sendRes
   val data = Mux1H(wayValid, cacheMem(index)).data
   val s    = Seq.tabulate(cellByte - 1)(o => ((o.U === offset) -> data(data.getWidth - 1, o * 8)))
@@ -89,11 +94,13 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
   // when waitRes
   val mask       = Reverse(Cat(Seq.tabulate(updateTimes)(index => Fill(axiIO.dataWidth, UIntToOH(counter)(index)))))
   val maskedData = Fill(updateTimes, axiIO.R.bits.data.asUInt) & mask
-  for (i <- 0 until waycnt) {
+  for (i <- 0 until wayCnt) {
     when(cacheFSM.is(waitRes) && index === i.U && axiIO.R.fire) {
-      cacheMem(i)(0).data  := maskedData | (cacheMem(i)(0).data & ~mask)
-      cacheMem(i)(0).tag   := tag
-      cacheMem(i)(0).valid := true.B
+      cacheMem(i)(replaceIndex).data := maskedData | (cacheMem(i)(0).data & ~mask)
+      when(counter === (updateTimes - 1).U) {
+        cacheMem(i)(replaceIndex).tag   := tag
+        cacheMem(i)(replaceIndex).valid := true.B
+      }
     }
   }
   axiIO.R.ready := cacheFSM.is(waitRes)

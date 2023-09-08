@@ -19,7 +19,8 @@ class InstructionExecuteUnit extends Module {
   controlReg := Mux(decodeIn.fire, decodeIn.bits.control, controlReg)
   val controlIn = Wire(new DecodeControlOut())
   val dataIn    = Wire(new DecodeDataOut())
-  val alu       = Module(new ALU)
+
+  val alu = Module(new ALU)
 
   val memOut = Wire(UInt(64.W))
 
