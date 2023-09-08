@@ -23,7 +23,7 @@ class DecodeOut extends Bundle {
 
 class InstructionDecodeUnit extends Module {
   val regIO          = IO(Input(new RegisterFileIO()))
-  val iCacheIO       = IO(Flipped(new CacheIO()))
+  val iCacheIO       = IO(Flipped(new CacheIO(32, 64)))
   val decodeOut      = IO(Decoupled(new DecodeOut))
   val controlDecoder = Module(new InstContorlDecoder)
 
