@@ -35,7 +35,7 @@ class InstructionExecuteUnit extends Module {
       (idle, decodeIn.fire && shouldMemWork, waitMemReq),
       (idle, decodeIn.fire && !shouldMemWork, waitPC),
       (waitMemReq, Mux(memIsRead, memIO.readReq.fire, memIO.writeReq.fire), waitMemRes),
-      (waitMemRes, Mux(memIsRead, memIO.readReq.fire, memIO.writeRes.fire), waitPC),
+      (waitMemRes, Mux(memIsRead, memIO.data.fire, memIO.writeRes.fire), waitPC),
       (waitPC, true.B, idle)
     )
   )
