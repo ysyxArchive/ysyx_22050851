@@ -97,7 +97,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 2, addrWidth: 
   val maskedData = Fill(updateTimes, axiIO.R.bits.data.asUInt) & mask
   for (i <- 0 until wayCnt) {
     when(cacheFSM.is(waitRes) && index === i.U && axiIO.R.fire) {
-      cacheMem(i)(replaceIndex).data := maskedData | (cacheMem(replaceIndex)(0).data & ~mask)
+      cacheMem(i)(replaceIndex).data := maskedData | (cacheMem(i)(replaceIndex).data & ~mask)
       when(counter === (updateTimes - 1).U) {
         cacheMem(i)(replaceIndex).tag   := tag
         cacheMem(i)(replaceIndex).valid := true.B
