@@ -101,8 +101,9 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
 
   // when idle
   val addr = Reg(UInt(addrWidth.W))
-  addr             := Mux(io.readReq.fire || io.writeReq.fire, io.addr, addr)
-  io.readReq.ready := cacheFSM.is(idle) && io.readReq.valid
+  addr              := Mux(io.readReq.fire || io.writeReq.fire, io.addr, addr)
+  io.readReq.ready  := cacheFSM.is(idle) && io.readReq.valid
+  io.writeReq.ready := cacheFSM.is(idle) && io.writeReq.valid
   replaceIndex := Mux(
     cacheFSM.willChangeTo(idle),
     Mux(replaceIndex === (groupSize - 1).U, 0.U, replaceIndex + 1.U),
@@ -166,7 +167,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   )
   axiIO.W.bits.strb := Fill(log2Ceil(dataWidth), true.B)
   //when  waitWRes
-  axiIO.B.ready := cacheFSM.is(waitRes)
+  io.writeReq.ready := cacheFSM.is(waitRes)
 
   axiIO.AW.bits.id   := DontCare
   axiIO.AW.bits.prot := DontCare
