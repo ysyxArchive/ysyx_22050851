@@ -53,7 +53,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
 
   val isRead = Reg(Bool())
 
-  val idle :: sendRes :: sendReq :: waitRes :: writeData :: sendWReq :: waitWRes :: others = Enum(5)
+  val idle :: sendRes :: sendReq :: waitRes :: writeData :: sendWReq :: waitWRes :: others = Enum(10)
 
   val counter = RegInit(0.U(log2Ceil(slotsPerLine).W))
   counter := PriorityMux(
