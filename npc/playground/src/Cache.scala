@@ -29,8 +29,8 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   val indexOffset = log2Ceil(cellByte)
   val tagOffset   = log2Ceil(cellByte) + log2Ceil(wayCnt)
 
-  val readIO    = readIO(new CacheIO())
-  val axiIO = readIO(new AxiLiteIO(UInt(64.W), 64))
+  val io    = IO(new CacheIO())
+  val axiIO = IO(new AxiLiteIO(UInt(64.W), 64))
 
   // 从axi更新cache需要的请求次数
   val updateTimes = cellByte * 8 / axiIO.dataWidth
@@ -57,9 +57,9 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   val cacheFSM = new FSM(
     idle,
     List(
-      (idle, readIO.readReq.fire && hit, sendRes),
-      (sendRes, readIO.data.fire, idle),
-      (idle, readIO.readReq.fire && !hit, sendReq),
+      (idle, io.readReq.fire && hit, sendRes),
+      (sendRes, io.data.fire, idle),
+      (idle, io.readReq.fire && !hit, sendReq),
       (sendReq, axiIO.AR.fire, waitRes),
       (waitRes, axiIO.R.fire && (counter =/= (updateTimes - 1).U), sendReq),
       (waitRes, axiIO.R.fire && (counter === (updateTimes - 1).U), sendRes)
@@ -68,9 +68,9 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
 
   val replaceIndex = RegInit(0.U(log2Ceil(groupSize).W))
 
-  val tag    = readIO.readReq.bits(addrWidth - 1, tagOffset)
-  val index  = readIO.readReq.bits(tagOffset - 1, indexOffset)
-  val offset = readIO.readReq.bits(indexOffset - 1, 0)
+  val tag    = io.readReq.bits(addrWidth - 1, tagOffset)
+  val index  = io.readReq.bits(tagOffset - 1, indexOffset)
+  val offset = io.readReq.bits(indexOffset - 1, 0)
 
   val wayValid = cacheMem(index).map(line => line.valid && line.tag === tag)
 
@@ -78,15 +78,15 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   
   // when idle
   val addr = Reg(UInt(addrWidth.W))
-  addr             := Mux(cacheFSM.is(idle), readIO.readReq.bits, addr)
-  readIO.readReq.ready := cacheFSM.is(idle) && readIO.readReq.valid
-  replaceIndex     := Mux(cacheFSM.is(idle), Mux(replaceIndex === (groupSize - 1).U, 0.U, replaceIndex + 1.U), replaceIndex)
+  addr             := Mux(cacheFSM.is(idle), io.readReq.bits, addr)
+  io.readReq.ready := cacheFSM.is(idle) && io.readReq.valid
+  replaceIndex     := Mux(cacheFSM.willChangeTo(idle), Mux(replaceIndex === (groupSize - 1).U, 0.U, replaceIndex + 1.U), replaceIndex)
   // when sendRes
   val line = Mux1H(wayValid, cacheMem(index))
   val data = line.data
   val s    = Seq.tabulate(cellByte)(o => ((o.U === offset) -> data(data.getWidth - 1, o * 8)))
-  readIO.data.bits  := PriorityMux(s)
-  readIO.data.valid := cacheFSM.is(sendRes)
+  io.data.bits  := PriorityMux(s)
+  io.data.valid := cacheFSM.is(sendRes)
   // when sendReq
   axiIO.AR.bits.addr := Cat(Seq(tag, index, counter << log2Ceil(axiIO.dataWidth / 8)))
   axiIO.AR.bits.id   := 0.U
