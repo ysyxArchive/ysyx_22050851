@@ -14,13 +14,16 @@ class CPU extends Module {
   val arbiter     = Module(new AxiLiteArbiter(2))
 
   val iCache = Module(new Cache())
+  val dCache = Module(new Cache())
+
   decoder.iCacheIO <> iCache.io
   iCache.axiIO <> arbiter.slaveIO(0)
   decoder.regIO := regs.io
 
   exe.decodeIn <> decoder.decodeOut
   exe.regIO <> regs.io
-  exe.memAxiM <> arbiter.slaveIO(1)
+  dCache.axiIO <> arbiter.slaveIO(1)
+  exe.memIO <> dCache.io
   exe.csrIn := csrregs.io.output
 
   mem.axiS <> arbiter.masterIO

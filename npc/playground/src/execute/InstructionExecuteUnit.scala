@@ -8,7 +8,7 @@ import utils._
 
 class InstructionExecuteUnit extends Module {
   val decodeIn   = IO(Flipped(Decoupled(new DecodeOut())))
-  val memAxiM    = IO(MemAxiLite())
+  val memIO      = IO(Flipped(new CacheIO(64, 64)))
   val regIO      = IO(Flipped(new RegisterFileIO()))
   val csrIn      = IO(Input(UInt(64.W)))
   val csrControl = IO(Flipped(new CSRFileControl()))
@@ -34,8 +34,8 @@ class InstructionExecuteUnit extends Module {
     List(
       (idle, decodeIn.fire && shouldMemWork, waitMemReq),
       (idle, decodeIn.fire && !shouldMemWork, waitPC),
-      (waitMemReq, Mux(memIsRead, memAxiM.AR.fire, memAxiM.AW.fire && memAxiM.W.fire), waitMemRes),
-      (waitMemRes, Mux(memIsRead, memAxiM.R.fire, memAxiM.B.fire), waitPC),
+      (waitMemReq, Mux(memIsRead, memIO.readReq.fire, memIO.writeReq.fire), waitMemRes),
+      (waitMemRes, Mux(memIsRead, memIO.readReq.fire, memIO.writeRes.fire), waitPC),
       (waitPC, true.B, idle)
     )
   )
@@ -139,25 +139,19 @@ class InstructionExecuteUnit extends Module {
     1.U(1.W)
   )
 
-  memAxiM.AR.valid     := exeFSM.is(waitMemReq) && memIsRead && shouldMemWork
-  memAxiM.AR.bits.addr := alu.io.out
-  memAxiM.AR.bits.id   := 0.U
-  memAxiM.AR.bits.prot := 0.U
-  memAxiM.R.ready      := exeFSM.is(waitMemRes) && memIsRead
-  memAxiM.AW.valid     := exeFSM.is(waitMemReq) && !memIsRead && shouldMemWork
-  memAxiM.AW.bits.addr := alu.io.out
-  memAxiM.AW.bits.id   := 0.U
-  memAxiM.AW.bits.prot := 0.U
-  memAxiM.W.valid      := exeFSM.is(waitMemReq) && !memIsRead && shouldMemWork
-  memAxiM.W.bits.data  := src2
-  memAxiM.W.bits.strb  := memMask
-  memAxiM.B.ready      := exeFSM.is(waitMemRes)
-  val memOutRaw = MuxLookup(controlIn.memlen, memAxiM.R.bits.data.asUInt)(
+  memIO.readReq.valid      := exeFSM.is(waitMemReq) && memIsRead && shouldMemWork
+  memIO.addr               := alu.io.out
+  memIO.data.ready         := exeFSM.is(waitMemRes) && memIsRead
+  memIO.writeReq.valid     := exeFSM.is(waitMemReq) && !memIsRead && shouldMemWork
+  memIO.writeReq.bits.data := src2
+  memIO.writeReq.bits.mask := memMask
+  memIO.writeRes.ready     := exeFSM.is(waitMemRes)
+  val memOutRaw = MuxLookup(controlIn.memlen, memIO.data.bits)(
     EnumSeq(
-      MemLen.one -> memAxiM.R.bits.data.asUInt(7, 0),
-      MemLen.two -> memAxiM.R.bits.data.asUInt(15, 0),
-      MemLen.four -> memAxiM.R.bits.data.asUInt(31, 0),
-      MemLen.eight -> memAxiM.R.bits.data.asUInt
+      MemLen.one -> memIO.data.asUInt(7, 0),
+      MemLen.two -> memIO.data.asUInt(15, 0),
+      MemLen.four -> memIO.data.asUInt(31, 0),
+      MemLen.eight -> memIO.data.asUInt
     )
   )
   memOut := Mux(
