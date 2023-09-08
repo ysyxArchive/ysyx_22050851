@@ -21,13 +21,13 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
   * @param groupSize 单路单元数
   * @param addrWidth 地址宽度
   */
-class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: Int = 64) extends Module {
+class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 2, addrWidth: Int = 64) extends Module {
   assert(1 << log2Ceil(cellByte) == cellByte)
   assert(1 << log2Ceil(wayCnt) == wayCnt)
   assert(1 << log2Ceil(groupSize) == groupSize)
   val totalByte   = cellByte * groupSize * wayCnt
-  val indexOffset = log2Up(cellByte)
-  val tagOffset   = log2Up(cellByte) + log2Up(groupSize)
+  val indexOffset = log2Ceil(cellByte)
+  val tagOffset   = log2Ceil(cellByte) + log2Ceil(groupSize)
 
   val io    = IO(new CacheIO())
   val axiIO = IO(new AxiLiteIO(UInt(64.W), 64))
