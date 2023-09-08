@@ -74,6 +74,9 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 2, addrWidth: 
 
   val wayValid = cacheMem(index).map(line => line.valid && line.tag === tag)
 
+  hit := wayValid.reduce(_ & _)
+  
+  
   // when idle
   val addr = Reg(UInt(addrWidth.W))
   addr             := Mux(cacheFSM.is(idle), io.readReq.bits, addr)
