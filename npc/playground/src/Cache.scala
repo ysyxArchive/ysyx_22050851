@@ -78,9 +78,9 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
       (waitRes, axiIO.R.fire && (counter === (slotsPerLine - 1).U) && isRead, sendRes),
       (waitRes, axiIO.R.fire && (counter === (slotsPerLine - 1).U) && !isRead, writeData),
       (sendWReq, axiIO.AW.fire && axiIO.W.fire, waitWRes),
-      (waitWRes, axiIO.R.fire && (counter =/= (slotsPerLine - 1).U), sendWReq),
-      (waitWRes, axiIO.R.fire && (counter === (slotsPerLine - 1).U), sendReq),
-      (writeData, io.writeRes.fire, idle)
+      (waitWRes, axiIO.B.fire && (counter =/= (slotsPerLine - 1).U), sendWReq),
+      (waitWRes, axiIO.B.fire && (counter === (slotsPerLine - 1).U), sendReq),
+      (writeData, io.writeReq.fire, idle)
     )
   )
 
@@ -134,7 +134,8 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   axiIO.R.ready := cacheFSM.is(waitRes)
   // when writeData
   val dataWriteReq = Reg(io.writeReq.bits.cloneType)
-  dataWriteReq := Mux(io.writeReq.fire, io.writeReq.bits, dataWriteReq)
+  dataWriteReq      := Mux(io.writeReq.fire, io.writeReq.bits, dataWriteReq)
+  io.writeRes.valid := true.B
 
   // ....001111111000...
   val writePositionMask = Reverse(
@@ -167,8 +168,9 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   )
   axiIO.W.bits.strb := Fill(log2Ceil(dataWidth), true.B)
   //when  waitWRes
-  io.writeReq.ready := cacheFSM.is(waitRes)
+  axiIO.B.ready := true.B
 
-  axiIO.AW.bits.id   := DontCare
+  axiIO.AW.bits.id := DontCare
+
   axiIO.AW.bits.prot := DontCare
 }
