@@ -84,7 +84,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
     )
   )
 
-  isRead := cacheFSM.is(idle) && io.readReq.fire
+  isRead := Mux(cacheFSM.is(idle), io.readReq.fire, isRead)
 
   val replaceIndex = RegInit(0.U(log2Ceil(groupSize).W))
 
@@ -170,7 +170,6 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   //when  waitWRes
   axiIO.B.ready := true.B
 
-  
-  axiIO.AW.bits.id := DontCare
+  axiIO.AW.bits.id   := DontCare
   axiIO.AW.bits.prot := DontCare
 }
