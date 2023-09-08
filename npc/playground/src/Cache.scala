@@ -133,7 +133,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   axiIO.R.ready := cacheFSM.is(waitRes)
   // when writeData
   val dataWriteReq = Reg(io.writeReq.bits.cloneType)
-  dataWriteReq := Mux(io.writeReq.fire, io.data.bits, dataWriteReq)
+  dataWriteReq := Mux(io.writeReq.fire, io.writeReq.bits, dataWriteReq)
 
   // ....001111111000...
   val writePositionMask = Reverse(
