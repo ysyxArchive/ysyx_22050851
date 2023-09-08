@@ -23,7 +23,7 @@ class DecodeOut extends Bundle {
 
 class InstructionDecodeUnit extends Module {
   val regIO          = IO(Input(new RegisterFileIO()))
-  val iCacheIO       = IO(Flipped(new CacheIO()))
+  val iCacheIO       = IO(Flipped(new CacheIO(64, 64)))
   val decodeOut      = IO(Decoupled(new DecodeOut))
   val controlDecoder = Module(new InstContorlDecoder)
 
@@ -42,7 +42,7 @@ class InstructionDecodeUnit extends Module {
 
   iCacheIO.data.ready    := decodeFSM.is(waitR)
   iCacheIO.readReq.valid := decodeFSM.is(waitAR)
-  iCacheIO.readReq.bits  := regIO.pc
+  iCacheIO.addr          := regIO.pc
 
   inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits.asUInt, inst)
 
@@ -78,4 +78,8 @@ class InstructionDecodeUnit extends Module {
   // decodeout.valid
   decodeOut.valid := decodeFSM.is(waitSend)
 
+  iCacheIO.writeReq.valid     := false.B
+  iCacheIO.writeReq.bits.data := DontCare
+  iCacheIO.writeReq.bits.mask := DontCare
+  iCacheIO.writeRes.ready     := false.B
 }
