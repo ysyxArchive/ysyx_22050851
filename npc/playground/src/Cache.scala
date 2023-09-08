@@ -22,12 +22,12 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
   * @param addrWidth 地址宽度
   */
 class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: Int = 64) extends Module {
-  assert(1 << log2Up(cellByte) == cellByte)
-  assert(1 << log2Up(wayCnt) == wayCnt)
-  assert(1 << log2Up(groupSize) == groupSize)
+  assert(1 << log2Ceil(cellByte) == cellByte)
+  assert(1 << log2Ceil(wayCnt) == wayCnt)
+  assert(1 << log2Ceil(groupSize) == groupSize)
   val totalByte   = cellByte * groupSize * wayCnt
-  val indexOffset = log2Up(cellByte)
-  val tagOffset   = log2Up(cellByte) + log2Up(groupSize)
+  val indexOffset = log2Ceil(cellByte)
+  val tagOffset   = log2Ceil(cellByte) + log2Ceil(groupSize)
 
   val io    = IO(new CacheIO())
   val axiIO = IO(new AxiLiteIO(UInt(64.W), 64))
@@ -45,7 +45,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
 
   val idle :: sendRes :: sendReq :: waitRes :: others = Enum(5)
 
-  val counter = RegInit(0.U(log2Up(updateTimes).W))
+  val counter = RegInit(0.U(log2Ceil(updateTimes).W))
   counter := PriorityMux(
     Seq(
       (counter === updateTimes.U) -> 0.U,
@@ -66,7 +66,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
     )
   )
 
-  val replaceIndex = RegInit(0.U(log2Up(groupSize).W))
+  val replaceIndex = RegInit(0.U(log2Ceil(groupSize).W))
 
   val tag    = io.readReq.bits(addrWidth - 1, tagOffset)
   val index  = io.readReq.bits(tagOffset - 1, indexOffset)
@@ -87,7 +87,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 1, addrWidth: 
   io.data.bits  := PriorityMux(s)
   io.data.valid := cacheFSM.is(sendRes)
   // when sendReq
-  axiIO.AR.bits.addr := Cat(Seq(tag, index, counter << log2Up(axiIO.dataWidth / 8)))
+  axiIO.AR.bits.addr := Cat(Seq(tag, index, counter << log2Ceil(axiIO.dataWidth / 8)))
   axiIO.AR.bits.id   := 0.U
   axiIO.AR.bits.prot := 0.U
   axiIO.AR.valid     := cacheFSM.is(sendReq)
