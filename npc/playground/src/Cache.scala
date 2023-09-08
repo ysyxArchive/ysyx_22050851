@@ -21,7 +21,7 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
   * @param groupSize 单路单元数
   * @param addrWidth 地址宽度
   */
-class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 2, addrWidth: Int = 64) extends Module {
+class Cache(cellByte: Int = 64, wayCnt: Int = 2, groupSize: Int = 4, addrWidth: Int = 64) extends Module {
   assert(1 << log2Ceil(cellByte) == cellByte)
   assert(1 << log2Ceil(wayCnt) == wayCnt)
   assert(1 << log2Ceil(groupSize) == groupSize)
