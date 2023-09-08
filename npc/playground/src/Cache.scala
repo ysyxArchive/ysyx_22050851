@@ -5,7 +5,7 @@ import decode.AluMode
 import os.group
 
 class CacheIO(dataWidth: Int, addrWidth: Int) extends Bundle {
-  val addr    = UInt(addrWidth.W)
+  val addr    = Input(UInt(addrWidth.W))
   val readReq = Flipped(Decoupled())
   val data    = Decoupled(UInt(dataWidth.W))
   val writeReq = Flipped(Decoupled(new Bundle {
@@ -33,13 +33,14 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   assert(1 << log2Ceil(cellByte) == cellByte)
   assert(1 << log2Ceil(wayCnt) == wayCnt)
   assert(1 << log2Ceil(groupSize) == groupSize)
-  val totalByte    = cellByte * groupSize * wayCnt
-  val indexOffset  = log2Ceil(cellByte)
-  val tagOffset    = log2Ceil(cellByte) + log2Ceil(wayCnt)
-  val slotsPerLine = cellByte * 8 / axiIO.dataWidth
+  val totalByte   = cellByte * groupSize * wayCnt
+  val indexOffset = log2Ceil(cellByte)
+  val tagOffset   = log2Ceil(cellByte) + log2Ceil(wayCnt)
 
   val io    = IO(new CacheIO(dataWidth, addrWidth))
   val axiIO = IO(new AxiLiteIO(UInt(dataWidth.W), addrWidth))
+
+  val slotsPerLine = cellByte * 8 / axiIO.dataWidth
 
   val cacheMem = RegInit(
     VecInit(
