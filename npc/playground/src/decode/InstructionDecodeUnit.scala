@@ -42,7 +42,7 @@ class InstructionDecodeUnit extends Module {
 
   iCacheIO.data.ready    := decodeFSM.is(waitR)
   iCacheIO.readReq.valid := decodeFSM.is(waitAR)
-  iCacheIO.readReq.bits  := regIO.pc
+  iCacheIO.addr          := regIO.pc
 
   inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits.asUInt, inst)
 
