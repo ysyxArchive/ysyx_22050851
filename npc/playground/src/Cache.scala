@@ -81,7 +81,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
       (sendWReq, axiIO.AW.fire && axiIO.W.fire, waitWRes),
       (waitWRes, axiIO.B.fire && (counter =/= (slotsPerLine - 1).U), sendWReq),
       (waitWRes, axiIO.B.fire && (counter === (slotsPerLine - 1).U), sendReq),
-      (writeData, io.writeReq.fire, idle)
+      (writeData, io.writeRes.fire, idle)
     )
   )
 
