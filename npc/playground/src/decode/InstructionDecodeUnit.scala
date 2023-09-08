@@ -78,6 +78,7 @@ class InstructionDecodeUnit extends Module {
   // decodeout.valid
   decodeOut.valid := decodeFSM.is(waitSend)
 
+  iCacheIO.writeReq.valid     := false.B
   iCacheIO.writeReq.bits.data := DontCare
   iCacheIO.writeReq.bits.mask := DontCare
   iCacheIO.writeRes.ready     := false.B
