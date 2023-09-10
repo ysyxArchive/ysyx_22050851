@@ -172,4 +172,14 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
 
   axiIO.AW.bits.id   := DontCare
   axiIO.AW.bits.prot := DontCare
+  when(cacheFSM.is(idle)) {
+    val addr = io.addr
+    when(io.writeReq.fire) {
+      val data = io.writeReq.bits.data
+      printf(cf"cache writing, addr is $addr, data is $data")
+    }
+    when(io.readReq.fire) {
+      printf(cf"cache reading, addr is $addr")
+    }
+  }
 }
