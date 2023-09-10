@@ -177,7 +177,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
       printf("cache writing, addr is %x, data is %x\n", addr, data)
     }
     when(io.readReq.fire) {
-      printf("cache reading, addr is %d\n", addr)
+      printf("cache reading, addr is %x\n", addr)
     }
   }
 }
