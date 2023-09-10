@@ -1,8 +1,6 @@
 import chisel3._
 import chisel3.util._
 import utils.FSM
-import decode.AluMode
-import os.group
 
 class CacheIO(dataWidth: Int, addrWidth: Int) extends Bundle {
   val addr    = Input(UInt(addrWidth.W))
@@ -176,10 +174,10 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
     val addr = io.addr
     when(io.writeReq.fire) {
       val data = io.writeReq.bits.data
-      printf(cf"cache writing, addr is %d, data is $data\n", addr)
+      printf("cache writing, addr is %x, data is %x\n", addr, data)
     }
     when(io.readReq.fire) {
-      printf(cf"cache reading, addr is %d\n", addr)
+      printf("cache reading, addr is %d\n", addr)
     }
   }
 }
