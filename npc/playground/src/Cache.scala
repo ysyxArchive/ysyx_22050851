@@ -165,7 +165,7 @@ class Cache(
   axiIO.W.bits.data := PriorityMux(
     Seq.tabulate(slotsPerLine)(index => ((index.U === counter) -> data((index + 1) * dataWidth - 1, index * dataWidth)))
   )
-  axiIO.W.bits.strb := Fill(log2Ceil(dataWidth), true.B)
+  axiIO.W.bits.strb := Fill(dataWidth / 8.U, true.B)
   //when  waitWRes
   axiIO.B.ready := true.B
 
