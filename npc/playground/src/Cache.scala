@@ -181,8 +181,9 @@ class Cache(
     when(io.writeReq.fire) {
       val data = io.writeReq.bits.data
       printf(
-        name + " writing, addr is %x, tag is %x, index is %x, offset is %x, data is %x\n",
+        name + " writing, addr is %x, mask is %x, tag is %x, index is %x, offset is %x, data is %x\n",
         addr,
+        mask,
         tag,
         index,
         offset,
