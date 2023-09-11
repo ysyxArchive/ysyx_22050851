@@ -145,7 +145,7 @@ class Cache(
   val writePositionMask = Reverse(
     Cat(
       Seq.tabulate(cellByte)(index =>
-        Fill(8, UIntToOH(offset)(index, math.max(index - log2Ceil(dataWidth) + 1, 0)).orR)
+        Fill(8, UIntToOH(offset)(index, math.max(index - dataWidth / 8 + 1, 0)).orR)
       )
     )
   )
