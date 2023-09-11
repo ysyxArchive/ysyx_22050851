@@ -183,7 +183,7 @@ class Cache(
       printf(
         name + " writing, addr is %x, mask is %x, tag is %x, index is %x, offset is %x, data is %x\n",
         addr,
-        mask,
+        writeReq.mask,
         tag,
         index,
         offset,
