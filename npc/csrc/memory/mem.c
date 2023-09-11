@@ -1,5 +1,6 @@
 #include <mem.h>
 #include "VCPU.h"
+#include "config.h"
 #include "device.h"
 #include "difftest.h"
 uint8_t mem[MEM_LEN] = {0};
@@ -22,10 +23,11 @@ void init_memory(char* bin_path) {
 
 uint64_t read_mem(uint64_t addr, size_t length) {
   uint64_t ret = read_mem_nolog(addr, length);
-  // TODO:mtrace
-  //  Log(ANSI_FMT("Reading %d bytes, starts with %lx, data is %lx",
-  //               ANSI_FG_YELLOW),
-  //      length, addr, ret);
+#ifdef MTRACE
+  Log(ANSI_FMT("Reading %d bytes, starts with %lx, data is %lx",
+               ANSI_FG_YELLOW),
+      length, addr, ret);
+#endif
   return ret;
 }
 uint64_t read_mem_nolog(uint64_t addr, size_t length) {
@@ -67,7 +69,10 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
 }
 
 void write_mem(uint64_t addr, size_t length, uint64_t data) {
-  // printf("%lx, %d, %lx\n", addr, length, data);
+#ifdef MTRACE
+  Log(ANSI_FMT("Writing %d bytes to %lx, data is %lx", ANSI_FG_YELLOW), length,
+      addr, data);
+#endif
   if (addr >= FB_ADDR && addr <= FB_ADDR + VGA_WIDTH * VGA_HEIGHT * 4) {
     Assert(length == 4 || length == 8, "output to FB with length == %ld, not 4",
            length);
