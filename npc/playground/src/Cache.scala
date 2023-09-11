@@ -181,8 +181,7 @@ class Cache(
     when(io.writeReq.fire) {
       val data = io.writeReq.bits.data
       printf(
-        "%s writing, addr is %x, tag is %x, index is %x, offset is %x, data is %x\n",
-        name,
+        name + "writing, addr is %x, tag is %x, index is %x, offset is %x, data is %x\n",
         addr,
         tag,
         index,
@@ -191,7 +190,7 @@ class Cache(
       )
     }
     when(io.readReq.fire) {
-      printf("%s reading, addr is %x, tag is %x, index is %x, offset is %x\n", name, addr, tag, index, offset)
+      printf(name + " reading, addr is %x, tag is %x, index is %x, offset is %x\n", addr, tag, index, offset)
     }
   }
 }
