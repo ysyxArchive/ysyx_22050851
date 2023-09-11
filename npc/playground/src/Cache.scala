@@ -1,6 +1,7 @@
 import chisel3._
 import chisel3.util._
 import utils.FSM
+import utils.Utils
 
 class CacheIO(dataWidth: Int, addrWidth: Int) extends Bundle {
   val addr    = Input(UInt(addrWidth.W))
@@ -142,16 +143,16 @@ class Cache(
   io.writeRes.valid := cacheFSM.is(writeData)
 
   // ....001111111000...
-  val writePositionMask = Reverse(
-    Cat(
-      Seq.tabulate(cellByte)(index => Fill(8, UIntToOH(offset)(index, math.max(index - dataWidth / 8 + 1, 0)).orR))
-    )
-  )
+  // val writePositionMask = Reverse(
+  //   Cat(
+  //     Seq.tabulate(cellByte)(index => Fill(8, UIntToOH(offset)(index, math.max(index - dataWidth / 8 + 1, 0)).orR))
+  //   )
+  // )
   val t2   = Reverse(Cat(Seq.tabulate(dataWidth / 8)(index => Fill(8, dataWriteReq.mask(index)))))
-  val temp = (writePositionMask & (t2 << (offset * 8.U)))
+  // val temp = (writePositionMask & (t2 << (offset * 8.U)))
   // ...1111110011111...
-  val writeMask       = ~writePositionMask | ~temp
-  val maskedWriteData = (dataWriteReq.data << (offset * 8.U)) & ~writeMask
+  val writeMask       = ~Utils.zeroExtend(t2 << (offset * 8.U), offset * 8.U + t2.getWidth.U)
+  val maskedWriteData = (dataWriteReq.data & t2) << (offset * 8.U)
   for (i <- 0 until wayCnt) {
     when(cacheFSM.is(writeData) && index === i.U && cacheMem(i)(targetIndex).valid) {
       cacheMem(i)(targetIndex).data  := maskedWriteData | (cacheMem(i)(targetIndex).data & writeMask)
