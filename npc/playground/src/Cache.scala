@@ -153,7 +153,7 @@ class Cache(
   }
   // when sendWReq
   axiIO.AW.valid     := cacheFSM.is(sendWReq)
-  axiIO.AW.bits.addr := Cat(tag, index, counter << log2Ceil(axiIO.dataWidth / 8))
+  axiIO.AW.bits.addr := Cat(cacheMem(index)(replaceIndex).tag, index, counter << log2Ceil(axiIO.dataWidth / 8))
   axiIO.W.valid      := cacheFSM.is(sendWReq)
   axiIO.W.bits.data := PriorityMux(
     Seq.tabulate(slotsPerLine)(i =>
