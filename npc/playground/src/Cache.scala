@@ -174,10 +174,10 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
     val addr = io.addr
     when(io.writeReq.fire) {
       val data = io.writeReq.bits.data
-      printf("cache writing, addr is %x, data is %x\n", addr, data)
+      printf("cache writing, addr is %x, tag is %x, index is %x, offset is %x, data is %x\n", addr, tag, index, offset, data)
     }
     when(io.readReq.fire) {
-      printf("cache reading, addr is %x\n", addr)
+      printf("cache reading, addr is %x, tag is %x, index is %x, offset is %x\n", addr, tag, index, offset)
     }
   }
 }
