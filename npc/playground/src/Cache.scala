@@ -8,7 +8,7 @@ class CacheIO(dataWidth: Int, addrWidth: Int) extends Bundle {
   val data    = Decoupled(UInt(dataWidth.W))
   val writeReq = Flipped(Decoupled(new Bundle {
     val data = UInt(dataWidth.W)
-    val mask = UInt(log2Ceil(dataWidth).W)
+    val mask = UInt((dataWidth / 8).W)
   }))
   val writeRes = Decoupled()
 }
