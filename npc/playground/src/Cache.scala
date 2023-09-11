@@ -64,7 +64,7 @@ class Cache(
   counter := PriorityMux(
     Seq(
       (counter === slotsPerLine.U) -> 0.U,
-      axiIO.R.fire -> (counter + 1.U),
+      (axiIO.R.fire || axiIO.B.fire) -> (counter + 1.U),
       true.B -> counter
     )
   )
