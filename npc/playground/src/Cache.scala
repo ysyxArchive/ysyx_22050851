@@ -44,7 +44,7 @@ class Cache(
   val io    = IO(new CacheIO(dataWidth, addrWidth))
   val axiIO = IO(new AxiLiteIO(UInt(dataWidth.W), addrWidth))
 
-  val slotsPerLine = cellByte * 8 / axiIO.dataWidth
+  val slotsPerLine = cellByte * 8 / dataWidth
 
   val cacheMem = RegInit(
     VecInit(
@@ -144,7 +144,7 @@ class Cache(
   // ....001111111000...
   val writePositionMask = Reverse(
     Cat(
-      Seq.tabulate(slotsPerLine)(index => Fill(dataWidth, UIntToOH(offset)(index)))
+      Seq.tabulate(slotsPerLine)(index => Fill(8, UIntToOH(offset)(index)))
     )
   )
   // ...1111110011111...
@@ -181,7 +181,7 @@ class Cache(
     when(io.writeReq.fire) {
       val data = io.writeReq.bits.data
       printf(
-        name + "writing, addr is %x, tag is %x, index is %x, offset is %x, data is %x\n",
+        name + " writing, addr is %x, tag is %x, index is %x, offset is %x, data is %x\n",
         addr,
         tag,
         index,
