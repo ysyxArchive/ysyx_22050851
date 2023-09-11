@@ -13,8 +13,8 @@ class CPU extends Module {
   val blackBoxOut = Module(new BlackBoxRegs)
   val arbiter     = Module(new AxiLiteArbiter(2))
 
-  val iCache = Module(new Cache())
-  val dCache = Module(new Cache())
+  val iCache = Module(new Cache(name = "icache"))
+  val dCache = Module(new Cache(name = "dcache"))
 
   decoder.iCacheIO <> iCache.io
   iCache.axiIO <> arbiter.slaveIO(0)

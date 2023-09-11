@@ -26,7 +26,13 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
   * @param groupSize 单路单元数
   * @param addrWidth 地址宽度
   */
-class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: Int = 64, dataWidth: Int = 64)
+class Cache(
+  cellByte:  Int    = 64,
+  wayCnt:    Int    = 4,
+  groupSize: Int    = 4,
+  addrWidth: Int    = 64,
+  dataWidth: Int    = 64,
+  name:      String = "cache")
     extends Module {
   assert(1 << log2Ceil(cellByte) == cellByte)
   assert(1 << log2Ceil(wayCnt) == wayCnt)
@@ -174,10 +180,18 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
     val addr = io.addr
     when(io.writeReq.fire) {
       val data = io.writeReq.bits.data
-      printf("cache writing, addr is %x, tag is %x, index is %x, offset is %x, data is %x\n", addr, tag, index, offset, data)
+      printf(
+        "%s writing, addr is %x, tag is %x, index is %x, offset is %x, data is %x\n",
+        name,
+        addr,
+        tag,
+        index,
+        offset,
+        data
+      )
     }
     when(io.readReq.fire) {
-      printf("cache reading, addr is %x, tag is %x, index is %x, offset is %x\n", addr, tag, index, offset)
+      printf("%s reading, addr is %x, tag is %x, index is %x, offset is %x\n", name, addr, tag, index, offset)
     }
   }
 }
