@@ -141,18 +141,10 @@ class Cache(
   val dataWriteReq = Reg(io.writeReq.bits.cloneType)
   dataWriteReq      := Mux(io.writeReq.fire, io.writeReq.bits, dataWriteReq)
   io.writeRes.valid := cacheFSM.is(writeData)
-
-  // ....001111111000...
-  // val writePositionMask = Reverse(
-  //   Cat(
-  //     Seq.tabulate(cellByte)(index => Fill(8, UIntToOH(offset)(index, math.max(index - dataWidth / 8 + 1, 0)).orR))
-  //   )
-  // )
-  val t2   = Reverse(Cat(Seq.tabulate(dataWidth / 8)(index => Fill(8, dataWriteReq.mask(index)))))
-  // val temp = (writePositionMask & (t2 << (offset * 8.U)))
+  val extendedMask = Reverse(Cat(Seq.tabulate(dataWidth / 8)(index => Fill(8, dataWriteReq.mask(index)))))
   // ...1111110011111...
-  val writeMask       = ~Utils.zeroExtend(t2 << (offset * 8.U), offset * 8.U + t2.getWidth.U)
-  val maskedWriteData = (dataWriteReq.data & t2) << (offset * 8.U)
+  val writeMask       = ~Utils.zeroExtend(extendedMask << (offset * 8.U), offset * 8.U + extendedMask.getWidth.U)
+  val maskedWriteData = (dataWriteReq.data & extendedMask) << (offset * 8.U)
   for (i <- 0 until wayCnt) {
     when(cacheFSM.is(writeData) && index === i.U && cacheMem(i)(targetIndex).valid) {
       cacheMem(i)(targetIndex).data  := maskedWriteData | (cacheMem(i)(targetIndex).data & writeMask)
@@ -164,11 +156,13 @@ class Cache(
   axiIO.AW.bits.addr := Cat(tag, index, counter << log2Ceil(axiIO.dataWidth / 8))
   axiIO.W.valid      := cacheFSM.is(sendWReq)
   axiIO.W.bits.data := PriorityMux(
-    Seq.tabulate(slotsPerLine)(index => ((index.U === counter) -> data((index + 1) * dataWidth - 1, index * dataWidth)))
+    Seq.tabulate(slotsPerLine)(i =>
+      ((i.U === counter) -> cacheMem(index)(replaceIndex).data((i + 1) * dataWidth - 1, i * dataWidth))
+    )
   )
-  axiIO.W.bits.strb := Fill(dataWidth / 8, true.B)
+  axiIO.W.bits.strb := Fill(8, true.B)
   //when  waitWRes
-  axiIO.B.ready := true.B
+  axiIO.B.ready := cacheFSM.is(waitWRes)
 
   axiIO.AW.bits.id   := DontCare
   axiIO.AW.bits.prot := DontCare
