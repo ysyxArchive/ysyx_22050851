@@ -144,9 +144,7 @@ class Cache(
   // ....001111111000...
   val writePositionMask = Reverse(
     Cat(
-      Seq.tabulate(cellByte)(index =>
-        Fill(8, UIntToOH(offset)(index, math.max(index - dataWidth / 8 + 1, 0)).orR)
-      )
+      Seq.tabulate(cellByte)(index => Fill(8, UIntToOH(offset)(index, math.max(index - dataWidth / 8 + 1, 0)).orR))
     )
   )
   // ...1111110011111...
@@ -158,7 +156,7 @@ class Cache(
         )
       )
     ))
-  val maskedWriteData = Fill(slotsPerLine, dataWriteReq.data) & ~writeMask
+  val maskedWriteData = (dataWriteReq.data << (offset * 8.U)) & ~writeMask
   for (i <- 0 until wayCnt) {
     when(cacheFSM.is(writeData) && index === i.U && cacheMem(i)(index).valid) {
       cacheMem(i)(targetIndex).data  := maskedWriteData | (cacheMem(i)(replaceIndex).data & writeMask)
