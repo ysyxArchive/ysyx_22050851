@@ -80,4 +80,8 @@ class FSM(val initState: UInt, val elems: List[(UInt, Bool, UInt)]) {
   def is(s: UInt): Bool = {
     return s === status
   }
+
+  def willChange(): Bool = {
+    elems.map({ case tri => (tri._1 === status && tri._2) }).reduce(_ || _)
+  }
 }

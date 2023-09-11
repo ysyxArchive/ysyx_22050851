@@ -9,7 +9,7 @@
 
 extern int npc_clock;
 extern LightSSS lightSSS;
-
+extern bool is_bad_halt;
 #define Log(format, ...)                                                       \
   _Log(ANSI_FMT("[%s:%d %s] " format, ANSI_FG_BLUE) "\n", __FILE__, __LINE__,  \
        __func__, ##__VA_ARGS__)
@@ -22,7 +22,7 @@ extern LightSSS lightSSS;
         lightSSS.wakeup_child(npc_clock);                                      \
         isa_reg_display();                                                     \
       }                                                                        \
-      assert(cond);                                                            \
+      is_bad_halt = true;                                                      \
     }                                                                          \
   } while (0)
 

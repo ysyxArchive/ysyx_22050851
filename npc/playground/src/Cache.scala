@@ -1,8 +1,7 @@
 import chisel3._
 import chisel3.util._
 import utils.FSM
-import decode.AluMode
-import os.group
+import utils.Utils
 
 class CacheIO(dataWidth: Int, addrWidth: Int) extends Bundle {
   val addr    = Input(UInt(addrWidth.W))
@@ -10,7 +9,7 @@ class CacheIO(dataWidth: Int, addrWidth: Int) extends Bundle {
   val data    = Decoupled(UInt(dataWidth.W))
   val writeReq = Flipped(Decoupled(new Bundle {
     val data = UInt(dataWidth.W)
-    val mask = UInt(log2Ceil(dataWidth).W)
+    val mask = UInt((dataWidth / 8).W)
   }))
   val writeRes = Decoupled()
 }
@@ -28,7 +27,13 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
   * @param groupSize 单路单元数
   * @param addrWidth 地址宽度
   */
-class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: Int = 64, dataWidth: Int = 64)
+class Cache(
+  cellByte:  Int    = 64,
+  wayCnt:    Int    = 4,
+  groupSize: Int    = 4,
+  addrWidth: Int    = 64,
+  dataWidth: Int    = 64,
+  name:      String = "cache")
     extends Module {
   assert(1 << log2Ceil(cellByte) == cellByte)
   assert(1 << log2Ceil(wayCnt) == wayCnt)
@@ -40,7 +45,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   val io    = IO(new CacheIO(dataWidth, addrWidth))
   val axiIO = IO(new AxiLiteIO(UInt(dataWidth.W), addrWidth))
 
-  val slotsPerLine = cellByte * 8 / axiIO.dataWidth
+  val slotsPerLine = cellByte * 8 / dataWidth
 
   val cacheMem = RegInit(
     VecInit(
@@ -52,6 +57,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   val isDirty = Wire(Bool())
 
   val isRead = Reg(Bool())
+  val addr   = Reg(UInt(addrWidth.W))
 
   val idle :: sendRes :: sendReq :: waitRes :: writeData :: sendWReq :: waitWRes :: others = Enum(10)
 
@@ -59,7 +65,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   counter := PriorityMux(
     Seq(
       (counter === slotsPerLine.U) -> 0.U,
-      axiIO.R.fire -> (counter + 1.U),
+      (axiIO.R.fire || axiIO.B.fire) -> (counter + 1.U),
       true.B -> counter
     )
   )
@@ -80,7 +86,7 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
       (sendWReq, axiIO.AW.fire && axiIO.W.fire, waitWRes),
       (waitWRes, axiIO.B.fire && (counter =/= (slotsPerLine - 1).U), sendWReq),
       (waitWRes, axiIO.B.fire && (counter === (slotsPerLine - 1).U), sendReq),
-      (writeData, io.writeReq.fire, idle)
+      (writeData, io.writeRes.fire, idle)
     )
   )
 
@@ -88,9 +94,9 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
 
   val replaceIndex = RegInit(0.U(log2Ceil(groupSize).W))
 
-  val tag    = io.addr(addrWidth - 1, tagOffset)
-  val index  = io.addr(tagOffset - 1, indexOffset)
-  val offset = io.addr(indexOffset - 1, 0)
+  val tag    = Mux(cacheFSM.is(idle), io.addr, addr)(addrWidth - 1, tagOffset)
+  val index  = Mux(cacheFSM.is(idle), io.addr, addr)(tagOffset - 1, indexOffset)
+  val offset = Mux(cacheFSM.is(idle), io.addr, addr)(indexOffset - 1, 0)
 
   val wayValid    = cacheMem(index).map(line => line.valid && line.tag === tag)
   val targetIndex = Mux1H(wayValid, Seq.tabulate(groupSize)(index => index.U))
@@ -100,7 +106,6 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   isDirty := cacheMem(index)(replaceIndex).dirty
 
   // when idle
-  val addr = Reg(UInt(addrWidth.W))
   addr              := Mux(io.readReq.fire || io.writeReq.fire, io.addr, addr)
   io.readReq.ready  := cacheFSM.is(idle) && io.readReq.valid
   io.writeReq.ready := cacheFSM.is(idle) && io.writeReq.valid
@@ -135,41 +140,48 @@ class Cache(cellByte: Int = 64, wayCnt: Int = 4, groupSize: Int = 4, addrWidth: 
   // when writeData
   val dataWriteReq = Reg(io.writeReq.bits.cloneType)
   dataWriteReq      := Mux(io.writeReq.fire, io.writeReq.bits, dataWriteReq)
-  io.writeRes.valid := true.B
-
-  // ....001111111000...
-  val writePositionMask = Reverse(
-    Cat(
-      Seq.tabulate(slotsPerLine)(index => Fill(dataWidth, UIntToOH(offset)(index)))
-    )
-  )
+  io.writeRes.valid := cacheFSM.is(writeData)
+  val extendedMask = Reverse(Cat(Seq.tabulate(dataWidth / 8)(index => Fill(8, dataWriteReq.mask(index)))))
   // ...1111110011111...
-  val writeMask = ~writePositionMask | (writePositionMask &
-    Reverse(
-      Cat(
-        Seq.tabulate(slotsPerLine)(_ =>
-          Cat(Seq.tabulate(dataWriteReq.mask.getWidth)(index => dataWriteReq.mask(index)))
-        )
-      )
-    ))
-  val maskedWriteData = Fill(slotsPerLine, dataWriteReq.data) & ~writeMask
+  val writeMask       = ~((extendedMask << (offset * 8.U)) | 0.U((cellByte * 8).W))
+  val maskedWriteData = (dataWriteReq.data & extendedMask) << (offset * 8.U)
   for (i <- 0 until wayCnt) {
-    when(cacheFSM.is(writeData) && index === i.U && cacheMem(i)(index).valid) {
-      cacheMem(i)(targetIndex).data  := maskedWriteData | (cacheMem(i)(replaceIndex).data & writeMask)
+    when(cacheFSM.is(writeData) && index === i.U && cacheMem(i)(targetIndex).valid) {
+      cacheMem(i)(targetIndex).data  := maskedWriteData | (cacheMem(i)(targetIndex).data & writeMask)
       cacheMem(i)(targetIndex).dirty := true.B
     }
   }
   // when sendWReq
   axiIO.AW.valid     := cacheFSM.is(sendWReq)
-  axiIO.AW.bits.addr := Cat(tag, index, counter << log2Ceil(axiIO.dataWidth / 8))
+  axiIO.AW.bits.addr := Cat(cacheMem(index)(replaceIndex).tag, index, counter << log2Ceil(axiIO.dataWidth / 8))
   axiIO.W.valid      := cacheFSM.is(sendWReq)
   axiIO.W.bits.data := PriorityMux(
-    Seq.tabulate(slotsPerLine)(index => ((index.U === counter) -> data((index + 1) * dataWidth - 1, index * dataWidth)))
+    Seq.tabulate(slotsPerLine)(i =>
+      ((i.U === counter) -> cacheMem(index)(replaceIndex).data((i + 1) * dataWidth - 1, i * dataWidth))
+    )
   )
-  axiIO.W.bits.strb := Fill(log2Ceil(dataWidth), true.B)
+  axiIO.W.bits.strb := Fill(8, true.B)
   //when  waitWRes
-  axiIO.B.ready := true.B
+  axiIO.B.ready := cacheFSM.is(waitWRes)
 
   axiIO.AW.bits.id   := DontCare
   axiIO.AW.bits.prot := DontCare
+  when(cacheFSM.is(idle)) {
+    val addr = io.addr
+    when(io.writeReq.fire) {
+      val data = io.writeReq.bits.data
+      printf(
+        name + " writing, addr is %x, mask is %x, tag is %x, index is %x, offset is %x, data is %x\n",
+        addr,
+        dataWriteReq.mask,
+        tag,
+        index,
+        offset,
+        data
+      )
+    }
+    when(io.readReq.fire) {
+      printf(name + " reading, addr is %x, tag is %x, index is %x, offset is %x\n", addr, tag, index, offset)
+    }
+  }
 }
