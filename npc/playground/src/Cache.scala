@@ -158,7 +158,7 @@ class Cache(
     ))
   val maskedWriteData = (dataWriteReq.data << (offset * 8.U)) & ~writeMask
   for (i <- 0 until wayCnt) {
-    when(cacheFSM.is(writeData) && index === i.U && cacheMem(i)(index).valid) {
+    when(cacheFSM.is(writeData) && index === i.U && cacheMem(i)(targetIndex).valid) {
       cacheMem(i)(targetIndex).data  := maskedWriteData | (cacheMem(i)(replaceIndex).data & writeMask)
       cacheMem(i)(targetIndex).dirty := true.B
     }
