@@ -145,7 +145,7 @@ class Cache(
   // when writeData
   val dataWriteReq = Reg(io.writeReq.bits.cloneType)
   dataWriteReq      := Mux(io.writeReq.fire, io.writeReq.bits, dataWriteReq)
-  io.writeRes.valid := cacheFSM.is(writeData)
+  io.writeRes.valid := cacheFSM.is(writeData) || cacheFSM.is(directWRes)
   val extendedMask = Reverse(Cat(Seq.tabulate(dataWidth / 8)(index => Fill(8, dataWriteReq.mask(index)))))
   // ...1111110011111...
   val writeMask       = ~((extendedMask << (offset * 8.U)) | 0.U((cellByte * 8).W))
