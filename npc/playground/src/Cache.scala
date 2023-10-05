@@ -59,7 +59,8 @@ class Cache(
   val isRead = Reg(Bool())
   val addr   = Reg(UInt(addrWidth.W))
 
-  val idle :: sendRes :: sendReq :: waitRes :: writeData :: sendWReq :: waitWRes :: others = Enum(10)
+  val idle :: sendRes :: sendReq :: waitRes :: writeData :: sendWReq :: waitWRes :: directWReq :: directWRes :: others =
+    Enum(10)
 
   val counter = RegInit(0.U(log2Ceil(slotsPerLine).W))
   counter := PriorityMux(
@@ -69,15 +70,17 @@ class Cache(
       true.B -> counter
     )
   )
+  val shouldDirectWrite = io.addr > 0xa0000000L.U
   val cacheFSM = new FSM(
     idle,
     List(
       (idle, io.readReq.fire && hit, sendRes),
       (idle, io.readReq.fire && !hit && !isDirty, sendReq),
       (idle, io.readReq.fire && !hit && isDirty, sendWReq),
-      (idle, io.writeReq.fire && hit, writeData),
-      (idle, io.writeReq.fire && !hit && !isDirty, sendReq),
-      (idle, io.writeReq.fire && !hit && isDirty, sendWReq),
+      (idle, io.writeReq.fire && !shouldDirectWrite && hit, writeData),
+      (idle, io.writeReq.fire && !shouldDirectWrite && !hit && !isDirty, sendReq),
+      (idle, io.writeReq.fire && !shouldDirectWrite && !hit && isDirty, sendWReq),
+      (idle, io.writeReq.fire && shouldDirectWrite, directWReq),
       (sendRes, io.data.fire, idle),
       (sendReq, axiIO.AR.fire, waitRes),
       (waitRes, axiIO.R.fire && (counter =/= (slotsPerLine - 1).U), sendReq),
@@ -86,7 +89,9 @@ class Cache(
       (sendWReq, axiIO.AW.fire && axiIO.W.fire, waitWRes),
       (waitWRes, axiIO.B.fire && (counter =/= (slotsPerLine - 1).U), sendWReq),
       (waitWRes, axiIO.B.fire && (counter === (slotsPerLine - 1).U), sendReq),
-      (writeData, io.writeRes.fire, idle)
+      (writeData, io.writeRes.fire, idle),
+      (directWReq, axiIO.AW.fire && axiIO.W.fire, directWRes),
+      (directWRes, axiIO.B.fire, idle)
     )
   )
 
@@ -151,18 +156,26 @@ class Cache(
       cacheMem(i)(targetIndex).dirty := true.B
     }
   }
-  // when sendWReq
-  axiIO.AW.valid     := cacheFSM.is(sendWReq)
-  axiIO.AW.bits.addr := Cat(cacheMem(index)(replaceIndex).tag, index, counter << log2Ceil(axiIO.dataWidth / 8))
-  axiIO.W.valid      := cacheFSM.is(sendWReq)
-  axiIO.W.bits.data := PriorityMux(
-    Seq.tabulate(slotsPerLine)(i =>
-      ((i.U === counter) -> cacheMem(index)(replaceIndex).data((i + 1) * dataWidth - 1, i * dataWidth))
-    )
+  // when sendWReq or directWReq
+  axiIO.AW.valid := cacheFSM.is(sendWReq) || cacheFSM.is(directWReq)
+  axiIO.AW.bits.addr := Mux(
+    cacheFSM.is(sendWReq),
+    Cat(cacheMem(index)(replaceIndex).tag, index, counter << log2Ceil(axiIO.dataWidth / 8)),
+    addr
   )
-  axiIO.W.bits.strb := Fill(8, true.B)
-  //when  waitWRes
-  axiIO.B.ready := cacheFSM.is(waitWRes)
+  axiIO.W.valid := cacheFSM.is(sendWReq) || cacheFSM.is(directWReq)
+  axiIO.W.bits.data := Mux(
+    cacheFSM.is(sendWReq),
+    PriorityMux(
+      Seq.tabulate(slotsPerLine)(i =>
+        ((i.U === counter) -> cacheMem(index)(replaceIndex).data((i + 1) * dataWidth - 1, i * dataWidth))
+      )
+    ),
+    dataWriteReq.data
+  )
+  axiIO.W.bits.strb := Mux(cacheFSM.is(sendWReq), Fill(8, true.B), dataWriteReq.mask)
+  //when  waitWRes or directWRes
+  axiIO.B.ready := cacheFSM.is(waitWRes) || cacheFSM.is(directWRes)
 
   axiIO.AW.bits.id   := DontCare
   axiIO.AW.bits.prot := DontCare
