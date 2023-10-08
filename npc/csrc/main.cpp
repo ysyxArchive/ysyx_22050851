@@ -124,7 +124,7 @@ int main(int argc, char* argv[]) {
   }
   int ret_value = cpu.gpr[10];
   if (is_bad_halt || ret_value != 0) {
-    if (cpu.pc - MEM_START < 0) {
+    if (cpu.pc - MEM_START <= 0) {
       Log("bad halt! pc=0x%lx", cpu.pc);
     } else {
       Log("bad halt! pc=0x%lx inst=0x%08x", cpu.pc,
