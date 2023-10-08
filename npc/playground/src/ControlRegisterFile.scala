@@ -57,8 +57,8 @@ class Mstatus(val value: UInt) {
   def apply(name: String) = get(name)
 }
 
-class ControlRegisters {
-  class ControlRegisterInfo(val name: String, val id: Int, val initVal: Int = 0)
+class ControlRegisterInfo(val name: String, val id: Int, val initVal: Int = 0)
+object ControlRegisters {
   val list = List(
     new ControlRegisterInfo("mepc", 0x341),
     new ControlRegisterInfo("mstatus", 0x300, 0x1800),
@@ -68,11 +68,16 @@ class ControlRegisters {
     new ControlRegisterInfo("mscratch", 0x340)
   )
 
-  val registers = list.map(info => RegInit(info.initVal.U(64.W)))
-
   def getIndexByName(name: String) = list.indexWhere(info => { info.name == name })
 
   def getInfoByName(name: String) = list(getIndexByName(name))
+
+}
+
+class ControlRegisters {
+  val list = ControlRegisters.list
+
+  val registers = VecInit(list.map(info => RegInit(info.initVal.U(64.W))))
 
   def apply(id: UInt): UInt = MuxLookup(id, 0.U)(
     list.zipWithIndex.map {
@@ -80,10 +85,11 @@ class ControlRegisters {
     }.toSeq
   )
 
-  def apply(name: String): UInt = apply(getInfoByName(name).id.U)
+  def apply(name: String): UInt = apply(ControlRegisters.getIndexByName(name).U)
 
-  def set(name: String, value: UInt) = registers(getIndexByName(name)) := value
+  def set(id: UInt, value: UInt): Any = registers(id) := value
 
+  def set(name: String, value: UInt): Any = registers(ControlRegisters.getIndexByName(name)) := value
 }
 
 object PrivMode {
@@ -184,7 +190,7 @@ class ControlRegisterFile extends Module {
       CsrSetMode.write -> mask
     )
   )
-
+  
   io.output := MuxLookup(io.control.csrBehave, outputVal)(
     EnumSeq(
       CsrBehave.no -> outputVal,
