@@ -1,9 +1,9 @@
+#include "fs.h"
+#include "proc.h"
 #include <elf.h>
 #include <proc.h>
 #include <ramdisk.h>
 #include <stdio.h>
-#include "fs.h"
-#include "proc.h"
 #ifdef __LP64__
 #define Elf_Ehdr Elf64_Ehdr
 #define Elf_Phdr Elf64_Phdr
@@ -11,7 +11,7 @@
 #define Elf_Ehdr Elf32_Ehdr
 #define Elf_Phdr Elf32_Phdr
 #endif
-uintptr_t loader(PCB* pcb, const char* filename) {
+uintptr_t loader(PCB *pcb, const char *filename) {
   protect(&(pcb->as));
   Log("new page dir %p", pcb->as.ptr);
   int fd = fs_open(filename, 0, 0);
@@ -60,16 +60,17 @@ uintptr_t loader(PCB* pcb, const char* filename) {
       continue;
     }
     fs_lseek(fd, prog_header_buf.p_offset, SEEK_SET);
-    fs_read(fd, (uint8_t*)prog_header_buf.p_vaddr, prog_header_buf.p_filesz);
-    memset((uint8_t*)prog_header_buf.p_vaddr + prog_header_buf.p_filesz, 0,
+    printf("%x %x\n", (unsigned)prog_header_buf.p_vaddr,(unsigned)prog_header_buf.p_memsz);
+    fs_read(fd, (uint8_t *)prog_header_buf.p_vaddr, prog_header_buf.p_filesz);
+    memset((uint8_t *)prog_header_buf.p_vaddr + prog_header_buf.p_filesz, 0,
            prog_header_buf.p_memsz - prog_header_buf.p_filesz);
   }
   return elfHeader.e_entry;
 }
 
-void naive_uload(PCB* pcb, const char* filename) {
+void naive_uload(PCB *pcb, const char *filename) {
   reset_fs();
   uintptr_t entry = loader(pcb, filename);
-  Log("Jump to entry = %p", (void*)entry);
+  Log("Jump to entry = %p", (void *)entry);
   ((void (*)())entry)();
 }

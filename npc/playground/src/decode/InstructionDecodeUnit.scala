@@ -1,4 +1,5 @@
 import chisel3._
+import chisel3.experimental.ChiselEnum
 import chisel3.experimental.BundleLiterals._
 import chisel3.util._
 import utils._
@@ -21,48 +22,41 @@ class DecodeOut extends Bundle {
   val control = Output(new DecodeControlOut);
 }
 
+object DecodeOut {
+  val default = new DecodeOut().Lit(_.control -> DecodeControlOut.default(), _.data -> DecodeDataOut.default)
+}
+
 class InstructionDecodeUnit extends Module {
-  val regIO          = IO(Input(new RegisterFileIO()))
-  val iCacheIO       = IO(Flipped(new CacheIO(64, 64)))
-  val decodeOut      = IO(Decoupled(new DecodeOut))
+  val io = IO(new Bundle {
+    val enable = Input(Bool())
+    val inst   = Input(UInt(32.W))
+    val ready  = Output(Bool())
+  })
+  
+  val decodeOut = IO(new DecodeOut)
+
   val controlDecoder = Module(new InstContorlDecoder)
 
-  val inst = RegInit(0x13.U(64.W))
+  io.ready := true.B
 
-  val idle :: waitAR :: waitR :: waitSend :: others = Enum(4)
-  val decodeFSM = new FSM(
-    waitAR,
-    List(
-      (waitAR, iCacheIO.readReq.fire, waitR),
-      (waitR, iCacheIO.data.fire, waitSend),
-      (waitSend, decodeOut.fire, idle),
-      (idle, decodeOut.ready, waitAR)
-    )
-  )
+  controlDecoder.input := io.inst
+  decodeOut.control    := controlDecoder.output
 
-  iCacheIO.data.ready    := decodeFSM.is(waitR)
-  iCacheIO.readReq.valid := decodeFSM.is(waitAR)
-  iCacheIO.addr          := regIO.pc
-
-  inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits.asUInt, inst)
-
-  // decodeout.control
-  controlDecoder.input   := inst
-  decodeOut.bits.control := controlDecoder.output
-
-  // decodeout.data
-  val rs1  = inst(19, 15)
-  val rs2  = inst(24, 20)
-  val rd   = inst(11, 7)
-  val immI = Utils.signExtend(inst(31, 20), 12)
-  val immS = Utils.signExtend(Cat(inst(31, 25), inst(11, 7)), 12)
-  val immU = Utils.signExtend(inst(31, 12), 20) << 12
-  val immB = Cat(Utils.signExtend(inst(31), 1), inst(7), inst(30, 25), inst(11, 8), 0.U(1.W))
+  val rs1  = io.inst(19, 15)
+  val rs2  = io.inst(24, 20)
+  val rd   = io.inst(11, 7)
+  val immI = Utils.signExtend(io.inst(31, 20), 12)
+  val immS = Utils.signExtend(Cat(io.inst(31, 25), io.inst(11, 7)), 12)
+  val immU = Utils.signExtend(io.inst(31, 12), 20) << 12
+  val immB = Cat(Utils.signExtend(io.inst(31), 1), io.inst(7), io.inst(30, 25), io.inst(11, 8), 0.U(1.W))
   val immJ = Utils.signExtend(
-    Cat(inst(31), inst(19, 12), inst(20), inst(30, 21), 0.U(1.W)),
+    Cat(io.inst(31), io.inst(19, 12), io.inst(20), io.inst(30, 21), 0.U(1.W)),
     20
   );
-  decodeOut.bits.data.imm := MuxLookup(controlDecoder.output.insttype, immI)(
+
+  decodeOut.data.imm := MuxLookup(
+    controlDecoder.output.insttype,
+    DontCare,
     EnumSeq(
       InstType.I -> immI,
       InstType.S -> immS,
@@ -71,15 +65,14 @@ class InstructionDecodeUnit extends Module {
       InstType.J -> immJ
     )
   )
-  decodeOut.bits.data.src1 := rs1
-  decodeOut.bits.data.src2 := rs2
-  decodeOut.bits.data.dst  := rd
+  decodeOut.data.src1 := rs1
+  decodeOut.data.src2 := rs2
+  decodeOut.data.dst  := rd
 
-  // decodeout.valid
-  decodeOut.valid := decodeFSM.is(waitSend)
-
-  iCacheIO.writeReq.valid     := false.B
-  iCacheIO.writeReq.bits.data := DontCare
-  iCacheIO.writeReq.bits.mask := DontCare
-  iCacheIO.writeRes.ready     := false.B
+  // when(output.ready) {
+  //   output.enq(decodeOut)
+  // }.otherwise {
+  //   output.bits  := DontCare
+  //   output.valid := false.B
+  // }
 }
