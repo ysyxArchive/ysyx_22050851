@@ -42,13 +42,14 @@ void context_uload(PCB* pcb,
   uint64_t offsetCount = 0;
   int argc = 0;
   int envc = 0;
-  // create stack space
-  uint8_t* stack_pages = (uint8_t*)new_page(STACK_SIZE / PGSIZE) - STACK_SIZE;
-  for (int i = 0; i < STACK_SIZE / PGSIZE; i++) {
-    map(&(pcb->as), pcb->as.area.end - STACK_SIZE + i * PGSIZE,
-        stack_pages + i * PGSIZE, 1);
-  }
-  void* stack = stack_pages + STACK_SIZE;
+  // // create stack space
+  // uint8_t* stack_pages = (uint8_t*)new_page(STACK_SIZE / PGSIZE) -
+  // STACK_SIZE; for (int i = 0; i < STACK_SIZE / PGSIZE; i++) {
+  //   map(&(pcb->as), pcb->as.area.end - STACK_SIZE + i * PGSIZE,
+  //       stack_pages + i * PGSIZE, 1);
+  // }
+  // void* stack = stack_pages + STACK_SIZE;
+  void* stack = (void*)0x88000000;
   for (int i = 0; envp[i]; i++) {
     envc += 1;
     offsetCount += strlen(envp[i]) + 1;
