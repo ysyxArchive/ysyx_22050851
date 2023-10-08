@@ -99,7 +99,7 @@ void init_proc() {
   //   char *envp[] = {NULL};
   //   context_uload(getPCB(), target_program[i], args, envp);
   // }
-  naive_uload(getPCB(), "/bin/pal");
+  context_kload(getPCB(), hello_fun, NULL);
   switch_boot_pcb();
 }
 
