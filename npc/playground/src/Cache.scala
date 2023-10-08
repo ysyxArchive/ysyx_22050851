@@ -61,7 +61,7 @@ class Cache(
   val addr   = Reg(UInt(addrWidth.W))
 
   val idle :: sendRes :: sendReq :: waitRes :: writeData :: sendWReq :: waitWRes :: directWReq :: directWRes :: directRReq :: directRRes :: directRBack :: others =
-    Enum(10)
+    Enum(16)
 
   val counter       = RegInit(0.U(log2Ceil(slotsPerLine).W))
   val shoudDirectRW = io.addr > 0xa0000000L.U
