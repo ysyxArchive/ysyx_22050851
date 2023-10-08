@@ -122,10 +122,15 @@ int main(int argc, char* argv[]) {
   while (!is_halt) {
     one_step();
   }
-  // int ret_value = cpu.gpr[10];
-  if (is_bad_halt || cpu.gpr[10] != 0) {
-    Log("bad halt! pc=0x%lx inst=0x%08x", cpu.pc,
-        *(uint32_t*)&(mem[cpu.pc - MEM_START]));
+  int ret_value = cpu.gpr[10];
+  if (is_bad_halt || ret_value != 0) {
+    if (cpu.pc - MEM_START < 0) {
+      Log("bad halt! pc=0x%lx", cpu.pc);
+    } else {
+      Log("bad halt! pc=0x%lx inst=0x%08x", cpu.pc,
+          *(uint32_t*)&(mem[cpu.pc - MEM_START]));
+    }
+
     if (!lightSSS.is_child()) {
       lightSSS.wakeup_child(npc_clock);
     }
