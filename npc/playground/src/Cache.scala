@@ -42,8 +42,9 @@ class Cache(
   val indexOffset = log2Ceil(cellByte)
   val tagOffset   = log2Ceil(cellByte) + log2Ceil(wayCnt)
 
-  val io    = IO(new CacheIO(dataWidth, addrWidth))
-  val axiIO = IO(new AxiLiteIO(UInt(dataWidth.W), addrWidth))
+  val io          = IO(new CacheIO(dataWidth, addrWidth))
+  val axiIO       = IO(new AxiLiteIO(UInt(dataWidth.W), addrWidth))
+  val enableDebug = IO(Input(Bool()))
 
   val slotsPerLine = cellByte * 8 / dataWidth
 
@@ -179,25 +180,28 @@ class Cache(
 
   axiIO.AW.bits.id   := DontCare
   axiIO.AW.bits.prot := DontCare
-  when(cacheFSM.is(idle)) {
-    val addr = io.addr
-    when(io.writeReq.fire) {
-      val data = io.writeReq.bits.data
-      printf(
-        name + " writing, addr is %x, mask is %x, tag is %x, index is %x, offset is %x, data is %x\n",
-        addr,
-        dataWriteReq.mask,
-        tag,
-        index,
-        offset,
-        data
-      )
+
+  when(enableDebug) {
+    when(cacheFSM.is(idle)) {
+      val addr = io.addr
+      when(io.writeReq.fire) {
+        val data = io.writeReq.bits.data
+        printf(
+          name + " writing, addr is %x, mask is %x, tag is %x, index is %x, offset is %x, data is %x\n",
+          addr,
+          dataWriteReq.mask,
+          tag,
+          index,
+          offset,
+          data
+        )
+      }
+      when(io.readReq.fire) {
+        printf(name + " reading, addr is %x, tag is %x, index is %x, offset is %x\n", addr, tag, index, offset)
+      }
     }
-    when(io.readReq.fire) {
-      printf(name + " reading, addr is %x, tag is %x, index is %x, offset is %x\n", addr, tag, index, offset)
+    when(cacheFSM.is(sendRes) && io.data.fire) {
+      printf("data is %x\n", io.data.bits)
     }
-  }
-  when(cacheFSM.is(sendRes) && io.data.fire) {
-    printf("data is %x\n", io.data.bits)
   }
 }
