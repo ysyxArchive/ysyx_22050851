@@ -77,9 +77,9 @@ void etrace(bool is_call, paddr_t source, word_t mstatus_old) {
   char buf[200];
   sprintf(buf,
           "detected exception %s at %x, mcause is %lx, mstatus "
-          "%lx -> %lx, mepc: %lx",
+          "%lx -> %lx",
           is_call ? "call" : "ret ", source, csrs("mcause"), mstatus_old,
-          csrs("mstatus"), csrs("mepc"));
+          csrs("mstatus"));
   Log(ANSI_FMT("%s", ANSI_FG_WHITE), buf);
 #endif
   return;
