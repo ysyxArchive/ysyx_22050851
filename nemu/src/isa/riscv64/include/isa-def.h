@@ -17,11 +17,12 @@
 #define __ISA_RISCV64_H__
 
 #include <common.h>
-
+#define CSR_CNT 6
 typedef struct {
   word_t gpr[32];
   vaddr_t pc;
-  word_t csr[5];
+  word_t csr[CSR_CNT];
+  bool INTR;
 } riscv64_CPU_state;
 
 // decode
@@ -32,5 +33,5 @@ typedef struct {
 } riscv64_ISADecodeInfo;
 
 #define isa_mmu_check(vaddr, len, type) ((csrs("satp") >> 60) ? MMU_TRANSLATE : MMU_DIRECT)
-#define isa_mmu_check_easy() isa_mmu_check(0, 0, 0)
+#define isa_mmu_check_easy() MMU_DIRECT
 #endif
