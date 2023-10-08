@@ -97,6 +97,7 @@ void one_step() {
   if (!difftest_check(&cpu)) {
     is_halt = true;
     is_bad_halt = true;
+    return;
   }
   top->clock = 0;
   eval_trace();
