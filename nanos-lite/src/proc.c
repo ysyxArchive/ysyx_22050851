@@ -94,11 +94,13 @@ void init_proc() {
   Log("Initializing processes...");
   // char *target_program[] = {"/bin/hello", "/bin/nterm", "/bin/pal"};
   // for (int i = 0; i < MAX_NR_PROC - 1; i++) {
-  //   char *args[] = {target_program[i], NULL};
-  //   char *envp[] = {NULL};
-  //   context_uload(getPCB(), target_program[i], args, envp);
+  // char *args[] = {target_program[i], NULL};
+  // char *envp[] = {NULL};
+  // context_uload(getPCB(), target_program[i], args, envp);
   // }
-  context_kload(getPCB(), "/bin/pal", NULL);
+  char* args[] = {"/bin/pal", NULL};
+  char* envp[] = {NULL};
+  context_uload(getPCB(), "/bin/pal", args, envp);
   switch_boot_pcb();
 }
 
