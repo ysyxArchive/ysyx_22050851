@@ -121,6 +121,7 @@ int main(int argc, char* argv[]) {
 
   while (!is_halt) {
     one_step();
+    Log("halt!");
   }
   int ret_value = cpu.gpr[10];
   if (is_bad_halt || ret_value != 0) {
