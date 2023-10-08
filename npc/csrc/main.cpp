@@ -127,16 +127,22 @@ int main(int argc, char* argv[]) {
   if (is_bad_halt || ret_value != 0) {
     Log("%lx", cpu.pc);
     Log("%lx", cpu.pc - MEM_START);
+    Log("stub1");
     if (cpu.pc - MEM_START <= 0) {
+      Log("stub4");
       Log("bad halt! pc=0x%x", cpu.pc);
     } else {
+      Log("stub3");
       Log("bad halt! pc=0x%x inst=0x%08x", cpu.pc,
           *(uint32_t*)&(mem[cpu.pc - MEM_START]));
     }
+    Log("stub2");
 
-    // if (!lightSSS.is_child()) {
-    //   lightSSS.wakeup_child(npc_clock);
-    // }
+    if (!lightSSS.is_child()) {
+      Log("stub6");
+      lightSSS.wakeup_child(npc_clock);
+    }
+    Log("stub5");
     exit(-1);
   }
   Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
