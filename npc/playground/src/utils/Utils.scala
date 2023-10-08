@@ -1,5 +1,6 @@
 package utils
 
+import chisel3._
 import chisel3.util._
 import scala.collection.SeqFactory
 import scala.collection.SeqOps
@@ -8,8 +9,9 @@ import scala.collection.IterableFactory
 import scala.annotation.unchecked.uncheckedVariance
 
 object Utils {
-  def signalExtend(num: UInt, length: Int): UInt = {
-    Cat(Fill(64 - length, num(length - 1, length - 1)), num)
+
+  def cast(num: UInt, castWidth: Int, outputWidth: Int): UInt = {
+    signExtend(num(castWidth - 1, 0), castWidth, outputWidth)
   }
 
   def zeroExtend(num: UInt, width: Int, targetWidth: Int): UInt = {
@@ -53,34 +55,6 @@ object Utils {
 object EnumSeq {
   def apply[T <: Data](elems: (EnumType, T)*) = elems.map {
     case (enumType, uint) => (enumType.asUInt, uint)
-  }
-}
-
-class FSM(val initState: UInt, val elems: List[(UInt, Bool, UInt)]) {
-  val status = RegInit(initState)
-  status := nextState(status)
-
-  def nextState(current: UInt): UInt = {
-    val table = elems.map({ case tri => (tri._1 === current && tri._2) -> tri._3 })
-    MuxCase(current, table)
-  }
-
-  def trigger(from: UInt, to: UInt): Bool = {
-    val table = elems.map({ case tri => (tri._1 === from && tri._3 === to) -> tri._2 })
-    return status === from && MuxCase(false.B, table)
-  }
-
-  def willChangeTo(to: UInt): Bool = {
-    val table = elems.map({ case tri => (tri._1 === status && tri._3 === to) -> tri._2 })
-    return MuxCase(false.B, table)
-  }
-
-  def is(s: UInt): Bool = {
-    return s === status
-  }
-
-  def willChange(): Bool = {
-    elems.map({ case tri => (tri._1 === status && tri._2) }).reduce(_ || _)
   }
 }
 

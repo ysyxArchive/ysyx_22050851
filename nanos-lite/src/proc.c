@@ -5,11 +5,11 @@
 #define MAX_NR_PROC 4
 
 static PCB pcb[MAX_NR_PROC] __attribute__((used)) = {};
-static PCB pcb_boot = {};
+static PCB *pcb_boot;
+int fppcb = 2;
 PCB *current = NULL;
 int pcbcount = 0;
-void switch_boot_pcb() { current = &pcb_boot; }
-PCB *executing[2];
+void switch_boot_pcb() { current = pcb_boot; }
 void hello_fun(void *arg) {
   int j = 1;
   while (1) {
@@ -22,7 +22,7 @@ void hello_fun(void *arg) {
 }
 
 void context_kload(PCB *pcb, void *entry, void *arg) {
-  Area area = {.start = pcb, .end = pcb + 1};
+  Area area = {.start = pcb->stack, .end = pcb->stack + STACK_SIZE};
   pcb->cp = kcontext(area, entry, arg);
 }
 
@@ -32,13 +32,19 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[],
   Assert(argv, "argv is NULL when executing %s", filename);
   Assert(envp, "envp is NULL when executing %s", filename);
   reset_fs();
-  Area area = {.start = pcb, .end = pcb + 1};
+  Area area = {.start = pcb->stack, .end = pcb->stack + STACK_SIZE};
   uintptr_t entry = loader(pcb, filename);
   pcb->cp = ucontext(&(pcb->as), area, (void *)entry);
   uint64_t offsetCount = 0;
   int argc = 0;
   int envc = 0;
-  void *stack = pcb->stack + STACK_SIZE;
+  // create stack space
+  uint8_t *stack_pages = (uint8_t *)new_page(STACK_SIZE / PGSIZE) - STACK_SIZE;
+  for (int i = 0; i < STACK_SIZE / PGSIZE; i++) {
+    map(&(pcb->as), pcb->as.area.end - STACK_SIZE + i * PGSIZE,
+        stack_pages + i * PGSIZE, 1);
+  }
+  void *stack = stack_pages + STACK_SIZE;
   for (int i = 0; envp[i]; i++) {
     envc += 1;
     offsetCount += strlen(envp[i]) + 1;
@@ -71,34 +77,33 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[],
   }
   *((uint64_t *)(stack - offsetCount) - 1) = argc;
   offsetCount += sizeof(uint64_t);
-  pcb->cp->GPRx = (uint64_t)(stack - offsetCount);
+  Log("as.area.end %x, offsetcount %x", (uint64_t)(pcb->as.area.end),
+      (offsetCount));
+  pcb->cp->GPRx = (uint64_t)(pcb->as.area.end - offsetCount);
 }
 
 PCB *getPCB() { return &(pcb[pcbcount++]); }
 
 void init_proc() {
   Log("Initializing processes...");
-  char target_program[] = "/bin/pal";
-  executing[0] = getPCB();
-  context_kload(executing[0], hello_fun, "p2");
-  char *args[] = {target_program, NULL};
-  char *envp[] = {NULL};
-  executing[1] = getPCB();
-  context_uload(executing[1], target_program, args, envp);
+  // char *target_program[] = {"/bin/hello", "/bin/nterm", "/bin/pal"};
+  pcb_boot = getPCB();
+  // for (int i = 0; i < MAX_NR_PROC - 1; i++) {
+  //   char *args[] = {target_program[i], NULL};
+  //   char *envp[] = {NULL};
+  //   context_uload(getPCB(), target_program[i], args, envp);
+  // }
   switch_boot_pcb();
-}
-
-void replacePCB(PCB *newone) {
-  for (int i = 0; i < 2; i++) {
-    if (executing[i] == current) {
-      executing[i] = newone;
-      return;
-    }
-  }
+  naive_uload(getPCB(), "/bin/pal");
 }
 
 Context *schedule(Context *prev) {
-  current->cp = prev;
-  current = current == executing[0] ? executing[1] : executing[0];
-  return current->cp;
+  // Assert(current, "current is NULL");
+  // current->cp = prev;
+  // int currentidx = current == &(pcb[fppcb]) ? fppcb : 1;
+  // int nextidx = currentidx == 1 ? fppcb : 1;
+  // int nextidx = 1;
+  // Log("jump to proc %d", nextidx);
+  // current = pcb + nextidx;
+  return prev;
 }

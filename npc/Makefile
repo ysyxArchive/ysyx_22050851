@@ -15,7 +15,7 @@ GEN_SCALA = $(abspath ./playground/src/decode/InstContorlDecoder.scala)
 VSRCS = $(shell find $(abspath ./build) -name "*.v" -or -name "*.sv")
 CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
 INCLUDES = $(shell find $(abspath ./include) -name "*.h")
-SCALAS = $(shell find $(abspath ./playground/src) -name "*.scala")
+SCALAS = $(shell find $(abspath ./playground/src) -name "*.scala") $(GEN_SCALA)
 INC_PATH = $(abspath ./include)
 INCFLAGS = $(addprefix -I, $(INC_PATH))
 CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" 
@@ -33,11 +33,12 @@ $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
 
-test:
-	mill -i __.test
-
 $(VSRCS): $(SCALAS)
 	make verilog
+	touch $(VSRCS)
+
+$(GEN_SCALA): playground/scripts/codemap.csv playground/scripts/parsedecode.py
+	python playground/scripts/parsedecode.py
 
 verilog: $(SCALAS)
 	$(call git_commit, "generate verilog")
@@ -77,5 +78,8 @@ test: $(BIN)
 run:
 	make sim
 
-.PHONY: test verilog help compile bsp reformat checkformat clean sim build
+gdb: $(BIN)
+	gdb -s $(BIN) --args $(BIN) $(IMG) $(ARGS) h 
+	
+.PHONY: test verilog help compile bsp reformat checkformat clean sim build gdb
 include ../Makefile

@@ -22,12 +22,8 @@
 #include "cpu/difftest.h"
 #include "difftest-def.h"
 
-
 extern long img_size;
 void init_difftest(char *ref_so_file, long img_size, int port);
-void difftest_detach();
-void difftest_attach();
-
 
 static bool is_batch_mode = false;
 void init_regex();
@@ -171,6 +167,8 @@ static int cmd_w(char* args) {
   printf("watchpoint created: %d %s\n", id, exp);
   return 0;
 }
+void difftest_detach();
+void difftest_attach();
 static int cmd_attach(char* args) {
     difftest_attach();
     return 0;

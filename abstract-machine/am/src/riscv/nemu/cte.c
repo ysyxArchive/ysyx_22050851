@@ -16,7 +16,13 @@ Context *__am_irq_handle(Context *c) {
       c->mepc += 4;
       c = user_handler(ev, c);
       break;
+    case 0x8000000000000007:
+      ev.event = EVENT_IRQ_TIMER;
+      c = user_handler(ev, c);
+      break;
     default:
+      printf("unkown error code %x", c->mcause);
+      halt(1);
       ev.event = EVENT_ERROR;
       break;
     }
@@ -30,7 +36,7 @@ extern void __am_asm_trap(void);
 bool cte_init(Context *(*handler)(Event, Context *)) {
   // initialize exception entry
   asm volatile("csrw mtvec, %0" : : "r"(__am_asm_trap));
-
+  asm volatile("csrw mscratch, 0");
   // register event handler
   user_handler = handler;
 
@@ -38,10 +44,10 @@ bool cte_init(Context *(*handler)(Event, Context *)) {
 }
 
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
-  Context c = {.mepc = (uint64_t)entry, .mstatus = 0xa00001800};
+  Context c = {.mepc = (uint64_t)entry, .mstatus = 0xa00001880};
   c.GPR2 = (uint64_t)arg;
-  memcpy(kstack.start, &c, sizeof(c));
-  return kstack.start;
+  memcpy(kstack.end - sizeof(c), &c, sizeof(c));
+  return kstack.end - sizeof(c);
 }
 
 void yield() { asm volatile("li a7, 1; ecall"); }

@@ -20,7 +20,7 @@ object playground extends ScalaModule with ScalafmtModule { m =>
   override def scalacPluginIvyDeps = Agg(
     ivy"org.chipsalliance:::chisel-plugin:5.0.0"
   )
-  object test extends Tests with Utest {
+  object test extends ScalaTests with Utest {
     override def ivyDeps = m.ivyDeps() ++ Agg(
       ivy"com.lihaoyi::utest:0.8.1",
       ivy"edu.berkeley.cs::chiseltest:5.0.0"

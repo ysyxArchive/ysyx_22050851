@@ -1,7 +1,4 @@
 #include <mem.h>
-
-uint8_t mem[MEM_LEN] = {0};
-size_t bin_file_size;
 #include "VCPU.h"
 #include "config.h"
 #include "device.h"
@@ -21,15 +18,11 @@ void init_memory(char* bin_path) {
   fseek(bin_file, 0L, SEEK_SET);
   fread(mem, size, 1, bin_file);
   fclose(bin_file);
-  bin_file_size = ptr;
+  bin_file_size = size;
 }
 
 uint64_t read_mem(uint64_t addr, size_t length) {
   uint64_t ret = read_mem_nolog(addr, length);
-
-  Log(ANSI_FMT("Reading %d bytes, starts with %lx, data is %lx\n",
-               ANSI_FG_YELLOW),
-      length, addr, ret);
 #ifdef MTRACE
   Log(ANSI_FMT("Reading %d bytes, starts with %lx, data is %lx",
                ANSI_FG_YELLOW),
@@ -72,7 +65,6 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
     panic("read from addr 0x%lx + 0x%lx out of range at pc == %lx", addr,
           length, cpu.pc);
   }
-
   return ret;
 }
 

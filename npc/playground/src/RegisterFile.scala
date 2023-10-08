@@ -13,8 +13,7 @@ class RegisterFileIO extends Bundle {
   val wdata = Input(UInt(64.W))
   val waddr = Input(UInt(5.W))
 
-  val dnpc    = Input(UInt(64.W))
-  val pcWrite = Input(Bool())
+  val dnpc = Input(UInt(64.W))
 
   val out0   = Output(UInt(64.W))
   val raddr0 = Input(UInt(5.W))
@@ -22,8 +21,7 @@ class RegisterFileIO extends Bundle {
   val out1   = Output(UInt(64.W))
   val raddr1 = Input(UInt(5.W))
 
-  val pc  = Output(UInt(64.W))
-  val npc = Output(UInt(64.W))
+  val pc = Output(UInt(64.W))
 }
 
 class RegisterFile extends Module {
@@ -45,6 +43,5 @@ class RegisterFile extends Module {
   io.out0 := Mux(io.raddr0 === 0.U, 0.U, regs(io.raddr0))
   io.out1 := Mux(io.raddr1 === 0.U, 0.U, regs(io.raddr1))
   io.pc   := pc
-  io.npc  := npc
 
 }
