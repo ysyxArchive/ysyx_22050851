@@ -97,6 +97,7 @@ void one_step() {
   if (!difftest_check(&cpu)) {
     is_halt = true;
     is_bad_halt = true;
+    return;
   }
   top->clock = 0;
   eval_trace();
@@ -123,8 +124,12 @@ int main(int argc, char* argv[]) {
   }
   int ret_value = cpu.gpr[10];
   if (is_bad_halt || ret_value != 0) {
-    Log("bad halt! pc=0x%lx inst=0x%08x", cpu.pc,
-        *(uint32_t*)&(mem[cpu.pc - MEM_START]));
+    if ((int64_t)cpu.pc - MEM_START <= 0) {
+      Log("bad halt! pc=0x%x", cpu.pc);
+    } else {
+      Log("bad halt! pc=0x%x inst=0x%08x", cpu.pc,
+          *(uint32_t*)&(mem[cpu.pc - MEM_START]));
+    }
     if (!lightSSS.is_child()) {
       lightSSS.wakeup_child(npc_clock);
     }

@@ -4,6 +4,8 @@ import chisel3.util.Decoupled
 import decode._
 
 class CPU extends Module {
+  val enableDebug = IO(Input(Bool()))
+
   val mem     = Module(new MemInterface)
   val regs    = Module(new RegisterFile)
   val csrregs = Module(new ControlRegisterFile)
@@ -36,4 +38,7 @@ class CPU extends Module {
   blackBoxOut.io.pc      := regs.debugPCOut;
   blackBoxOut.io.regs    := regs.debugOut;
   blackBoxOut.io.csrregs := csrregs.debugOut;
+
+  iCache.enableDebug := enableDebug
+  dCache.enableDebug := enableDebug
 }

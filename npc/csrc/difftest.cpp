@@ -77,7 +77,7 @@ bool difftest_check(CPU *cpu) {
   difftest_regcpy(&refcpu, FROM_REF);
   bool difftest_failed = false;
   if (lastcpu.pc != refcpu.pc) {
-    printf("Difftest Failed\n Expected pc: %llx, Actual pc: %llx \n", refcpu.pc,
+    printf("Difftest Failed\nExpected pc: %llx, Actual pc: %llx \n", refcpu.pc,
            lastcpu.pc);
     difftest_failed = true;
   }
