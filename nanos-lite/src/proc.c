@@ -114,6 +114,6 @@ Context* schedule(Context* prev) {
   // int nextidx = 1;
   // Log("jump to proc %d", nextidx);
   // current = pcb + nextidx;
-  Log("%lx prev", prev);
+  Log("%x prev", prev);
   return pcb[0].cp;
 }
