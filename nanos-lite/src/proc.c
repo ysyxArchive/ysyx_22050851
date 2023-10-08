@@ -102,7 +102,6 @@ void init_proc() {
   char* args[] = {"/bin/pal", NULL};
   // char* envp[] = {NULL};
   context_kload(getPCB(), hello_fun, args);
-  Log("%x", pcb[0].cp);
   // context_uload(getPCB(), "/bin/bird", args, envp);
   switch_boot_pcb();
 }
@@ -115,5 +114,6 @@ Context* schedule(Context* prev) {
   // int nextidx = 1;
   // Log("jump to proc %d", nextidx);
   // current = pcb + nextidx;
-  return pcb[0].cp ;
+  Log("%lx prev", prev);
+  return pcb[0].cp;
 }
