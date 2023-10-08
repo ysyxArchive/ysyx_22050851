@@ -122,9 +122,8 @@ int main(int argc, char* argv[]) {
   while (!is_halt) {
     one_step();
   }
-    Log("halt!");
-  int ret_value = cpu.gpr[10];
-  if (is_bad_halt || ret_value != 0) {
+  // int ret_value = cpu.gpr[10];
+  if (is_bad_halt || cpu.gpr[10] != 0) {
     Log("bad halt! pc=0x%lx inst=0x%08x", cpu.pc,
         *(uint32_t*)&(mem[cpu.pc - MEM_START]));
     if (!lightSSS.is_child()) {
