@@ -101,7 +101,7 @@ void init_proc() {
   // }
   char* args[] = {"/bin/pal", NULL};
   char* envp[] = {NULL};
-  context_kload(getPCB(), hello_fun, args);
+  // context_kload(getPCB(), hello_fun, args);
   context_uload(getPCB(), "/bin/bird", args, envp);
   switch_boot_pcb();
 }
