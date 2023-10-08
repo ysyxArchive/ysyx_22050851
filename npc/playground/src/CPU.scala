@@ -3,37 +3,40 @@ import chisel3.util.Enum
 import chisel3.util.Decoupled
 import decode._
 
+/**
+  * Compute GCD using subtraction method.
+  * Subtracts the smaller from the larger until register y is zero.
+  * value in register x is then the GCD
+  */
+
 class CPU extends Module {
-  val mem     = Module(new MemInterface)
-  val regs    = Module(new RegisterFile)
-  val csrregs = Module(new ControlRegisterFile)
-  // val ifu         = Module(new InstructionFetchUnit)
+  val pcio = IO(new Bundle {
+    val inst = Input(UInt(32.W))
+    val pc   = Output(UInt(64.W))
+  })
+
+  val regs        = Module(new RegisterFile)
+  val csrregs     = Module(new ControlRegisterFile)
   val decoder     = Module(new InstructionDecodeUnit)
   val exe         = Module(new InstructionExecuteUnit)
-  val blackBoxOut = Module(new BlackBoxRegs)
-  val arbiter     = Module(new AxiLiteArbiter(2))
+  val mem         = Module(new BlackBoxMem)
+  val blackBoxOut = Module(new BlackBoxRegs);
 
-  val iCache = Module(new Cache(name = "icache"))
-  val dCache = Module(new Cache(name = "dcache"))
+  pcio.pc := regs.io.pc
 
-  decoder.iCacheIO <> iCache.io
-  iCache.axiIO <> arbiter.slaveIO(0)
-  decoder.regIO := regs.io
+  decoder.io.inst   := pcio.inst
+  decoder.io.enable := true.B
 
-  exe.decodeIn <> decoder.decodeOut
+  exe.decodeIn := decoder.decodeOut
   exe.regIO <> regs.io
-  dCache.axiIO <> arbiter.slaveIO(1)
-  exe.memIO <> dCache.io
+  exe.memIO <> mem.io
   exe.csrIn := csrregs.io.output
 
-  mem.axiS <> arbiter.masterIO
-
-  csrregs.io.data     := decoder.decodeOut.bits.data
+  csrregs.io.decodeIn := decoder.decodeOut
   csrregs.io.src1Data := regs.io.out0
-  csrregs.io.control  := exe.csrControl
   csrregs.regIn       := regs.io
 
-  blackBoxOut.io.pc      := regs.debugPCOut;
+  blackBoxOut.io.pc      := regs.io.pc;
   blackBoxOut.io.regs    := regs.debugOut;
   blackBoxOut.io.csrregs := csrregs.debugOut;
 }

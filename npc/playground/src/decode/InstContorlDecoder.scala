@@ -5,6 +5,7 @@ package decode
 import chisel3._
 import chisel3.util.BitPat
 import chisel3.util.experimental.decode._
+import chisel3.experimental.ChiselEnum
 object InstType extends ChiselEnum {
 	val  R = Value(0.U)
 	val  I = Value(1.U)
