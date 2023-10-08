@@ -28,6 +28,11 @@ void haltop(unsigned char good_halt) {
 }
 
 void init_npc() {
+#ifdef ENABLE_DEBUG
+  top->enableDebug = true;
+#else
+  top->enableDebug = false;
+#endif
   for (int i = 0; i < 10; i++) {
     top->reset = true;
     top->clock = 1;
