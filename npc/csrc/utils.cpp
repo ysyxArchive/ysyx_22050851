@@ -93,7 +93,7 @@ void eval_trace() {
       lightSSS.get_end_cycles() - npc_clock < WAVE_TRACE_CLOCKS) {
     tfp->dump(tfp_clock++);
     tfp->flush();
-    printf("%d\n", npc_clock);
+    printf("%d %d\n", npc_clock, tfp_clock);
   }
   npc_clock++;
 }
