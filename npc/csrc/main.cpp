@@ -128,9 +128,9 @@ int main(int argc, char* argv[]) {
     Log("%lx", cpu.pc);
     Log("%lx", cpu.pc - MEM_START);
     if (cpu.pc - MEM_START <= 0) {
-      Log("bad halt! pc=0x%lx", cpu.pc);
+      Log("bad halt! pc=0x%x", cpu.pc);
     } else {
-      Log("bad halt! pc=0x%lx inst=0x%08x", cpu.pc,
+      Log("bad halt! pc=0x%x inst=0x%08x", cpu.pc,
           *(uint32_t*)&(mem[cpu.pc - MEM_START]));
     }
 
