@@ -104,6 +104,7 @@ void init_proc() {
 }
 
 Context* schedule(Context* prev) {
+  Log("schedule");
   // Assert(current, "current is NULL");
   // current->cp = prev;
   // int currentidx = current == &(pcb[fppcb]) ? fppcb : 1;
