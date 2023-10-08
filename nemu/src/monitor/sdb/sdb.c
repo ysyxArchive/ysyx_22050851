@@ -21,7 +21,7 @@
 #include "memory/paddr.h"
 #include "cpu/difftest.h"
 #include "difftest-def.h"
-
+#include "cpu/difftest.h"
 extern long img_size;
 void init_difftest(char *ref_so_file, long img_size, int port);
 
