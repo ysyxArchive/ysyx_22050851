@@ -134,9 +134,9 @@ int main(int argc, char* argv[]) {
           *(uint32_t*)&(mem[cpu.pc - MEM_START]));
     }
 
-    if (!lightSSS.is_child()) {
-      lightSSS.wakeup_child(npc_clock);
-    }
+    // if (!lightSSS.is_child()) {
+    //   lightSSS.wakeup_child(npc_clock);
+    // }
     exit(-1);
   }
   Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
