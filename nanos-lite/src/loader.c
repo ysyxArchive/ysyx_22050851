@@ -1,9 +1,9 @@
-#include "fs.h"
-#include "proc.h"
 #include <elf.h>
 #include <proc.h>
 #include <ramdisk.h>
 #include <stdio.h>
+#include "fs.h"
+#include "proc.h"
 #ifdef __LP64__
 #define Elf_Ehdr Elf64_Ehdr
 #define Elf_Phdr Elf64_Phdr
@@ -11,7 +11,7 @@
 #define Elf_Ehdr Elf32_Ehdr
 #define Elf_Phdr Elf32_Phdr
 #endif
-uintptr_t loader(PCB *pcb, const char *filename) {
+uintptr_t loader(PCB* pcb, const char* filename) {
   protect(&(pcb->as));
   Log("new page dir %p", pcb->as.ptr);
   int fd = fs_open(filename, 0, 0);
@@ -75,9 +75,9 @@ uintptr_t loader(PCB *pcb, const char *filename) {
   return elfHeader.e_entry;
 }
 
-void naive_uload(PCB *pcb, const char *filename) {
+void naive_uload(PCB* pcb, const char* filename) {
   reset_fs();
   uintptr_t entry = loader(pcb, filename);
-  Log("Jump to entry = %p", (void *)entry);
+  Log("Jump to entry = %p", (void*)entry);
   ((void (*)())entry)();
 }
