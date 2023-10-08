@@ -62,14 +62,7 @@ class Cache(
   val idle :: sendRes :: sendReq :: waitRes :: writeData :: sendWReq :: waitWRes :: directWReq :: directWRes :: others =
     Enum(10)
 
-  val counter = RegInit(0.U(log2Ceil(slotsPerLine).W))
-  counter := PriorityMux(
-    Seq(
-      (counter === slotsPerLine.U) -> 0.U,
-      (axiIO.R.fire || (cacheFSM.is(waitWRes) && axiIO.B.fire)) -> (counter + 1.U),
-      true.B -> counter
-    )
-  )
+  val counter           = RegInit(0.U(log2Ceil(slotsPerLine).W))
   val shouldDirectWrite = io.addr > 0xa0000000L.U
   val cacheFSM = new FSM(
     idle,
@@ -92,6 +85,13 @@ class Cache(
       (writeData, io.writeRes.fire, idle),
       (directWReq, axiIO.AW.fire && axiIO.W.fire, directWRes),
       (directWRes, axiIO.B.fire, idle)
+    )
+  )
+  counter := PriorityMux(
+    Seq(
+      (counter === slotsPerLine.U) -> 0.U,
+      (axiIO.R.fire || (cacheFSM.is(waitWRes) && axiIO.B.fire)) -> (counter + 1.U),
+      true.B -> counter
     )
   )
 
