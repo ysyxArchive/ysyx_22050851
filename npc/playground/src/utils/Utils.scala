@@ -1,10 +1,7 @@
 package utils
 
 import chisel3._
-import chisel3.experimental.ChiselEnum
-import chisel3.experimental.EnumType
 import chisel3.util._
-import firrtl.seqCat
 import scala.collection.SeqFactory
 import scala.collection.SeqOps
 import chisel3.internal.Builder
@@ -56,7 +53,7 @@ object Utils {
 }
 
 object EnumSeq {
-  def apply(elems: (EnumType, UInt)*) = elems.map {
+  def apply[T <: Data](elems: (EnumType, T)*) = elems.map {
     case (enumType, uint) => (enumType.asUInt, uint)
   }
 }
@@ -78,6 +75,13 @@ class FSM(val initState: UInt, val elems: List[(UInt, Bool, UInt)]) {
   def willChangeTo(to: UInt): Bool = {
     val table = elems.map({ case tri => (tri._1 === status && tri._3 === to) -> tri._2 })
     return MuxCase(false.B, table)
+  }
 
+  def is(s: UInt): Bool = {
+    return s === status
+  }
+
+  def willChange(): Bool = {
+    elems.map({ case tri => (tri._1 === status && tri._2) }).reduce(_ || _)
   }
 }

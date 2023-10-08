@@ -1,4 +1,3 @@
-import Chisel.{switch, Cat, Decoupled, DecoupledIO, Fill, Mux1H, MuxCase, MuxLookup}
 import chisel3.DontCare.:=
 import chisel3._
 import chisel3.experimental.{BaseModule, ChiselEnum}

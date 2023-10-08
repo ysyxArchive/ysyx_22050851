@@ -5,7 +5,7 @@ class MemIO extends Bundle {
   val enable = Input(Bool())
   val isRead = Input(Bool())
   val addr   = Input(UInt(64.W))
-  val mask   = Input(UInt(4.W))
+  val mask   = Input(UInt(8.W))
   val rdata  = Output(UInt(64.W))
   val wdata  = Input(UInt(64.W))
   val clock  = Input(Clock())
