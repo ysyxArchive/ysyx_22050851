@@ -64,6 +64,8 @@ class Cache(
     Enum(16)
 
   val counter       = RegInit(0.U(log2Ceil(slotsPerLine).W))
+  val directData = Reg(UInt(dataWidth.W))
+
   val shoudDirectRW = io.addr > 0xa0000000L.U
   val cacheFSM = new FSM(
     idle,
@@ -148,7 +150,6 @@ class Cache(
   }
   axiIO.R.ready := cacheFSM.is(waitRes) || cacheFSM.is(directRRes)
   // when directRRes
-  val directData = Reg(UInt(dataWidth.W))
   directData := Mux(cacheFSM.is(directRRes) && axiIO.R.fire, axiIO.R.bits.data, directData)
   // when writeData
   val dataWriteReq = Reg(io.writeReq.bits.cloneType)
