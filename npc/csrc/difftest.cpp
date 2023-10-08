@@ -54,10 +54,57 @@ void load_difftest_so(char* diff_so_file) {
          difftest_init != NULL);
 }
 
+<<<<<<< HEAD
 void difftest_check(CPU* cpu) {
   CPU refcpu;
   difftest_exec(1);
   difftest_regcpy(&refcpu, FROM_REF);
+=======
+bool skip_once = false;
+void difftest_skip() { skip_once = true; }
+
+void difftest_step(CPU *cpu) {
+  if (skip_once == true) {
+    difftest_regcpy(cpu, TO_REF);
+    skip_once = false;
+  } else {
+    difftest_exec(1);
+  }
+}
+// when pc changed, last pc pointered inst must be executed done 
+static CPU lastcpu;
+static CPU refcpu;
+bool difftest_check(CPU *cpu) {
+  if (lastcpu.pc == cpu->pc) {
+    memcpy(&lastcpu, cpu, sizeof(CPU));
+    return true;
+  }
+  memcpy(&lastcpu, cpu, sizeof(CPU));
+  difftest_step(cpu);
+  difftest_regcpy(&refcpu, FROM_REF);
+  bool difftest_failed = false;
+  if (lastcpu.pc != refcpu.pc) {
+    printf("Difftest Failed\n Expected pc: %llx, Actual pc: %llx \n", refcpu.pc,
+           lastcpu.pc);
+    difftest_failed = true;
+  }
+  for (int i = 0; i < 32; i++) {
+    if (lastcpu.gpr[i] != refcpu.gpr[i]) {
+      printf("Difftest Failed\ncheck reg[%d] failed before pc:%llx\nExpected: "
+             "%llx, Actual: %llx \n",
+             i, lastcpu.pc, refcpu.gpr[i], lastcpu.gpr[i]);
+      difftest_failed = true;
+    }
+  }
+  for (int i = 0; i < 6; i++) {
+    if (lastcpu.csr[i] != refcpu.csr[i]) {
+      printf("Difftest Failed\ncheck csr %s failed before pc:%llx\nExpected: "
+             "%llx, Actual: %llx \n",
+             csrregs[i], lastcpu.pc, refcpu.csr[i], lastcpu.csr[i]);
+      difftest_failed = true;
+    }
+  }
+>>>>>>> npc
 
   Assert(cpu->pc == refcpu.pc,
          "Difftest Failed\n Expected pc: %llx, Actual pc: %llx ", refcpu.pc,
@@ -90,4 +137,5 @@ void difftest_initial(CPU* cpu) {
   Log("difftest_memcpy, %d", difftest_memcpy);
   difftest_memcpy(MEM_START, mem, MEM_LEN, TO_REF);
   Log("difftest_init done");
+  memcpy(&lastcpu, cpu, sizeof(CPU));
 }

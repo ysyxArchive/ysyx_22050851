@@ -6,6 +6,8 @@ import decode.OperationType
 import chisel3.util.Cat
 import chisel3.util.Reverse
 import chisel3.util.Fill
+import decode.AluMode
+import utils.EnumSeq
 
 object ALUUtils {
   val width = 2

@@ -1,6 +1,13 @@
 #include <common.h>
 #include <difftest.h>
 #include <getopt.h>
+#include "VCPU.h"
+#include "VCPU__Dpi.h"
+#include "mem.h"
+#include "tools/lightsss.h"
+#include "verilated.h"
+#include "verilated_dpi.h"
+#include "verilated_vcd_c.h"
 
 static char* diff_so_file;
 static char* img_file;
@@ -62,4 +69,31 @@ void load_files() {
   Assert(diff_so_file, "difftest ref file not found!");
   Log("detected so file: %s", diff_so_file);
   load_difftest_so(diff_so_file);
+}
+
+VerilatedVcdC* tfp;
+VCPU* top;
+extern LightSSS lightSSS;
+
+void init_vcd_trace() {
+  VerilatedContext* contextp = new VerilatedContext;
+  Verilated::traceEverOn(true);  // 导出vcd波形需要加此语句
+  tfp = new VerilatedVcdC();     // 导出vcd波形需要加此语句
+  top = new VCPU{contextp};
+  top->reset = false;
+  top->trace(tfp, 0);
+  tfp->open("wave.vcd");  // 打开vcd
+}
+
+extern int npc_clock;
+int tfp_clock = 0;
+void eval_trace() {
+  top->eval();
+  if (lightSSS.is_child() && lightSSS.is_not_good() &&
+      lightSSS.get_end_cycles() - npc_clock < WAVE_TRACE_CLOCKS) {
+    tfp->dump(tfp_clock++);
+    tfp->flush();
+    printf("%d %d\n", npc_clock, tfp_clock);
+  }
+  npc_clock++;
 }
