@@ -12,7 +12,8 @@
 #define Elf_Phdr Elf32_Phdr
 #endif
 uintptr_t loader(PCB* pcb, const char* filename) {
-  protect(&(pcb->as));
+  // protect(&(pcb->as));
+  pcb->as.area = RANGE(0x83000000, 0x88000000);
   Log("new page dir %p", pcb->as.ptr);
   int fd = fs_open(filename, 0, 0);
   fs_lseek(fd, 0, SEEK_SET);
