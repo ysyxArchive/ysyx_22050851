@@ -89,7 +89,7 @@ extern int npc_clock;
 int tfp_clock = 0;
 void eval_trace() {
   top->eval();
-  if (lightSSS.is_not_good() &&
+  if (lightSSS.is_child() && lightSSS.is_not_good() &&
       lightSSS.get_end_cycles() - npc_clock < WAVE_TRACE_CLOCKS) {
     tfp->dump(tfp_clock++);
     tfp->flush();
