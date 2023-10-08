@@ -197,4 +197,7 @@ class Cache(
       printf(name + " reading, addr is %x, tag is %x, index is %x, offset is %x\n", addr, tag, index, offset)
     }
   }
+  when(cacheFSM.is(sendRes) && io.data.fire) {
+    printf("data is %x\n", io.data.bits)
+  }
 }
