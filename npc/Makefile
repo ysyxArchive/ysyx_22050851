@@ -10,13 +10,9 @@ VERILATOR_CFLAGS += -MMD --build -cc \
 VERILATOR_CFLAGS += -Wno-WIDTH  # 记得删掉
 BIN = $(BUILD_DIR)/$(TOPNAME)
 
-<<<<<<< HEAD
-VSRCS = $(shell find $(abspath ./build) -name "*.v")
-=======
 GEN_SCALA = $(abspath ./playground/src/decode/InstContorlDecoder.scala)
 
 VSRCS = $(shell find $(abspath ./build) -name "*.v" -or -name "*.sv")
->>>>>>> npc
 CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
 INCLUDES = $(shell find $(abspath ./include) -name "*.h")
 SCALAS = $(shell find $(abspath ./playground/src) -name "*.scala")

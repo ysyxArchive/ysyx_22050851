@@ -18,21 +18,12 @@ object playground extends ScalaModule with ScalafmtModule { m =>
     ivy"org.chipsalliance::chisel:5.0.0"
   )
   override def scalacPluginIvyDeps = Agg(
-<<<<<<< HEAD
-    ivy"edu.berkeley.cs:::chisel3-plugin:3.5.4",
-=======
     ivy"org.chipsalliance:::chisel-plugin:5.0.0"
->>>>>>> npc
   )
   object test extends Tests with Utest {
     override def ivyDeps = m.ivyDeps() ++ Agg(
-<<<<<<< HEAD
-      ivy"com.lihaoyi::utest:0.7.10",
-      ivy"edu.berkeley.cs::chiseltest:0.5.4",
-=======
       ivy"com.lihaoyi::utest:0.8.1",
       ivy"edu.berkeley.cs::chiseltest:5.0.0"
->>>>>>> npc
     )
   }
   def repositoriesTask = T.task {

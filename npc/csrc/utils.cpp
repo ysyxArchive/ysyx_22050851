@@ -1,8 +1,6 @@
 #include <common.h>
 #include <difftest.h>
 #include <getopt.h>
-<<<<<<< HEAD
-=======
 #include "VCPU.h"
 #include "VCPU__Dpi.h"
 #include "mem.h"
@@ -10,7 +8,6 @@
 #include "verilated.h"
 #include "verilated_dpi.h"
 #include "verilated_vcd_c.h"
->>>>>>> npc
 
 static char* diff_so_file;
 static char* img_file;
@@ -72,8 +69,6 @@ void load_files() {
   Assert(diff_so_file, "difftest ref file not found!");
   Log("detected so file: %s", diff_so_file);
   load_difftest_so(diff_so_file);
-<<<<<<< HEAD
-=======
 }
 
 VerilatedVcdC* tfp;
@@ -101,5 +96,4 @@ void eval_trace() {
     printf("%d %d\n", npc_clock, tfp_clock);
   }
   npc_clock++;
->>>>>>> npc
 }

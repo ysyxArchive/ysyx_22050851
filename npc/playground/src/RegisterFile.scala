@@ -27,27 +27,6 @@ class RegisterFileIO extends Bundle {
 }
 
 class RegisterFile extends Module {
-<<<<<<< HEAD
-  val io          = IO(new RegisterFileIO())
-  val blackBoxOut = Module(new BlackBoxRegs);
-
-  val pc  = Wire(UInt(64.W))
-  val npc = Wire(UInt(64.W))
-
-  val regs = RegInit(VecInit(Seq.fill(32)(0.U(64.W))))
-
-  blackBoxOut.io.pc    := pc;
-  blackBoxOut.io.regs  := regs;
-  blackBoxOut.io.waddr := 0.U;
-  blackBoxOut.io.wdata := io.wdata;
-
-  pc  := RegNext(Mux(io.pcWrite, io.dnpc, npc), "h80000000".asUInt(64.W))
-  npc := pc + 4.U
-
-  for (i <- 0 to 31) {
-    regs(i) := Mux(io.waddr === i.U, io.wdata, regs(i))
-  }
-=======
   val io         = IO(new RegisterFileIO())
   val debugOut   = IO(Output(Vec(32, UInt(64.W))))
   val debugPCOut = IO(Output(UInt(64.W)))
@@ -62,7 +41,6 @@ class RegisterFile extends Module {
 
   debugOut   := regs
   debugPCOut := pc
->>>>>>> npc
 
   io.out0 := Mux(io.raddr0 === 0.U, 0.U, regs(io.raddr0))
   io.out1 := Mux(io.raddr1 === 0.U, 0.U, regs(io.raddr1))
