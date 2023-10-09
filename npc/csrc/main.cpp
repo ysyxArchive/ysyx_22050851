@@ -4,6 +4,7 @@
 #include "device.h"
 #include "difftest.h"
 #include "mem.h"
+#include "time.h"
 #include "tools/lightsss.h"
 #include "verilated.h"
 #include "verilated_dpi.h"
@@ -11,6 +12,8 @@
 
 bool is_halt = false;
 bool is_bad_halt = false;
+
+uint64_t inst_count = 0;
 
 extern VCPU* top;
 CPU cpu;
@@ -80,20 +83,20 @@ void one_step() {
   eval_trace();
   update_cpu();
 
-  static int latpcchange = 0;
+  static int lastpcchange = 0;
   static uint64_t lastpc = 0;
   if (lastpc == cpu.pc) {
-    latpcchange++;
-    if (latpcchange > MAX_WAIT_ROUND) {
+    lastpcchange++;
+    if (lastpcchange > MAX_WAIT_ROUND) {
       Log("error pc not changed for %d cycles", MAX_WAIT_ROUND);
       is_bad_halt = true;
       is_halt = true;
     }
   } else {
-    latpcchange = 0;
+    inst_count++;
+    lastpcchange = 0;
   }
   lastpc = cpu.pc;
-
   if (!difftest_check(&cpu)) {
     is_halt = true;
     is_bad_halt = true;
@@ -119,9 +122,12 @@ int main(int argc, char* argv[]) {
   difftest_initial(&cpu);
   Log("init_done");
 
+  auto start_time = clock();
   while (!is_halt) {
     one_step();
   }
+  auto end_time = clock();
+
   int ret_value = cpu.gpr[10];
   if (is_bad_halt || ret_value != 0) {
     if ((int64_t)cpu.pc - MEM_START <= 0) {
@@ -133,9 +139,11 @@ int main(int argc, char* argv[]) {
     if (!lightSSS.is_child()) {
       lightSSS.wakeup_child(npc_clock);
     }
-    exit(-1);
+  } else {
+    Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
   }
-  Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
+  Log("execute speed: %d inst/s",
+      inst_count / ((end_time - start_time) / 1000));
   lightSSS.do_clear();
   return 0;
 }
