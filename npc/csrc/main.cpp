@@ -127,7 +127,7 @@ int main(int argc, char* argv[]) {
     one_step();
   }
   auto end_time = clock();
-
+  Log("start %ld, end %ld", start_time, end_time);
   int ret_value = cpu.gpr[10];
   if (is_bad_halt || ret_value != 0) {
     if ((int64_t)cpu.pc - MEM_START <= 0) {
