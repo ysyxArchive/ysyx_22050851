@@ -63,16 +63,18 @@ class InstructionExecuteUnit extends Module {
   )
   val csrInReg = RegInit(csrIn)
   csrInReg := Mux(exeFSM.willChangeTo(waitPC), csrIn, csrInReg)
-  val dnpcAddSrc = MuxLookup(controlIn.pcsrc, regIO.pc)(
-    EnumSeq(
-      PcSrc.pc -> regIO.pc,
-      PcSrc.src1 -> src1
+  val dnpcAddSrcReg = RegNext(
+    MuxLookup(controlIn.pcsrc, regIO.pc)(
+      EnumSeq(
+        PcSrc.pc -> regIO.pc,
+        PcSrc.src1 -> src1
+      )
     )
   )
-  val dnpcAlter = MuxLookup(controlIn.pccsr, dnpcAddSrc)(
+  val dnpcAlter = MuxLookup(controlIn.pccsr, dnpcAddSrcReg)(
     EnumSeq(
-      PcCsr.origin -> (dnpcAddSrc + dataIn.imm),
-      PcCsr.csr -> Mux(exeFSM.willChangeTo(waitPC), csrIn, csrInReg)
+      PcCsr.origin -> (dnpcAddSrcReg + dataIn.imm),
+      PcCsr.csr -> csrInReg
     )
   )
   regIO.dnpc := Mux(exeFSM.is(waitPC), Mux(pcBranch.asBool, dnpcAlter, snpc), regIO.pc)
