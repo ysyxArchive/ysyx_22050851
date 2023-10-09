@@ -122,11 +122,11 @@ int main(int argc, char* argv[]) {
   difftest_initial(&cpu);
   Log("init_done");
 
-  auto start_time = clock();
+  auto start_time = time(NULL);
   while (!is_halt) {
     one_step();
   }
-  auto end_time = clock();
+  auto end_time = time(NULL);
   Log("start %ld, end %ld", start_time, end_time);
   int ret_value = cpu.gpr[10];
   if (is_bad_halt || ret_value != 0) {
@@ -143,8 +143,8 @@ int main(int argc, char* argv[]) {
     Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
   }
   Log("execute speed: %ld inst/s,  %ld insts, %ld seconds",
-      inst_count / ((end_time - start_time) / 1000), inst_count,
-      (end_time - start_time) / 1000);
+      inst_count / (end_time - start_time), inst_count,
+      end_time - start_time);
   lightSSS.do_clear();
   return 0;
 }
