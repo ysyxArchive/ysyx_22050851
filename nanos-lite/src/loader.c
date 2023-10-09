@@ -12,6 +12,7 @@
 #define Elf_Phdr Elf32_Phdr
 #endif
 uintptr_t loader(PCB* pcb, const char* filename) {
+  // TODO: 临时改动
   // protect(&(pcb->as));
   pcb->as.area = RANGE(0x83000000, 0x88000000);
   Log("new page dir %p", pcb->as.ptr);
