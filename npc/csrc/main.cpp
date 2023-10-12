@@ -1,3 +1,4 @@
+#include <chrono>
 #include "VCPU.h"
 #include "VCPU__Dpi.h"
 #include "common.h"
@@ -14,6 +15,7 @@ bool is_halt = false;
 bool is_bad_halt = false;
 
 uint64_t inst_count = 0;
+uint64_t cycle_count = 0;
 
 extern VCPU* top;
 CPU cpu;
@@ -108,6 +110,7 @@ void one_step() {
   if ((npc_clock / 2) % LIGHT_SSS_CYCLE_INTERVAL == 0) {
     lightSSS.do_fork();
   }
+  cycle_count++;
 }
 
 int main(int argc, char* argv[]) {
@@ -122,18 +125,22 @@ int main(int argc, char* argv[]) {
   difftest_initial(&cpu);
   Log("init_done");
 
-  auto start_time = time(NULL);
+  auto start = std::chrono::high_resolution_clock::now();
   while (!is_halt) {
     one_step();
   }
-  auto end_time = time(NULL);
-  Log("start %ld, end %ld", start_time, end_time);
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+          .count();
+
+  Log("start %ld, end %ld", start, end);
   int ret_value = cpu.gpr[10];
   if (is_bad_halt || ret_value != 0) {
     if ((int64_t)cpu.pc - MEM_START <= 0) {
-      Log("bad halt! pc=0x%x", cpu.pc);
+      Log("bad halt! pc=0x%8lx", cpu.pc);
     } else {
-      Log("bad halt! pc=0x%x inst=0x%08x", cpu.pc,
+      Log("bad halt! pc=0x%8lx inst=0x%08x", cpu.pc,
           *(uint32_t*)&(mem[cpu.pc - MEM_START]));
     }
     if (!lightSSS.is_child()) {
@@ -142,9 +149,10 @@ int main(int argc, char* argv[]) {
   } else {
     Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
   }
-  Log("execute speed: %ld inst/s,  %ld insts, %ld seconds",
-      inst_count / (end_time - start_time), inst_count,
-      end_time - start_time);
+  Log("execute speed: %.2lf inst/s,  %lld insts, %.3f seconds",
+      (double)inst_count * 1000 / duration, inst_count, (double)duration / 1000);
+  Log("IPC: %.2lf inst/cycle, freq: %.2lf KHz",
+      (double)inst_count / cycle_count, (double)cycle_count / duration);
   lightSSS.do_clear();
   return 0;
 }
