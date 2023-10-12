@@ -1,3 +1,4 @@
+#include <chrono>
 #include "VCPU.h"
 #include "VCPU__Dpi.h"
 #include "common.h"
@@ -122,18 +123,22 @@ int main(int argc, char* argv[]) {
   difftest_initial(&cpu);
   Log("init_done");
 
-  auto start_time = time(NULL);
+  auto start = std::chrono::high_resolution_clock::now();
   while (!is_halt) {
     one_step();
   }
-  auto end_time = time(NULL);
-  Log("start %ld, end %ld", start_time, end_time);
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+          .count();
+
+  Log("start %ld, end %ld", start, end);
   int ret_value = cpu.gpr[10];
   if (is_bad_halt || ret_value != 0) {
     if ((int64_t)cpu.pc - MEM_START <= 0) {
-      Log("bad halt! pc=0x%x", cpu.pc);
+      Log("bad halt! pc=0x%8lx", cpu.pc);
     } else {
-      Log("bad halt! pc=0x%x inst=0x%08x", cpu.pc,
+      Log("bad halt! pc=0x%8lx inst=0x%08x", cpu.pc,
           *(uint32_t*)&(mem[cpu.pc - MEM_START]));
     }
     if (!lightSSS.is_child()) {
@@ -142,9 +147,8 @@ int main(int argc, char* argv[]) {
   } else {
     Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
   }
-  Log("execute speed: %f inst/s,  %ld insts, %ld seconds",
-      (float)inst_count / (end_time - start_time), inst_count,
-      end_time - start_time);
+  Log("execute speed: %lf inst/s,  %ld insts, %ld seconds",
+      (double)inst_count * 1000 / duration, inst_count, duration / 1000);
   lightSSS.do_clear();
   return 0;
 }
