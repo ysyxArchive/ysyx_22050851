@@ -12,5 +12,4 @@
 !init.sh
 /fceux-am
 /nvboard
-/am-kernels
-npc/.metals/*
+npc/.metals/*/am-kernels
