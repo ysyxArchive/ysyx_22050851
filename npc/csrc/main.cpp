@@ -142,7 +142,7 @@ int main(int argc, char* argv[]) {
   } else {
     Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
   }
-  Log("execute speed: %ld inst/s,  %ld insts, %ld seconds",
+  Log("execute speed: %f inst/s,  %ld insts, %ld seconds",
       (float)inst_count / (end_time - start_time), inst_count,
       end_time - start_time);
   lightSSS.do_clear();
