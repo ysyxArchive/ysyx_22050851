@@ -15,6 +15,7 @@ bool is_halt = false;
 bool is_bad_halt = false;
 
 uint64_t inst_count = 0;
+uint64_t cycle_count = 0;
 
 extern VCPU* top;
 CPU cpu;
@@ -109,6 +110,7 @@ void one_step() {
   if ((npc_clock / 2) % LIGHT_SSS_CYCLE_INTERVAL == 0) {
     lightSSS.do_fork();
   }
+  cycle_count++;
 }
 
 int main(int argc, char* argv[]) {
@@ -147,8 +149,10 @@ int main(int argc, char* argv[]) {
   } else {
     Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
   }
-  Log("execute speed: %.2lf inst/s,  %lld insts, %.2f seconds",
+  Log("execute speed: %.2lf inst/s,  %lld insts, %.3f seconds",
       (double)inst_count * 1000 / duration, inst_count, (double)duration / 1000);
+  Log("IPC: %.2lf inst/cycle, freq: %lf KHz",
+      (double)inst_count / cycle_count, (double)cycle_count / duration);
   lightSSS.do_clear();
   return 0;
 }
