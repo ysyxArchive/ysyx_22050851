@@ -11,7 +11,7 @@ VERILATOR_CFLAGS += -Wno-WIDTH  # 记得删掉
 BIN = $(BUILD_DIR)/$(TOPNAME)
 
 GEN_SCALA = $(abspath ./playground/src/decode/InstContorlDecoder.scala)
-
+MILL = ./mill
 VSRCS = $(shell find $(abspath ./build) -name "*.v" -or -name "*.sv")
 CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
 INCLUDES = $(shell find $(abspath ./include) -name "*.h")
@@ -43,22 +43,22 @@ $(GEN_SCALA): playground/scripts/codemap.csv playground/scripts/parsedecode.py
 verilog: $(SCALAS)
 	$(call git_commit, "generate verilog")
 	mkdir -p $(BUILD_DIR)
-	mill -i __.test.runMain Elaborate -td $(BUILD_DIR) --split-verilog --warnings-as-errors
+	$(MILL) -i __.test.runMain Elaborate -td $(BUILD_DIR) --split-verilog --warnings-as-errors
 
 help:
-	mill -i __.test.runMain Elaborate --help
+	$(MILL) -i __.test.runMain Elaborate --help
 
 compile:
-	mill -i __.compile
+	$(MILL) -i __.compile
 
 bsp:
-	mill -i mill.bsp.BSP/install
+	$(MILL) -i mill.bsp.BSP/install
 
 reformat:
-	mill -i __.reformat
+	$(MILL) -i __.reformat
 
 checkformat:
-	mill -i __.checkFormat
+	$(MILL) -i __.checkFormat
 
 clean:
 	-rm -rf $(BUILD_DIR)
