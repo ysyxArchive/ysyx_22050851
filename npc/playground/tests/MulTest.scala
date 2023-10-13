@@ -1,25 +1,46 @@
-class MyModule extends Module {
-  val io = IO(new Bundle {
-    val in  = Input(UInt(16.W))
-    val out = Output(UInt(16.W))
-  })
+import chisel3._
+import chiseltest._
+import chisel3.experimental.BundleLiterals._
 
-  io.out := RegNext(io.in)
-}
-class BasicTest extends AnyFlatSpec with ChiselScalatestTester {
-  behavior.of("MyModule")
-  // test class body here
-  it should "do something" in {
-    // test case body here
-    test(new MyModule) { c =>
-      // test body here
-      c.io.in.poke(0.U)
-      c.clock.step()
-      c.io.out.expect(0.U)
-      c.io.in.poke(42.U)
-      c.clock.step()
-      c.io.out.expect(42.U)
-      println("Last output value :" + c.io.out.peek().litValue)
+import utest._
+
+/**
+  * This is a trivial example of how to run this Specification
+  * From within sbt use:
+  * {{{
+  * testOnly gcd.GcdDecoupledTester
+  * }}}
+  * From a terminal shell use:
+  * {{{
+  * sbt 'testOnly gcd.GcdDecoupledTester'
+  * }}}
+  */
+object GCDSpec extends ChiselUtestTester {
+  val tests = Tests {
+    test("GCD") {
+      testCircuit(new SimpleMultiplier()) { dut =>
+        dut.input.initSource()
+        dut.input.setSourceClock(dut.clock)
+        dut.output.initSink()
+        dut.output.setSinkClock(dut.clock)
+        val testValues = for { x <- 0 to 10; y <- 0 to 10 } yield (x, y)
+        val inputSeq   = testValues.map { case (x, y) => (new GcdInputBundle(16)).Lit(_.value1 -> x.U, _.value2 -> y.U) }
+        val resultSeq = testValues.map {
+          case (x, y) =>
+            (new GcdOutputBundle(16)).Lit(_.value1 -> x.U, _.value2 -> y.U, _.gcd -> BigInt(x).gcd(BigInt(y)).U)
+        }
+        fork {
+          // push inputs into the calculator, stall for 11 cycles one third of the way
+          val (seq1, seq2) = inputSeq.splitAt(resultSeq.length / 3)
+          dut.input.enqueueSeq(seq1)
+          dut.clock.step(11)
+          dut.input.enqueueSeq(seq2)
+        }.fork {
+          // retrieve computations from the calculator, stall for 10 cycles one half of the way
+          val (seq1, seq2) = resultSeq.splitAt(resultSeq.length / 2)
+          dut.output.expectDequeueSeq(1)
+        }.join()
+      }
     }
   }
 }
