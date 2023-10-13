@@ -50,6 +50,8 @@ object Utils {
     }
     ret
   }
+
+  def signedReverse(num: UInt): UInt = ~num + 1.U
 }
 
 object EnumSeq {

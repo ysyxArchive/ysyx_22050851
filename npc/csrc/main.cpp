@@ -151,7 +151,7 @@ int main(int argc, char* argv[]) {
   }
   Log("execute speed: %.2lf inst/s,  %lld insts, %.3f seconds",
       (double)inst_count * 1000 / duration, inst_count, (double)duration / 1000);
-  Log("IPC: %.2lf inst/cycle, freq: %lf KHz",
+  Log("IPC: %.2lf inst/cycle, freq: %.2lf KHz",
       (double)inst_count / cycle_count, (double)cycle_count / duration);
   lightSSS.do_clear();
   return 0;
