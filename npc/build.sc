@@ -15,9 +15,7 @@ object playground extends ScalaModule with ScalafmtModule { m =>
     "-Xcheckinit"
   )
   override def ivyDeps = Agg(
-    ivy"org.chipsalliance::chisel:5.0.0",
-    ivy"edu.berkeley.cs::chiseltest:5.0.0",
-    ivy"org.scalatest::scalatest:3.2.17"
+    ivy"org.chipsalliance::chisel:5.0.0"
   )
   override def scalacPluginIvyDeps = Agg(
     ivy"org.chipsalliance:::chisel-plugin:5.0.0"
