@@ -83,12 +83,14 @@ class ALU extends Module {
 
   val immOut = Wire(UInt(64.W))
 
+  val mulOps = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt))
+
   val inA        = io.in.bits.inA
   val inB        = io.in.bits.inB
   val opType     = io.in.bits.opType
   val inANotZero = inA.orR;
   val inBNotZero = inB.orR;
-  val isImm      = io.in.bits.opType.asUInt =/= AluMode.mul.asUInt
+  val isImm      = !mulOps.contains(io.in.bits.opType.asUInt)
 
   simpleAdder.io.inA := inA
   simpleAdder.io.inB := Mux(opType === AluMode.sub, ~inB, inB)
@@ -98,7 +100,7 @@ class ALU extends Module {
   val aluFSM = new FSM(
     normal,
     List(
-      (normal, io.in.fire && !isImm, busyMul),
+      (normal, io.in.fire && mulOps.contains(io.in.bits.opType.asUInt), busyMul),
       (busyMul, multiplier.io.outValid, normal)
     )
   )
@@ -106,7 +108,7 @@ class ALU extends Module {
   multiplier.io.multiplicand := io.in.bits.inA
   multiplier.io.multiplier   := io.in.bits.inB
   multiplier.io.flush        := false.B
-  multiplier.io.mulValid     := aluFSM.willChangeTo(busyMul) && io.in.bits.opType.asUInt === AluMode.mul.asUInt
+  multiplier.io.mulValid     := aluFSM.trigger(normal, busyMul)
   multiplier.io.mulSigned    := false.B
   multiplier.io.mulw         := io.in.bits.opType.asUInt === AluMode.mulw.asUInt
 
