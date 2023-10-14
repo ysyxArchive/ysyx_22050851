@@ -138,9 +138,9 @@ int main(int argc, char* argv[]) {
   int ret_value = cpu.gpr[10];
   if (is_bad_halt || ret_value != 0) {
     if ((int64_t)cpu.pc - MEM_START <= 0) {
-      Log("bad halt! pc=0x%8lx", cpu.pc);
+      Log(ANSI_FMT("bad halt!", ANSI_FG_RED) " pc=0x%8lx", cpu.pc);
     } else {
-      Log( ANSI_FMT("bad halt!", ANSI_FG_RED)"bad halt! pc=0x%8lx inst=0x%08x", cpu.pc,
+      Log(ANSI_FMT("bad halt!", ANSI_FG_RED) " pc=0x%8lx inst=0x%08x", cpu.pc,
           *(uint32_t*)&(mem[cpu.pc - MEM_START]));
     }
     if (!lightSSS.is_child()) {
@@ -150,9 +150,10 @@ int main(int argc, char* argv[]) {
     Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
   }
   Log("execute speed: %.2lf inst/s,  %lld insts, %.3f seconds",
-      (double)inst_count * 1000 / duration, inst_count, (double)duration / 1000);
+      (double)inst_count * 1000 / duration, inst_count,
+      (double)duration / 1000);
   Log("IPC: %.2lf inst/cycle, freq: %.2lf KHz",
       (double)inst_count / cycle_count, (double)cycle_count / duration);
   lightSSS.do_clear();
-  return 0;
+  return (is_bad_halt || ret_value != 0);
 }
