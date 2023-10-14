@@ -51,12 +51,12 @@ class InstructionExecuteUnit extends Module {
   val snpc = regIO.pc + 4.U
   val pcBranch = MuxLookup(controlIn.pcaddrsrc, false.B)(
     EnumSeq(
-      PCAddrSrc.aluzero -> alu.signalIO.isZero,
-      PCAddrSrc.aluneg -> alu.signalIO.isNegative,
-      PCAddrSrc.alunotneg -> !alu.signalIO.isNegative,
-      PCAddrSrc.alunotzero -> !alu.signalIO.isZero,
-      PCAddrSrc.alunotcarryandnotzero -> (!alu.signalIO.isCarry && !alu.signalIO.isZero),
-      PCAddrSrc.alucarryorzero -> (alu.signalIO.isCarry || alu.signalIO.isZero),
+      PCAddrSrc.aluzero -> alu.io.out.bits.signals.isZero,
+      PCAddrSrc.aluneg -> alu.io.out.bits.signals.isNegative,
+      PCAddrSrc.alunotneg -> !alu.io.out.bits.signals.isNegative,
+      PCAddrSrc.alunotzero -> !alu.io.out.bits.signals.isZero,
+      PCAddrSrc.alunotcarryandnotzero -> (!alu.io.out.bits.signals.isCarry && !alu.io.out.bits.signals.isZero),
+      PCAddrSrc.alucarryorzero -> (alu.io.out.bits.signals.isCarry || alu.io.out.bits.signals.isZero),
       PCAddrSrc.zero -> false.B,
       PCAddrSrc.one -> true.B
     )
@@ -78,14 +78,14 @@ class InstructionExecuteUnit extends Module {
     )
   )
   regIO.dnpc := Mux(exeFSM.is(waitPC), Mux(pcBranch.asBool, dnpcAlter, snpc), regIO.pc)
-  val regwdata = MuxLookup(controlIn.regwritemux, alu.io.out)(
+  val regwdata = MuxLookup(controlIn.regwritemux, alu.io.out.bits.out)(
     EnumSeq(
-      RegWriteMux.alu -> alu.io.out,
+      RegWriteMux.alu -> alu.io.out.bits.out,
       RegWriteMux.snpc -> snpc,
       RegWriteMux.mem -> memOut,
-      RegWriteMux.aluneg -> Utils.zeroExtend(alu.signalIO.isNegative, 1, 64),
+      RegWriteMux.aluneg -> Utils.zeroExtend(alu.io.out.bits.signals.isNegative, 1, 64),
       RegWriteMux.alunotcarryandnotzero -> Utils
-        .zeroExtend(!alu.signalIO.isCarry && !alu.signalIO.isZero, 1, 64),
+        .zeroExtend(!alu.io.out.bits.signals.isCarry && !alu.io.out.bits.signals.isZero, 1, 64),
       RegWriteMux.csr -> csrIn
     )
   )
@@ -105,21 +105,21 @@ class InstructionExecuteUnit extends Module {
     )
 
   // alu
-  alu.io.inA := MuxLookup(controlIn.alumux1, 0.U)(
+  alu.io.in.bits.inA := MuxLookup(controlIn.alumux1, 0.U)(
     EnumSeq(
       AluMux1.pc -> regIO.pc,
       AluMux1.src1 -> src1,
       AluMux1.zero -> 0.U
     )
   )
-  alu.io.inB := MuxLookup(controlIn.alumux2, 0.U)(
+  alu.io.in.bits.inB := MuxLookup(controlIn.alumux2, 0.U)(
     EnumSeq(
       AluMux2.imm -> dataIn.imm,
       AluMux2.src2 -> src2
     )
   )
   val res = AluMode.safe(controlIn.alumode)
-  alu.io.opType := res._1
+  alu.io.in.bits.opType := res._1
 
   // csr
   csrControl.csrBehave  := Mux(exeFSM.willChangeTo(waitPC), controlIn.csrbehave, CsrBehave.no.asUInt)
