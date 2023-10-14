@@ -26,14 +26,17 @@ class InstructionExecuteUnit extends Module {
 
   val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   val shouldMemWork = decodeIn.bits.control.memmode =/= MemMode.no.asUInt
+  val shouldWaitALU = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt)).contains(decodeIn.bits.control.alumode)
 
-  val idle :: waitMemReq :: waitMemRes :: waitPC :: other = Enum(4)
+  val idle :: waitMemReq :: waitMemRes :: waitPC :: waitALU :: other = Enum(10)
 
   val exeFSM = new FSM(
     idle,
     List(
       (idle, decodeIn.fire && shouldMemWork, waitMemReq),
-      (idle, decodeIn.fire && !shouldMemWork, waitPC),
+      (idle, decodeIn.fire && shouldWaitALU, waitALU),
+      (idle, decodeIn.fire, waitPC),
+      (waitALU, alu.io.out.fire, waitPC),
       (waitMemReq, Mux(memIsRead, memIO.readReq.fire, memIO.writeReq.fire), waitMemRes),
       (waitMemRes, Mux(memIsRead, memIO.data.fire, memIO.writeRes.fire), waitPC),
       (waitPC, true.B, idle)
@@ -51,12 +54,12 @@ class InstructionExecuteUnit extends Module {
   val snpc = regIO.pc + 4.U
   val pcBranch = MuxLookup(controlIn.pcaddrsrc, false.B)(
     EnumSeq(
-      PCAddrSrc.aluzero -> alu.signalIO.isZero,
-      PCAddrSrc.aluneg -> alu.signalIO.isNegative,
-      PCAddrSrc.alunotneg -> !alu.signalIO.isNegative,
-      PCAddrSrc.alunotzero -> !alu.signalIO.isZero,
-      PCAddrSrc.alunotcarryandnotzero -> (!alu.signalIO.isCarry && !alu.signalIO.isZero),
-      PCAddrSrc.alucarryorzero -> (alu.signalIO.isCarry || alu.signalIO.isZero),
+      PCAddrSrc.aluzero -> alu.io.out.bits.signals.isZero,
+      PCAddrSrc.aluneg -> alu.io.out.bits.signals.isNegative,
+      PCAddrSrc.alunotneg -> !alu.io.out.bits.signals.isNegative,
+      PCAddrSrc.alunotzero -> !alu.io.out.bits.signals.isZero,
+      PCAddrSrc.alunotcarryandnotzero -> (!alu.io.out.bits.signals.isCarry && !alu.io.out.bits.signals.isZero),
+      PCAddrSrc.alucarryorzero -> (alu.io.out.bits.signals.isCarry || alu.io.out.bits.signals.isZero),
       PCAddrSrc.zero -> false.B,
       PCAddrSrc.one -> true.B
     )
@@ -78,14 +81,14 @@ class InstructionExecuteUnit extends Module {
     )
   )
   regIO.dnpc := Mux(exeFSM.is(waitPC), Mux(pcBranch.asBool, dnpcAlter, snpc), regIO.pc)
-  val regwdata = MuxLookup(controlIn.regwritemux, alu.io.out)(
+  val regwdata = MuxLookup(controlIn.regwritemux, alu.io.out.bits.out)(
     EnumSeq(
-      RegWriteMux.alu -> alu.io.out,
+      RegWriteMux.alu -> alu.io.out.bits.out,
       RegWriteMux.snpc -> snpc,
       RegWriteMux.mem -> memOut,
-      RegWriteMux.aluneg -> Utils.zeroExtend(alu.signalIO.isNegative, 1, 64),
+      RegWriteMux.aluneg -> Utils.zeroExtend(alu.io.out.bits.signals.isNegative, 1, 64),
       RegWriteMux.alunotcarryandnotzero -> Utils
-        .zeroExtend(!alu.signalIO.isCarry && !alu.signalIO.isZero, 1, 64),
+        .zeroExtend(!alu.io.out.bits.signals.isCarry && !alu.io.out.bits.signals.isZero, 1, 64),
       RegWriteMux.csr -> csrIn
     )
   )
@@ -105,22 +108,23 @@ class InstructionExecuteUnit extends Module {
     )
 
   // alu
-  alu.io.inA := MuxLookup(controlIn.alumux1, 0.U)(
+  alu.io.in.bits.inA := MuxLookup(controlIn.alumux1, 0.U)(
     EnumSeq(
       AluMux1.pc -> regIO.pc,
       AluMux1.src1 -> src1,
       AluMux1.zero -> 0.U
     )
   )
-  alu.io.inB := MuxLookup(controlIn.alumux2, 0.U)(
+  alu.io.in.bits.inB := MuxLookup(controlIn.alumux2, 0.U)(
     EnumSeq(
       AluMux2.imm -> dataIn.imm,
       AluMux2.src2 -> src2
     )
   )
   val res = AluMode.safe(controlIn.alumode)
-  alu.io.opType := res._1
-
+  alu.io.in.bits.opType := res._1
+  alu.io.out.ready      := alu.io.out.bits.isImmidiate || exeFSM.is(waitALU)
+  alu.io.in.valid       := decodeIn.fire
   // csr
   csrControl.csrBehave  := Mux(exeFSM.willChangeTo(waitPC), controlIn.csrbehave, CsrBehave.no.asUInt)
   csrControl.csrSetmode := Mux(exeFSM.willChangeTo(waitPC), controlIn.csrsetmode, CsrSetMode.origin.asUInt)
@@ -142,9 +146,11 @@ class InstructionExecuteUnit extends Module {
     Fill(1, Mux(memlen > 1.U, 1.U, 0.U)),
     1.U(1.W)
   )
+  val memAddrReg = Reg(UInt(64.W))
+  memAddrReg := Mux(exeFSM.willChangeTo(waitMemReq), alu.io.out.bits.out, memAddrReg)
 
   memIO.readReq.valid      := exeFSM.is(waitMemReq) && memIsRead && shouldMemWork
-  memIO.addr               := alu.io.out
+  memIO.addr               := memAddrReg
   memIO.data.ready         := exeFSM.is(waitMemRes) && memIsRead
   memIO.writeReq.valid     := exeFSM.is(waitMemReq) && !memIsRead && shouldMemWork
   memIO.writeReq.bits.data := src2

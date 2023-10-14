@@ -9,19 +9,18 @@ VERILATOR_CFLAGS += -MMD --build -cc \
 				-O3 --x-assign fast --x-initial fast --noassert --trace 
 VERILATOR_CFLAGS += -Wno-WIDTH  # 记得删掉
 BIN = $(BUILD_DIR)/$(TOPNAME)
-
 GEN_SCALA = $(abspath ./playground/src/decode/InstContorlDecoder.scala)
-
 VSRCS = $(shell find $(abspath ./build) -name "*.v" -or -name "*.sv")
 CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
 INCLUDES = $(shell find $(abspath ./include) -name "*.h")
 SCALAS = $(shell find $(abspath ./playground/src) -name "*.scala") $(GEN_SCALA)
+SCALATESTS = $(shell find $(abspath ./playground/src) -name "*.scala")
 INC_PATH = $(abspath ./include)
 INCFLAGS = $(addprefix -I, $(INC_PATH))
 CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" 
 LDFLAGS += -lSDL2 -lSDL2_image -ldl
 override ARGS += --diff=${NEMU_HOME}/build/riscv64-nemu-interpreter-so
-export PATH := $(PATH):$(abspath ./utils)
+export PATH := $(PATH):$(abspath ./tools)
 
 default: $(BIN)
 
@@ -72,8 +71,8 @@ sim: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 	$(BIN) $(IMG) $(ARGS) 
 
-test: $(BIN)
-	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
+test: $(SCALATESTS)
+	mill -i __.test
 
 run:
 	make sim

@@ -60,7 +60,7 @@ for colIndex in range(3, len(df.columns)):
 df_new["concat"] = df_new.apply(lambda row: " ".join(row[3:]), axis=1)
 
 
-def genEnum(colName: str, values: list[str]):
+def genEnum(colName: str, values: 'list[str]'):
     if len(values) == 0:
         return ""
     # TODO: yesno -> 10
