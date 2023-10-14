@@ -26,7 +26,7 @@ class InstructionExecuteUnit extends Module {
 
   val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   val shouldMemWork = decodeIn.bits.control.memmode =/= MemMode.no.asUInt
-  val shouldWaitALU =  VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt)).contains(decodeIn.bits.control.alumode)
+  val shouldWaitALU = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt)).contains(decodeIn.bits.control.alumode)
 
   val idle :: waitMemReq :: waitMemRes :: waitPC :: waitALU :: other = Enum(10)
 
@@ -146,9 +146,11 @@ class InstructionExecuteUnit extends Module {
     Fill(1, Mux(memlen > 1.U, 1.U, 0.U)),
     1.U(1.W)
   )
+  val memAddrReg = Reg(UInt(64.W))
+  memAddrReg := Mux(exeFSM.willChangeTo(waitMemReq), alu.io.out.bits.out, memAddrReg)
 
   memIO.readReq.valid      := exeFSM.is(waitMemReq) && memIsRead && shouldMemWork
-  memIO.addr               := alu.io.out.bits.out
+  memIO.addr               := memAddrReg
   memIO.data.ready         := exeFSM.is(waitMemRes) && memIsRead
   memIO.writeReq.valid     := exeFSM.is(waitMemReq) && !memIsRead && shouldMemWork
   memIO.writeReq.bits.data := src2
