@@ -10,6 +10,7 @@ import utils.EnumSeq
 import chisel3.util.Decoupled
 import utils.FSM
 import decode.RegWriteMux
+import decode.AluMux2
 
 object ALUSignalType extends ChiselEnum {
   val isZero, isNegative = Value
@@ -129,7 +130,7 @@ class ALU extends Module {
       AluMode.xor -> (inA ^ inB)
     )
   )
-  val out = immOut
+  val out = Mux(aluFSM.trigger(busyMul, normal), multiplier.io.resultLow, immOut)
   io.out.valid                   := (aluFSM.is(normal) && io.in.fire && isImm) || aluFSM.trigger(busyMul, normal)
   io.out.bits.isImmidiate        := isImm
   io.out.bits.out                := out
