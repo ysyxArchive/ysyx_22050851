@@ -82,7 +82,7 @@ class SimpleMultiplier extends Module {
     outReg
   )
 
-  io.mulReady := counter === 0.U && !io.flush
+  io.mulReady := mulFSM.is(idle) && !io.flush
   io.outValid := outValidReg
   val out = Mux(outNeg, Utils.signedReverse(outReg), outReg)
   io.resultHigh := out >> 64
