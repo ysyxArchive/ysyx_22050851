@@ -27,13 +27,15 @@ class InstructionExecuteUnit extends Module {
   val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   val shouldMemWork = decodeIn.bits.control.memmode =/= MemMode.no.asUInt
 
-  val idle :: waitMemReq :: waitMemRes :: waitPC :: other = Enum(4)
+  val idle :: waitMemReq :: waitMemRes :: waitPC :: waitALU :: other = Enum(4)
 
   val exeFSM = new FSM(
     idle,
     List(
       (idle, decodeIn.fire && shouldMemWork, waitMemReq),
       (idle, decodeIn.fire && !shouldMemWork, waitPC),
+      (idle, decodeIn.fire && decodeIn.bits.control.alumode === AluMode.mul.asUInt, waitALU),
+      (waitALU, alu.io.out.fire, waitPC),
       (waitMemReq, Mux(memIsRead, memIO.readReq.fire, memIO.writeReq.fire), waitMemRes),
       (waitMemRes, Mux(memIsRead, memIO.data.fire, memIO.writeRes.fire), waitPC),
       (waitPC, true.B, idle)
@@ -120,7 +122,8 @@ class InstructionExecuteUnit extends Module {
   )
   val res = AluMode.safe(controlIn.alumode)
   alu.io.in.bits.opType := res._1
-
+  alu.io.out.ready      := alu.io.out.bits.isImmidiate || exeFSM.is(waitALU)
+  alu.io.in.valid       := decodeIn.fire
   // csr
   csrControl.csrBehave  := Mux(exeFSM.willChangeTo(waitPC), controlIn.csrbehave, CsrBehave.no.asUInt)
   csrControl.csrSetmode := Mux(exeFSM.willChangeTo(waitPC), controlIn.csrsetmode, CsrSetMode.origin.asUInt)
