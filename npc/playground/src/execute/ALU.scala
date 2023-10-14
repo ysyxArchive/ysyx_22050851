@@ -108,7 +108,7 @@ class ALU extends Module {
   multiplier.io.flush        := false.B
   multiplier.io.mulValid     := aluFSM.willChangeTo(busyMul) && io.in.bits.opType.asUInt === AluMode.mul.asUInt
   multiplier.io.mulSigned    := false.B
-  multiplier.io.mulw         := io.in.bits.opType.asUInt === AluMode.mulw
+  multiplier.io.mulw         := io.in.bits.opType.asUInt === AluMode.mulw.asUInt
 
   immOut := MuxLookup(opType.asUInt, 0.U)(
     EnumSeq(
