@@ -33,8 +33,8 @@ class InstructionExecuteUnit extends Module {
     idle,
     List(
       (idle, decodeIn.fire && shouldMemWork, waitMemReq),
-      (idle, decodeIn.fire && !shouldMemWork, waitPC),
       (idle, decodeIn.fire && decodeIn.bits.control.alumode === AluMode.mul.asUInt, waitALU),
+      (idle, decodeIn.fire, waitPC),
       (waitALU, alu.io.out.fire, waitPC),
       (waitMemReq, Mux(memIsRead, memIO.readReq.fire, memIO.writeReq.fire), waitMemRes),
       (waitMemRes, Mux(memIsRead, memIO.data.fire, memIO.writeRes.fire), waitPC),
