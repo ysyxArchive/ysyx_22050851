@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
     if ((int64_t)cpu.pc - MEM_START <= 0) {
       Log("bad halt! pc=0x%8lx", cpu.pc);
     } else {
-      Log( ANSI_FMT("hit good trap!", ANSI_FG_RED)"bad halt! pc=0x%8lx inst=0x%08x", cpu.pc,
+      Log( ANSI_FMT("bad halt!", ANSI_FG_RED)"bad halt! pc=0x%8lx inst=0x%08x", cpu.pc,
           *(uint32_t*)&(mem[cpu.pc - MEM_START]));
     }
     if (!lightSSS.is_child()) {
