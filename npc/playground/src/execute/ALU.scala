@@ -129,7 +129,7 @@ class ALU extends Module {
   )
   val out = immOut
   io.out.valid                   := (aluFSM.is(normal) && io.in.fire && isImm) || aluFSM.trigger(busyMul, normal)
-  io.out.isImmidiate             := isImm
+  io.out.bits.isImmidiate        := isImm
   io.out.bits.out                := out
   io.out.bits.signals.isCarry    := simpleAdder.io.outC
   io.out.bits.signals.isNegative := out(63)
