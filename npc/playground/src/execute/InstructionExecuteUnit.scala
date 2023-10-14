@@ -144,7 +144,7 @@ class InstructionExecuteUnit extends Module {
   )
 
   memIO.readReq.valid      := exeFSM.is(waitMemReq) && memIsRead && shouldMemWork
-  memIO.addr               := alu.io.out
+  memIO.addr               := alu.io.out.bits.out
   memIO.data.ready         := exeFSM.is(waitMemRes) && memIsRead
   memIO.writeReq.valid     := exeFSM.is(waitMemReq) && !memIsRead && shouldMemWork
   memIO.writeReq.bits.data := src2
