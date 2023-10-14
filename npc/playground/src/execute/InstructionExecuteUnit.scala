@@ -27,7 +27,7 @@ class InstructionExecuteUnit extends Module {
   val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   val shouldMemWork = decodeIn.bits.control.memmode =/= MemMode.no.asUInt
 
-  val idle :: waitMemReq :: waitMemRes :: waitPC :: waitALU :: other = Enum(4)
+  val idle :: waitMemReq :: waitMemRes :: waitPC :: waitALU :: other = Enum(10)
 
   val exeFSM = new FSM(
     idle,
