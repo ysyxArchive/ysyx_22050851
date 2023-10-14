@@ -26,6 +26,7 @@ class InstructionExecuteUnit extends Module {
 
   val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   val shouldMemWork = decodeIn.bits.control.memmode =/= MemMode.no.asUInt
+  val shouldWaitALU = Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt).contains(decodeIn.bits.control.alumode)
 
   val idle :: waitMemReq :: waitMemRes :: waitPC :: waitALU :: other = Enum(10)
 
@@ -33,7 +34,7 @@ class InstructionExecuteUnit extends Module {
     idle,
     List(
       (idle, decodeIn.fire && shouldMemWork, waitMemReq),
-      (idle, decodeIn.fire && decodeIn.bits.control.alumode === AluMode.mul.asUInt, waitALU),
+      (idle, decodeIn.fire && shouldWaitALU, waitALU),
       (idle, decodeIn.fire, waitPC),
       (waitALU, alu.io.out.fire, waitPC),
       (waitMemReq, Mux(memIsRead, memIO.readReq.fire, memIO.writeReq.fire), waitMemRes),
