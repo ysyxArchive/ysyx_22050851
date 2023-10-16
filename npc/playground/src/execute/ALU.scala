@@ -93,7 +93,7 @@ class ALU extends Module {
   val opType     = io.in.bits.opType
   val inANotZero = inA.orR;
   val inBNotZero = inB.orR;
-  val isImm      = !mulOps.contains(io.in.bits.opType.asUInt)
+  val isImm      = !mulOps.contains(io.in.bits.opType.asUInt) && !divOps.contains(io.in.bits.opType.asUInt)
 
   simpleAdder.io.inA := inA
   simpleAdder.io.inB := Mux(opType === AluMode.sub, ~inB, inB)
