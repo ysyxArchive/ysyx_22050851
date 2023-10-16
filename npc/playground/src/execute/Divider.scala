@@ -51,7 +51,7 @@ class SimpleDivider extends Module {
     )
   )
 
-  val inACasted = Mux(io.divw, Utils.signExtend(inAReg, 32, 128), Utils.signExtend(io.dividend, 64, 128))
+  val inACasted = Mux(io.divw, Utils.signExtend(io.dividend, 32, 128), Utils.signExtend(io.dividend, 64, 128))
   val inBCasted = Mux(io.divw, Utils.signExtend(io.divisor, 32, 64), io.divisor)
   inAReg    := Mux(divFSM.is(idle), Mux(inANeg, Utils.signedReverse(inACasted), inACasted), inAReg)
   inBReg    := Mux(divFSM.is(idle), Mux(inBNeg, Utils.signedReverse(inBCasted), inBCasted), inBReg)
