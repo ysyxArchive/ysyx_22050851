@@ -127,7 +127,8 @@ class ALU extends Module {
   divider.io.flush           := false.B
   divider.io.divValid        := aluFSM.trigger(normal, busyDiv)
   divider.io.divSigned       := false.B
-  divider.io.divw            := false.B // io.in.bits.opType.asUInt === AluMode.divw.asUInt
+  divider.io.divw := VecInit(Seq(AluMode.remw, AluMode.remuw, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
+    .contains(io.in.bits.opType.asUInt)
 
   immOut := MuxLookup(opType.asUInt, 0.U)(
     EnumSeq(
