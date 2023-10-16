@@ -103,7 +103,7 @@ class ALU extends Module {
   simpleAdder.io.inB := Mux(opType === AluMode.sub, ~inB, inB)
   simpleAdder.io.inC := opType === AluMode.sub
 
-  val normal :: busyMul :: busyDiv :: others = util.Enum(2)
+  val normal :: busyMul :: busyDiv :: others = util.Enum(3)
   val aluFSM = new FSM(
     normal,
     List(
