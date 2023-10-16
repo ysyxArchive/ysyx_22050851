@@ -110,7 +110,7 @@ class ALU extends Module {
       (normal, io.in.fire && mulOps.contains(io.in.bits.opType.asUInt), busyMul),
       (normal, io.in.fire && VecInit(divOps ++ remOps).contains(io.in.bits.opType.asUInt), busyDiv),
       (busyMul, multiplier.io.outValid, normal),
-      (busyDiv, multiplier.io.outValid, normal)
+      (busyDiv, divider.io.outValid, normal)
     )
   )
 
