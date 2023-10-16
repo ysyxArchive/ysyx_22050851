@@ -87,8 +87,8 @@ class ALU extends Module {
   val immOut = Wire(UInt(64.W))
 
   val mulOps = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt))
-  val divOps = VecInit(Seq(AluMode.div, AluMode.divu).map(t => t.asUInt))
-  val remOps = VecInit(Seq(AluMode.rem, AluMode.remu).map(t => t.asUInt))
+  val divOps = VecInit(Seq(AluMode.div, AluMode.divu, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
+  val remOps = VecInit(Seq(AluMode.rem, AluMode.remu, AluMode.remw, AluMode.remuw).map(t => t.asUInt))
   val ops    = VecInit(mulOps ++ divOps ++ remOps)
 
   val inA        = io.in.bits.inA
