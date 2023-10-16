@@ -11,6 +11,7 @@ import chisel3.util.Decoupled
 import utils.FSM
 import decode.RegWriteMux
 import decode.AluMux2
+import chisel3.util.MuxCase
 
 object ALUSignalType extends ChiselEnum {
   val isZero, isNegative = Value
@@ -81,30 +82,39 @@ class ALU extends Module {
 
   val simpleAdder = Module(new SimpleAdder())
   val multiplier  = Module(new SimpleMultiplier())
+  val divider     = Module(new SimpleDivider())
 
   val immOut = Wire(UInt(64.W))
 
   val mulOps = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt))
+  val divOps = VecInit(Seq(AluMode.div, AluMode.divu, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
+  val remOps = VecInit(Seq(AluMode.rem, AluMode.remu, AluMode.remw, AluMode.remuw).map(t => t.asUInt))
+  val ops    = VecInit(mulOps ++ divOps ++ remOps)
 
   val inA        = io.in.bits.inA
   val inB        = io.in.bits.inB
   val opType     = io.in.bits.opType
   val inANotZero = inA.orR;
   val inBNotZero = inB.orR;
-  val isImm      = !mulOps.contains(io.in.bits.opType.asUInt)
+  val isImm      = !ops.contains(io.in.bits.opType.asUInt)
+  val isRem      = Reg(Bool())
 
   simpleAdder.io.inA := inA
   simpleAdder.io.inB := Mux(opType === AluMode.sub, ~inB, inB)
   simpleAdder.io.inC := opType === AluMode.sub
 
-  val normal :: busyMul :: others = util.Enum(2)
+  val normal :: busyMul :: busyDiv :: others = util.Enum(3)
   val aluFSM = new FSM(
     normal,
     List(
       (normal, io.in.fire && mulOps.contains(io.in.bits.opType.asUInt), busyMul),
-      (busyMul, multiplier.io.outValid, normal)
+      (normal, io.in.fire && VecInit(divOps ++ remOps).contains(io.in.bits.opType.asUInt), busyDiv),
+      (busyMul, multiplier.io.outValid, normal),
+      (busyDiv, divider.io.outValid, normal)
     )
   )
+
+  isRem := Mux(aluFSM.trigger(normal, busyDiv), remOps.contains(io.in.bits.opType.asUInt), isRem)
 
   multiplier.io.multiplicand := io.in.bits.inA
   multiplier.io.multiplier   := io.in.bits.inB
@@ -112,6 +122,13 @@ class ALU extends Module {
   multiplier.io.mulValid     := aluFSM.trigger(normal, busyMul)
   multiplier.io.mulSigned    := false.B
   multiplier.io.mulw         := io.in.bits.opType.asUInt === AluMode.mulw.asUInt
+  divider.io.dividend        := io.in.bits.inA
+  divider.io.divisor         := io.in.bits.inB
+  divider.io.flush           := false.B
+  divider.io.divValid        := aluFSM.trigger(normal, busyDiv)
+  divider.io.divSigned       := false.B
+  divider.io.divw := VecInit(Seq(AluMode.remw, AluMode.remuw, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
+    .contains(io.in.bits.opType.asUInt)
 
   immOut := MuxLookup(opType.asUInt, 0.U)(
     EnumSeq(
@@ -130,8 +147,18 @@ class ALU extends Module {
       AluMode.xor -> (inA ^ inB)
     )
   )
-  val out = Mux(aluFSM.trigger(busyMul, normal), multiplier.io.resultLow, immOut)
-  io.out.valid                   := (aluFSM.is(normal) && io.in.fire && isImm) || aluFSM.trigger(busyMul, normal)
+  val out = MuxCase(
+    immOut,
+    Seq(
+      aluFSM.trigger(busyMul, normal) -> multiplier.io.resultLow,
+      (aluFSM.trigger(busyDiv, normal) && !isRem) -> divider.io.quotient,
+      (aluFSM.trigger(busyDiv, normal) && isRem) -> divider.io.remainder
+    )
+  )
+  io.out.valid := (aluFSM.is(normal) && io.in.fire && isImm) || aluFSM.trigger(busyMul, normal) || aluFSM.trigger(
+    busyDiv,
+    normal
+  )
   io.out.bits.isImmidiate        := isImm
   io.out.bits.out                := out
   io.out.bits.signals.isCarry    := simpleAdder.io.outC

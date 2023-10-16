@@ -26,7 +26,7 @@ class InstructionExecuteUnit extends Module {
 
   val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
   val shouldMemWork = decodeIn.bits.control.memmode =/= MemMode.no.asUInt
-  val shouldWaitALU = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt)).contains(decodeIn.bits.control.alumode)
+  val shouldWaitALU = !alu.io.out.bits.isImmidiate
 
   val idle :: waitMemReq :: waitMemRes :: waitPC :: waitALU :: other = Enum(10)
 
