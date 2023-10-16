@@ -83,7 +83,7 @@ class SimpleDivider extends Module {
       inAReg(62.U(7.W) - counter)
     ),
     Seq(
-      divFSM.is(idle) -> inAReg(125, 63),
+      divFSM.is(idle) -> inACasted(125, 63),
       divFSM.willChangeTo(idle) -> Mux(canSub, subReg - inBReg, subReg)
     )
   )
