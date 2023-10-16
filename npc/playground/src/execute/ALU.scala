@@ -11,6 +11,7 @@ import chisel3.util.Decoupled
 import utils.FSM
 import decode.RegWriteMux
 import decode.AluMux2
+import chisel3.util.MuxCase
 
 object ALUSignalType extends ChiselEnum {
   val isZero, isNegative = Value
@@ -87,13 +88,16 @@ class ALU extends Module {
 
   val mulOps = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt))
   val divOps = VecInit(Seq(AluMode.div, AluMode.divu).map(t => t.asUInt))
+  val remOps = VecInit(Seq(AluMode.rem, AluMode.remu).map(t => t.asUInt))
+  val ops    = VecInit(mulOps ++ divOps ++ remOps)
 
   val inA        = io.in.bits.inA
   val inB        = io.in.bits.inB
   val opType     = io.in.bits.opType
   val inANotZero = inA.orR;
   val inBNotZero = inB.orR;
-  val isImm      = !mulOps.contains(io.in.bits.opType.asUInt) && !divOps.contains(io.in.bits.opType.asUInt)
+  val isImm      = !ops.contains(io.in.bits.opType.asUInt)
+  val isRem      = Reg(Bool())
 
   simpleAdder.io.inA := inA
   simpleAdder.io.inB := Mux(opType === AluMode.sub, ~inB, inB)
@@ -104,11 +108,13 @@ class ALU extends Module {
     normal,
     List(
       (normal, io.in.fire && mulOps.contains(io.in.bits.opType.asUInt), busyMul),
-      (normal, io.in.fire && divOps.contains(io.in.bits.opType.asUInt), busyDiv),
+      (normal, io.in.fire && VecInit(divOps ++ remOps).contains(io.in.bits.opType.asUInt), busyDiv),
       (busyMul, multiplier.io.outValid, normal),
       (busyDiv, multiplier.io.outValid, normal)
     )
   )
+
+  isRem := Mux(aluFSM.trigger(normal, busyDiv), remOps.contains(io.in.bits.opType.asUInt), isRem)
 
   multiplier.io.multiplicand := io.in.bits.inA
   multiplier.io.multiplier   := io.in.bits.inB
@@ -140,7 +146,14 @@ class ALU extends Module {
       AluMode.xor -> (inA ^ inB)
     )
   )
-  val out = Mux(aluFSM.trigger(busyMul, normal), multiplier.io.resultLow, immOut)
+  val out = MuxCase(
+    immOut,
+    Seq(
+      aluFSM.trigger(busyMul, normal) -> multiplier.io.resultLow,
+      (aluFSM.trigger(busyDiv, normal) && !isRem) -> divider.io.quotient,
+      (aluFSM.trigger(busyDiv, normal) && isRem) -> divider.io.remainder
+    )
+  )
   io.out.valid                   := (aluFSM.is(normal) && io.in.fire && isImm) || aluFSM.trigger(busyMul, normal)
   io.out.bits.isImmidiate        := isImm
   io.out.bits.out                := out
