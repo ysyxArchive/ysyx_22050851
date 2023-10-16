@@ -81,10 +81,12 @@ class ALU extends Module {
 
   val simpleAdder = Module(new SimpleAdder())
   val multiplier  = Module(new SimpleMultiplier())
+  val divider     = Module(new SimpleDivider())
 
   val immOut = Wire(UInt(64.W))
 
   val mulOps = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt))
+  val divOps = VecInit(Seq(AluMode.div, AluMode.divu).map(t => t.asUInt))
 
   val inA        = io.in.bits.inA
   val inB        = io.in.bits.inB
@@ -97,12 +99,14 @@ class ALU extends Module {
   simpleAdder.io.inB := Mux(opType === AluMode.sub, ~inB, inB)
   simpleAdder.io.inC := opType === AluMode.sub
 
-  val normal :: busyMul :: others = util.Enum(2)
+  val normal :: busyMul :: busyDiv :: others = util.Enum(2)
   val aluFSM = new FSM(
     normal,
     List(
       (normal, io.in.fire && mulOps.contains(io.in.bits.opType.asUInt), busyMul),
-      (busyMul, multiplier.io.outValid, normal)
+      (normal, io.in.fire && divOps.contains(io.in.bits.opType.asUInt), busyDiv),
+      (busyMul, multiplier.io.outValid, normal),
+      (busyDiv, multiplier.io.outValid, normal)
     )
   )
 
@@ -112,6 +116,12 @@ class ALU extends Module {
   multiplier.io.mulValid     := aluFSM.trigger(normal, busyMul)
   multiplier.io.mulSigned    := false.B
   multiplier.io.mulw         := io.in.bits.opType.asUInt === AluMode.mulw.asUInt
+  divider.io.dividend        := io.in.bits.inA
+  divider.io.divisor         := io.in.bits.inB
+  divider.io.flush           := false.B
+  divider.io.divValid        := aluFSM.trigger(normal, busyDiv)
+  divider.io.divSigned       := false.B
+  divider.io.divw            := false.B // io.in.bits.opType.asUInt === AluMode.divw.asUInt
 
   immOut := MuxLookup(opType.asUInt, 0.U)(
     EnumSeq(
