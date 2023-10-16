@@ -133,8 +133,6 @@ int main(int argc, char* argv[]) {
   auto duration =
       std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
           .count();
-
-  Log("start %ld, end %ld", start, end);
   int ret_value = cpu.gpr[10];
   if (is_bad_halt || ret_value != 0) {
     if ((int64_t)cpu.pc - MEM_START <= 0) {
