@@ -93,7 +93,7 @@ class SimpleDivider extends Module {
       Seq(
         divFSM.is(idle) -> 0.U,
         (!isHalfDiv && divFSM.is(working) && counter === (63 - i).U) -> canSub,
-        (isHalfDiv && divFSM.is(working) && counter === (31 - i).U) -> canSub
+        (isHalfDiv && divFSM.is(working) && counter === Math.max(31 - i, 0).U) -> canSub
       )
     )
   }
