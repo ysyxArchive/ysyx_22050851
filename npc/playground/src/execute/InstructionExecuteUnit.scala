@@ -130,6 +130,11 @@ class InstructionExecuteUnit extends Module {
   csrControl.csrSetmode := Mux(exeFSM.willChangeTo(waitPC), controlIn.csrsetmode, CsrSetMode.origin.asUInt)
   csrControl.csrSource  := controlIn.csrsource
 
+  // csr
+  csrControl.csrBehave  := Mux(exeFSM.willChangeTo(exewaitPC), decodeIn.control.csrbehave, CsrBehave.no.asUInt)
+  csrControl.csrSetmode := Mux(exeFSM.willChangeTo(exewaitPC), decodeIn.control.csrsetmode, CsrSetMode.origin.asUInt)
+  csrControl.csrSource  := decodeIn.control.csrsource
+
   // mem
   val memlen = MuxLookup(controlIn.memlen, 1.U)(
     EnumSeq(

@@ -17,8 +17,10 @@ object DecodeDataOut {
 }
 
 class DecodeOut extends Bundle {
+  val valid   = Output(Bool())
   val data    = Output(new DecodeDataOut);
   val control = Output(new DecodeControlOut);
+  val done    = Input(Bool())
 }
 
 class InstructionDecodeUnit extends Module {
