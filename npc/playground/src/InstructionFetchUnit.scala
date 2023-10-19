@@ -25,7 +25,7 @@ class InstructionFetchUnit extends Module {
 
   iCacheIO.data.ready    := fetchFSM.is(waitR)
   iCacheIO.readReq.valid := fetchFSM.is(waitAR)
-  iCacheIO.addr          := regIO.pc
+  iCacheIO.addr          := predictPC
 
   predictPC := Mux(fetchFSM.willChangeTo(waitAR), predictPC + 4.U, predictPC)
 
