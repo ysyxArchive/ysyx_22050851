@@ -31,7 +31,7 @@ class WriteBackUnit extends Module {
   val csrIn      = IO(Input(UInt(64.W)))
   val csrControl = IO(Flipped(new CSRFileControl()))
 
-  val wbInReg = RegInit(new WBIn())
+  val wbInReg = Reg(new WBIn())
 
   val idle :: busy :: other = Enum(3)
 
