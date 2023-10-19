@@ -13,9 +13,9 @@ class ExeDataIn extends Bundle {
   val imm  = Input(UInt(64.W))
 }
 
-object ExeDataIn {
-  val default = new ExeDataIn().Lit(_.dst -> 0.U, _.src1 -> 0.U, _.src2 -> 0.U, _.imm -> 0.U)
-}
+// object ExeDataIn {
+//   val default = new ExeDataIn().Lit(_.dst -> 0.U, _.src1 -> 0.U, _.src2 -> 0.U, _.imm -> 0.U)
+// }
 
 class ExeIn extends Bundle {
   val valid   = Output(Bool())
