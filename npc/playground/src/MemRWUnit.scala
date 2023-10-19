@@ -177,7 +177,7 @@ class MemRWUnit extends Module {
     Utils.zeroExtend(memOutRaw, memlen << 3)
   )
 
-  memIn.ready := memFSM.is(idle)
+  memIn.ready := memFSM.is(waitIn)
 
   memOut.valid              := memFSM.is(waitOut)
   memOut.bits.debug         := memInReg.debug
