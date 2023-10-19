@@ -9,7 +9,7 @@ class CPU extends Module {
   val mem         = Module(new MemInterface)
   val regs        = Module(new RegisterFile)
   val csrregs     = Module(new ControlRegisterFile)
-  val ifu         = Module(new InstructionFetchUnit)
+  // val ifu         = Module(new InstructionFetchUnit)
   val decoder     = Module(new InstructionDecodeUnit)
   val exe         = Module(new InstructionExecuteUnit)
   val blackBoxOut = Module(new BlackBoxRegs)
