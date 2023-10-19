@@ -128,6 +128,7 @@ class InstructionExecuteUnit extends Module {
   exeOut.bits.data.dst     := exeInReg.data.dst
   exeOut.bits.data.signals := alu.io.out.bits.signals
   exeOut.bits.data.pc      := exeInReg.data.pc
+  exeOut.bits.data.imm     := exeInReg.data.imm
 
   exeOut.bits.debug := exeInReg.debug
 }
