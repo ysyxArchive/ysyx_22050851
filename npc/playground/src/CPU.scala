@@ -35,8 +35,11 @@ class CPU extends Module {
 
   dCache.axiIO <> arbiter.slaveIO(1)
   mem.axiS <> arbiter.masterIO
+  memu.memIO <> dCache.io
 
   csrregs.io.data := decoder.decodeOut.bits.data
+
+  csrregs.io.control <> wbu.csrControl
 
   wbu.regIO <> regs.writeIO
 
