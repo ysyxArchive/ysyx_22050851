@@ -64,7 +64,7 @@ int parse_args(int argc, char* argv[]) {
 void load_files() {
   if (!img_file) {
     Log("not detected img file, use default file %s", "tools/default.bin");
-    img_file = "tools/default.o";
+    img_file = "tools/default.bin";
   }
   Log("detected img file: %s", img_file);
   init_memory(img_file);
