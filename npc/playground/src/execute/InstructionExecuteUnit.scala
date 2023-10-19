@@ -13,9 +13,9 @@ class ExeDataIn extends Bundle {
   val imm  = Input(UInt(64.W))
 }
 
-// object ExeDataIn {
-//   val default = new ExeDataIn().Lit(_.dst -> 0.U, _.src1 -> 0.U, _.src2 -> 0.U, _.imm -> 0.U)
-// }
+object ExeDataIn {
+  val default = new ExeDataIn().Lit(_.dst -> 0.U, _.src1 -> 0.U, _.src2 -> 0.U, _.imm -> 0.U)
+}
 
 class ExeIn extends Bundle {
   val valid   = Output(Bool())
@@ -147,11 +147,6 @@ class InstructionExecuteUnit extends Module {
   csrControl.csrBehave  := Mux(exeFSM.willChangeTo(waitPC), controlIn.csrbehave, CsrBehave.no.asUInt)
   csrControl.csrSetmode := Mux(exeFSM.willChangeTo(waitPC), controlIn.csrsetmode, CsrSetMode.origin.asUInt)
   csrControl.csrSource  := controlIn.csrsource
-
-  // csr
-  csrControl.csrBehave  := Mux(exeFSM.willChangeTo(exewaitPC), decodeIn.control.csrbehave, CsrBehave.no.asUInt)
-  csrControl.csrSetmode := Mux(exeFSM.willChangeTo(exewaitPC), decodeIn.control.csrsetmode, CsrSetMode.origin.asUInt)
-  csrControl.csrSource  := decodeIn.control.csrsource
 
   // mem
   val memlen = MuxLookup(controlIn.memlen, 1.U)(
