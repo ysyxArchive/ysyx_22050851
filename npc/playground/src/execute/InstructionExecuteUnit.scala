@@ -7,11 +7,13 @@ import execute._
 import utils._
 
 class ExeDataIn extends Bundle {
-  val src1 = Output(UInt(5.W))
-  val src2 = Output(UInt(5.W))
-  val dst  = Output(UInt(5.W))
-  val imm  = Output(UInt(64.W))
-  val pc   = Output(UInt(64.W))
+  val src1     = Output(UInt(5.W))
+  val src1Data = Output(UInt(64.W))
+  val src2     = Output(UInt(5.W))
+  val src2Data = Output(UInt(64.W))
+  val dst      = Output(UInt(5.W))
+  val imm      = Output(UInt(64.W))
+  val pc       = Output(UInt(64.W))
 
 }
 
@@ -24,9 +26,8 @@ class ExeIn extends Bundle {
 class InstructionExecuteUnit extends Module {
   val exeIn  = IO(Flipped(Decoupled(new ExeIn())))
   val exeOut = IO(Decoupled(new MemRWIn()))
-  val regIO  = IO(Flipped(new RegReadIO()))
   val csrIn  = IO(Input(UInt(64.W)))
-  // val csrControl = IO(Flipped(new CSRFileControl()))
+  val regIn  = IO(Input(new RegReadIO()))
 
   val exeInReg = Reg(new ExeIn())
 
@@ -47,60 +48,19 @@ class InstructionExecuteUnit extends Module {
   )
 
   exeInReg := Mux(exeIn.fire, exeIn.bits, exeInReg)
-  // regIO
-  val src1 = Wire(UInt(64.W))
-  val src2 = Wire(UInt(64.W))
-  regIO.raddr0 := exeInReg.data.src1
-  regIO.raddr1 := exeInReg.data.src2
-  val snpc = regIO.pc + 4.U
-  val pcBranch = MuxLookup(exeInReg.control.pcaddrsrc, false.B)(
-    EnumSeq(
-      PCAddrSrc.aluzero -> alu.io.out.bits.signals.isZero,
-      PCAddrSrc.aluneg -> alu.io.out.bits.signals.isNegative,
-      PCAddrSrc.alunotneg -> !alu.io.out.bits.signals.isNegative,
-      PCAddrSrc.alunotzero -> !alu.io.out.bits.signals.isZero,
-      PCAddrSrc.alunotcarryandnotzero -> (!alu.io.out.bits.signals.isCarry && !alu.io.out.bits.signals.isZero),
-      PCAddrSrc.alucarryorzero -> (alu.io.out.bits.signals.isCarry || alu.io.out.bits.signals.isZero),
-      PCAddrSrc.zero -> false.B,
-      PCAddrSrc.one -> true.B
-    )
-  )
-  // val csrInReg = RegInit(csrIn)
-  // csrInReg := Mux(exeFSM.willChangeTo(waitPC), csrIn, csrInReg)
-  val dnpcAddSrcReg = RegNext(
-    MuxLookup(exeInReg.control.pcsrc, regIO.pc)(
-      EnumSeq(
-        PcSrc.pc -> regIO.pc,
-        PcSrc.src1 -> src1
-      )
-    )
-  )
-
-  src1 :=
-    Mux(
-      exeInReg.control.srccast1,
-      Utils.cast(regIO.out0, 32, 64),
-      regIO.out0
-    )
-  src2 :=
-    Mux(
-      exeInReg.control.srccast2,
-      Utils.cast(regIO.out1, 32, 64),
-      regIO.out1
-    )
 
   // alu
   alu.io.in.bits.inA := MuxLookup(exeInReg.control.alumux1, 0.U)(
     EnumSeq(
-      AluMux1.pc -> regIO.pc,
-      AluMux1.src1 -> src1,
+      AluMux1.pc -> exeInReg.data.pc,
+      AluMux1.src1 -> exeInReg.data.src1Data,
       AluMux1.zero -> 0.U
     )
   )
   alu.io.in.bits.inB := MuxLookup(exeInReg.control.alumux2, 0.U)(
     EnumSeq(
       AluMux2.imm -> exeInReg.data.imm,
-      AluMux2.src2 -> src2
+      AluMux2.src2 -> exeInReg.data.src2Data
     )
   )
   val res = AluMode.safe(exeInReg.control.alumode)
@@ -124,7 +84,7 @@ class InstructionExecuteUnit extends Module {
   exeOut.bits.data.signals  := alu.io.out.bits.signals
   exeOut.bits.data.pc       := exeInReg.data.pc
   exeOut.bits.data.imm      := exeInReg.data.imm
-  exeOut.bits.data.src1Data := src1
+  exeOut.bits.data.src1Data := exeInReg.data.src1Data
 
   exeOut.bits.debug := exeInReg.debug
 }
