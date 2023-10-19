@@ -172,7 +172,7 @@ class MemRWUnit extends Module {
       MemLen.eight -> memIO.data.asUInt
     )
   )
-  memOut := Mux(
+  val memData = Mux(
     memInReg.control.memmode === MemMode.read.asUInt,
     Utils.signExtend(memOutRaw, memlen << 3),
     Utils.zeroExtend(memOutRaw, memlen << 3)
