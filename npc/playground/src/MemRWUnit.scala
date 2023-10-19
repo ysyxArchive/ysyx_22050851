@@ -28,7 +28,7 @@ class MemDataIn extends Bundle {
 class MemRWUnit extends Module {
   val memIO  = IO(Flipped(new CacheIO(64, 64)))
   val memIn  = IO(Flipped(Decoupled(new MemRWIn())))
-  val memOut = Wire(Decoupled(new WBIn()))
+  val memOut = IO(Decoupled(new WBIn()))
   // val regIO      = IO(Flipped(new RegisterFileIO()))
   // val csrIn      = IO(Input(UInt(64.W)))
   // val csrControl = IO(Flipped(new CSRFileControl()))
