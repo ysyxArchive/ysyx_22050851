@@ -19,7 +19,7 @@ class ExeIn extends Bundle {
 }
 
 class InstructionExecuteUnit extends Module {
-  val exeIn      = IO(Flipped(Decoupled(new ExeIn())))
+  val exeIn      = IO(Decoupled(new ExeIn()))
   val memIO      = IO(Flipped(new CacheIO(64, 64)))
   val regIO      = IO(Flipped(new RegisterFileIO()))
   val csrIn      = IO(Input(UInt(64.W)))
