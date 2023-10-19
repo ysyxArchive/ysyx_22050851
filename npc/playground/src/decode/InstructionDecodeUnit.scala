@@ -5,10 +5,26 @@ import utils._
 import decode._
 import execute._
 
+class DecodeDataOut extends Bundle {
+  val src1 = Output(UInt(5.W))
+  val src2 = Output(UInt(5.W))
+  val dst  = Output(UInt(5.W))
+  val imm  = Output(UInt(64.W))
+}
+
+object DecodeDataOut {
+  val default = new DecodeDataOut().Lit(_.dst -> 0.U, _.src1 -> 0.U, _.src2 -> 0.U, _.imm -> 0.U)
+}
+
+class DecodeOut extends Bundle {
+  val data    = Output(new DecodeDataOut);
+  val control = Output(new DecodeControlOut);
+}
+
 class InstructionDecodeUnit extends Module {
   val regIO          = IO(Input(new RegisterFileIO()))
   val iCacheIO       = IO(Flipped(new CacheIO(64, 64)))
-  val decodeOut      = IO(Decoupled(new ExeIn()))
+  val decodeOut      = IO(Decoupled(new DecodeOut))
   val controlDecoder = Module(new InstContorlDecoder)
 
   val inst = RegInit(0x13.U(32.W))
@@ -66,8 +82,4 @@ class InstructionDecodeUnit extends Module {
   iCacheIO.writeReq.bits.data := DontCare
   iCacheIO.writeReq.bits.mask := DontCare
   iCacheIO.writeRes.ready     := false.B
-
-  // debug
-  decodeOut.bits.debug.pc   := regIO.pc
-  decodeOut.bits.debug.inst := inst
 }

@@ -22,7 +22,7 @@ class CPU extends Module {
   iCache.axiIO <> arbiter.slaveIO(0)
   decoder.regIO := regs.io
 
-  exe.exeIn <> decoder.decodeOut
+  exe.decodeIn <> decoder.decodeOut
   exe.regIO <> regs.io
   dCache.axiIO <> arbiter.slaveIO(1)
   exe.memIO <> dCache.io

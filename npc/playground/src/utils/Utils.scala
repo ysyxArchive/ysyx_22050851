@@ -87,8 +87,3 @@ class FSM(val initState: UInt, val elems: List[(UInt, Bool, UInt)]) {
     elems.map({ case tri => (tri._1 === status && tri._2) }).reduce(_ || _)
   }
 }
-
-class DebugInfo extends Bundle {
-  val pc = Output(UInt(64.W))
-  val inst = Output(UInt(32.W))
-}
