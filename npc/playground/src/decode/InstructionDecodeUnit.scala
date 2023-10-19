@@ -66,4 +66,8 @@ class InstructionDecodeUnit extends Module {
   iCacheIO.writeReq.bits.data := DontCare
   iCacheIO.writeReq.bits.mask := DontCare
   iCacheIO.writeRes.ready     := false.B
+
+  // debug
+  decodeOut.debug.pc   := regIO.pcaddrsrc
+  decodeOut.debug.inst := inst
 }
