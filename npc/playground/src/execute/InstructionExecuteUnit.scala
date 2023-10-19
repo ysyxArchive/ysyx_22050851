@@ -27,7 +27,6 @@ class InstructionExecuteUnit extends Module {
   val exeIn  = IO(Flipped(Decoupled(new ExeIn())))
   val exeOut = IO(Decoupled(new MemRWIn()))
   val csrIn  = IO(Input(UInt(64.W)))
-  val regIn  = IO(Input(new RegReadIO()))
 
   val exeInReg = Reg(new ExeIn())
 
