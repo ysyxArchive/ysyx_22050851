@@ -25,7 +25,7 @@ class InstructionExecuteUnit extends Module {
   val exeOut     = IO(Decoupled(new MemRWIn()))
   val regIO      = IO(Flipped(new RegReadIO()))
   val csrIn      = IO(Input(UInt(64.W)))
-  val csrControl = IO(Flipped(new CSRFileControl()))
+  // val csrControl = IO(Flipped(new CSRFileControl()))
 
   val exeInReg = Reg(new ExeIn())
 

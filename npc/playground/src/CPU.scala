@@ -36,7 +36,6 @@ class CPU extends Module {
   mem.axiS <> arbiter.masterIO
 
   csrregs.io.data    := decoder.decodeOut.bits.data
-  csrregs.io.control := exe.csrControl
 
   blackBoxOut.io.pc      := regs.debugPCOut;
   blackBoxOut.io.regs    := regs.debugOut;
