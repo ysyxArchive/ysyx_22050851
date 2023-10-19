@@ -177,8 +177,14 @@ class MemRWUnit extends Module {
 
   memIn.ready := memFSM.is(idle)
 
-  memOut.valid         := memFSM.is(waitOut)
-  memOut.bits.debug    := memInReg.debug
-  memOut.bits.data     :<= memInReg.data
-  memOut.bits.data.mem := memData
+  memOut.valid             := memFSM.is(waitOut)
+  memOut.bits.debug        := memInReg.debug
+  memOut.bits.data.src1    := memInReg.data.src1
+  memOut.bits.data.src2    := memInReg.data.src2
+  memOut.bits.data.dst     := memInReg.data.dst
+  memOut.bits.data.mem     := memData
+  memOut.bits.data.alu     := memInReg.data.alu
+  memOut.bits.data.mem     := memData
+  memOut.bits.data.signals := memInReg.data.signals
+  memOut.bits.data.pc      := memInReg.data.pc
 }
