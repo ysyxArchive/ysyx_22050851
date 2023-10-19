@@ -1,7 +1,6 @@
 import chisel3._
 import chisel3.util.{is, switch, MuxLookup}
 import chisel3.util.Decoupled
-import decode.DecodeControlOut
 import decode.CsrSource
 import decode.AluMux1
 import decode._
@@ -100,7 +99,7 @@ class CSRFileControl extends Bundle {
 
 class ControlRegisterFileIO extends Bundle {
   val src1Data = Input(UInt(64.W))
-  val data     = Flipped(new DecodeDataOut())
+  val data     = Flipped(new ExeDataIn())
   val control  = new CSRFileControl()
   val output   = Output(UInt(64.W))
 }

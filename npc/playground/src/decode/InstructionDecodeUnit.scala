@@ -5,52 +5,38 @@ import utils._
 import decode._
 import execute._
 
-class DecodeDataOut extends Bundle {
-  val src1 = Output(UInt(5.W))
-  val src2 = Output(UInt(5.W))
-  val dst  = Output(UInt(5.W))
-  val imm  = Output(UInt(64.W))
-}
-
-object DecodeDataOut {
-  val default = new DecodeDataOut().Lit(_.dst -> 0.U, _.src1 -> 0.U, _.src2 -> 0.U, _.imm -> 0.U)
-}
-
-class DecodeOut extends Bundle {
-  val data    = Output(new DecodeDataOut);
-  val control = Output(new DecodeControlOut);
+class DecodeIn extends Bundle {
+  val debug = Output(new DebugInfo)
+  val pc    = Output(UInt(64.W))
+  val inst  = Output(UInt(32.W))
 }
 
 class InstructionDecodeUnit extends Module {
   val regIO          = IO(Input(new RegisterFileIO()))
-  val iCacheIO       = IO(Flipped(new CacheIO(64, 64)))
-  val decodeOut      = IO(Decoupled(new DecodeOut))
+  val decodeIn       = IO(Flipped(Decoupled(new DecodeIn())))
+  val decodeOut      = IO(Decoupled(new ExeIn()))
   val controlDecoder = Module(new InstContorlDecoder)
 
-  val inst = RegInit(0x13.U(32.W))
+  val decodeInReg = Reg(new DecodeIn())
 
-  val idle :: waitAR :: waitR :: waitSend :: others = Enum(4)
+  val idle :: waitFetch :: waitSend :: others = Enum(4)
   val decodeFSM = new FSM(
-    waitAR,
+    waitFetch,
     List(
-      (waitAR, iCacheIO.readReq.fire, waitR),
-      (waitR, iCacheIO.data.fire, waitSend),
       (waitSend, decodeOut.fire, idle),
-      (idle, decodeOut.ready, waitAR)
+      (waitFetch, decodeIn.fire, waitSend),
+      (idle, decodeOut.ready, waitFetch)
     )
   )
 
-  iCacheIO.data.ready    := decodeFSM.is(waitR)
-  iCacheIO.readReq.valid := decodeFSM.is(waitAR)
-  iCacheIO.addr          := regIO.pc
-
-  inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits.asUInt, inst)
+  decodeInReg := Mux(decodeIn.fire, decodeIn.bits, decodeInReg)
 
   // decodeout.control
-  controlDecoder.input   := inst
+  controlDecoder.input   := decodeInReg.inst
   decodeOut.bits.control := controlDecoder.output
 
   // decodeout.data
+  val inst = decodeInReg.inst
   val rs1  = inst(19, 15)
   val rs2  = inst(24, 20)
   val rd   = inst(11, 7)
@@ -77,9 +63,7 @@ class InstructionDecodeUnit extends Module {
 
   // decodeout.valid
   decodeOut.valid := decodeFSM.is(waitSend)
-
-  iCacheIO.writeReq.valid     := false.B
-  iCacheIO.writeReq.bits.data := DontCare
-  iCacheIO.writeReq.bits.mask := DontCare
-  iCacheIO.writeRes.ready     := false.B
+  // debug
+  decodeOut.bits.debug.pc   := regIO.pc
+  decodeOut.bits.debug.inst := inst
 }

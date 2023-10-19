@@ -6,10 +6,10 @@ import decode._
 class CPU extends Module {
   val enableDebug = IO(Input(Bool()))
 
-  val mem     = Module(new MemInterface)
-  val regs    = Module(new RegisterFile)
-  val csrregs = Module(new ControlRegisterFile)
-  // val ifu         = Module(new InstructionFetchUnit)
+  val mem         = Module(new MemInterface)
+  val regs        = Module(new RegisterFile)
+  val csrregs     = Module(new ControlRegisterFile)
+  val ifu         = Module(new InstructionFetchUnit)
   val decoder     = Module(new InstructionDecodeUnit)
   val exe         = Module(new InstructionExecuteUnit)
   val blackBoxOut = Module(new BlackBoxRegs)
@@ -18,11 +18,11 @@ class CPU extends Module {
   val iCache = Module(new Cache(name = "icache"))
   val dCache = Module(new Cache(name = "dcache"))
 
-  decoder.iCacheIO <> iCache.io
+  ifu.iCacheIO <> iCache.io
   iCache.axiIO <> arbiter.slaveIO(0)
   decoder.regIO := regs.io
 
-  exe.decodeIn <> decoder.decodeOut
+  exe.exeIn <> decoder.decodeOut
   exe.regIO <> regs.io
   dCache.axiIO <> arbiter.slaveIO(1)
   exe.memIO <> dCache.io
