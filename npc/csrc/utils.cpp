@@ -65,10 +65,9 @@ void load_files() {
   if (!img_file) {
     Log("not detected img file, use default file %s", "tools/default.o");
     img_file = "tools/default.o";
-    Log("detected img file: %s", img_file);
-    init_memory(img_file);
   }
-  Assert(img_file, "img file not found!");
+  Log("detected img file: %s", img_file);
+  init_memory(img_file);
 
   Assert(diff_so_file, "difftest ref file not found!");
   Log("detected so file: %s", diff_so_file);
