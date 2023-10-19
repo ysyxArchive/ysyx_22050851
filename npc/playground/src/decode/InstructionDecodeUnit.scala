@@ -66,4 +66,6 @@ class InstructionDecodeUnit extends Module {
   // debug
   decodeOut.bits.debug.pc   := regIO.pc
   decodeOut.bits.debug.inst := inst
+
+  decodeIn.ready := decodeFSM.is(waitFetch)
 }
