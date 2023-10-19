@@ -18,7 +18,6 @@ class MemDataIn extends Bundle {
   val dst     = Output(UInt(5.W))
   val imm     = Output(UInt(64.W))
   val alu     = Output(UInt(64.W))
-  val mem     = Output(UInt(64.W))
   val signals = new SignalIO()
   val pc      = Input(UInt(64.W))
 }
@@ -178,7 +177,8 @@ class MemRWUnit extends Module {
 
   memIn.ready := memFSM.is(idle)
 
-  memOut.valid      := memFSM.is(waitOut)
-  memOut.bits.debug := memIn.bits.debug
-  memOut.bits.data  := memIn.bits.data
+  memOut.valid         := memFSM.is(waitOut)
+  memOut.bits.debug    := memInReg.debug
+  memOut.bits.data     := memInReg.data
+  memOut.bits.data.mem := memData
 }

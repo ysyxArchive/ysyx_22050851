@@ -11,6 +11,7 @@ class ExeDataIn extends Bundle {
   val src2 = Output(UInt(5.W))
   val dst  = Output(UInt(5.W))
   val imm  = Output(UInt(64.W))
+  val pc  = Output(UInt(64.W))
 
 }
 
@@ -21,10 +22,10 @@ class ExeIn extends Bundle {
 }
 
 class InstructionExecuteUnit extends Module {
-  val exeIn      = IO(Flipped(Decoupled(new ExeIn())))
-  val exeOut     = IO(Decoupled(new MemRWIn()))
-  val regIO      = IO(Flipped(new RegReadIO()))
-  val csrIn      = IO(Input(UInt(64.W)))
+  val exeIn  = IO(Flipped(Decoupled(new ExeIn())))
+  val exeOut = IO(Decoupled(new MemRWIn()))
+  val regIO  = IO(Flipped(new RegReadIO()))
+  val csrIn  = IO(Input(UInt(64.W)))
   // val csrControl = IO(Flipped(new CSRFileControl()))
 
   val exeInReg = Reg(new ExeIn())
@@ -119,11 +120,15 @@ class InstructionExecuteUnit extends Module {
 
   exeIn.ready := exeFSM.is(idle)
 
-  exeOut.valid          := exeFSM.is(waitSend)
-  exeOut.bits.control   := exeInReg.control
-  exeOut.bits.data.alu  := alu.io.out.bits.out
-  exeOut.bits.data.src1 := exeInReg.data.src1
-  exeOut.bits.data.src2 := exeInReg.data.src2
+  exeOut.valid             := exeFSM.is(waitSend)
+  exeOut.bits.control      := exeInReg.control
+  exeOut.bits.data.alu     := alu.io.out.bits.out
+  exeOut.bits.data.src1    := exeInReg.data.src1
+  exeOut.bits.data.src2    := exeInReg.data.src2
+  exeOut.bits.data.dst     := exeInReg.data.dst
+  exeOut.bits.data.signals := alu.io.out.bits.signals
+  exeOut.bits.data.pc      := exeInReg.data.pc
+
 
   exeOut.bits.debug := exeInReg.debug
 }
