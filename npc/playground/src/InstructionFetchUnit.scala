@@ -12,14 +12,13 @@ class InstructionFetchUnit extends Module {
 
   val inst = RegInit(0x13.U(32.W))
 
-  val idle :: waitAR :: waitR :: waitSend :: others = Enum(4)
+  val waitAR :: waitR :: waitSend :: others = Enum(4)
   val fetchFSM = new FSM(
     waitAR,
     List(
       (waitAR, iCacheIO.readReq.fire, waitR),
       (waitR, iCacheIO.data.fire, waitSend),
-      (waitSend, fetchOut.fire, idle),
-      (idle, fetchOut.ready, waitAR)
+      (waitSend, fetchOut.fire, waitAR)
     )
   )
 

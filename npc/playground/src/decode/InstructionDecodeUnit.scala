@@ -19,14 +19,10 @@ class InstructionDecodeUnit extends Module {
 
   val decodeInReg = Reg(new DecodeIn())
 
-  val idle :: waitFetch :: waitSend :: others = Enum(4)
+  val waitFetch :: waitSend :: others = Enum(4)
   val decodeFSM = new FSM(
     waitFetch,
-    List(
-      (waitSend, decodeOut.fire, idle),
-      (waitFetch, decodeIn.fire, waitSend),
-      (idle, decodeOut.ready, waitFetch)
-    )
+    List((waitSend, decodeOut.fire, waitFetch), (waitFetch, decodeIn.fire, waitSend))
   )
 
   decodeInReg := Mux(decodeIn.fire, decodeIn.bits, decodeInReg)
@@ -60,16 +56,13 @@ class InstructionDecodeUnit extends Module {
   decodeOut.bits.data.src2 := rs2
   decodeOut.bits.data.dst  := rd
 
-  // decodeout.valid
-  decodeOut.valid := decodeFSM.is(waitSend)
+  decodeOut.valid        := decodeFSM.is(waitSend)
+  decodeOut.bits.data.pc := decodeInReg.pc
+  decodeOut.bits.control := controlDecoder.output
+
+  decodeIn.ready := decodeFSM.is(waitFetch)
   // debug
   decodeOut.bits.debug.pc   := regIO.pc
   decodeOut.bits.debug.inst := inst
-
-  decodeIn.ready := decodeFSM.is(waitFetch)
-
-  decodeOut.valid         := decodeFSM.is(waitSend)
-  decodeOut.bits.data.pc  := decodeInReg.pc
-  decodeOut.bits.control  := controlDecoder.output
 
 }

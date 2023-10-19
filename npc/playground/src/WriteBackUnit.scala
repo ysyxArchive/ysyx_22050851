@@ -47,10 +47,6 @@ class WriteBackUnit extends Module {
   wbInReg := Mux(wbIn.fire, wbIn.bits, wbInReg)
 
   // regWriteIO
-  // val src1 = Wire(UInt(64.W))
-  // val src2 = Wire(UInt(64.W))
-  // regWriteIO.raddr0 := wbInReg.data.src1
-  // regWriteIO.raddr1 := wbInReg.data.src2
   regWriteIO.waddr := Mux(wbFSM.is(busy) && wbInReg.control.regwrite, wbInReg.data.dst, 0.U)
   val snpc = wbInReg.data.pc + 4.U
   val pcBranch = MuxLookup(wbInReg.control.pcaddrsrc, false.B)(

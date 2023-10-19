@@ -34,16 +34,15 @@ class InstructionExecuteUnit extends Module {
 
   val shouldWaitALU = !alu.io.out.bits.isImmidiate
 
-  val idle :: waitDecode :: waitALU :: waitSend :: other = Enum(10)
+  val waitDecode :: waitALU :: waitSend :: other = Enum(10)
 
   val exeFSM = new FSM(
-    idle,
+    waitDecode,
     List(
       (waitDecode, exeIn.fire && shouldWaitALU, waitALU),
       (waitDecode, exeIn.fire, waitSend),
       (waitALU, alu.io.out.fire, waitSend),
-      (waitSend, exeOut.fire, idle),
-      (idle, exeOut.ready, waitDecode)
+      (waitSend, exeOut.fire, waitDecode)
     )
   )
 
@@ -108,10 +107,6 @@ class InstructionExecuteUnit extends Module {
   alu.io.in.bits.opType := res._1
   alu.io.out.ready      := alu.io.out.bits.isImmidiate || exeFSM.is(waitALU)
   alu.io.in.valid       := exeIn.fire
-  // csr
-  // csrControl.csrBehave  := Mux(exeFSM.willChangeTo(waitPC), exeInReg.control.csrbehave, CsrBehave.no.asUInt)
-  // csrControl.csrSetmode := Mux(exeFSM.willChangeTo(waitPC), exeInReg.control.csrsetmode, CsrSetMode.origin.asUInt)
-  // csrControl.csrSource  := exeInReg.control.csrsource
 
   // blackBoxHalt
   val blackBox = Module(new BlackBoxHalt);
