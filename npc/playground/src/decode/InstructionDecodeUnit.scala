@@ -70,7 +70,6 @@ class InstructionDecodeUnit extends Module {
 
   decodeOut.valid         := decodeFSM.is(waitSend)
   decodeOut.bits.data.pc  := decodeInReg.pc
-  decodeout.bits.data.imm := imm
   decodeOut.bits.control  := controlDecoder.output
 
 }
