@@ -30,13 +30,15 @@ class CPU extends Module {
   iCache.axiIO <> arbiter.slaveIO(0)
   decoder.regIO := regs.readIO
 
-  dCache.axiIO <> arbiter.slaveIO(1)
   exe.csrIn := csrregs.io.output
   exe.regIO <> regs.readIO
 
+  dCache.axiIO <> arbiter.slaveIO(1)
   mem.axiS <> arbiter.masterIO
 
   csrregs.io.data := decoder.decodeOut.bits.data
+
+  wbu.regIO <> regs.writeIO
 
   blackBoxOut.io.pc      := regs.debugPCOut;
   blackBoxOut.io.regs    := regs.debugOut;
