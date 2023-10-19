@@ -1,34 +1,44 @@
-import chisel3.DontCare.:=
 import chisel3._
-import chisel3.experimental.{BaseModule, ChiselEnum}
-import chisel3.util.Enum
-import dataclass.data
+import chisel3.experimental.BundleLiterals._
+import chisel3.util._
+import utils._
+import decode._
+import execute._
 
 class InstructionFetchUnit extends Module {
-  val instOut = MemReadOnlyAxiLiteIO.slave()
+  val regIO    = IO(Input(new RegReadIO()))
+  val fetchOut = IO(Decoupled(new DecodeIn()))
+  val iCacheIO = IO(Flipped(new CacheIO(64, 64)))
 
-  val mem = Module(new BlackBoxMem)
+  val inst = RegInit(0x13.U(32.W))
 
-  val instValid = RegInit(false.B)
-  val inst      = RegInit(0x13.U(32.W)) // addi
+  val idle :: waitAR :: waitR :: waitSend :: others = Enum(4)
+  val fetchFSM = new FSM(
+    waitAR,
+    List(
+      (waitAR, iCacheIO.readReq.fire, waitR),
+      (waitR, iCacheIO.data.fire, waitSend),
+      (waitSend, fetchOut.fire, idle),
+      (idle, fetchOut.ready, waitAR)
+    )
+  )
 
-  val outData = Wire(MemAxiLite().R.bits)
-  outData.id   := 0.U
-  outData.data := inst
+  iCacheIO.data.ready    := fetchFSM.is(waitR)
+  iCacheIO.readReq.valid := fetchFSM.is(waitAR)
+  iCacheIO.addr          := regIO.pc
 
-  mem.io.clock  := clock
-  mem.io.isRead := true.B
-  mem.io.mask   := DontCare
-  mem.io.addr   := instOut.AR.bits.addr
-  mem.io.enable := instOut.AR.fire
+  inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits.asUInt, inst)
 
-  inst := Mux(instOut.AR.fire, mem.io.rdata, inst)
+  fetchOut.valid := fetchFSM.is(waitSend)
 
-  instValid := Mux(instValid, !instOut.R.fire, instOut.AR.fire)
+  iCacheIO.writeReq.valid     := false.B
+  iCacheIO.writeReq.bits.data := DontCare
+  iCacheIO.writeReq.bits.mask := DontCare
+  iCacheIO.writeRes.ready     := false.B
 
-  instOut.AR.ready := !instValid
-  instOut.R.valid  := instValid
-
-  instOut.R.bits := outData
-
+  // fetchout
+  fetchOut.bits.debug.pc   := regIO.pc
+  fetchOut.bits.debug.inst := inst
+  fetchOut.bits.pc         := regIO.pc
+  fetchOut.bits.inst       := inst
 }

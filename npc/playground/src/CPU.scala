@@ -6,34 +6,46 @@ import decode._
 class CPU extends Module {
   val enableDebug = IO(Input(Bool()))
 
-  val mem     = Module(new MemInterface)
-  val regs    = Module(new RegisterFile)
-  val csrregs = Module(new ControlRegisterFile)
-  // val ifu         = Module(new InstructionFetchUnit)
-  val decoder     = Module(new InstructionDecodeUnit)
-  val exe         = Module(new InstructionExecuteUnit)
+  val mem         = Module(new MemInterface)
+  val regs        = Module(new RegisterFile)
+  val csrregs     = Module(new ControlRegisterFile)
   val blackBoxOut = Module(new BlackBoxRegs)
-  val arbiter     = Module(new AxiLiteArbiter(2))
 
-  val iCache = Module(new Cache(name = "icache"))
-  val dCache = Module(new Cache(name = "dcache"))
+  val ifu     = Module(new InstructionFetchUnit)
+  val decoder = Module(new InstructionDecodeUnit)
+  val exe     = Module(new InstructionExecuteUnit)
+  val memu    = Module(new MemRWUnit())
+  val wbu     = Module(new WriteBackUnit())
 
-  decoder.iCacheIO <> iCache.io
+  val arbiter = Module(new AxiLiteArbiter(2))
+  val iCache  = Module(new Cache(name = "icache"))
+  val dCache  = Module(new Cache(name = "dcache"))
+
+  
+  ifu.fetchOut <> decoder.decodeIn
+  decoder.decodeOut <> exe.exeIn
+  exe.exeOut <> memu.memIn
+  memu.memOut <> wbu.wbIn
+  
   iCache.axiIO <> arbiter.slaveIO(0)
-  decoder.regIO := regs.io
-
-  exe.decodeIn <> decoder.decodeOut
-  exe.regIO <> regs.io
   dCache.axiIO <> arbiter.slaveIO(1)
-  exe.memIO <> dCache.io
-  exe.csrIn := csrregs.io.output
-
+  decoder.regIO := regs.readIO
   mem.axiS <> arbiter.masterIO
 
-  csrregs.io.data     := decoder.decodeOut.bits.data
-  csrregs.io.src1Data := regs.io.out0
-  csrregs.io.control  := exe.csrControl
-  csrregs.regIn       := regs.io
+  ifu.iCacheIO <> iCache.io
+  ifu.regIO := regs.readIO
+
+  exe.csrIn := csrregs.io.output
+  exe.regIO <> regs.readIO
+
+  memu.memIO <> dCache.io
+
+  wbu.csrIn := csrregs.io.output
+  wbu.regWriteIO <> regs.writeIO
+  wbu.regReadIO := regs.readIO
+
+  csrregs.io.data := memu.memOut.bits.data
+  csrregs.io.control <> wbu.csrControl
 
   blackBoxOut.io.pc      := regs.debugPCOut;
   blackBoxOut.io.regs    := regs.debugOut;
