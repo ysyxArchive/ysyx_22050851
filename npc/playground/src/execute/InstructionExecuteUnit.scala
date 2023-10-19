@@ -36,16 +36,17 @@ class InstructionExecuteUnit extends Module {
 
   dataReg    := Mux(exeIn.fire, exeIn.bits.data, dataReg)
   controlReg := Mux(exeIn.fire, exeIn.bits.control, controlReg)
-  val exeInReg = Reg(new ExeIn())
+  val exeInReg = Reg(new ExeIn().bits)
 
   val alu = Module(new ALU)
 
   val memOut = Wire(UInt(64.W))
 
-  val memIsRead     = exeIn.control.memmode === MemMode.read.asUInt || exeIn.control.memmode === MemMode.readu.asUInt
   val shouldMemWork = exeIn.bits.control.memmode =/= MemMode.no.asUInt
+  
+  val memIsRead     = exeInReg.control.memmode === MemMode.read.asUInt || exeInReg.control.memmode === MemMode.readu.asUInt
   val shouldWaitALU = !alu.io.out.bits.isImmidiate
-
+  
   val idle :: waitMemReq :: waitMemRes :: waitPC :: waitALU :: other = Enum(10)
 
   val exeFSM = new FSM(
@@ -61,7 +62,7 @@ class InstructionExecuteUnit extends Module {
     )
   )
 
-  exeInReg := Mux(exeFSM.is(idle), exeInReg.bits.control, exeInReg)
+  exeInReg := Mux(exeIn.fire, exeIn.bits, exeInReg)
   // regIO
   val src1 = Wire(UInt(64.W))
   val src2 = Wire(UInt(64.W))
