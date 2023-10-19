@@ -13,14 +13,13 @@ class ExeDataIn extends Bundle {
   val imm  = Input(UInt(64.W))
 }
 
-
 class ExeIn extends Bundle {
   val data    = Input(new ExeDataIn);
   val control = Input(new ExeControlIn);
 }
 
 class InstructionExecuteUnit extends Module {
-  val exeIn      = IO(Decoupled(new ExeIn()))
+  val exeIn      = IO(Flipped(Decoupled(new ExeIn())))
   val memIO      = IO(Flipped(new CacheIO(64, 64)))
   val regIO      = IO(Flipped(new RegisterFileIO()))
   val csrIn      = IO(Input(UInt(64.W)))
@@ -33,10 +32,10 @@ class InstructionExecuteUnit extends Module {
   val memOut = Wire(UInt(64.W))
 
   val shouldMemWork = exeIn.bits.control.memmode =/= MemMode.no.asUInt
-  
+
   val memIsRead     = exeInReg.control.memmode === MemMode.read.asUInt || exeInReg.control.memmode === MemMode.readu.asUInt
   val shouldWaitALU = !alu.io.out.bits.isImmidiate
-  
+
   val idle :: waitMemReq :: waitMemRes :: waitPC :: waitALU :: other = Enum(10)
 
   val exeFSM = new FSM(

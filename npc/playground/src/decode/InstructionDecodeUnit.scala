@@ -8,7 +8,7 @@ import execute._
 class InstructionDecodeUnit extends Module {
   val regIO          = IO(Input(new RegisterFileIO()))
   val iCacheIO       = IO(Flipped(new CacheIO(64, 64)))
-  val decodeOut      = IO(Flipped(Decoupled(new ExeIn)))
+  val decodeOut      = IO(Decoupled(new ExeIn))
   val controlDecoder = Module(new InstContorlDecoder)
 
   val inst = RegInit(0x13.U(32.W))
