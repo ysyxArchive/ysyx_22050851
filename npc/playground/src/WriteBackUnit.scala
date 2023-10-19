@@ -34,13 +34,13 @@ class WriteBackUnit extends Module {
 
   val wbInReg = Reg(new WBIn())
 
-  val idle :: waitPC :: other = Enum(3)
+  val idle :: busy :: other = Enum(3)
 
   val wbFSM = new FSM(
     idle,
     List(
-      (idle, wbIn.fire, waitPC),
-      (waitPC, true.B, idle)
+      (idle, wbIn.fire, busy),
+      (busy, true.B, idle)
     )
   )
 
@@ -51,7 +51,7 @@ class WriteBackUnit extends Module {
   // val src2 = Wire(UInt(64.W))
   // regWriteIO.raddr0 := wbInReg.data.src1
   // regWriteIO.raddr1 := wbInReg.data.src2
-  regWriteIO.waddr := Mux(wbInReg.control.regwrite && wbIn.fire, wbInReg.data.dst, 0.U)
+  regWriteIO.waddr := Mux(wbFSM.is(busy) && wbInReg.control.regwrite, wbInReg.data.dst, 0.U)
   val snpc = wbInReg.data.pc + 4.U
   val pcBranch = MuxLookup(wbInReg.control.pcaddrsrc, false.B)(
     EnumSeq(
@@ -66,7 +66,7 @@ class WriteBackUnit extends Module {
     )
   )
   val csrInReg = RegInit(csrIn)
-  csrInReg := Mux(wbFSM.willChangeTo(waitPC), csrIn, csrInReg)
+  csrInReg := Mux(wbFSM.willChangeTo(busy), csrIn, csrInReg)
   val dnpcAddSrcReg = RegNext(
     MuxLookup(wbInReg.control.pcsrc, wbInReg.data.pc)(
       EnumSeq(
@@ -81,7 +81,7 @@ class WriteBackUnit extends Module {
       PcCsr.csr -> csrInReg
     )
   )
-  regWriteIO.dnpc := Mux(wbFSM.is(waitPC), Mux(pcBranch.asBool, dnpcAlter, snpc), regReadIO.pc)
+  regWriteIO.dnpc := Mux(wbFSM.is(busy), Mux(pcBranch.asBool, dnpcAlter, snpc), regReadIO.pc)
   val regwdata = MuxLookup(wbInReg.control.regwritemux, wbInReg.data.alu)(
     EnumSeq(
       RegWriteMux.alu -> wbInReg.data.alu,
@@ -95,8 +95,8 @@ class WriteBackUnit extends Module {
   )
   regWriteIO.wdata := Mux(wbInReg.control.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)
   // csr
-  csrControl.csrBehave  := Mux(wbFSM.willChangeTo(waitPC), wbInReg.control.csrbehave, CsrBehave.no.asUInt)
-  csrControl.csrSetmode := Mux(wbFSM.willChangeTo(waitPC), wbInReg.control.csrsetmode, CsrSetMode.origin.asUInt)
+  csrControl.csrBehave  := Mux(wbFSM.willChangeTo(busy), wbInReg.control.csrbehave, CsrBehave.no.asUInt)
+  csrControl.csrSetmode := Mux(wbFSM.willChangeTo(busy), wbInReg.control.csrsetmode, CsrSetMode.origin.asUInt)
   csrControl.csrSource  := wbInReg.control.csrsource
 
   wbIn.ready := wbFSM.is(idle)
