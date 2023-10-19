@@ -13,9 +13,9 @@ class ExeDataIn extends Bundle {
   val imm  = Input(UInt(64.W))
 }
 
-// object ExeDataIn {
-//   val default = new ExeDataIn().Lit(_.dst -> 0.U, _.src1 -> 0.U, _.src2 -> 0.U, _.imm -> 0.U)
-// }
+object ExeDataIn {
+  val default = new ExeDataIn().Lit(_.dst -> 0.U, _.src1 -> 0.U, _.src2 -> 0.U, _.imm -> 0.U)
+}
 
 class ExeIn extends Bundle {
   val data    = Input(new ExeDataIn);
@@ -23,7 +23,7 @@ class ExeIn extends Bundle {
 }
 
 class InstructionExecuteUnit extends Module {
-  val decodeIn   = IO(Decoupled(new ExeIn()))
+  val exeIn   = IO(Decoupled(new ExeIn()))
   val memIO      = IO(Flipped(new CacheIO(64, 64)))
   val regIO      = IO(Flipped(new RegisterFileIO()))
   val csrIn      = IO(Input(UInt(64.W)))
@@ -31,17 +31,17 @@ class InstructionExecuteUnit extends Module {
 
   val controlReg = RegInit(DecodeControlOut.default())
   val dataReg    = RegInit(DecodeDataOut.default)
-  dataReg    := Mux(decodeIn.fire, decodeIn.bits.data, dataReg)
-  controlReg := Mux(decodeIn.fire, decodeIn.bits.control, controlReg)
+  dataReg    := Mux(exeIn.fire, exeIn.bits.data, dataReg)
+  controlReg := Mux(exeIn.fire, exeIn.bits.control, controlReg)
   val controlIn = Wire(new DecodeControlOut())
-  val dataIn    = Wire(new DecodeDataOut())
+  val exeIn    = Wire(new DecodeDataOut())
 
   val alu = Module(new ALU)
 
   val memOut = Wire(UInt(64.W))
 
   val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
-  val shouldMemWork = decodeIn.bits.control.memmode =/= MemMode.no.asUInt
+  val shouldMemWork = exeIn.bits.control.memmode =/= MemMode.no.asUInt
   val shouldWaitALU = !alu.io.out.bits.isImmidiate
 
   val idle :: waitMemReq :: waitMemRes :: waitPC :: waitALU :: other = Enum(10)
@@ -49,9 +49,9 @@ class InstructionExecuteUnit extends Module {
   val exeFSM = new FSM(
     idle,
     List(
-      (idle, decodeIn.fire && shouldMemWork, waitMemReq),
-      (idle, decodeIn.fire && shouldWaitALU, waitALU),
-      (idle, decodeIn.fire, waitPC),
+      (idle, exeIn.fire && shouldMemWork, waitMemReq),
+      (idle, exeIn.fire && shouldWaitALU, waitALU),
+      (idle, exeIn.fire, waitPC),
       (waitALU, alu.io.out.fire, waitPC),
       (waitMemReq, Mux(memIsRead, memIO.readReq.fire, memIO.writeReq.fire), waitMemRes),
       (waitMemRes, Mux(memIsRead, memIO.data.fire, memIO.writeRes.fire), waitPC),
@@ -59,8 +59,8 @@ class InstructionExecuteUnit extends Module {
     )
   )
 
-  controlIn := Mux(exeFSM.is(idle), decodeIn.bits.control, controlReg)
-  dataIn    := Mux(exeFSM.is(idle), decodeIn.bits.data, dataReg)
+  controlIn := Mux(exeFSM.is(idle), exeIn.bits.control, controlReg)
+  dataIn    := Mux(exeFSM.is(idle), exeIn.bits.data, dataReg)
   // regIO
   val src1 = Wire(UInt(64.W))
   val src2 = Wire(UInt(64.W))
@@ -140,7 +140,7 @@ class InstructionExecuteUnit extends Module {
   val res = AluMode.safe(controlIn.alumode)
   alu.io.in.bits.opType := res._1
   alu.io.out.ready      := alu.io.out.bits.isImmidiate || exeFSM.is(waitALU)
-  alu.io.in.valid       := decodeIn.fire
+  alu.io.in.valid       := exeIn.fire
   // csr
   csrControl.csrBehave  := Mux(exeFSM.willChangeTo(waitPC), controlIn.csrbehave, CsrBehave.no.asUInt)
   csrControl.csrSetmode := Mux(exeFSM.willChangeTo(waitPC), controlIn.csrsetmode, CsrSetMode.origin.asUInt)
@@ -191,5 +191,5 @@ class InstructionExecuteUnit extends Module {
   blackBox.io.halt     := controlIn.goodtrap
   blackBox.io.bad_halt := controlIn.badtrap || res._2 === false.B
 
-  decodeIn.ready := exeFSM.is(idle)
+  exeIn.ready := exeFSM.is(idle)
 }
