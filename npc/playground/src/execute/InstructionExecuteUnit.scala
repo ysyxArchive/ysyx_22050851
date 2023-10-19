@@ -14,7 +14,12 @@ class ExeDataIn extends Bundle {
 }
 
 object ExeDataIn {
-  val default = new ExeDataIn().Lit(_.dst -> 0.U, _.src1 -> 0.U, _.src2 -> 0.U, _.imm -> 0.U)
+  val default = new ExeDataIn()
+  default.dst -> 0.U
+  default.src1 -> 0.U
+  default.src2 -> 0.U
+  default.imm -> 0.U
+  default
 }
 
 class ExeIn extends Bundle {
@@ -23,7 +28,7 @@ class ExeIn extends Bundle {
 }
 
 class InstructionExecuteUnit extends Module {
-  val exeIn   = IO(Decoupled(new ExeIn()))
+  val exeIn      = IO(Decoupled(new ExeIn()))
   val memIO      = IO(Flipped(new CacheIO(64, 64)))
   val regIO      = IO(Flipped(new RegisterFileIO()))
   val csrIn      = IO(Input(UInt(64.W)))
@@ -34,7 +39,7 @@ class InstructionExecuteUnit extends Module {
   dataReg    := Mux(exeIn.fire, exeIn.bits.data, dataReg)
   controlReg := Mux(exeIn.fire, exeIn.bits.control, controlReg)
   val controlIn = Wire(new DecodeControlOut())
-  val exeIn    = Wire(new DecodeDataOut())
+  val exeIn     = Wire(new DecodeDataOut())
 
   val alu = Module(new ALU)
 
