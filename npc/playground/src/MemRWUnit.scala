@@ -179,6 +179,6 @@ class MemRWUnit extends Module {
 
   memOut.valid         := memFSM.is(waitOut)
   memOut.bits.debug    := memInReg.debug
-  memOut.bits.data     := memInReg.data
+  memOut.bits.data     :<= memInReg.data
   memOut.bits.data.mem := memData
 }
