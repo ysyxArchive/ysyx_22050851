@@ -28,7 +28,6 @@ class CPU extends Module {
 
   iCache.axiIO <> arbiter.slaveIO(0)
   dCache.axiIO <> arbiter.slaveIO(1)
-  decoder.regIO := regs.readIO
   mem.axiS <> arbiter.masterIO
 
   ifu.iCacheIO <> iCache.io
@@ -42,7 +41,6 @@ class CPU extends Module {
 
   wbu.csrIn := csrregs.io.output
   wbu.regWriteIO <> regs.writeIO
-  wbu.regReadIO := regs.readIO
 
   csrregs.io.data := memu.memOut.bits.data
   csrregs.io.control <> wbu.csrControl
