@@ -78,7 +78,7 @@ class WriteBackUnit extends Module {
   )
   regWriteIO.dnpc := Mux(
     reset.asBool,
-    (0x80000000.U)(64.W),
+    "h80000000".asUInt(64.W),
     Mux(wbFSM.is(busy), Mux(pcBranch.asBool, dnpcAlter, snpc), wbInReg.data.pc)
   )
   val regwdata = MuxLookup(wbInReg.control.regwritemux, wbInReg.data.alu)(
