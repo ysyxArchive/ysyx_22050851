@@ -32,7 +32,6 @@ class CPU extends Module {
 
   exe.regIO <> regs.io
   dCache.axiIO <> arbiter.slaveIO(1)
-  exe.memIO <> dCache.io
   exe.csrIn := csrregs.io.output
 
   mem.axiS <> arbiter.masterIO
