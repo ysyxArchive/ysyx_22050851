@@ -34,9 +34,7 @@ class InstructionExecuteUnit extends Module {
   val csrIn      = IO(Input(UInt(64.W)))
   val csrControl = IO(Flipped(new CSRFileControl()))
 
-  dataReg    := Mux(exeIn.fire, exeIn.bits.data, dataReg)
-  controlReg := Mux(exeIn.fire, exeIn.bits.control, controlReg)
-  val exeInReg = Reg(new ExeIn().bits)
+  val exeInReg = Reg(new ExeIn())
 
   val alu = Module(new ALU)
 
@@ -66,9 +64,9 @@ class InstructionExecuteUnit extends Module {
   // regIO
   val src1 = Wire(UInt(64.W))
   val src2 = Wire(UInt(64.W))
-  regIO.raddr0 := dataIn.src1
-  regIO.raddr1 := dataIn.src2
-  regIO.waddr  := Mux(controlIn.regwrite && exeFSM.willChangeTo(waitPC), dataIn.dst, 0.U)
+  regIO.raddr0 := exeInReg.data.src1
+  regIO.raddr1 := exeInReg.data.src2
+  regIO.waddr  := Mux(controlIn.regwrite && exeFSM.willChangeTo(waitPC), exeInReg.data.dst, 0.U)
   val snpc = regIO.pc + 4.U
   val pcBranch = MuxLookup(controlIn.pcaddrsrc, false.B)(
     EnumSeq(
@@ -94,7 +92,7 @@ class InstructionExecuteUnit extends Module {
   )
   val dnpcAlter = MuxLookup(controlIn.pccsr, dnpcAddSrcReg)(
     EnumSeq(
-      PcCsr.origin -> (dnpcAddSrcReg + dataIn.imm),
+      PcCsr.origin -> (dnpcAddSrcReg + exeInReg.data.imm),
       PcCsr.csr -> csrInReg
     )
   )
@@ -135,7 +133,7 @@ class InstructionExecuteUnit extends Module {
   )
   alu.io.in.bits.inB := MuxLookup(controlIn.alumux2, 0.U)(
     EnumSeq(
-      AluMux2.imm -> dataIn.imm,
+      AluMux2.imm -> exeInReg.data.imm,
       AluMux2.src2 -> src2
     )
   )
