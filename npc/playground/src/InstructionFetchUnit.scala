@@ -6,18 +6,21 @@ import decode._
 import execute._
 
 class InstructionFetchUnit extends Module {
-  val regIO    = IO(Input(new RegReadIO()))
-  val fetchOut = IO(Decoupled(new DecodeIn()))
-  val iCacheIO = IO(Flipped(new CacheIO(64, 64)))
+  val regIO      = IO(Input(new RegReadIO()))
+  val fetchOut   = IO(Decoupled(new DecodeIn()))
+  val iCacheIO   = IO(Flipped(new CacheIO(64, 64)))
+  val fromDecode = IO(Flipped(new DecodeBack()))
 
   val inst      = RegInit(0x13.U(32.W))
   val predictPC = RegInit(regIO.pc)
+  val branched  = RegInit(false.B)
 
   val waitAR :: waitR :: waitSend :: others = Enum(4)
   val fetchFSM = new FSM(
     waitAR,
     List(
       (waitAR, iCacheIO.readReq.fire, waitR),
+      (waitR, fromDecode.willTakeBranch && !branched, waitAR),
       (waitR, iCacheIO.data.fire, waitSend),
       (waitSend, fetchOut.fire, waitAR)
     )
@@ -27,7 +30,12 @@ class InstructionFetchUnit extends Module {
   iCacheIO.readReq.valid := fetchFSM.is(waitAR)
   iCacheIO.addr          := predictPC
 
-  predictPC := Mux(fetchFSM.willChangeTo(waitAR), predictPC + 4.U, predictPC)
+  predictPC := Mux(
+    fromDecode.willTakeBranch,
+    fromDecode.branchPc,
+    Mux(fetchFSM.willChangeTo(waitAR), predictPC + 4.U, predictPC)
+  )
+  branched := Mux(fetchOut.fire, false.B, fromDecode.willTakeBranch)
 
   inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits.asUInt, inst)
 

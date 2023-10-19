@@ -121,7 +121,7 @@ class ExeControlIn extends Bundle {
 
 object ExeControlIn{
   def default() = {
-    val defaultout = Wire(new ExeControlIn);
+    val defaultout = Wire(new DecodeControlOut);
 	 defaultout.insttype := 0.U
 	 defaultout.srccast1 := false.B
 	 defaultout.srccast2 := false.B
