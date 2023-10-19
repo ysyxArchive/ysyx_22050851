@@ -18,14 +18,12 @@ class ExeDataIn extends Bundle {
 // }
 
 class ExeIn extends Bundle {
-  val valid   = Output(Bool())
-  val data    = Output(new ExeDataIn);
-  val control = Output(new ExeControlIn);
-  val done    = Input(Bool())
+  val data    = Input(new ExeDataIn);
+  val control = Input(new ExeControlIn);
 }
 
 class InstructionExecuteUnit extends Module {
-  val decodeIn   = IO(Flipped(Decoupled(new DecodeOut())))
+  val decodeIn   = IO(Decoupled(new ExeIn()))
   val memIO      = IO(Flipped(new CacheIO(64, 64)))
   val regIO      = IO(Flipped(new RegisterFileIO()))
   val csrIn      = IO(Input(UInt(64.W)))
