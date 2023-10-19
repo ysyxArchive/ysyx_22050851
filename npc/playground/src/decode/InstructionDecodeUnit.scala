@@ -68,6 +68,6 @@ class InstructionDecodeUnit extends Module {
   iCacheIO.writeRes.ready     := false.B
 
   // debug
-  decodeOut.debug.pc   := regIO.pcaddrsrc
-  decodeOut.debug.inst := inst
+  decodeOut.bits.debug.pc   := regIO.pcaddrsrc
+  decodeOut.bits.debug.inst := inst
 }
