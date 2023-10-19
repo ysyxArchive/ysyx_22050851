@@ -34,17 +34,15 @@ class InstructionExecuteUnit extends Module {
   val csrIn      = IO(Input(UInt(64.W)))
   val csrControl = IO(Flipped(new CSRFileControl()))
 
-  val controlReg = RegInit(DecodeControlOut.default())
-  val dataReg    = RegInit(DecodeDataOut.default)
   dataReg    := Mux(exeIn.fire, exeIn.bits.data, dataReg)
   controlReg := Mux(exeIn.fire, exeIn.bits.control, controlReg)
-  val exeInReg = Wire(new ExeIn())
+  val exeInReg = Reg(new ExeIn())
 
   val alu = Module(new ALU)
 
   val memOut = Wire(UInt(64.W))
 
-  val memIsRead     = controlIn.memmode === MemMode.read.asUInt || controlIn.memmode === MemMode.readu.asUInt
+  val memIsRead     = exeIn.control.memmode === MemMode.read.asUInt || exeIn.control.memmode === MemMode.readu.asUInt
   val shouldMemWork = exeIn.bits.control.memmode =/= MemMode.no.asUInt
   val shouldWaitALU = !alu.io.out.bits.isImmidiate
 
