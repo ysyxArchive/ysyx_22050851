@@ -28,7 +28,7 @@ class CPU extends Module {
   memu.memOut <> wbu.wbIn
 
   iCache.axiIO <> arbiter.slaveIO(0)
-  decoder.regIO <> regs.readIO
+  decoder.regIO := regs.readIO
 
   dCache.axiIO <> arbiter.slaveIO(1)
   exe.csrIn := csrregs.io.output
