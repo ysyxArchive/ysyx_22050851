@@ -17,6 +17,7 @@ _start:
     add a3, t3, t4  # 加法4: a3 = t3 + t4
     add a4, t4, t5  # 加法5: a4 = t4 + t5
     add a5, t5, t0  # 加法6: a5 = t5 + t0
+    lui a0, 0  # 归零
     
     # 程序退出
     ebreak

@@ -136,10 +136,12 @@ int main(int argc, char* argv[]) {
   int ret_value = cpu.gpr[10];
   if (is_bad_halt || ret_value != 0) {
     if ((int64_t)cpu.pc - MEM_START <= 0) {
-      Log(ANSI_FMT("bad halt! pc=0x%8lx", ANSI_FG_RED), cpu.pc);
+      Log(ANSI_FMT("bad halt! return value is %d, pc=0x%8lx", ANSI_FG_RED),
+          ret_value, cpu.pc);
     } else {
-      Log(ANSI_FMT("bad halt! pc=0x%8lx inst=0x%08x", ANSI_FG_RED), cpu.pc,
-          *(uint32_t*)&(mem[cpu.pc - MEM_START]));
+      Log(ANSI_FMT("bad halt! return value is %d, pc=0x%8lx inst=0x%08x",
+                   ANSI_FG_RED),
+          ret_value, cpu.pc, *(uint32_t*)&(mem[cpu.pc - MEM_START]));
     }
     if (!lightSSS.is_child()) {
       lightSSS.wakeup_child(npc_clock);
