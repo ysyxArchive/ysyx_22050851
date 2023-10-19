@@ -118,7 +118,7 @@ class InstructionExecuteUnit extends Module {
   blackBox.io.halt     := exeInReg.control.goodtrap
   blackBox.io.bad_halt := exeInReg.control.badtrap || res._2 === false.B
 
-  exeIn.ready := exeFSM.is(idle)
+  exeIn.ready := exeFSM.is(waitDecode)
 
   exeOut.valid              := exeFSM.is(waitSend)
   exeOut.bits.control       := exeInReg.control
