@@ -41,7 +41,7 @@ class CPU extends Module {
 
   wbu.csrIn := csrregs.io.output
 
-  csrregs.io.data := decoder.decodeOut.bits.data
+  csrregs.io.data := memu.memOut.bits.data
 
   csrregs.io.control <> wbu.csrControl
 
