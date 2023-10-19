@@ -23,6 +23,8 @@ class CPU extends Module {
 
   ifu.iCacheIO <> iCache.io
   ifu.fetchOut <> decoder.decodeIn
+  ifu.regIO := regs.readIO
+
   decoder.decodeOut <> exe.exeIn
   exe.exeOut <> memu.memIn
   memu.memOut <> wbu.wbIn
@@ -36,6 +38,8 @@ class CPU extends Module {
   dCache.axiIO <> arbiter.slaveIO(1)
   mem.axiS <> arbiter.masterIO
   memu.memIO <> dCache.io
+
+  wbu.csrIn := csrregs.io.output
 
   csrregs.io.data := decoder.decodeOut.bits.data
 
