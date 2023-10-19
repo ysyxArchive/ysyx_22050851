@@ -7,19 +7,19 @@ import execute._
 import utils._
 
 class ExeDataIn extends Bundle {
-  val src1 = Input(UInt(5.W))
-  val src2 = Input(UInt(5.W))
-  val dst  = Input(UInt(5.W))
-  val imm  = Input(UInt(64.W))
+  val src1 = Output(UInt(5.W))
+  val src2 = Output(UInt(5.W))
+  val dst  = Output(UInt(5.W))
+  val imm  = Output(UInt(64.W))
 }
 
 class ExeIn extends Bundle {
-  val data    = Input(new ExeDataIn);
-  val control = Input(new ExeControlIn);
+  val data    = Output(new ExeDataIn);
+  val control = Output(new ExeControlIn);
 }
 
 class InstructionExecuteUnit extends Module {
-  val exeIn      = IO(Decoupled(new ExeIn()))
+  val exeIn      = IO(Flipped(Decoupled(new ExeIn())))
   val memIO      = IO(Flipped(new CacheIO(64, 64)))
   val regIO      = IO(Flipped(new RegisterFileIO()))
   val csrIn      = IO(Input(UInt(64.W)))
