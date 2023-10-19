@@ -15,7 +15,7 @@ class WBDataIn extends Bundle {
   val alu      = Output(UInt(64.W))
   val mem      = Output(UInt(64.W))
   val signals  = new SignalIO()
-  val pc       = Input(UInt(64.W))
+  val pc       = Output(UInt(64.W))
 }
 
 class WBIn extends Bundle {
