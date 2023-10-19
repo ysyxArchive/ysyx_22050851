@@ -81,7 +81,7 @@ class WriteBackUnit extends Module {
       PcCsr.csr -> csrInReg
     )
   )
-  regWriteIO.dnpc := Mux(wbFSM.is(waitPC), Mux(pcBranch.asBool, dnpcAlter, snpc), wbInReg.data.pc)
+  regWriteIO.dnpc := Mux(wbFSM.is(waitPC), Mux(pcBranch.asBool, dnpcAlter, snpc), regReadIO.pc)
   val regwdata = MuxLookup(wbInReg.control.regwritemux, wbInReg.data.alu)(
     EnumSeq(
       RegWriteMux.alu -> wbInReg.data.alu,
