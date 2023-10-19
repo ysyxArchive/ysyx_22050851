@@ -45,7 +45,8 @@ class CPU extends Module {
 
   csrregs.io.control <> wbu.csrControl
 
-  wbu.regIO <> regs.writeIO
+  wbu.regWriteIO <> regs.writeIO
+  wbu.regReadIO := regs.readIO
 
   blackBoxOut.io.pc      := regs.debugPCOut;
   blackBoxOut.io.regs    := regs.debugOut;

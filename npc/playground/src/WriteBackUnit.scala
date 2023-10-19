@@ -27,7 +27,8 @@ class WBIn extends Bundle {
 class WriteBackUnit extends Module {
   val wbIn = IO(Flipped(Decoupled(new WBIn())))
   // val memIO      = IO(Flipped(new CacheIO(64, 64)))
-  val regIO      = IO(Flipped(new RegWriteIO()))
+  val regWriteIO = IO(Flipped(new RegWriteIO()))
+  val regReadIO  = IO(Input(new RegReadIO()))
   val csrIn      = IO(Input(UInt(64.W)))
   val csrControl = IO(Flipped(new CSRFileControl()))
 
@@ -45,12 +46,12 @@ class WriteBackUnit extends Module {
 
   wbInReg := Mux(wbIn.fire, wbIn.bits, wbInReg)
 
-  // regIO
+  // regWriteIO
   // val src1 = Wire(UInt(64.W))
   // val src2 = Wire(UInt(64.W))
-  // regIO.raddr0 := wbInReg.data.src1
-  // regIO.raddr1 := wbInReg.data.src2
-  regIO.waddr := Mux(wbInReg.control.regwrite && wbIn.fire, wbInReg.data.dst, 0.U)
+  // regWriteIO.raddr0 := wbInReg.data.src1
+  // regWriteIO.raddr1 := wbInReg.data.src2
+  regWriteIO.waddr := Mux(wbInReg.control.regwrite && wbIn.fire, wbInReg.data.dst, 0.U)
   val snpc = wbInReg.data.pc + 4.U
   val pcBranch = MuxLookup(wbInReg.control.pcaddrsrc, false.B)(
     EnumSeq(
@@ -80,7 +81,7 @@ class WriteBackUnit extends Module {
       PcCsr.csr -> csrInReg
     )
   )
-  regIO.dnpc := Mux(wbFSM.is(waitPC), Mux(pcBranch.asBool, dnpcAlter, snpc), wbInReg.data.pc)
+  regWriteIO.dnpc := Mux(wbFSM.is(waitPC), Mux(pcBranch.asBool, dnpcAlter, snpc), wbInReg.data.pc)
   val regwdata = MuxLookup(wbInReg.control.regwritemux, wbInReg.data.alu)(
     EnumSeq(
       RegWriteMux.alu -> wbInReg.data.alu,
@@ -92,7 +93,7 @@ class WriteBackUnit extends Module {
       RegWriteMux.csr -> csrIn
     )
   )
-  regIO.wdata := Mux(wbInReg.control.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)
+  regWriteIO.wdata := Mux(wbInReg.control.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)
   // csr
   csrControl.csrBehave  := Mux(wbFSM.willChangeTo(waitPC), wbInReg.control.csrbehave, CsrBehave.no.asUInt)
   csrControl.csrSetmode := Mux(wbFSM.willChangeTo(waitPC), wbInReg.control.csrsetmode, CsrSetMode.origin.asUInt)
