@@ -66,9 +66,9 @@ class InstructionExecuteUnit extends Module {
   val src2 = Wire(UInt(64.W))
   regIO.raddr0 := exeInReg.data.src1
   regIO.raddr1 := exeInReg.data.src2
-  regIO.waddr  := Mux(controlIn.regwrite && exeFSM.willChangeTo(waitPC), exeInReg.data.dst, 0.U)
+  regIO.waddr  := Mux(exeInReg.control.regwrite && exeFSM.willChangeTo(waitPC), exeInReg.data.dst, 0.U)
   val snpc = regIO.pc + 4.U
-  val pcBranch = MuxLookup(controlIn.pcaddrsrc, false.B)(
+  val pcBranch = MuxLookup(exeInReg.control.pcaddrsrc, false.B)(
     EnumSeq(
       PCAddrSrc.aluzero -> alu.io.out.bits.signals.isZero,
       PCAddrSrc.aluneg -> alu.io.out.bits.signals.isNegative,
@@ -83,21 +83,21 @@ class InstructionExecuteUnit extends Module {
   val csrInReg = RegInit(csrIn)
   csrInReg := Mux(exeFSM.willChangeTo(waitPC), csrIn, csrInReg)
   val dnpcAddSrcReg = RegNext(
-    MuxLookup(controlIn.pcsrc, regIO.pc)(
+    MuxLookup(exeInReg.control.pcsrc, regIO.pc)(
       EnumSeq(
         PcSrc.pc -> regIO.pc,
         PcSrc.src1 -> src1
       )
     )
   )
-  val dnpcAlter = MuxLookup(controlIn.pccsr, dnpcAddSrcReg)(
+  val dnpcAlter = MuxLookup(exeInReg.control.pccsr, dnpcAddSrcReg)(
     EnumSeq(
       PcCsr.origin -> (dnpcAddSrcReg + exeInReg.data.imm),
       PcCsr.csr -> csrInReg
     )
   )
   regIO.dnpc := Mux(exeFSM.is(waitPC), Mux(pcBranch.asBool, dnpcAlter, snpc), regIO.pc)
-  val regwdata = MuxLookup(controlIn.regwritemux, alu.io.out.bits.out)(
+  val regwdata = MuxLookup(exeInReg.control.regwritemux, alu.io.out.bits.out)(
     EnumSeq(
       RegWriteMux.alu -> alu.io.out.bits.out,
       RegWriteMux.snpc -> snpc,
@@ -108,46 +108,46 @@ class InstructionExecuteUnit extends Module {
       RegWriteMux.csr -> csrIn
     )
   )
-  regIO.wdata := Mux(controlIn.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)
+  regIO.wdata := Mux(exeInReg.control.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)
 
   src1 :=
     Mux(
-      controlIn.srccast1,
+      exeInReg.control.srccast1,
       Utils.cast(regIO.out0, 32, 64),
       regIO.out0
     )
   src2 :=
     Mux(
-      controlIn.srccast2,
+      exeInReg.control.srccast2,
       Utils.cast(regIO.out1, 32, 64),
       regIO.out1
     )
 
   // alu
-  alu.io.in.bits.inA := MuxLookup(controlIn.alumux1, 0.U)(
+  alu.io.in.bits.inA := MuxLookup(exeInReg.control.alumux1, 0.U)(
     EnumSeq(
       AluMux1.pc -> regIO.pc,
       AluMux1.src1 -> src1,
       AluMux1.zero -> 0.U
     )
   )
-  alu.io.in.bits.inB := MuxLookup(controlIn.alumux2, 0.U)(
+  alu.io.in.bits.inB := MuxLookup(exeInReg.control.alumux2, 0.U)(
     EnumSeq(
       AluMux2.imm -> exeInReg.data.imm,
       AluMux2.src2 -> src2
     )
   )
-  val res = AluMode.safe(controlIn.alumode)
+  val res = AluMode.safe(exeInReg.control.alumode)
   alu.io.in.bits.opType := res._1
   alu.io.out.ready      := alu.io.out.bits.isImmidiate || exeFSM.is(waitALU)
   alu.io.in.valid       := exeIn.fire
   // csr
-  csrControl.csrBehave  := Mux(exeFSM.willChangeTo(waitPC), controlIn.csrbehave, CsrBehave.no.asUInt)
-  csrControl.csrSetmode := Mux(exeFSM.willChangeTo(waitPC), controlIn.csrsetmode, CsrSetMode.origin.asUInt)
-  csrControl.csrSource  := controlIn.csrsource
+  csrControl.csrBehave  := Mux(exeFSM.willChangeTo(waitPC), exeInReg.control.csrbehave, CsrBehave.no.asUInt)
+  csrControl.csrSetmode := Mux(exeFSM.willChangeTo(waitPC), exeInReg.control.csrsetmode, CsrSetMode.origin.asUInt)
+  csrControl.csrSource  := exeInReg.control.csrsource
 
   // mem
-  val memlen = MuxLookup(controlIn.memlen, 1.U)(
+  val memlen = MuxLookup(exeInReg.control.memlen, 1.U)(
     EnumSeq(
       MemLen.one -> 1.U,
       MemLen.two -> 2.U,
@@ -172,7 +172,7 @@ class InstructionExecuteUnit extends Module {
   memIO.writeReq.bits.data := src2
   memIO.writeReq.bits.mask := memMask
   memIO.writeRes.ready     := exeFSM.is(waitMemRes)
-  val memOutRaw = MuxLookup(controlIn.memlen, memIO.data.bits)(
+  val memOutRaw = MuxLookup(exeInReg.control.memlen, memIO.data.bits)(
     EnumSeq(
       MemLen.one -> memIO.data.asUInt(7, 0),
       MemLen.two -> memIO.data.asUInt(15, 0),
@@ -181,15 +181,15 @@ class InstructionExecuteUnit extends Module {
     )
   )
   memOut := Mux(
-    controlIn.memmode === MemMode.read.asUInt,
+    exeInReg.control.memmode === MemMode.read.asUInt,
     Utils.signExtend(memOutRaw, memlen << 3),
     Utils.zeroExtend(memOutRaw, memlen << 3)
   )
 
   // blackBoxHalt
   val blackBox = Module(new BlackBoxHalt);
-  blackBox.io.halt     := controlIn.goodtrap
-  blackBox.io.bad_halt := controlIn.badtrap || res._2 === false.B
+  blackBox.io.halt     := exeInReg.control.goodtrap
+  blackBox.io.bad_halt := exeInReg.control.badtrap || res._2 === false.B
 
   exeIn.ready := exeFSM.is(idle)
 }
