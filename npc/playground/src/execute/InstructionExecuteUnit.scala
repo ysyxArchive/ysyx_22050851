@@ -118,4 +118,12 @@ class InstructionExecuteUnit extends Module {
   blackBox.io.bad_halt := exeInReg.control.badtrap || res._2 === false.B
 
   exeIn.ready := exeFSM.is(idle)
+
+  exeOut.valid          := exeFSM.is(waitSend)
+  exeOut.bits.control   := exeInReg.control
+  exeOut.bits.data.alu  := alu.io.out.bits.out
+  exeOut.bits.data.src1 := exeInReg.data.src1
+  exeOut.bits.data.src2 := exeInReg.data.src2
+
+  exeOut.bits.debug := exeInReg.debug
 }
