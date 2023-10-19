@@ -6,7 +6,7 @@ import decode._
 import execute._
 
 class InstructionFetchUnit extends Module {
-  val regIO    = IO(Input(new RegisterFileIO()))
+  val regIO    = IO(Input(new RegReadIO()))
   val fetchOut = IO(Decoupled(new DecodeIn()))
   val iCacheIO = IO(Flipped(new CacheIO(64, 64)))
 

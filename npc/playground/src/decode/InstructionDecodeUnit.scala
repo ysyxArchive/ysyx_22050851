@@ -12,7 +12,7 @@ class DecodeIn extends Bundle {
 }
 
 class InstructionDecodeUnit extends Module {
-  val regIO          = IO(Input(new RegisterFileIO()))
+  val regIO          = IO(Input(new RegReadIO()))
   val decodeIn       = IO(Flipped(Decoupled(new DecodeIn())))
   val decodeOut      = IO(Decoupled(new ExeIn()))
   val controlDecoder = Module(new InstContorlDecoder)

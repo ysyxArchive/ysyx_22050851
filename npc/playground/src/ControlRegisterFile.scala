@@ -99,6 +99,7 @@ class CSRFileControl extends Bundle {
 
 class ControlRegisterFileIO extends Bundle {
   val src1Data = Input(UInt(64.W))
+  val pc       = Input(UInt(64.W))
   val data     = Flipped(new ExeDataIn())
   val control  = new CSRFileControl()
   val output   = Output(UInt(64.W))
@@ -107,7 +108,6 @@ class ControlRegisterFileIO extends Bundle {
 class ControlRegisterFile extends Module {
   val io       = IO(new ControlRegisterFileIO())
   val debugOut = IO(Output(Vec(6, UInt(64.W))))
-  val regIn    = IO(Input(Flipped(new RegisterFileIO())))
 
   val uimm  = io.data.src1
   val csrId = io.data.imm
@@ -155,7 +155,7 @@ class ControlRegisterFile extends Module {
           "mepc",
           Mux(
             io.control.csrBehave === CsrBehave.ecall.asUInt,
-            regIn.pc,
+            io.pc,
             Mux(csrId === id.U, writeBack, register("mepc"))
           )
         )
