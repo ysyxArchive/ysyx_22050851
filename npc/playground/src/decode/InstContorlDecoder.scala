@@ -97,7 +97,7 @@ object CsrBehave extends ChiselEnum {
 	val ecall = Value(1.U)
 	val mret = Value(2.U)
 }
-class DecodeControlOut extends Bundle {
+class ExeControlIn extends Bundle {
 	val insttype = Output(UInt(3.W))
 	val srccast1 = Output(Bool())
 	val srccast2 = Output(Bool())
@@ -119,7 +119,7 @@ class DecodeControlOut extends Bundle {
 	val csrbehave = Output(UInt(2.W))
 }
 
-object DecodeControlOut{
+object ExeControlIn{
   def default() = {
     val defaultout = Wire(new DecodeControlOut);
 	 defaultout.insttype := 0.U
@@ -220,7 +220,7 @@ class InstContorlDecoder extends Module {
     BitPat("b110 0 0 ?? ? ????? 0 ??? 0 00 ?? 000 ? 0 1 00 ? 0 00") // inv
   )
   val input  = IO(Input(UInt(32.W)))
-  val output  = IO(new DecodeControlOut)
+  val output  = IO(new ExeControlIn)
   val decodeOut = decoder(input, table)
   output.csrbehave := decodeOut(1, 0)
   output.pccsr := decodeOut(2, 2)

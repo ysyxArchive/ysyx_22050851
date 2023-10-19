@@ -6,6 +6,24 @@ import os.read
 import execute._
 import utils._
 
+class ExeDataIn extends Bundle {
+  val src1 = Input(UInt(5.W))
+  val src2 = Input(UInt(5.W))
+  val dst  = Input(UInt(5.W))
+  val imm  = Input(UInt(64.W))
+}
+
+object ExeDataIn {
+  val default = new ExeDataIn().Lit(_.dst -> 0.U, _.src1 -> 0.U, _.src2 -> 0.U, _.imm -> 0.U)
+}
+
+class ExeIn extends Bundle {
+  val valid   = Output(Bool())
+  val data    = Output(new ExeDataIn);
+  val control = Output(new ExeControlIn);
+  val done    = Input(Bool())
+}
+
 class InstructionExecuteUnit extends Module {
   val decodeIn   = IO(Flipped(Decoupled(new DecodeOut())))
   val memIO      = IO(Flipped(new CacheIO(64, 64)))

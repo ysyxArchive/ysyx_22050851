@@ -5,24 +5,6 @@ import utils._
 import decode._
 import execute._
 
-class DecodeDataOut extends Bundle {
-  val src1 = Output(UInt(5.W))
-  val src2 = Output(UInt(5.W))
-  val dst  = Output(UInt(5.W))
-  val imm  = Output(UInt(64.W))
-}
-
-object DecodeDataOut {
-  val default = new DecodeDataOut().Lit(_.dst -> 0.U, _.src1 -> 0.U, _.src2 -> 0.U, _.imm -> 0.U)
-}
-
-class DecodeOut extends Bundle {
-  val valid   = Output(Bool())
-  val data    = Output(new DecodeDataOut);
-  val control = Output(new DecodeControlOut);
-  val done    = Input(Bool())
-}
-
 class InstructionDecodeUnit extends Module {
   val regIO          = IO(Input(new RegisterFileIO()))
   val iCacheIO       = IO(Flipped(new CacheIO(64, 64)))
