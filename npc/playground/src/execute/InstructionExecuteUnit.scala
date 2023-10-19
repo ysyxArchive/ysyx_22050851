@@ -13,14 +13,6 @@ class ExeDataIn extends Bundle {
   val imm  = Input(UInt(64.W))
 }
 
-object ExeDataIn {
-  val default = new ExeDataIn()
-  default.dst -> 0.U
-  default.src1 -> 0.U
-  default.src2 -> 0.U
-  default.imm -> 0.U
-  default
-}
 
 class ExeIn extends Bundle {
   val data    = Input(new ExeDataIn);
