@@ -147,7 +147,7 @@ int main(int argc, char* argv[]) {
   } else {
     Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
   }
-  Log("execute speed: %.2lf inst/s,  %lld insts, %.3f seconds",
+  Log("execute speed: %.2lf inst/s,  %ld insts, %.3f seconds",
       (double)inst_count * 1000 / duration, inst_count,
       (double)duration / 1000);
   Log("IPC: %.2lf inst/cycle, freq: %.2lf KHz",
