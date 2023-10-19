@@ -37,7 +37,7 @@ class MemRWUnit extends Module {
   val waitIn :: waitMemReq :: waitMemRes :: waitOut :: other = Enum(10)
 
   val memFSM = new FSM(
-    idle,
+    waitIn,
     List(
       (waitIn, memIn.fire && shouldMemWork, waitMemReq),
       (waitIn, memIn.fire && !shouldMemWork, waitOut),
