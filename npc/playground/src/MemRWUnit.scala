@@ -52,6 +52,8 @@ class MemRWUnit extends Module {
       (waitOut, memOut.fire, idle)
     )
   )
+
+  memInReg := Mux(memIn.fire, memIn.bits, memInReg)
   // regIO
   // val src1 = Wire(UInt(64.W))
   // val src2 = Wire(UInt(64.W))
