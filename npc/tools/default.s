@@ -19,5 +19,5 @@ _start:
     add a5, t5, t0  # 加法6: a5 = t5 + t0
     
     # 程序退出
-    ecall
+    ebreak
     
