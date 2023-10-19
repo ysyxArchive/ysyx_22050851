@@ -38,8 +38,7 @@ class InstructionExecuteUnit extends Module {
   val dataReg    = RegInit(DecodeDataOut.default)
   dataReg    := Mux(exeIn.fire, exeIn.bits.data, dataReg)
   controlReg := Mux(exeIn.fire, exeIn.bits.control, controlReg)
-  val controlIn = Wire(new DecodeControlOut())
-  val exeIn     = Wire(new DecodeDataOut())
+  val exeIn = Wire(new ExeIn())
 
   val alu = Module(new ALU)
 
