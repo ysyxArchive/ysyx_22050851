@@ -187,4 +187,5 @@ class MemRWUnit extends Module {
   memOut.bits.data.mem     := memData
   memOut.bits.data.signals := memInReg.data.signals
   memOut.bits.data.pc      := memInReg.data.pc
+  memOut.bits.control      := memInReg.control
 }

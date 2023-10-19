@@ -32,8 +32,7 @@ class InstructionDecodeUnit extends Module {
   decodeInReg := Mux(decodeIn.fire, decodeIn.bits, decodeInReg)
 
   // decodeout.control
-  controlDecoder.input   := decodeInReg.inst
-  decodeOut.bits.control := controlDecoder.output
+  controlDecoder.input := decodeInReg.inst
 
   // decodeout.data
   val inst = decodeInReg.inst
@@ -68,4 +67,10 @@ class InstructionDecodeUnit extends Module {
   decodeOut.bits.debug.inst := inst
 
   decodeIn.ready := decodeFSM.is(waitFetch)
+
+  decodeOut.valid         := decodeFSM.is(waitSend)
+  decodeOut.bits.data.pc  := decodeInReg.pc
+  decodeout.bits.data.imm := imm
+  decodeOut.bits.control  := controlDecoder.output
+
 }
