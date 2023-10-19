@@ -30,5 +30,4 @@ class InstructionFetchUnit extends Module {
   instOut.R.valid  := instValid
 
   instOut.R.bits := outData
-
 }
