@@ -38,7 +38,7 @@ class InstructionExecuteUnit extends Module {
   val dataReg    = RegInit(DecodeDataOut.default)
   dataReg    := Mux(exeIn.fire, exeIn.bits.data, dataReg)
   controlReg := Mux(exeIn.fire, exeIn.bits.control, controlReg)
-  val exeIn = Wire(new ExeIn())
+  val exeInReg = Wire(new ExeIn())
 
   val alu = Module(new ALU)
 
@@ -63,8 +63,7 @@ class InstructionExecuteUnit extends Module {
     )
   )
 
-  controlIn := Mux(exeFSM.is(idle), exeIn.bits.control, controlReg)
-  dataIn    := Mux(exeFSM.is(idle), exeIn.bits.data, dataReg)
+  exeInReg := Mux(exeFSM.is(idle), exeInReg.bits.control, exeInReg)
   // regIO
   val src1 = Wire(UInt(64.W))
   val src2 = Wire(UInt(64.W))
