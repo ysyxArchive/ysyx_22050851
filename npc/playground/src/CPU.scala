@@ -25,7 +25,7 @@ class CPU extends Module {
   ifu.fetchOut <> decoder.decodeIn
   decoder.decodeOut <> exe.exeIn
   exe.exeOut <> memu.memIn
-  memu.memOut <> wbu.wbInReg
+  memu.memOut <> wbu.wbIn
 
   iCache.axiIO <> arbiter.slaveIO(0)
   decoder.regIO := regs.io
