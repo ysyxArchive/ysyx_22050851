@@ -21,12 +21,11 @@ class CPU extends Module {
   val iCache  = Module(new Cache(name = "icache"))
   val dCache  = Module(new Cache(name = "dcache"))
 
-  
   ifu.fetchOut <> decoder.decodeIn
   decoder.decodeOut <> exe.exeIn
   exe.exeOut <> memu.memIn
   memu.memOut <> wbu.wbIn
-  
+
   iCache.axiIO <> arbiter.slaveIO(0)
   dCache.axiIO <> arbiter.slaveIO(1)
   decoder.regIO := regs.readIO
@@ -35,8 +34,9 @@ class CPU extends Module {
   ifu.iCacheIO <> iCache.io
   ifu.regIO := regs.readIO
 
+  decoder.regIO <> regs.readIO
+
   exe.csrIn := csrregs.io.output
-  exe.regIO <> regs.readIO
 
   memu.memIO <> dCache.io
 
