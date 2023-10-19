@@ -31,7 +31,7 @@ class WriteBackUnit extends Module {
   val csrIn      = IO(Input(UInt(64.W)))
   val csrControl = IO(Flipped(new CSRFileControl()))
 
-  val wbInReg = Reg(new WBIn())
+  val wbInReg = RegInit(new WBIn())
 
   val idle :: busy :: other = Enum(3)
 
@@ -76,7 +76,11 @@ class WriteBackUnit extends Module {
       PcCsr.csr -> csrInReg
     )
   )
-  regWriteIO.dnpc := Mux(wbFSM.is(busy), Mux(pcBranch.asBool, dnpcAlter, snpc), wbInReg.data.pc)
+  regWriteIO.dnpc := Mux(
+    reset.asBool,
+    0x80000000.U,
+    Mux(wbFSM.is(busy), Mux(pcBranch.asBool, dnpcAlter, snpc), wbInReg.data.pc)
+  )
   val regwdata = MuxLookup(wbInReg.control.regwritemux, wbInReg.data.alu)(
     EnumSeq(
       RegWriteMux.alu -> wbInReg.data.alu,
