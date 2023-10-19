@@ -34,17 +34,16 @@ class MemRWUnit extends Module {
   val shouldMemWork = memIn.bits.control.memmode =/= MemMode.no.asUInt
   val memIsRead     = memInReg.control.memmode === MemMode.read.asUInt || memInReg.control.memmode === MemMode.readu.asUInt
 
-  val idle :: waitIn :: waitMemReq :: waitMemRes :: waitOut :: other = Enum(10)
+  val waitIn :: waitMemReq :: waitMemRes :: waitOut :: other = Enum(10)
 
   val memFSM = new FSM(
-    idle,
+    waitIn,
     List(
-      (idle, memOut.ready, waitIn),
       (waitIn, memIn.fire && shouldMemWork, waitMemReq),
       (waitIn, memIn.fire && !shouldMemWork, waitOut),
       (waitMemReq, Mux(memIsRead, memIO.readReq.fire, memIO.writeReq.fire), waitMemRes),
       (waitMemRes, Mux(memIsRead, memIO.data.fire, memIO.writeRes.fire), waitOut),
-      (waitOut, memOut.fire, idle)
+      (waitOut, memOut.fire, waitIn)
     )
   )
 

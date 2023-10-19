@@ -10,22 +10,24 @@ class InstructionFetchUnit extends Module {
   val fetchOut = IO(Decoupled(new DecodeIn()))
   val iCacheIO = IO(Flipped(new CacheIO(64, 64)))
 
-  val inst = RegInit(0x13.U(32.W))
+  val inst      = RegInit(0x13.U(32.W))
+  val predictPC = RegInit(regIO.pc)
 
-  val idle :: waitAR :: waitR :: waitSend :: others = Enum(4)
+  val waitAR :: waitR :: waitSend :: others = Enum(4)
   val fetchFSM = new FSM(
     waitAR,
     List(
       (waitAR, iCacheIO.readReq.fire, waitR),
       (waitR, iCacheIO.data.fire, waitSend),
-      (waitSend, fetchOut.fire, idle),
-      (idle, fetchOut.ready, waitAR)
+      (waitSend, fetchOut.fire, waitAR)
     )
   )
 
   iCacheIO.data.ready    := fetchFSM.is(waitR)
   iCacheIO.readReq.valid := fetchFSM.is(waitAR)
-  iCacheIO.addr          := regIO.pc
+  iCacheIO.addr          := predictPC
+
+  predictPC := Mux(fetchFSM.willChangeTo(waitAR), predictPC + 4.U, predictPC)
 
   inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits.asUInt, inst)
 
@@ -37,8 +39,8 @@ class InstructionFetchUnit extends Module {
   iCacheIO.writeRes.ready     := false.B
 
   // fetchout
-  fetchOut.bits.debug.pc   := regIO.pc
+  fetchOut.bits.debug.pc   := predictPC
   fetchOut.bits.debug.inst := inst
-  fetchOut.bits.pc         := regIO.pc
+  fetchOut.bits.pc         := predictPC
   fetchOut.bits.inst       := inst
 }

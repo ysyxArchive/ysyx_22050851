@@ -12,21 +12,18 @@ class DecodeIn extends Bundle {
 }
 
 class InstructionDecodeUnit extends Module {
-  val regIO          = IO(Input(new RegReadIO()))
-  val decodeIn       = IO(Flipped(Decoupled(new DecodeIn())))
-  val decodeOut      = IO(Decoupled(new ExeIn()))
+  val regIO     = IO(Flipped(new RegReadIO()))
+  val decodeIn  = IO(Flipped(Decoupled(new DecodeIn())))
+  val decodeOut = IO(Decoupled(new ExeIn()))
+
   val controlDecoder = Module(new InstContorlDecoder)
 
   val decodeInReg = Reg(new DecodeIn())
 
-  val idle :: waitFetch :: waitSend :: others = Enum(4)
+  val waitFetch :: waitSend :: others = Enum(4)
   val decodeFSM = new FSM(
     waitFetch,
-    List(
-      (waitSend, decodeOut.fire, idle),
-      (waitFetch, decodeIn.fire, waitSend),
-      (idle, decodeOut.ready, waitFetch)
-    )
+    List((waitSend, decodeOut.fire, waitFetch), (waitFetch, decodeIn.fire, waitSend))
   )
 
   decodeInReg := Mux(decodeIn.fire, decodeIn.bits, decodeInReg)
@@ -65,6 +62,24 @@ class InstructionDecodeUnit extends Module {
   decodeOut.bits.control := controlDecoder.output
 
   decodeIn.ready := decodeFSM.is(waitFetch)
+
+  // regIO
+  regIO.raddr0 := rs1
+  regIO.raddr1 := rs2
+
+  decodeOut.bits.data.src1Data :=
+    Mux(
+      controlDecoder.output.srccast1,
+      Utils.cast(regIO.out0, 32, 64),
+      regIO.out0
+    )
+  decodeOut.bits.data.src2Data :=
+    Mux(
+      controlDecoder.output.srccast2,
+      Utils.cast(regIO.out1, 32, 64),
+      regIO.out1
+    )
+
   // debug
   decodeOut.bits.debug.pc   := regIO.pc
   decodeOut.bits.debug.inst := inst
