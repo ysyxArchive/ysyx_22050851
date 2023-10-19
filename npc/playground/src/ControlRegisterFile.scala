@@ -98,11 +98,9 @@ class CSRFileControl extends Bundle {
 }
 
 class ControlRegisterFileIO extends Bundle {
-  val src1Data = Input(UInt(64.W))
-  val pc       = Input(UInt(64.W))
-  val data     = Flipped(new ExeDataIn())
-  val control  = new CSRFileControl()
-  val output   = Output(UInt(64.W))
+  val data    = Flipped(new WBDataIn())
+  val control = new CSRFileControl()
+  val output  = Output(UInt(64.W))
 }
 
 class ControlRegisterFile extends Module {
@@ -123,9 +121,9 @@ class ControlRegisterFile extends Module {
     EnumSeq(CsrBehave.ecall -> PrivMode.M, CsrBehave.mret -> mstatus("MPP"))
   )
 
-  val mask = MuxLookup(io.control.csrSource, io.src1Data)(
+  val mask = MuxLookup(io.control.csrSource, io.data.src1Data)(
     EnumSeq(
-      CsrSource.src1 -> io.src1Data,
+      CsrSource.src1 -> io.data.src1Data,
       CsrSource.uimm -> uimm
     )
   )
@@ -155,7 +153,7 @@ class ControlRegisterFile extends Module {
           "mepc",
           Mux(
             io.control.csrBehave === CsrBehave.ecall.asUInt,
-            io.pc,
+            io.data.pc,
             Mux(csrId === id.U, writeBack, register("mepc"))
           )
         )

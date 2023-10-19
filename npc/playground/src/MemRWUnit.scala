@@ -13,8 +13,10 @@ class MemRWIn extends Bundle {
 }
 
 class MemDataIn extends Bundle {
-  val src1    = Output(UInt(5.W))
-  val src2    = Output(UInt(5.W))
+  val src1     = Output(UInt(5.W))
+  val src2     = Output(UInt(5.W))
+  val src1Data = Output(UInt(64.W))
+
   val dst     = Output(UInt(5.W))
   val imm     = Output(UInt(64.W))
   val alu     = Output(UInt(64.W))
@@ -177,16 +179,17 @@ class MemRWUnit extends Module {
 
   memIn.ready := memFSM.is(idle)
 
-  memOut.valid             := memFSM.is(waitOut)
-  memOut.bits.debug        := memInReg.debug
-  memOut.bits.data.src1    := memInReg.data.src1
-  memOut.bits.data.src2    := memInReg.data.src2
-  memOut.bits.data.dst     := memInReg.data.dst
-  memOut.bits.data.mem     := memData
-  memOut.bits.data.alu     := memInReg.data.alu
-  memOut.bits.data.mem     := memData
-  memOut.bits.data.signals := memInReg.data.signals
-  memOut.bits.data.pc      := memInReg.data.pc
-  memOut.bits.data.imm     := memInReg.data.imm
-  memOut.bits.control      := memInReg.control
+  memOut.valid              := memFSM.is(waitOut)
+  memOut.bits.debug         := memInReg.debug
+  memOut.bits.data.src1     := memInReg.data.src1
+  memOut.bits.data.src2     := memInReg.data.src2
+  memOut.bits.data.src1Data := memInReg.data.src1Data
+  memOut.bits.data.dst      := memInReg.data.dst
+  memOut.bits.data.mem      := memData
+  memOut.bits.data.alu      := memInReg.data.alu
+  memOut.bits.data.mem      := memData
+  memOut.bits.data.signals  := memInReg.data.signals
+  memOut.bits.data.pc       := memInReg.data.pc
+  memOut.bits.data.imm      := memInReg.data.imm
+  memOut.bits.control       := memInReg.control
 }

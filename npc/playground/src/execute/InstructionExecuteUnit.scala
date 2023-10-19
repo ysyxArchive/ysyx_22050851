@@ -120,15 +120,16 @@ class InstructionExecuteUnit extends Module {
 
   exeIn.ready := exeFSM.is(idle)
 
-  exeOut.valid             := exeFSM.is(waitSend)
-  exeOut.bits.control      := exeInReg.control
-  exeOut.bits.data.alu     := alu.io.out.bits.out
-  exeOut.bits.data.src1    := exeInReg.data.src1
-  exeOut.bits.data.src2    := exeInReg.data.src2
-  exeOut.bits.data.dst     := exeInReg.data.dst
-  exeOut.bits.data.signals := alu.io.out.bits.signals
-  exeOut.bits.data.pc      := exeInReg.data.pc
-  exeOut.bits.data.imm     := exeInReg.data.imm
+  exeOut.valid              := exeFSM.is(waitSend)
+  exeOut.bits.control       := exeInReg.control
+  exeOut.bits.data.alu      := alu.io.out.bits.out
+  exeOut.bits.data.src1     := exeInReg.data.src1
+  exeOut.bits.data.src2     := exeInReg.data.src2
+  exeOut.bits.data.dst      := exeInReg.data.dst
+  exeOut.bits.data.signals  := alu.io.out.bits.signals
+  exeOut.bits.data.pc       := exeInReg.data.pc
+  exeOut.bits.data.imm      := exeInReg.data.imm
+  exeOut.bits.data.src1Data := src1
 
   exeOut.bits.debug := exeInReg.debug
 }
