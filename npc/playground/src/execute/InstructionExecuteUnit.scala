@@ -78,9 +78,12 @@ class InstructionExecuteUnit extends Module {
 
   exeIn.ready := exeFSM.is(waitDecode)
 
+  val aluOut = Reg(UInt(64.W))
+  aluOut := Mux(alu.io.out.fire, alu.io.out.bits.out, aluOut)
+
   exeOut.valid              := exeFSM.is(waitSend)
   exeOut.bits.control       := exeInReg.control
-  exeOut.bits.data.alu      := alu.io.out.bits.out
+  exeOut.bits.data.alu      := Mux(alu.io.out.bits.isImmidiate, alu.io.out.bits.out, aluOut)
   exeOut.bits.data.src1     := exeInReg.data.src1
   exeOut.bits.data.src2     := exeInReg.data.src2
   exeOut.bits.data.dst      := exeInReg.data.dst
