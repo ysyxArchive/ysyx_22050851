@@ -129,8 +129,8 @@ class InstructionDecodeUnit extends Module {
 
   decodeBack.willTakeBranch := willTakeBranch
   decodeBack.branchPc       := branchPc
+  
   decodeOut.bits.data.dnpc  := Mux(shouldWait, decodeInReg.pc, Mux(willTakeBranch, branchPc, decodeInReg.pc + 4.U))
-
   // debug
   decodeOut.bits.debug.pc   := decodeInReg.debug.pc
   decodeOut.bits.debug.inst := inst
