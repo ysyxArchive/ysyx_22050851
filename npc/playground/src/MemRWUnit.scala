@@ -66,11 +66,9 @@ class MemRWUnit extends Module {
     Fill(1, Mux(memlen > 1.U, 1.U, 0.U)),
     1.U(1.W)
   )
-  val memAddrReg = Reg(UInt(64.W))
-  memAddrReg := Mux(memFSM.willChangeTo(waitMemReq), memInReg.data.alu, memAddrReg)
 
   memIO.readReq.valid      := memFSM.is(waitMemReq) && memIsRead && shouldMemWork
-  memIO.addr               := memAddrReg
+  memIO.addr               := memInReg.data.alu
   memIO.data.ready         := memFSM.is(waitMemRes) && memIsRead
   memIO.writeReq.valid     := memFSM.is(waitMemReq) && !memIsRead && shouldMemWork
   memIO.writeReq.bits.data := memInReg.data.src2
