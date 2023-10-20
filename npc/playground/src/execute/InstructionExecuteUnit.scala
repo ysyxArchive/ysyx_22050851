@@ -41,6 +41,7 @@ class InstructionExecuteUnit extends Module {
   val exeFSM = new FSM(
     waitDecode,
     List(
+      (waitDecode, exeIn.fire && !exeIn.bits.enable, waitDecode),
       (waitDecode, exeIn.fire && shouldWaitALU, waitALU),
       (waitDecode, exeIn.fire, waitSend),
       (waitALU, alu.io.out.fire, waitSend),
@@ -88,8 +89,8 @@ class InstructionExecuteUnit extends Module {
   exeOut.bits.data.imm      := exeInReg.data.imm
   exeOut.bits.data.src1Data := exeInReg.data.src1Data
   exeOut.bits.enable        := exeInReg.enable
-  
-  exeOut.bits.debug         := exeInReg.debug
+
+  exeOut.bits.debug := exeInReg.debug
 
   toDecode := exeInReg.data.dst
 

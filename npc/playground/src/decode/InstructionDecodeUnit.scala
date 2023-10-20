@@ -30,11 +30,13 @@ class InstructionDecodeUnit extends Module {
   val decodeInReg = Reg(new DecodeIn())
 
   val willTakeBranch = Wire(Bool())
+  val shouldWait     = Wire(Bool())
 
   val waitFetch :: waitSend :: bubble :: others = Enum(4)
   val decodeFSM = new FSM(
     waitFetch,
     List(
+      (waitSend, decodeOut.fire && shouldWait, waitSend),
       (waitSend, decodeOut.fire && !willTakeBranch, waitFetch),
       (waitSend, decodeOut.fire && willTakeBranch, bubble),
       (bubble, true.B, waitFetch),
@@ -102,8 +104,8 @@ class InstructionDecodeUnit extends Module {
   )
 
   // RAW check
-  val dstVec     = VecInit(fromExe, fromMemu, fromWbu)
-  val shouldWait = (rs1 =/= 0.U && dstVec.contains(rs1)) || (rs2 =/= 0.U && dstVec.contains(rs2))
+  val dstVec = VecInit(fromExe, fromMemu, fromWbu)
+  shouldWait            := (rs1 =/= 0.U && dstVec.contains(rs1)) || (rs2 =/= 0.U && dstVec.contains(rs2))
   decodeOut.bits.enable := !shouldWait
 
   // branch check
