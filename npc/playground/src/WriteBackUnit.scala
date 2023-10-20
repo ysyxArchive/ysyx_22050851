@@ -91,5 +91,5 @@ class WriteBackUnit extends Module {
 
   wbIn.ready := wbFSM.is(idle)
 
-  toDecode := Mux(wbFSM.is(waitIn), 0.U, wbInReg.data.dst)
+  toDecode := Mux(wbFSM.is(idle), 0.U, wbInReg.data.dst)
 }
