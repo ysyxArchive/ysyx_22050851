@@ -42,8 +42,8 @@ class InstructionExecuteUnit extends Module {
     waitDecode,
     List(
       (waitDecode, exeIn.fire && !exeIn.bits.enable, waitDecode),
-      (waitDecode, exeIn.fire && shouldWaitALU, waitALU),
-      (waitDecode, exeIn.fire, waitSend),
+      (waitDecode, exeIn.fire && exeIn.bits.enable && shouldWaitALU, waitALU),
+      (waitDecode, exeIn.fire && exeIn.bits.enable, waitSend),
       (waitALU, alu.io.out.fire, waitSend),
       (waitSend, exeOut.fire, waitDecode)
     )
