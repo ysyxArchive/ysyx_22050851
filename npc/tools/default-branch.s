@@ -19,9 +19,9 @@ _start:
     add a5, t5, t0  # 加法6: a5 = t5 + t0
     
     # jump
-    jal t0, 8
+    jal t0, branch
     ebreak
-    
+branch:
     lui a0, 0  # 归零
     
     # 程序退出
