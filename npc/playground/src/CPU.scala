@@ -26,6 +26,8 @@ class CPU extends Module {
   exe.exeOut <> memu.memIn
   memu.memOut <> wbu.wbIn
 
+  ifu.fromDecode <> decoder.decodeBack
+
   iCache.axiIO <> arbiter.slaveIO(0)
   dCache.axiIO <> arbiter.slaveIO(1)
   mem.axiS <> arbiter.masterIO

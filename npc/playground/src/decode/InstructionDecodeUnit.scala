@@ -11,19 +11,32 @@ class DecodeIn extends Bundle {
   val inst  = Output(UInt(32.W))
 }
 
+class DecodeBack extends Bundle {
+  val willTakeBranch = Output(Bool())
+  val branchPc       = Output(UInt(64.W))
+}
+
 class InstructionDecodeUnit extends Module {
-  val regIO     = IO(Flipped(new RegReadIO()))
-  val decodeIn  = IO(Flipped(Decoupled(new DecodeIn())))
-  val decodeOut = IO(Decoupled(new ExeIn()))
+  val regIO      = IO(Flipped(new RegReadIO()))
+  val decodeIn   = IO(Flipped(Decoupled(new DecodeIn())))
+  val decodeOut  = IO(Decoupled(new ExeIn()))
+  val decodeBack = IO(new DecodeBack())
 
   val controlDecoder = Module(new InstContorlDecoder)
 
   val decodeInReg = Reg(new DecodeIn())
 
-  val waitFetch :: waitSend :: others = Enum(4)
+  val willTakeBranch = Wire(Bool())
+
+  val waitFetch :: waitSend :: bubble :: others = Enum(4)
   val decodeFSM = new FSM(
     waitFetch,
-    List((waitSend, decodeOut.fire, waitFetch), (waitFetch, decodeIn.fire, waitSend))
+    List(
+      (waitSend, decodeOut.fire && !willTakeBranch, waitFetch),
+      (waitSend, decodeOut.fire && willTakeBranch, bubble),
+      (bubble, true.B, waitFetch),
+      (waitFetch, decodeIn.fire, waitSend)
+    )
   )
 
   decodeInReg := Mux(decodeIn.fire, decodeIn.bits, decodeInReg)
@@ -44,7 +57,7 @@ class InstructionDecodeUnit extends Module {
     Cat(inst(31), inst(19, 12), inst(20), inst(30, 21), 0.U(1.W)),
     20
   );
-  decodeOut.bits.data.imm := MuxLookup(controlDecoder.output.insttype, immI)(
+  val imm = MuxLookup(controlDecoder.output.insttype, immI)(
     EnumSeq(
       InstType.I -> immI,
       InstType.S -> immS,
@@ -53,6 +66,7 @@ class InstructionDecodeUnit extends Module {
       InstType.J -> immJ
     )
   )
+  decodeOut.bits.data.imm  := imm
   decodeOut.bits.data.src1 := rs1
   decodeOut.bits.data.src2 := rs2
   decodeOut.bits.data.dst  := rd
@@ -66,22 +80,49 @@ class InstructionDecodeUnit extends Module {
   // regIO
   regIO.raddr0 := rs1
   regIO.raddr1 := rs2
+  val src1Data = Mux(
+    controlDecoder.output.srccast1,
+    Utils.cast(regIO.out0, 32, 64),
+    regIO.out0
+  )
+  val src2Data = Mux(
+    controlDecoder.output.srccast2,
+    Utils.cast(regIO.out1, 32, 64),
+    regIO.out1
+  )
+  decodeOut.bits.data.src1Data := src1Data
+  decodeOut.bits.data.src2Data := src2Data
+  Mux(
+    controlDecoder.output.srccast2,
+    Utils.cast(regIO.out1, 32, 64),
+    regIO.out1
+  )
 
-  decodeOut.bits.data.src1Data :=
-    Mux(
-      controlDecoder.output.srccast1,
-      Utils.cast(regIO.out0, 32, 64),
-      regIO.out0
+  // branch check
+  willTakeBranch := MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
+    EnumSeq(
+      PCAddrSrc.aluzero -> (src1Data === src2Data),
+      PCAddrSrc.alunotneg -> (src1Data.asSInt >= src2Data.asSInt),
+      PCAddrSrc.alucarryorzero -> (src1Data >= src2Data),
+      PCAddrSrc.aluneg -> (src1Data.asSInt < src2Data.asSInt),
+      PCAddrSrc.alunotcarryandnotzero -> (src1Data < src2Data),
+      PCAddrSrc.alunotzero -> (src1Data =/= src2Data),
+      PCAddrSrc.one -> true.B
     )
-  decodeOut.bits.data.src2Data :=
-    Mux(
-      controlDecoder.output.srccast2,
-      Utils.cast(regIO.out1, 32, 64),
-      regIO.out1
+  )
+  val branchPc = MuxLookup(controlDecoder.output.pcsrc, 0.U)(
+    EnumSeq(
+      PcSrc.pc -> decodeInReg.pc,
+      PcSrc.src1 -> src1Data
     )
+  ) + imm
 
+  decodeBack.willTakeBranch := willTakeBranch
+  decodeBack.branchPc       := branchPc
+
+  decodeOut.bits.data.dnpc := Mux(willTakeBranch, branchPc, decodeInReg.pc + 4.U)
   // debug
-  decodeOut.bits.debug.pc   := regIO.pc
+  decodeOut.bits.debug.pc   := decodeInReg.debug.pc
   decodeOut.bits.debug.inst := inst
 
 }
