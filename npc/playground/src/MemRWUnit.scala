@@ -106,6 +106,7 @@ class MemRWUnit extends Module {
   memOut.bits.data.dnpc     := memInReg.data.dnpc
   memOut.bits.data.imm      := memInReg.data.imm
   memOut.bits.control       := memInReg.control
+  memOut.bits.enable        := memInReg.enable
 
   toDecode := memInReg.data.dst
 }
