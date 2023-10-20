@@ -108,5 +108,5 @@ class MemRWUnit extends Module {
   memOut.bits.control       := memInReg.control
   memOut.bits.enable        := memInReg.enable
 
-  toDecode := memInReg.data.dst
+  toDecode := Mux(memFSM.is(waitIn), 0.U, memInReg.data.dst)
 }

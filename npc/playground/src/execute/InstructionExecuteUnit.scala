@@ -92,6 +92,6 @@ class InstructionExecuteUnit extends Module {
 
   exeOut.bits.debug := exeInReg.debug
 
-  toDecode := exeInReg.data.dst
+  toDecode := Mux(exeFSM.is(waitDecode), 0.U, exeInReg.data.dst)
 
 }
