@@ -67,11 +67,6 @@ class InstructionExecuteUnit extends Module {
   alu.io.out.ready      := alu.io.out.bits.isImmidiate || exeFSM.is(waitALU)
   alu.io.in.valid       := exeIn.fire
 
-  // blackBoxHalt
-  val blackBox = Module(new BlackBoxHalt);
-  blackBox.io.halt     := exeInReg.control.goodtrap
-  blackBox.io.bad_halt := exeInReg.control.badtrap || res._2 === false.B
-
   exeIn.ready := exeFSM.is(waitDecode)
 
   exeOut.valid              := exeFSM.is(waitSend)

@@ -63,14 +63,14 @@ class WriteBackUnit extends Module {
   )
   val csrInReg = RegInit(csrIn)
   csrInReg := Mux(wbFSM.willChangeTo(busy), csrIn, csrInReg)
-  val dnpcAddSrcReg = 
+  val dnpcAddSrcReg =
     MuxLookup(wbInReg.control.pcsrc, wbInReg.data.pc)(
       EnumSeq(
         PcSrc.pc -> wbInReg.data.pc,
         PcSrc.src1 -> wbInReg.data.src1
       )
     )
-  
+
   val dnpcAlter = MuxLookup(wbInReg.control.pccsr, dnpcAddSrcReg)(
     EnumSeq(
       PcCsr.origin -> (dnpcAddSrcReg + wbInReg.data.imm),
@@ -94,6 +94,11 @@ class WriteBackUnit extends Module {
   csrControl.csrBehave  := Mux(wbFSM.willChangeTo(busy), wbInReg.control.csrbehave, CsrBehave.no.asUInt)
   csrControl.csrSetmode := Mux(wbFSM.willChangeTo(busy), wbInReg.control.csrsetmode, CsrSetMode.origin.asUInt)
   csrControl.csrSource  := wbInReg.control.csrsource
+
+  // blackBoxHalt
+  val blackBox = Module(new BlackBoxHalt);
+  blackBox.io.halt     := wbInReg.control.goodtrap
+  blackBox.io.bad_halt := wbInReg.control.badtrap
 
   wbIn.ready := wbFSM.is(idle)
 }
