@@ -63,14 +63,14 @@ class WriteBackUnit extends Module {
   )
   val csrInReg = RegInit(csrIn)
   csrInReg := Mux(wbFSM.willChangeTo(busy), csrIn, csrInReg)
-  val dnpcAddSrcReg = RegNext(
+  val dnpcAddSrcReg = 
     MuxLookup(wbInReg.control.pcsrc, wbInReg.data.pc)(
       EnumSeq(
         PcSrc.pc -> wbInReg.data.pc,
         PcSrc.src1 -> wbInReg.data.src1
       )
     )
-  )
+  
   val dnpcAlter = MuxLookup(wbInReg.control.pccsr, dnpcAddSrcReg)(
     EnumSeq(
       PcCsr.origin -> (dnpcAddSrcReg + wbInReg.data.imm),
