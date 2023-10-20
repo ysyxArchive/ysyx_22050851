@@ -81,7 +81,7 @@ def genIOObject():
     ret = """
 object ExeControlIn{
   def default() = {
-    val defaultout = Wire(new DecodeControlOut);
+    val defaultout = Wire(new ExeControlIn);
 """
     for colName, _ in codemap:
         defaultValue = defaultDict[colName]
