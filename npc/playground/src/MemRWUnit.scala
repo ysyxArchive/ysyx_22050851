@@ -10,6 +10,7 @@ class MemRWIn extends Bundle {
   val debug   = Output(new DebugInfo)
   val data    = Output(new MemDataIn);
   val control = Output(new ExeControlIn);
+  val enable  = Output(Bool())
 }
 
 class MemDataIn extends Bundle {

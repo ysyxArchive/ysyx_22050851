@@ -101,6 +101,11 @@ class InstructionDecodeUnit extends Module {
     regIO.out1
   )
 
+  // RAW check
+  val dstVec     = VecInit(fromExe, fromMemu, fromWbu)
+  val shouldWait = (rs1 =/= 0.U && dstVec.contains(rs1)) || (rs2 =/= 0.U && dstVec.contains(rs2))
+  decodeOut.bits.enable := !shouldWait
+
   // branch check
   willTakeBranch := MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
     EnumSeq(
@@ -122,12 +127,8 @@ class InstructionDecodeUnit extends Module {
 
   decodeBack.willTakeBranch := willTakeBranch
   decodeBack.branchPc       := branchPc
-  decodeOut.bits.data.dnpc  := Mux(willTakeBranch, branchPc, decodeInReg.pc + 4.U)
+  decodeOut.bits.data.dnpc  := Mux(shouldWait, decodeInReg.pc, Mux(willTakeBranch, branchPc, decodeInReg.pc + 4.U))
 
-  // RAW check
-  val dstVec     = VecInit(fromExe, fromMemu, fromWbu)
-  val shouldWait = (rs1 =/= 0.U && dstVec.contains(rs1)) || (rs2 =/= 0.U && dstVec.contains(rs2))
-  decodeOut.bits.enable := !shouldWait
   // debug
   decodeOut.bits.debug.pc   := decodeInReg.debug.pc
   decodeOut.bits.debug.inst := inst
