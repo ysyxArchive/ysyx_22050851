@@ -50,11 +50,6 @@ class InstructionExecuteUnit extends Module {
   )
 
   exeInReg := Mux(exeIn.fire, exeIn.bits, exeInReg)
-  exeInReg.control := Mux(
-    exeIn.fire,
-    Mux(exeIn.bits.enable, exeIn.bits.control, ExeControlIn.default()),
-    exeInReg.control
-  )
 
   // alu
   alu.io.in.bits.inA := MuxLookup(exeInReg.control.alumux1, 0.U)(
