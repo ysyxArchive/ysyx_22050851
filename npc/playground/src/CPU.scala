@@ -36,6 +36,9 @@ class CPU extends Module {
   ifu.regIO := regs.readIO
 
   decoder.regIO <> regs.readIO
+  decoder.fromExe  := exe.toDecode
+  decoder.fromMemu := memu.toDecode
+  decoder.fromWbu  := wbu.toDecode
 
   exe.csrIn := csrregs.io.output
 
