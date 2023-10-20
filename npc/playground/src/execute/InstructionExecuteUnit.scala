@@ -41,14 +41,15 @@ class InstructionExecuteUnit extends Module {
 
   val shouldWaitALU = ops.contains(exeIn.bits.control.alumode.asUInt)
 
-  val waitDecode :: waitALU :: waitSend :: other = Enum(10)
+  val waitDecode :: sendALU :: waitALU :: waitSend :: other = Enum(10)
 
   val exeFSM = new FSM(
     waitDecode,
     List(
       (waitDecode, exeIn.fire && !exeIn.bits.enable, waitDecode),
-      (waitDecode, exeIn.fire && exeIn.bits.enable && shouldWaitALU, waitALU),
+      (waitDecode, exeIn.fire && exeIn.bits.enable && shouldWaitALU, sendALU),
       (waitDecode, exeIn.fire && exeIn.bits.enable && !shouldWaitALU, waitSend),
+      (sendALU, alu.io.in.fire, waitALU),
       (waitALU, alu.io.out.fire, waitSend),
       (waitSend, exeOut.fire, waitDecode)
     )
@@ -73,7 +74,7 @@ class InstructionExecuteUnit extends Module {
   val res = AluMode.safe(exeInReg.control.alumode)
   alu.io.in.bits.opType := res._1
   alu.io.out.ready      := alu.io.out.bits.isImmidiate || exeFSM.is(waitALU)
-  alu.io.in.valid       := exeIn.fire
+  alu.io.in.valid       := exeFSM.is(sendALU)
 
   exeIn.ready := exeFSM.is(waitDecode)
 
