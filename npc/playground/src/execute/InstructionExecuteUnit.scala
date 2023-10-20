@@ -14,7 +14,7 @@ class ExeDataIn extends Bundle {
   val dst      = Output(UInt(5.W))
   val imm      = Output(UInt(64.W))
   val pc       = Output(UInt(64.W))
-
+  val dnpc     = Output(UInt(64.W))
 }
 
 class ExeIn extends Bundle {
@@ -77,6 +77,7 @@ class InstructionExecuteUnit extends Module {
   exeOut.bits.data.dst      := exeInReg.data.dst
   exeOut.bits.data.signals  := alu.io.out.bits.signals
   exeOut.bits.data.pc       := exeInReg.data.pc
+  exeOut.bits.data.dnpc     := exeInReg.data.dnpc
   exeOut.bits.data.imm      := exeInReg.data.imm
   exeOut.bits.data.src1Data := exeInReg.data.src1Data
 

@@ -16,6 +16,7 @@ class WBDataIn extends Bundle {
   val mem      = Output(UInt(64.W))
   val signals  = new SignalIO()
   val pc       = Output(UInt(64.W))
+  val dnpc     = Output(UInt(64.W))
 }
 
 class WBIn extends Bundle {
@@ -62,22 +63,8 @@ class WriteBackUnit extends Module {
     )
   )
   val csrInReg = RegInit(csrIn)
-  csrInReg := Mux(wbFSM.willChangeTo(busy), csrIn, csrInReg)
-  val dnpcAddSrcReg =
-    MuxLookup(wbInReg.control.pcsrc, wbInReg.data.pc)(
-      EnumSeq(
-        PcSrc.pc -> wbInReg.data.pc,
-        PcSrc.src1 -> wbInReg.data.src1
-      )
-    )
-
-  val dnpcAlter = MuxLookup(wbInReg.control.pccsr, dnpcAddSrcReg)(
-    EnumSeq(
-      PcCsr.origin -> (dnpcAddSrcReg + wbInReg.data.imm),
-      PcCsr.csr -> csrInReg
-    )
-  )
-  regWriteIO.dnpc := Mux(wbFSM.is(busy), Mux(pcBranch.asBool, dnpcAlter, snpc), regReadIO.pc)
+  csrInReg        := Mux(wbFSM.willChangeTo(busy), csrIn, csrInReg)
+  regWriteIO.dnpc := Mux(wbFSM.is(busy), wbInReg.data.dnpc, regReadIO.pc)
   val regwdata = MuxLookup(wbInReg.control.regwritemux, wbInReg.data.alu)(
     EnumSeq(
       RegWriteMux.alu -> wbInReg.data.alu,
