@@ -21,17 +21,22 @@ class InstructionDecodeUnit extends Module {
   val decodeIn   = IO(Flipped(Decoupled(new DecodeIn())))
   val decodeOut  = IO(Decoupled(new ExeIn()))
   val decodeBack = IO(new DecodeBack())
+  val fromExe    = IO(Input(UInt(5.W)))
+  val fromMemu   = IO(Input(UInt(5.W)))
+  val fromWbu    = IO(Input(UInt(5.W)))
 
   val controlDecoder = Module(new InstContorlDecoder)
 
   val decodeInReg = Reg(new DecodeIn())
 
   val willTakeBranch = Wire(Bool())
+  val shouldWait     = Wire(Bool())
 
   val waitFetch :: waitSend :: bubble :: others = Enum(4)
   val decodeFSM = new FSM(
     waitFetch,
     List(
+      (waitSend, decodeOut.fire && shouldWait, waitSend),
       (waitSend, decodeOut.fire && !willTakeBranch, waitFetch),
       (waitSend, decodeOut.fire && willTakeBranch, bubble),
       (bubble, true.B, waitFetch),
@@ -98,6 +103,11 @@ class InstructionDecodeUnit extends Module {
     regIO.out1
   )
 
+  // RAW check
+  val dstVec = VecInit(fromExe, fromMemu, fromWbu)
+  shouldWait            := (rs1 =/= 0.U && dstVec.contains(rs1)) || (rs2 =/= 0.U && dstVec.contains(rs2))
+  decodeOut.bits.enable := !shouldWait
+
   // branch check
   willTakeBranch := MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
     EnumSeq(
@@ -119,8 +129,8 @@ class InstructionDecodeUnit extends Module {
 
   decodeBack.willTakeBranch := willTakeBranch
   decodeBack.branchPc       := branchPc
-
-  decodeOut.bits.data.dnpc := Mux(willTakeBranch, branchPc, decodeInReg.pc + 4.U)
+  
+  decodeOut.bits.data.dnpc  := Mux(shouldWait, decodeInReg.pc, Mux(willTakeBranch, branchPc, decodeInReg.pc + 4.U))
   // debug
   decodeOut.bits.debug.pc   := decodeInReg.debug.pc
   decodeOut.bits.debug.inst := inst

@@ -10,6 +10,7 @@ class MemRWIn extends Bundle {
   val debug   = Output(new DebugInfo)
   val data    = Output(new MemDataIn);
   val control = Output(new ExeControlIn);
+  val enable  = Output(Bool())
 }
 
 class MemDataIn extends Bundle {
@@ -25,9 +26,10 @@ class MemDataIn extends Bundle {
 }
 
 class MemRWUnit extends Module {
-  val memIO  = IO(Flipped(new CacheIO(64, 64)))
-  val memIn  = IO(Flipped(Decoupled(new MemRWIn())))
-  val memOut = IO(Decoupled(new WBIn()))
+  val memIO    = IO(Flipped(new CacheIO(64, 64)))
+  val memIn    = IO(Flipped(Decoupled(new MemRWIn())))
+  val memOut   = IO(Decoupled(new WBIn()))
+  val toDecode = IO(Output(UInt(5.W)))
 
   val memInReg = Reg(new MemRWIn())
 
@@ -104,4 +106,7 @@ class MemRWUnit extends Module {
   memOut.bits.data.dnpc     := memInReg.data.dnpc
   memOut.bits.data.imm      := memInReg.data.imm
   memOut.bits.control       := memInReg.control
+  memOut.bits.enable        := memInReg.enable
+
+  toDecode := Mux(memFSM.is(waitIn), 0.U, memInReg.data.dst)
 }

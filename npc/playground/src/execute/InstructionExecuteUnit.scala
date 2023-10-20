@@ -21,12 +21,14 @@ class ExeIn extends Bundle {
   val debug   = Output(new DebugInfo)
   val data    = Output(new ExeDataIn);
   val control = Output(new ExeControlIn);
+  val enable  = Output(Bool())
 }
 
 class InstructionExecuteUnit extends Module {
-  val exeIn  = IO(Flipped(Decoupled(new ExeIn())))
-  val exeOut = IO(Decoupled(new MemRWIn()))
-  val csrIn  = IO(Input(UInt(64.W)))
+  val exeIn    = IO(Flipped(Decoupled(new ExeIn())))
+  val exeOut   = IO(Decoupled(new MemRWIn()))
+  val csrIn    = IO(Input(UInt(64.W)))
+  val toDecode = IO(Output(UInt(5.W)))
 
   val exeInReg = Reg(new ExeIn())
 
@@ -39,6 +41,7 @@ class InstructionExecuteUnit extends Module {
   val exeFSM = new FSM(
     waitDecode,
     List(
+      (waitDecode, exeIn.fire && !exeIn.bits.enable, waitDecode),
       (waitDecode, exeIn.fire && shouldWaitALU, waitALU),
       (waitDecode, exeIn.fire, waitSend),
       (waitALU, alu.io.out.fire, waitSend),
@@ -80,6 +83,9 @@ class InstructionExecuteUnit extends Module {
   exeOut.bits.data.dnpc     := exeInReg.data.dnpc
   exeOut.bits.data.imm      := exeInReg.data.imm
   exeOut.bits.data.src1Data := exeInReg.data.src1Data
+  exeOut.bits.enable        := exeInReg.enable
 
   exeOut.bits.debug := exeInReg.debug
+
+  toDecode := Mux(exeFSM.is(waitDecode), 0.U, exeInReg.data.dst)
 }

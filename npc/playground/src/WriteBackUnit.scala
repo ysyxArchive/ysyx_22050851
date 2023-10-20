@@ -23,6 +23,7 @@ class WBIn extends Bundle {
   val debug   = Output(new DebugInfo)
   val data    = Output(new WBDataIn);
   val control = Output(new ExeControlIn);
+  val enable  = Output(Bool())
 }
 
 class WriteBackUnit extends Module {
@@ -32,6 +33,7 @@ class WriteBackUnit extends Module {
   val regReadIO  = IO(Input(new RegReadIO()))
   val csrIn      = IO(Input(UInt(64.W)))
   val csrControl = IO(Flipped(new CSRFileControl()))
+  val toDecode   = IO(Output(UInt(5.W)))
 
   val wbInReg = Reg(new WBIn())
 
@@ -88,4 +90,6 @@ class WriteBackUnit extends Module {
   blackBox.io.bad_halt := wbFSM.willChangeTo(idle) && wbInReg.control.badtrap
 
   wbIn.ready := wbFSM.is(idle)
+
+  toDecode := Mux(wbFSM.is(idle), 0.U, wbInReg.data.dst)
 }
