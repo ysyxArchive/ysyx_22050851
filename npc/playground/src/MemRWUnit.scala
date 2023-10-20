@@ -82,12 +82,16 @@ class MemRWUnit extends Module {
       MemLen.eight -> memIO.data.asUInt
     )
   )
-  val memData = Mux(
-    memInReg.control.memmode === MemMode.read.asUInt,
-    Utils.signExtend(memOutRaw, memlen << 3),
-    Utils.zeroExtend(memOutRaw, memlen << 3)
+  val memData = Reg(UInt(64.W))
+  memData := Mux(
+    memFSM.willChangeTo(waitOut),
+    Mux(
+      memInReg.control.memmode === MemMode.read.asUInt,
+      Utils.signExtend(memOutRaw, memlen << 3),
+      Utils.zeroExtend(memOutRaw, memlen << 3)
+    ),
+    memData
   )
-
   memIn.ready := memFSM.is(waitIn)
 
   memOut.valid              := memFSM.is(waitOut)
