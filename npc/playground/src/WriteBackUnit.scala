@@ -32,6 +32,7 @@ class WriteBackUnit extends Module {
   val regReadIO  = IO(Input(new RegReadIO()))
   val csrIn      = IO(Input(UInt(64.W)))
   val csrControl = IO(Flipped(new CSRFileControl()))
+  val toDecode   = IO(Output(UInt(5.W)))
 
   val wbInReg = Reg(new WBIn())
 
@@ -88,4 +89,6 @@ class WriteBackUnit extends Module {
   blackBox.io.bad_halt := wbFSM.willChangeTo(idle) && wbInReg.control.badtrap
 
   wbIn.ready := wbFSM.is(idle)
+  
+  toDecode := wbInReg.data.dst
 }

@@ -21,6 +21,9 @@ class InstructionDecodeUnit extends Module {
   val decodeIn   = IO(Flipped(Decoupled(new DecodeIn())))
   val decodeOut  = IO(Decoupled(new ExeIn()))
   val decodeBack = IO(new DecodeBack())
+  val fromExe    = IO(Input(UInt(5.W)))
+  val fromMemu   = IO(Input(UInt(5.W)))
+  val fromWbu    = IO(Input(UInt(5.W)))
 
   val controlDecoder = Module(new InstContorlDecoder)
 
@@ -119,8 +122,12 @@ class InstructionDecodeUnit extends Module {
 
   decodeBack.willTakeBranch := willTakeBranch
   decodeBack.branchPc       := branchPc
+  decodeOut.bits.data.dnpc  := Mux(willTakeBranch, branchPc, decodeInReg.pc + 4.U)
 
-  decodeOut.bits.data.dnpc := Mux(willTakeBranch, branchPc, decodeInReg.pc + 4.U)
+  // RAW check
+  val dstVec     = VecInit(fromExe, fromMemu, fromWbu)
+  val shouldWait = (rs1 =/= 0.U && dstVec.contains(rs1)) || (rs2 =/= 0.U && dstVec.contains(rs2))
+  decodeOut.bits.enable := !shouldWait
   // debug
   decodeOut.bits.debug.pc   := decodeInReg.debug.pc
   decodeOut.bits.debug.inst := inst
