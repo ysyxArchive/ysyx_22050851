@@ -34,7 +34,12 @@ class InstructionExecuteUnit extends Module {
 
   val alu = Module(new ALU)
 
-  val shouldWaitALU = !alu.io.out.bits.isImmidiate
+  val mulOps = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt))
+  val divOps = VecInit(Seq(AluMode.div, AluMode.divu, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
+  val remOps = VecInit(Seq(AluMode.rem, AluMode.remu, AluMode.remw, AluMode.remuw).map(t => t.asUInt))
+  val ops    = VecInit(mulOps ++ divOps ++ remOps)
+
+  val shouldWaitALU = ops.contains(exeIn.bits.control.alumode.asUInt)
 
   val waitDecode :: waitALU :: waitSend :: other = Enum(10)
 
