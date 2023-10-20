@@ -120,7 +120,7 @@ class InstructionDecodeUnit extends Module {
   decodeBack.willTakeBranch := willTakeBranch
   decodeBack.branchPc       := branchPc
   // debug
-  decodeOut.bits.debug.pc   := regIO.pc
+  decodeOut.bits.debug.pc   := decodeInReg.debug.pc
   decodeOut.bits.debug.inst := inst
 
 }
