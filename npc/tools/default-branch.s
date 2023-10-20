@@ -19,7 +19,7 @@ _start:
     add a5, t5, t0  # 加法6: a5 = t5 + t0
     
     # jump
-    jal 8
+    jal t0, 8
     ebreak
     
     lui a0, 0  # 归零
