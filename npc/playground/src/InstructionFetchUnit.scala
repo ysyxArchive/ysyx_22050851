@@ -11,19 +11,16 @@ class InstructionFetchUnit extends Module {
   val iCacheIO   = IO(Flipped(new CacheIO(64, 64)))
   val fromDecode = IO(Flipped(new DecodeBack()))
 
-  val inst      = RegInit(0x13.U(32.W))
-  val predictPC = RegInit(regIO.pc)
-  // val branched      = RegInit(false.B)
-  // val takeBranchReg = Reg(Bool())
+  val inst           = RegInit(0x13.U(32.W))
+  val predictPC      = RegInit(regIO.pc)
   val needTakeBranch = Wire(Bool())
-  val branchPC       = Reg(UInt(64.W))
 
   val waitAR :: waitR :: waitSend :: others = Enum(4)
   val fetchFSM = new FSM(
     waitAR,
     List(
       (waitAR, iCacheIO.readReq.fire, waitR),
-      (waitR, iCacheIO.data.fire && fromDecode.willTakeBranch || needTakeBranch, waitAR),
+      (waitR, iCacheIO.data.fire && needTakeBranch, waitAR),
       (waitR, iCacheIO.data.fire, waitSend),
       (waitSend, fetchOut.fire || needTakeBranch, waitAR)
     )
@@ -31,15 +28,12 @@ class InstructionFetchUnit extends Module {
 
   iCacheIO.data.ready    := fetchFSM.is(waitR)
   iCacheIO.readReq.valid := fetchFSM.is(waitAR)
-  iCacheIO.addr          := Mux(fetchFSM.changedFrom(waitR), branchPC, predictPC)
+  iCacheIO.addr          := Mux(fetchFSM.changedFrom(waitR), fromDecode.branchPc, predictPC)
 
-  needTakeBranch := (fromDecode.willTakeBranch && fromDecode.branchPc =/= predictPC) || RegNext(
-    !fetchFSM.willChangeTo(waitAR) && fromDecode.willTakeBranch && fromDecode.branchPc =/= predictPC
-  )
-  branchPC := Mux(fromDecode.willTakeBranch && fromDecode.branchPc =/= predictPC, fromDecode.branchPc, branchPC)
+  needTakeBranch := fromDecode.valid && fromDecode.willTakeBranch && fromDecode.branchPc =/= predictPC
 
   predictPC :=
-    Mux(fetchFSM.willChangeTo(waitAR), Mux(needTakeBranch, branchPC, predictPC + 4.U), predictPC)
+    Mux(fetchFSM.willChangeTo(waitAR), Mux(needTakeBranch, fromDecode.branchPc, predictPC + 4.U), predictPC)
 
   inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits.asUInt, inst)
 

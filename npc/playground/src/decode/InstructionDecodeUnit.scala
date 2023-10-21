@@ -12,6 +12,7 @@ class DecodeIn extends Bundle {
 }
 
 class DecodeBack extends Bundle {
+  val valid          = Output(Bool())
   val willTakeBranch = Output(Bool())
   val branchPc       = Output(UInt(64.W))
 }
@@ -127,6 +128,7 @@ class InstructionDecodeUnit extends Module {
     )
   ) + imm
 
+  decodeBack.valid          := !shouldWait
   decodeBack.willTakeBranch := willTakeBranch
   decodeBack.branchPc       := branchPc
 
