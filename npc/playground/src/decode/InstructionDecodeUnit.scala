@@ -109,15 +109,19 @@ class InstructionDecodeUnit extends Module {
   decodeOut.bits.enable := !shouldWait
 
   // branch check
-  willTakeBranch := MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
-    EnumSeq(
-      PCAddrSrc.aluzero -> (src1Data === src2Data),
-      PCAddrSrc.alunotneg -> (src1Data.asSInt >= src2Data.asSInt),
-      PCAddrSrc.alucarryorzero -> (src1Data >= src2Data),
-      PCAddrSrc.aluneg -> (src1Data.asSInt < src2Data.asSInt),
-      PCAddrSrc.alunotcarryandnotzero -> (src1Data < src2Data),
-      PCAddrSrc.alunotzero -> (src1Data =/= src2Data),
-      PCAddrSrc.one -> true.B
+  willTakeBranch := Mux(
+    shouldWait,
+    false.B,
+    MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
+      EnumSeq(
+        PCAddrSrc.aluzero -> (src1Data === src2Data),
+        PCAddrSrc.alunotneg -> (src1Data.asSInt >= src2Data.asSInt),
+        PCAddrSrc.alucarryorzero -> (src1Data >= src2Data),
+        PCAddrSrc.aluneg -> (src1Data.asSInt < src2Data.asSInt),
+        PCAddrSrc.alunotcarryandnotzero -> (src1Data < src2Data),
+        PCAddrSrc.alunotzero -> (src1Data =/= src2Data),
+        PCAddrSrc.one -> true.B
+      )
     )
   )
   val branchPc = MuxLookup(controlDecoder.output.pcsrc, 0.U)(
@@ -129,8 +133,8 @@ class InstructionDecodeUnit extends Module {
 
   decodeBack.willTakeBranch := willTakeBranch
   decodeBack.branchPc       := branchPc
-  
-  decodeOut.bits.data.dnpc  := Mux(shouldWait, decodeInReg.pc, Mux(willTakeBranch, branchPc, decodeInReg.pc + 4.U))
+
+  decodeOut.bits.data.dnpc := Mux(shouldWait, decodeInReg.pc, Mux(willTakeBranch, branchPc, decodeInReg.pc + 4.U))
   // debug
   decodeOut.bits.debug.pc   := decodeInReg.debug.pc
   decodeOut.bits.debug.inst := inst
