@@ -71,7 +71,7 @@ class MemRWUnit extends Module {
   memIO.addr               := memInReg.data.alu
   memIO.data.ready         := memFSM.is(waitMemRes) && memIsRead
   memIO.writeReq.valid     := memFSM.is(waitMemReq) && !memIsRead && shouldMemWork
-  memIO.writeReq.bits.data := memInReg.data.src2
+  memIO.writeReq.bits.data := memInReg.data.src2Data
   memIO.writeReq.bits.mask := memMask
   memIO.writeRes.ready     := memFSM.is(waitMemRes)
   memIO.debug              := memInReg.debug
