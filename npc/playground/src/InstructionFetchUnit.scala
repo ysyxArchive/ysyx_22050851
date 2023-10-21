@@ -37,7 +37,7 @@ class InstructionFetchUnit extends Module {
     Mux(fetchFSM.willChangeTo(waitAR), predictPC + 4.U, predictPC)
   )
   branched      := Mux(fetchOut.fire, false.B, Mux(fetchFSM.is(waitR), fromDecode.willTakeBranch, branched))
-  takeBranchReg := Mux(fetchFSM.is(waitSend), Mux(takeBranchReg, true.B, fromDecode.willTakeBranch), false.B)
+  takeBranchReg := Mux(fetchOut.fire, false.B, Mux(takeBranchReg, true.B, fromDecode.willTakeBranch))
 
   inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits.asUInt, inst)
 
