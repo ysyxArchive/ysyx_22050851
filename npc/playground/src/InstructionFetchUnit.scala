@@ -46,6 +46,8 @@ class InstructionFetchUnit extends Module {
   iCacheIO.writeReq.bits.data := DontCare
   iCacheIO.writeReq.bits.mask := DontCare
   iCacheIO.writeRes.ready     := false.B
+  iCacheIO.debug.pc           := predictPC
+  iCacheIO.debug.inst         := inst
 
   // fetchout
   fetchOut.bits.debug.pc   := predictPC
