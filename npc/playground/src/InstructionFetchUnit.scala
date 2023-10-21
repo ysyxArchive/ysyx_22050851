@@ -31,7 +31,7 @@ class InstructionFetchUnit extends Module {
 
   iCacheIO.data.ready    := fetchFSM.is(waitR)
   iCacheIO.readReq.valid := fetchFSM.is(waitAR)
-  iCacheIO.addr          := predictPC
+  iCacheIO.addr          := Mux(fetchFSM.changedFrom(waitR), branchPC, predictPC)
 
   needTakeBranch := Mux(
     fetchFSM.willChangeTo(waitAR),
