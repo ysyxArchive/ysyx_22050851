@@ -1,5 +1,5 @@
 code,behave,name,InstType,SrcCast1,SrcCast2,AluMux1,AluMux2,AluMode,RegWrite,RegWriteMux,RegWSEXT,MemMode,MemLen,PCAddrSrc,PcSrc,GoodTrap,BadTrap,CsrSetMode,CsrSource,PcCsr,CsrBehave
-any,nothing,default,any,no,no,any,any,any,no,any,no,no,any,zero,any,no,no,origin,any,origin,no
+any,nothing,default,any,no,no,any,any,add,no,any,no,no,any,zero,any,no,no,origin,any,origin,no
 0000000 ????? ????? 000 ????? 01100 11,Reg(dest)=src1+src2,add," R",,,src1,src2,add,yes,alu,no,no,,,,,,,,,
 ??????? ????? ????? 000 ????? 00100 11,Reg(dest)=src1+imm,addi," I",,,src1,imm,add,yes,alu,no,no,,,,,,,,,
 ??????? ????? ????? 000 ????? 00110 11,"Reg(dest)=SEXT(src1+imm,32)",addiw," I",,,src1,imm,add,yes,alu,yes,no,,,,,,,,,

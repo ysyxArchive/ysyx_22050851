@@ -17,6 +17,7 @@ class MemDataIn extends Bundle {
   val src1     = Output(UInt(5.W))
   val src2     = Output(UInt(5.W))
   val src1Data = Output(UInt(64.W))
+  val src2Data = Output(UInt(64.W))
   val dst      = Output(UInt(5.W))
   val imm      = Output(UInt(64.W))
   val alu      = Output(UInt(64.W))
@@ -66,16 +67,16 @@ class MemRWUnit extends Module {
     Fill(1, Mux(memlen > 1.U, 1.U, 0.U)),
     1.U(1.W)
   )
-  val memAddrReg = Reg(UInt(64.W))
-  memAddrReg := Mux(memFSM.willChangeTo(waitMemReq), memInReg.data.alu, memAddrReg)
 
   memIO.readReq.valid      := memFSM.is(waitMemReq) && memIsRead && shouldMemWork
-  memIO.addr               := memAddrReg
+  memIO.addr               := memInReg.data.alu
   memIO.data.ready         := memFSM.is(waitMemRes) && memIsRead
   memIO.writeReq.valid     := memFSM.is(waitMemReq) && !memIsRead && shouldMemWork
-  memIO.writeReq.bits.data := memInReg.data.src2
+  memIO.writeReq.bits.data := memInReg.data.src2Data
   memIO.writeReq.bits.mask := memMask
   memIO.writeRes.ready     := memFSM.is(waitMemRes)
+  memIO.debug              := memInReg.debug
+
   val memOutRaw = MuxLookup(memInReg.control.memlen, memIO.data.bits)(
     EnumSeq(
       MemLen.one -> memIO.data.asUInt(7, 0),
@@ -84,12 +85,16 @@ class MemRWUnit extends Module {
       MemLen.eight -> memIO.data.asUInt
     )
   )
-  val memData = Mux(
-    memInReg.control.memmode === MemMode.read.asUInt,
-    Utils.signExtend(memOutRaw, memlen << 3),
-    Utils.zeroExtend(memOutRaw, memlen << 3)
+  val memData = Reg(UInt(64.W))
+  memData := Mux(
+    memFSM.willChangeTo(waitOut),
+    Mux(
+      memInReg.control.memmode === MemMode.read.asUInt,
+      Utils.signExtend(memOutRaw, memlen << 3),
+      Utils.zeroExtend(memOutRaw, memlen << 3)
+    ),
+    memData
   )
-
   memIn.ready := memFSM.is(waitIn)
 
   memOut.valid              := memFSM.is(waitOut)

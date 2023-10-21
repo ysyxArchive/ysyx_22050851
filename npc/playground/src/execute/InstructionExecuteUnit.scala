@@ -34,16 +34,22 @@ class InstructionExecuteUnit extends Module {
 
   val alu = Module(new ALU)
 
-  val shouldWaitALU = !alu.io.out.bits.isImmidiate
+  val mulOps = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt))
+  val divOps = VecInit(Seq(AluMode.div, AluMode.divu, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
+  val remOps = VecInit(Seq(AluMode.rem, AluMode.remu, AluMode.remw, AluMode.remuw).map(t => t.asUInt))
+  val ops    = VecInit(mulOps ++ divOps ++ remOps)
 
-  val waitDecode :: waitALU :: waitSend :: other = Enum(10)
+  val shouldWaitALU = ops.contains(exeIn.bits.control.alumode.asUInt)
+
+  val waitDecode :: sendALU :: waitALU :: waitSend :: other = Enum(10)
 
   val exeFSM = new FSM(
     waitDecode,
     List(
       (waitDecode, exeIn.fire && !exeIn.bits.enable, waitDecode),
-      (waitDecode, exeIn.fire && shouldWaitALU, waitALU),
-      (waitDecode, exeIn.fire, waitSend),
+      (waitDecode, exeIn.fire && exeIn.bits.enable && shouldWaitALU, sendALU),
+      (waitDecode, exeIn.fire && exeIn.bits.enable && !shouldWaitALU, waitSend),
+      (sendALU, alu.io.in.fire, waitALU),
       (waitALU, alu.io.out.fire, waitSend),
       (waitSend, exeOut.fire, waitDecode)
     )
@@ -68,13 +74,16 @@ class InstructionExecuteUnit extends Module {
   val res = AluMode.safe(exeInReg.control.alumode)
   alu.io.in.bits.opType := res._1
   alu.io.out.ready      := alu.io.out.bits.isImmidiate || exeFSM.is(waitALU)
-  alu.io.in.valid       := exeIn.fire
+  alu.io.in.valid       := exeFSM.is(sendALU)
 
   exeIn.ready := exeFSM.is(waitDecode)
 
+  val aluOut = Reg(UInt(64.W))
+  aluOut := Mux(alu.io.out.fire, alu.io.out.bits.out, aluOut)
+
   exeOut.valid              := exeFSM.is(waitSend)
   exeOut.bits.control       := exeInReg.control
-  exeOut.bits.data.alu      := alu.io.out.bits.out
+  exeOut.bits.data.alu      := Mux(alu.io.out.bits.isImmidiate, alu.io.out.bits.out, aluOut)
   exeOut.bits.data.src1     := exeInReg.data.src1
   exeOut.bits.data.src2     := exeInReg.data.src2
   exeOut.bits.data.dst      := exeInReg.data.dst
@@ -83,6 +92,7 @@ class InstructionExecuteUnit extends Module {
   exeOut.bits.data.dnpc     := exeInReg.data.dnpc
   exeOut.bits.data.imm      := exeInReg.data.imm
   exeOut.bits.data.src1Data := exeInReg.data.src1Data
+  exeOut.bits.data.src2Data := exeInReg.data.src2Data
   exeOut.bits.enable        := exeInReg.enable
 
   exeOut.bits.debug := exeInReg.debug

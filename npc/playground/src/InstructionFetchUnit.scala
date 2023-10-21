@@ -11,31 +11,32 @@ class InstructionFetchUnit extends Module {
   val iCacheIO   = IO(Flipped(new CacheIO(64, 64)))
   val fromDecode = IO(Flipped(new DecodeBack()))
 
-  val inst      = RegInit(0x13.U(32.W))
-  val predictPC = RegInit(regIO.pc)
-  val branched  = RegInit(false.B)
+  val inst           = RegInit(0x13.U(32.W))
+  val predictPC      = RegInit(regIO.pc)
+  val needTakeBranch = Wire(Bool())
 
-  val waitAR :: waitR :: waitSend :: others = Enum(4)
+  val waitAR :: waitR :: waitBranch :: waitSend :: others = Enum(4)
   val fetchFSM = new FSM(
     waitAR,
     List(
       (waitAR, iCacheIO.readReq.fire, waitR),
-      (waitR, fromDecode.willTakeBranch && !branched, waitAR),
-      (waitR, iCacheIO.data.fire, waitSend),
-      (waitSend, fetchOut.fire, waitAR)
+      (waitR, iCacheIO.data.fire && needTakeBranch, waitAR),
+      (waitR, iCacheIO.data.fire && fromDecode.valid, waitSend),
+      (waitR, iCacheIO.data.fire && !fromDecode.valid, waitBranch),
+      (waitBranch, fromDecode.valid && needTakeBranch, waitAR),
+      (waitBranch, fromDecode.valid && !needTakeBranch, waitAR),
+      (waitSend, fetchOut.fire || needTakeBranch, waitAR)
     )
   )
 
   iCacheIO.data.ready    := fetchFSM.is(waitR)
   iCacheIO.readReq.valid := fetchFSM.is(waitAR)
-  iCacheIO.addr          := predictPC
+  iCacheIO.addr          := Mux(fetchFSM.changedFrom(waitR), fromDecode.branchPc, predictPC)
 
-  predictPC := Mux(
-    fromDecode.willTakeBranch,
-    fromDecode.branchPc,
-    Mux(fetchFSM.willChangeTo(waitAR), predictPC + 4.U, predictPC)
-  )
-  branched := Mux(fetchOut.fire, false.B, Mux(fetchFSM.is(waitR), fromDecode.willTakeBranch, branched))
+  needTakeBranch := fromDecode.valid && fromDecode.willTakeBranch && fromDecode.branchPc =/= predictPC
+
+  predictPC :=
+    Mux(fetchFSM.willChangeTo(waitAR), Mux(needTakeBranch, fromDecode.branchPc, predictPC + 4.U), predictPC)
 
   inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits.asUInt, inst)
 
@@ -45,6 +46,8 @@ class InstructionFetchUnit extends Module {
   iCacheIO.writeReq.bits.data := DontCare
   iCacheIO.writeReq.bits.mask := DontCare
   iCacheIO.writeRes.ready     := false.B
+  iCacheIO.debug.pc           := predictPC
+  iCacheIO.debug.inst         := inst
 
   // fetchout
   fetchOut.bits.debug.pc   := predictPC

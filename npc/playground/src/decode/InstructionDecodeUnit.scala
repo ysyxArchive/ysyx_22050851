@@ -12,6 +12,7 @@ class DecodeIn extends Bundle {
 }
 
 class DecodeBack extends Bundle {
+  val valid          = Output(Bool())
   val willTakeBranch = Output(Bool())
   val branchPc       = Output(UInt(64.W))
 }
@@ -76,7 +77,7 @@ class InstructionDecodeUnit extends Module {
   decodeOut.bits.data.src2 := rs2
   decodeOut.bits.data.dst  := rd
 
-  decodeOut.valid        := decodeFSM.is(waitSend)
+  decodeOut.valid        := decodeFSM.is(waitSend) && !shouldWait
   decodeOut.bits.data.pc := decodeInReg.pc
   decodeOut.bits.control := controlDecoder.output
 
@@ -109,7 +110,7 @@ class InstructionDecodeUnit extends Module {
   decodeOut.bits.enable := !shouldWait
 
   // branch check
-  willTakeBranch := MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
+  willTakeBranch := !shouldWait && MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
     EnumSeq(
       PCAddrSrc.aluzero -> (src1Data === src2Data),
       PCAddrSrc.alunotneg -> (src1Data.asSInt >= src2Data.asSInt),
@@ -127,10 +128,11 @@ class InstructionDecodeUnit extends Module {
     )
   ) + imm
 
+  decodeBack.valid          := !shouldWait
   decodeBack.willTakeBranch := willTakeBranch
   decodeBack.branchPc       := branchPc
-  
-  decodeOut.bits.data.dnpc  := Mux(shouldWait, decodeInReg.pc, Mux(willTakeBranch, branchPc, decodeInReg.pc + 4.U))
+
+  decodeOut.bits.data.dnpc := Mux(shouldWait, decodeInReg.pc, Mux(willTakeBranch, branchPc, decodeInReg.pc + 4.U))
   // debug
   decodeOut.bits.debug.pc   := decodeInReg.debug.pc
   decodeOut.bits.debug.inst := inst

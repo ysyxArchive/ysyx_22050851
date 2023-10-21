@@ -2,6 +2,7 @@ import chisel3._
 import chisel3.util._
 import utils.FSM
 import utils.Utils
+import utils.DebugInfo
 
 class CacheIO(dataWidth: Int, addrWidth: Int) extends Bundle {
   val addr    = Input(UInt(addrWidth.W))
@@ -12,6 +13,7 @@ class CacheIO(dataWidth: Int, addrWidth: Int) extends Bundle {
     val mask = UInt((dataWidth / 8).W)
   }))
   val writeRes = Decoupled()
+  val debug    = Input(new DebugInfo())
 }
 
 class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
@@ -63,7 +65,7 @@ class Cache(
   val idle :: sendRes :: sendReq :: waitRes :: writeData :: sendWReq :: waitWRes :: directWReq :: directWRes :: directRReq :: directRRes :: directRBack :: others =
     Enum(16)
 
-  val counter       = RegInit(0.U(log2Ceil(slotsPerLine).W))
+  val counter    = RegInit(0.U(log2Ceil(slotsPerLine).W))
   val directData = Reg(UInt(dataWidth.W))
 
   val shoudDirectRW = io.addr > 0xa0000000L.U
@@ -195,17 +197,27 @@ class Cache(
       when(io.writeReq.fire) {
         val data = io.writeReq.bits.data
         printf(
-          name + " writing, addr is %x, mask is %x, tag is %x, index is %x, offset is %x, data is %x\n",
+          name + " writing, addr is %x, mask is %x, tag is %x, index is %x, offset is %x, data is %x\n, pc is %x, inst is %x\n",
           addr,
           dataWriteReq.mask,
           tag,
           index,
           offset,
-          data
+          data,
+          io.debug.pc,
+          io.debug.inst
         )
       }
       when(io.readReq.fire) {
-        printf(name + " reading, addr is %x, tag is %x, index is %x, offset is %x\n", addr, tag, index, offset)
+        printf(
+          name + " reading, addr is %x, tag is %x, index is %x, offset is %x\n, pc is %x, inst is %x\n",
+          addr,
+          tag,
+          index,
+          offset,
+          io.debug.pc,
+          io.debug.inst
+        )
       }
     }
     when(cacheFSM.is(sendRes) && io.data.fire) {
