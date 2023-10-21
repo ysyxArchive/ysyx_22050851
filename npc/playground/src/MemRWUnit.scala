@@ -17,6 +17,7 @@ class MemDataIn extends Bundle {
   val src1     = Output(UInt(5.W))
   val src2     = Output(UInt(5.W))
   val src1Data = Output(UInt(64.W))
+  val src2Data = Output(UInt(64.W))
   val dst      = Output(UInt(5.W))
   val imm      = Output(UInt(64.W))
   val alu      = Output(UInt(64.W))

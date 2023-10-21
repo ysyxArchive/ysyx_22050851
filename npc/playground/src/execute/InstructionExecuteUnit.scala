@@ -92,6 +92,7 @@ class InstructionExecuteUnit extends Module {
   exeOut.bits.data.dnpc     := exeInReg.data.dnpc
   exeOut.bits.data.imm      := exeInReg.data.imm
   exeOut.bits.data.src1Data := exeInReg.data.src1Data
+  exeOut.bits.data.src2Data := exeInReg.data.src2Data
   exeOut.bits.enable        := exeInReg.enable
 
   exeOut.bits.debug := exeInReg.debug
