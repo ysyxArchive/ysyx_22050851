@@ -21,7 +21,7 @@ class InstructionFetchUnit extends Module {
     List(
       (waitAR, iCacheIO.readReq.fire, waitR),
       (waitR, iCacheIO.data.fire && needTakeBranch, waitAR),
-      (waitR, iCacheIO.data.fire, waitSend),
+      (waitR, iCacheIO.data.fire && fromDecode.valid, waitSend),
       (waitSend, fetchOut.fire || needTakeBranch, waitAR)
     )
   )
