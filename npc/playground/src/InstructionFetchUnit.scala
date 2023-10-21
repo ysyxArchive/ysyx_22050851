@@ -15,13 +15,16 @@ class InstructionFetchUnit extends Module {
   val predictPC      = RegInit(regIO.pc)
   val needTakeBranch = Wire(Bool())
 
-  val waitAR :: waitR :: waitSend :: others = Enum(4)
+  val waitAR :: waitR :: waitBranch :: waitSend :: others = Enum(4)
   val fetchFSM = new FSM(
     waitAR,
     List(
       (waitAR, iCacheIO.readReq.fire, waitR),
       (waitR, iCacheIO.data.fire && needTakeBranch, waitAR),
       (waitR, iCacheIO.data.fire && fromDecode.valid, waitSend),
+      (waitR, iCacheIO.data.fire && !fromDecode.valid, waitBranch),
+      (waitBranch, fromDecode.valid && needTakeBranch, waitAR),
+      (waitBranch, fromDecode.valid && !needTakeBranch, waitAR),
       (waitSend, fetchOut.fire || needTakeBranch, waitAR)
     )
   )
