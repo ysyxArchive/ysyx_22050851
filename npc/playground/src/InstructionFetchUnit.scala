@@ -25,8 +25,7 @@ class InstructionFetchUnit extends Module {
       (waitAR, iCacheIO.readReq.fire, waitR),
       (waitR, iCacheIO.data.fire && needTakeBranch, waitAR),
       (waitR, iCacheIO.data.fire, waitSend),
-      (waitSend, needTakeBranch, waitAR),
-      (waitSend, fetchOut.fire, waitAR)
+      (waitSend, fetchOut.fire || needTakeBranch, waitAR)
     )
   )
 
