@@ -10,7 +10,7 @@
 #define MAX_WAIT_ROUND 300
 // #define MTRACE
 // npc 内部debug
-#define ENABLE_DEBUG
+// #define ENABLE_DEBUG
 
 
 #endif
