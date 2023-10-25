@@ -13,6 +13,7 @@ class InstructionFetchUnit extends Module {
 
   val inst           = RegInit(0x13.U(32.W))
   val predictPC      = RegInit(regIO.pc)
+  val lastPC         = RegInit(regIO.pc)
   val needTakeBranch = Wire(Bool())
 
   val waitAR :: waitR :: waitBranch :: others = Enum(4)
@@ -36,18 +37,19 @@ class InstructionFetchUnit extends Module {
 
   predictPC :=
     Mux(fetchFSM.willChangeTo(waitR), Mux(needTakeBranch, fromDecode.branchPc, predictPC + 4.U), predictPC)
+  lastPC := Mux(fetchFSM.willChangeTo(waitR), predictPC, lastPC)
 
   inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits.asUInt, inst)
 
   fetchOut.valid := iCacheIO.data.fire
 
   // fetchout
-  fetchOut.bits.debug.pc   := predictPC
+  fetchOut.bits.debug.pc   := lastPC
   fetchOut.bits.debug.inst := inst
-  fetchOut.bits.pc         := predictPC
+  fetchOut.bits.pc         := lastPC
   fetchOut.bits.inst       := inst
 
-  iCacheIO.debug.pc   := predictPC
+  iCacheIO.debug.pc   := lastPC
   iCacheIO.debug.inst := inst
 
   iCacheIO.writeReq.valid     := false.B
