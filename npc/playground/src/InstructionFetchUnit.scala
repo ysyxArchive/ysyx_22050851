@@ -29,7 +29,7 @@ class InstructionFetchUnit extends Module {
     )
   )
 
-  iCacheIO.data.ready    := fetchFSM.is(waitR)
+  iCacheIO.data.ready    := fetchFSM.is(waitR) && fetchOut.ready
   iCacheIO.readReq.valid := fetchFSM.is(waitAR)
   iCacheIO.addr          := predictPC
 
@@ -41,7 +41,7 @@ class InstructionFetchUnit extends Module {
 
   inst := iCacheIO.data.bits.asUInt
 
-  fetchOut.valid := iCacheIO.data.fire
+  fetchOut.valid := fetchFSM.is(waitR)
 
   // fetchout
   fetchOut.bits.debug.pc   := lastPC
