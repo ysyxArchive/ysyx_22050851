@@ -12,6 +12,13 @@ class MemRWIn extends Bundle {
   val control = Output(new ExeControlIn);
   val enable  = Output(Bool())
 }
+object MemRWIn {
+  def default = {
+    val defaultWire = WireDefault(new MemRWIn)
+    defaultWire.data.pc := "h80000000".asUInt(64.W)
+    defaultWire
+  }
+}
 
 class MemDataIn extends Bundle {
   val src1     = Output(UInt(5.W))
@@ -32,7 +39,7 @@ class MemRWUnit extends Module {
   val memOut   = IO(Decoupled(new WBIn()))
   val toDecode = IO(Output(UInt(5.W)))
 
-  val memInReg = Reg(new MemRWIn())
+  val memInReg = RegInit(MemRWIn.default)
 
   val shouldMemWork = memIn.bits.control.memmode =/= MemMode.no.asUInt
   val memIsRead     = memInReg.control.memmode === MemMode.read.asUInt || memInReg.control.memmode === MemMode.readu.asUInt
@@ -116,4 +123,3 @@ class MemRWUnit extends Module {
 
   toDecode := Mux(!busy, 0.U, memInReg.data.dst)
 }
-
