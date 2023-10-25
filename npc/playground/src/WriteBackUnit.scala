@@ -38,20 +38,20 @@ class WriteBackUnit extends Module {
   val wbInReg   = Reg(new WBIn())
   val wbInValid = Reg(new Bool())
 
-  val idle :: busy :: other = Enum(3)
+  // val idle :: busy :: other = Enum(3)
 
-  val wbFSM = new FSM(
-    idle,
-    List(
-      (idle, wbIn.fire, busy),
-      (busy, true.B, idle)
-    )
-  )
+  // val wbFSM = new FSM(
+  //   idle,
+  //   List(
+  //     (idle, wbIn.fire, busy),
+  //     (busy, true.B, idle)
+  //   )
+  // )
   wbInValid := wbIn.valid
   wbInReg   := Mux(wbIn.valid, wbIn.bits, wbInReg)
 
   // regWriteIO
-  regWriteIO.waddr := Mux(wbFSM.is(busy) && wbInReg.control.regwrite, wbInReg.data.dst, 0.U)
+  regWriteIO.waddr := Mux(wbInValid && wbInReg.control.regwrite, wbInReg.data.dst, 0.U)
   val snpc = wbInReg.data.pc + 4.U
   val pcBranch = MuxLookup(wbInReg.control.pcaddrsrc, false.B)(
     EnumSeq(
@@ -66,8 +66,8 @@ class WriteBackUnit extends Module {
     )
   )
   val csrInReg = RegInit(csrIn)
-  csrInReg        := Mux(wbFSM.willChangeTo(busy), csrIn, csrInReg)
-  regWriteIO.dnpc := Mux(wbFSM.is(busy), wbInReg.data.dnpc, regReadIO.pc)
+  csrInReg        := Mux(wbIn.valid, csrIn, csrInReg)
+  regWriteIO.dnpc := Mux(wbInValid, wbInReg.data.dnpc, regReadIO.pc)
   val regwdata = MuxLookup(wbInReg.control.regwritemux, wbInReg.data.alu)(
     EnumSeq(
       RegWriteMux.alu -> wbInReg.data.alu,
@@ -81,14 +81,14 @@ class WriteBackUnit extends Module {
   )
   regWriteIO.wdata := Mux(wbInReg.control.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)
   // csr
-  csrControl.csrBehave  := Mux(wbFSM.willChangeTo(busy), wbInReg.control.csrbehave, CsrBehave.no.asUInt)
-  csrControl.csrSetmode := Mux(wbFSM.willChangeTo(busy), wbInReg.control.csrsetmode, CsrSetMode.origin.asUInt)
+  csrControl.csrBehave  := Mux(wbIn.valid, wbInReg.control.csrbehave, CsrBehave.no.asUInt)
+  csrControl.csrSetmode := Mux(wbIn.valid, wbInReg.control.csrsetmode, CsrSetMode.origin.asUInt)
   csrControl.csrSource  := wbInReg.control.csrsource
 
   // blackBoxHalt
   val blackBox = Module(new BlackBoxHalt);
-  blackBox.io.halt     := wbFSM.willChangeTo(idle) && wbInReg.control.goodtrap
-  blackBox.io.bad_halt := wbFSM.willChangeTo(idle) && wbInReg.control.badtrap
+  blackBox.io.halt     := !wbIn.valid && wbInReg.control.goodtrap
+  blackBox.io.bad_halt := !wbIn.valid && wbInReg.control.badtrap
 
   wbIn.ready := true.B
 
