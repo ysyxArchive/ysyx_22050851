@@ -33,14 +33,13 @@ class InstructionDecodeUnit extends Module {
   val willTakeBranch = Wire(Bool())
   val shouldWait     = Wire(Bool())
 
-  val waitFetch :: waitSend :: bubble :: others = Enum(4)
+  val waitFetch :: waitSend :: others = Enum(4)
   val decodeFSM = new FSM(
     waitFetch,
     List(
       (waitSend, decodeOut.fire && shouldWait, waitSend),
       (waitSend, decodeOut.fire && !willTakeBranch, waitFetch),
-      (waitSend, decodeOut.fire && willTakeBranch, bubble),
-      (bubble, true.B, waitFetch),
+      (waitSend, decodeOut.fire && willTakeBranch, waitFetch),
       (waitFetch, decodeIn.fire, waitSend)
     )
   )
@@ -110,7 +109,7 @@ class InstructionDecodeUnit extends Module {
   decodeOut.bits.enable := !shouldWait
 
   // branch check
-  willTakeBranch := !shouldWait && MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
+  willTakeBranch := !shouldWait && decodeFSM.is(waitSend) && MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
     EnumSeq(
       PCAddrSrc.aluzero -> (src1Data === src2Data),
       PCAddrSrc.alunotneg -> (src1Data.asSInt >= src2Data.asSInt),

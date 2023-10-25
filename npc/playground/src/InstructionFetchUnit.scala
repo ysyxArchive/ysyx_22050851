@@ -11,47 +11,56 @@ class InstructionFetchUnit extends Module {
   val iCacheIO   = IO(Flipped(new CacheIO(64, 64)))
   val fromDecode = IO(Flipped(new DecodeBack()))
 
-  val inst           = RegInit(0x13.U(32.W))
+  val inst           = WireInit(0x13.U(32.W))
   val predictPC      = RegInit(regIO.pc)
+  val lastPC         = RegInit(regIO.pc)
   val needTakeBranch = Wire(Bool())
 
-  val waitAR :: waitR :: waitBranch :: waitSend :: others = Enum(4)
+  val waitAR :: waitR :: waitBranch :: others = Enum(4)
   val fetchFSM = new FSM(
     waitAR,
     List(
       (waitAR, iCacheIO.readReq.fire, waitR),
-      (waitR, iCacheIO.data.fire && needTakeBranch, waitAR),
-      (waitR, iCacheIO.data.fire && fromDecode.valid, waitSend),
-      (waitR, iCacheIO.data.fire && !fromDecode.valid, waitBranch),
+      (waitR, iCacheIO.data.fire, waitAR),
+      // (waitR, iCacheIO.data.fire && needTakeBranch, waitAR),
+      // (waitR, iCacheIO.data.fire && fromDecode.valid, waitAR),
+      // (waitR, iCacheIO.data.fire && !fromDecode.valid, waitBranch),
       (waitBranch, fromDecode.valid && needTakeBranch, waitAR),
-      (waitBranch, fromDecode.valid && !needTakeBranch, waitAR),
-      (waitSend, fetchOut.fire || needTakeBranch, waitAR)
+      (waitBranch, fromDecode.valid && !needTakeBranch, waitAR)
     )
   )
 
-  iCacheIO.data.ready    := fetchFSM.is(waitR)
-  iCacheIO.readReq.valid := fetchFSM.is(waitAR)
-  iCacheIO.addr          := Mux(fetchFSM.changedFrom(waitR), fromDecode.branchPc, predictPC)
+  iCacheIO.data.ready    := fetchFSM.is(waitR) && fetchOut.ready
+  iCacheIO.readReq.valid := fetchFSM.is(waitAR) && fromDecode.valid && !needTakeBranch
+  iCacheIO.addr          := predictPC
 
-  needTakeBranch := fromDecode.valid && fromDecode.willTakeBranch && fromDecode.branchPc =/= predictPC
+  // needTakeBranch := fromDecode.valid && fromDecode.willTakeBranch && fromDecode.branchPc =/= predictPC
+  needTakeBranch := (!RegNext(fromDecode.willTakeBranch) || RegNext(
+    fromDecode.valid
+  ) === waitR) && fromDecode.willTakeBranch && fetchFSM.is(waitAR)
 
-  predictPC :=
-    Mux(fetchFSM.willChangeTo(waitAR), Mux(needTakeBranch, fromDecode.branchPc, predictPC + 4.U), predictPC)
+  predictPC := Mux(
+    needTakeBranch && fetchFSM.is(waitAR),
+    fromDecode.branchPc,
+    Mux(fetchFSM.willChangeTo(waitR), predictPC + 4.U, predictPC)
+  )
+  lastPC := Mux(fetchFSM.willChangeTo(waitR), predictPC, lastPC)
 
-  inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits.asUInt, inst)
+  inst := iCacheIO.data.bits.asUInt
 
-  fetchOut.valid := fetchFSM.is(waitSend)
+  fetchOut.valid := fetchFSM.is(waitR) && iCacheIO.data.valid
+
+  // fetchout
+  fetchOut.bits.debug.pc   := lastPC
+  fetchOut.bits.debug.inst := inst
+  fetchOut.bits.pc         := lastPC
+  fetchOut.bits.inst       := inst
+
+  iCacheIO.debug.pc   := predictPC
+  iCacheIO.debug.inst := inst
 
   iCacheIO.writeReq.valid     := false.B
   iCacheIO.writeReq.bits.data := DontCare
   iCacheIO.writeReq.bits.mask := DontCare
   iCacheIO.writeRes.ready     := false.B
-  iCacheIO.debug.pc           := predictPC
-  iCacheIO.debug.inst         := inst
-
-  // fetchout
-  fetchOut.bits.debug.pc   := predictPC
-  fetchOut.bits.debug.inst := inst
-  fetchOut.bits.pc         := predictPC
-  fetchOut.bits.inst       := inst
 }
