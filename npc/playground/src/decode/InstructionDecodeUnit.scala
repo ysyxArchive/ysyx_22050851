@@ -33,14 +33,13 @@ class InstructionDecodeUnit extends Module {
   val willTakeBranch = Wire(Bool())
   val shouldWait     = Wire(Bool())
 
-  val waitFetch :: waitSend :: bubble :: others = Enum(4)
+  val waitFetch :: waitSend :: others = Enum(4)
   val decodeFSM = new FSM(
     waitFetch,
     List(
       (waitSend, decodeOut.fire && shouldWait, waitSend),
       (waitSend, decodeOut.fire && !willTakeBranch, waitFetch),
-      (waitSend, decodeOut.fire && willTakeBranch, bubble),
-      (bubble, true.B, waitFetch),
+      (waitSend, decodeOut.fire && willTakeBranch, waitFetch),
       (waitFetch, decodeIn.fire, waitSend)
     )
   )
