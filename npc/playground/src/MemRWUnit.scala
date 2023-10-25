@@ -14,7 +14,7 @@ class MemRWIn extends Bundle {
 }
 object MemRWIn {
   def default = {
-    val defaultWire = WireDefault(new MemRWIn())
+    val defaultWire = Wire(new MemRWIn())
     defaultWire.data.pc := "h80000000".asUInt(64.W)
     defaultWire
   }
