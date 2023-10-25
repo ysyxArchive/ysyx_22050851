@@ -20,10 +20,11 @@ class InstructionFetchUnit extends Module {
   val fetchFSM = new FSM(
     waitAR,
     List(
-      (waitAR, iCacheIO.readReq.fire && fetchOut.fire, waitR),
+      (waitAR, iCacheIO.readReq.fire, waitR),
+      (waitR, iCacheIO.data.fire, waitAR),
       // (waitR, iCacheIO.data.fire && needTakeBranch, waitAR),
-      (waitR, iCacheIO.data.fire && fromDecode.valid, waitAR),
-      (waitR, iCacheIO.data.fire && !fromDecode.valid, waitBranch),
+      // (waitR, iCacheIO.data.fire && fromDecode.valid, waitAR),
+      // (waitR, iCacheIO.data.fire && !fromDecode.valid, waitBranch),
       (waitBranch, fromDecode.valid && needTakeBranch, waitAR),
       (waitBranch, fromDecode.valid && !needTakeBranch, waitAR)
     )
