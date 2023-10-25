@@ -11,7 +11,7 @@ class InstructionFetchUnit extends Module {
   val iCacheIO   = IO(Flipped(new CacheIO(64, 64)))
   val fromDecode = IO(Flipped(new DecodeBack()))
 
-  val inst           = RegInit(0x13.U(32.W))
+  val inst           = WireInit(0x13.U(32.W))
   val predictPC      = RegInit(regIO.pc)
   val lastPC         = RegInit(regIO.pc)
   val needTakeBranch = Wire(Bool())
