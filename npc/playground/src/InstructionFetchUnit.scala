@@ -41,7 +41,7 @@ class InstructionFetchUnit extends Module {
 
   inst := iCacheIO.data.bits.asUInt
 
-  fetchOut.valid := fetchFSM.is(waitR)
+  fetchOut.valid := fetchFSM.is(waitR) && iCacheIO.data.valid
 
   // fetchout
   fetchOut.bits.debug.pc   := lastPC
