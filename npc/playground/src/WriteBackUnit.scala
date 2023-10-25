@@ -35,7 +35,8 @@ class WriteBackUnit extends Module {
   val csrControl = IO(Flipped(new CSRFileControl()))
   val toDecode   = IO(Output(UInt(5.W)))
 
-  val wbInReg = Reg(new WBIn())
+  val wbInReg   = Reg(new WBIn())
+  val wbInValid = Reg(new Bool())
 
   val idle :: busy :: other = Enum(3)
 
@@ -46,8 +47,8 @@ class WriteBackUnit extends Module {
       (busy, true.B, idle)
     )
   )
-
-  wbInReg := Mux(wbIn.fire, wbIn.bits, wbInReg)
+  wbInValid := wbIn.valid
+  wbInReg   := Mux(wbIn.valid, wbIn.bits, wbInReg)
 
   // regWriteIO
   regWriteIO.waddr := Mux(wbFSM.is(busy) && wbInReg.control.regwrite, wbInReg.data.dst, 0.U)
@@ -89,7 +90,7 @@ class WriteBackUnit extends Module {
   blackBox.io.halt     := wbFSM.willChangeTo(idle) && wbInReg.control.goodtrap
   blackBox.io.bad_halt := wbFSM.willChangeTo(idle) && wbInReg.control.badtrap
 
-  wbIn.ready := wbFSM.is(idle)
+  wbIn.ready := true.B
 
-  toDecode := Mux(wbFSM.is(idle), 0.U, wbInReg.data.dst)
+  toDecode := Mux(wbInValid, 0.U, wbInReg.data.dst)
 }
