@@ -37,9 +37,8 @@ class InstructionFetchUnit extends Module {
   // needTakeBranch := fromDecode.valid && fromDecode.willTakeBranch && fromDecode.branchPc =/= predictPC
   needTakeBranch := !RegNext(fromDecode.willTakeBranch) && fromDecode.willTakeBranch
 
-  predictPC :=
-    Mux(fetchFSM.willChangeTo(waitR), Mux(needTakeBranch, fromDecode.branchPc, predictPC + 4.U), predictPC)
-  lastPC := Mux(fetchFSM.willChangeTo(waitR), predictPC, lastPC)
+  predictPC := Mux(needTakeBranch, fromDecode.branchPc, Mux(fetchFSM.willChangeTo(waitR), predictPC + 4.U, predictPC))
+  lastPC    := Mux(fetchFSM.willChangeTo(waitR), predictPC, lastPC)
 
   inst := iCacheIO.data.bits.asUInt
 
