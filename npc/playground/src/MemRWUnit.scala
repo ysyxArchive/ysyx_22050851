@@ -96,7 +96,7 @@ class MemRWUnit extends Module {
     Utils.signExtend(memOutRaw, memlen << 3),
     Utils.zeroExtend(memOutRaw, memlen << 3)
   )
-  memIn.ready := memFSM.is(waitIn)
+  memIn.ready := !busy
 
   memOut.valid              := !busy
   memOut.bits.debug         := memInReg.debug
