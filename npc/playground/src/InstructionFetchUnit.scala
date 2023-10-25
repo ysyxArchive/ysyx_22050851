@@ -49,7 +49,7 @@ class InstructionFetchUnit extends Module {
   fetchOut.bits.pc         := lastPC
   fetchOut.bits.inst       := inst
 
-  iCacheIO.debug.pc   := lastPC
+  iCacheIO.debug.pc   := predictPC
   iCacheIO.debug.inst := inst
 
   iCacheIO.writeReq.valid     := false.B
