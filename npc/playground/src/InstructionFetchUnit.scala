@@ -40,7 +40,7 @@ class InstructionFetchUnit extends Module {
   ) === waitR) && fromDecode.willTakeBranch && fetchFSM.is(waitAR)
 
   predictPC := Mux(
-    needTakeBranch && RegNext(fetchFSM.status) === waitR,
+    needTakeBranch && fetchFSM.is(waitAR),
     fromDecode.branchPc,
     Mux(fetchFSM.willChangeTo(waitR), predictPC + 4.U, predictPC)
   )
