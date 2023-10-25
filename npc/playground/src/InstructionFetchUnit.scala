@@ -36,7 +36,7 @@ class InstructionFetchUnit extends Module {
 
   // needTakeBranch := fromDecode.valid && fromDecode.willTakeBranch && fromDecode.branchPc =/= predictPC
   needTakeBranch := (!RegNext(fromDecode.willTakeBranch) || RegNext(
-    fetchFSM.status
+    fromDecode.valid
   ) === waitR) && fromDecode.willTakeBranch && fetchFSM.is(waitAR)
 
   predictPC := Mux(
