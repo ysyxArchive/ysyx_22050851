@@ -20,7 +20,7 @@ class InstructionFetchUnit extends Module {
     waitAR,
     List(
       (waitAR, iCacheIO.readReq.fire, waitR),
-      (waitR, iCacheIO.data.fire && needTakeBranch, waitAR),
+      // (waitR, iCacheIO.data.fire && needTakeBranch, waitAR),
       (waitR, iCacheIO.data.fire && fromDecode.valid, waitAR),
       (waitR, iCacheIO.data.fire && !fromDecode.valid, waitBranch),
       (waitBranch, fromDecode.valid && needTakeBranch, waitAR),
