@@ -104,8 +104,8 @@ class MemRWUnit extends Module {
     Utils.signExtend(memOutRaw, memlen << 3),
     Utils.zeroExtend(memOutRaw, memlen << 3)
   )
+  memIn.ready := Mux(shouldMemWork, false.B, !dataValid)
   when(memIn.fire && !shouldMemWork) {
-    memIn.ready               := true.B
     memOut.valid              := true.B
     memOut.bits.debug         := memIn.bits.debug
     memOut.bits.data.src1     := memIn.bits.data.src1
@@ -123,7 +123,6 @@ class MemRWUnit extends Module {
 
     toDecode := memIn.bits.data.dst
   }.otherwise {
-    memIn.ready               := !dataValid
     memOut.valid              := !busy && dataValid
     memOut.bits.debug         := memInReg.debug
     memOut.bits.data.src1     := memInReg.data.src1
