@@ -42,6 +42,8 @@ class InstructionDecodeUnit extends Module {
   val willTakeBranch = Wire(Bool())
   val shouldWait     = Wire(Bool())
 
+  val busy      = RegInit(false.B)
+  val dataValid = RegInit(false.B)
   // val waitFetch :: waitSend :: others = Enum(4)
   // val decodeFSM = new FSM(
   //   waitFetch,
@@ -85,12 +87,14 @@ class InstructionDecodeUnit extends Module {
   decodeOut.bits.data.src2 := rs2
   decodeOut.bits.data.dst  := rd
 
-  decodeOut.valid        := decodeIn.fire && !shouldWait
+  decodeOut.valid        := !busy && dataValid && !shouldWait
   decodeOut.bits.data.pc := decodeInReg.pc
   decodeOut.bits.control := controlDecoder.output
 
   decodeIn.ready := !shouldWait
 
+  busy      := Mux(busy, !decodeOut.fire, decodeIn.fire && !decodeOut.fire)
+  dataValid := Mux(dataValid, !decodeOut.fire, decodeIn.fire)
   // regIO
   regIO.raddr0 := rs1
   regIO.raddr1 := rs2
