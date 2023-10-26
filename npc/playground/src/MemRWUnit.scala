@@ -104,7 +104,7 @@ class MemRWUnit extends Module {
     Utils.signExtend(memOutRaw, memlen << 3),
     Utils.zeroExtend(memOutRaw, memlen << 3)
   )
-  memIn.ready := Mux(shouldMemWork, false.B, !dataValid)
+  memIn.ready := !busy
   when(memIn.fire && !shouldMemWork) {
     memOut.valid              := true.B
     memOut.bits.debug         := memIn.bits.debug
