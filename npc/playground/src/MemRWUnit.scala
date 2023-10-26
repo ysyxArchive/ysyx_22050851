@@ -48,21 +48,21 @@ class MemRWUnit extends Module {
   val waitingReadBack = RegInit(false.B)
   val dataValid       = RegInit(false.B)
 
-  waitingReadBack := Mux(waitingReadBack, !memIO.data.fire, memIO.readReq.fire)
-  busy            := Mux(busy, Mux(memIsRead, !memIO.data.fire, !memIO.writeReq.fire), memIn.fire && shouldMemWork)
-  dataValid       := Mux(dataValid, !memOut.fire, memIn.fire && shouldMemWork)
-  // val waitIn :: waitMemReq :: waitMemRes :: waitOut :: other = Enum(10)
+  // waitingReadBack := Mux(waitingReadBack, !memIO.data.fire, memIO.readReq.fire)
+  // busy            := Mux(busy, Mux(memIsRead, !memIO.data.fire, !memIO.writeReq.fire), memIn.fire && shouldMemWork)
+  // dataValid       := Mux(dataValid, !memOut.fire, memIn.fire && shouldMemWork)
+  val idle :: waitMemReq :: waitMemRes :: waitOut :: other = Enum(10)
 
-  // val memFSM = new FSM(
-  //   waitIn,
-  //   List(
-  //     (waitIn, memIn.fire && shouldMemWork, waitMemReq),
-  //     (waitIn, memIn.fire && !shouldMemWork, waitOut),
-  //     (waitMemReq, Mux(memIsRead, memIO.readReq.fire, memIO.writeReq.fire), waitMemRes),
-  //     (waitMemRes, Mux(memIsRead, memIO.data.fire, memIO.writeRes.fire), waitOut),
-  //     (waitOut, memOut.fire, waitIn)
-  //   )
-  // )
+  val memFSM = new FSM(
+    idle,
+    List(
+      (idle, memIn.fire && shouldMemWork, waitMemReq),
+      (waitMemReq, memIsRead && memIO.readReq.fire, waitMemRes),
+      (waitMemRes, memIO.data.fire, waitOut),
+      (waitMemReq, !memIsRead && memIO.writeReq.fire, waitOut),
+      (waitOut, memOut.fire, idle)
+    )
+  )
 
   memInReg := Mux(memIn.fire, memIn.bits, memInReg)
   // mem
@@ -123,7 +123,7 @@ class MemRWUnit extends Module {
 
     toDecode := memIn.bits.data.dst
   }.otherwise {
-    memOut.valid              := !busy && dataValid
+    memOut.valid              := memFSM.is(waitOut)
     memOut.bits.debug         := memInReg.debug
     memOut.bits.data.src1     := memInReg.data.src1
     memOut.bits.data.src2     := memInReg.data.src2
