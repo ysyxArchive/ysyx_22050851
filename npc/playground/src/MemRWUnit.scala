@@ -41,7 +41,7 @@ class MemRWUnit extends Module {
 
   val memInReg = RegInit(MemRWIn.default)
 
-  val shouldMemWork = memIn.bits.control.memmode =/= MemMode.no.asUInt
+  val shouldMemWork = memIn.valid && memIn.bits.control.memmode =/= MemMode.no.asUInt
   val memIsRead     = memInReg.control.memmode === MemMode.read.asUInt || memInReg.control.memmode === MemMode.readu.asUInt
 
   val busy            = RegInit(false.B)
