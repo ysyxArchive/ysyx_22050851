@@ -92,5 +92,5 @@ class WriteBackUnit extends Module {
 
   wbIn.ready := true.B
 
-  toDecode := Mux(RegNext(wbIn.fire), wbInReg.data.dst, 0.U)
+  toDecode := Mux(wbInValid, wbInReg.data.dst, 0.U)
 }

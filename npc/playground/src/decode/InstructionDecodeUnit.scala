@@ -9,15 +9,6 @@ class DecodeIn extends Bundle {
   val debug = Output(new DebugInfo)
   val pc    = Output(UInt(64.W))
   val inst  = Output(UInt(32.W))
-
-}
-
-object DecodeIn {
-  def default = {
-    val defaultWire = WireDefault(0.U.asTypeOf(new DecodeIn()))
-    defaultWire.pc := "h80000000".asUInt(64.W)
-    defaultWire
-  }
 }
 
 class DecodeBack extends Bundle {
@@ -37,23 +28,21 @@ class InstructionDecodeUnit extends Module {
 
   val controlDecoder = Module(new InstContorlDecoder)
 
-  val decodeInReg = RegInit(DecodeIn.default)
+  val decodeInReg = Reg(new DecodeIn())
 
   val willTakeBranch = Wire(Bool())
   val shouldWait     = Wire(Bool())
 
-  val busy      = RegInit(false.B)
-  val dataValid = RegInit(false.B)
-  // val waitFetch :: waitSend :: others = Enum(4)
-  // val decodeFSM = new FSM(
-  //   waitFetch,
-  //   List(
-  //     (waitSend, decodeOut.fire && shouldWait, waitSend),
-  //     (waitSend, decodeOut.fire && !willTakeBranch, waitFetch),
-  //     (waitSend, decodeOut.fire && willTakeBranch, waitFetch),
-  //     (waitFetch, decodeIn.fire, waitSend)
-  //   )
-  // )
+  val waitFetch :: waitSend :: others = Enum(4)
+  val decodeFSM = new FSM(
+    waitFetch,
+    List(
+      (waitSend, decodeOut.fire && shouldWait, waitSend),
+      (waitSend, decodeOut.fire && !willTakeBranch, waitFetch),
+      (waitSend, decodeOut.fire && willTakeBranch, waitFetch),
+      (waitFetch, decodeIn.fire, waitSend)
+    )
+  )
 
   decodeInReg := Mux(decodeIn.fire, decodeIn.bits, decodeInReg)
 
@@ -87,14 +76,12 @@ class InstructionDecodeUnit extends Module {
   decodeOut.bits.data.src2 := rs2
   decodeOut.bits.data.dst  := rd
 
-  decodeOut.valid        := dataValid && !shouldWait
+  decodeOut.valid        := decodeFSM.is(waitSend) && !shouldWait
   decodeOut.bits.data.pc := decodeInReg.pc
   decodeOut.bits.control := controlDecoder.output
 
-  decodeIn.ready := !shouldWait
+  decodeIn.ready := decodeFSM.is(waitFetch)
 
-  busy      := Mux(busy, !decodeOut.fire, decodeIn.fire && !decodeOut.fire)
-  dataValid := Mux(dataValid, !decodeOut.fire, decodeIn.fire)
   // regIO
   regIO.raddr0 := rs1
   regIO.raddr1 := rs2
@@ -122,7 +109,7 @@ class InstructionDecodeUnit extends Module {
   decodeOut.bits.enable := !shouldWait
 
   // branch check
-  willTakeBranch := !shouldWait && MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
+  willTakeBranch := !shouldWait && decodeFSM.is(waitSend) && MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
     EnumSeq(
       PCAddrSrc.aluzero -> (src1Data === src2Data),
       PCAddrSrc.alunotneg -> (src1Data.asSInt >= src2Data.asSInt),

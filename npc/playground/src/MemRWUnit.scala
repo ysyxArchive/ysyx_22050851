@@ -12,13 +12,6 @@ class MemRWIn extends Bundle {
   val control = Output(new ExeControlIn);
   val enable  = Output(Bool())
 }
-object MemRWIn {
-  def default = {
-    val defaultWire = WireDefault(0.U.asTypeOf(new MemRWIn()))
-    defaultWire.data.dnpc := "h80000000".asUInt(64.W)
-    defaultWire
-  }
-}
 
 class MemDataIn extends Bundle {
   val src1     = Output(UInt(5.W))
@@ -39,28 +32,21 @@ class MemRWUnit extends Module {
   val memOut   = IO(Decoupled(new WBIn()))
   val toDecode = IO(Output(UInt(5.W)))
 
-  val memInReg = RegInit(MemRWIn.default)
+  val memInReg = Reg(new MemRWIn())
 
-  val shouldMemWork = memIn.valid && memIn.bits.control.memmode =/= MemMode.no.asUInt
+  val shouldMemWork = memIn.bits.control.memmode =/= MemMode.no.asUInt
   val memIsRead     = memInReg.control.memmode === MemMode.read.asUInt || memInReg.control.memmode === MemMode.readu.asUInt
 
-  // val busy            = RegInit(false.B)
-  // val waitingReadBack = RegInit(false.B)
-  // val dataValid       = RegInit(false.B)
-
-  // waitingReadBack := Mux(waitingReadBack, !memIO.data.fire, memIO.readReq.fire)
-  // busy            := Mux(busy, Mux(memIsRead, !memIO.data.fire, !memIO.writeReq.fire), memIn.fire && shouldMemWork)
-  // dataValid       := Mux(dataValid, !memOut.fire, memIn.fire && shouldMemWork)
-  val idle :: waitMemReq :: waitMemRes :: waitOut :: other = Enum(10)
+  val waitIn :: waitMemReq :: waitMemRes :: waitOut :: other = Enum(10)
 
   val memFSM = new FSM(
-    idle,
+    waitIn,
     List(
-      (idle, memIn.fire && shouldMemWork, waitMemReq),
-      (waitMemReq, memIsRead && memIO.readReq.fire, waitMemRes),
-      (waitMemRes, memIO.data.fire, waitOut),
-      (waitMemReq, !memIsRead && memIO.writeReq.fire, waitOut),
-      (waitOut, memOut.fire, idle)
+      (waitIn, memIn.fire && shouldMemWork, waitMemReq),
+      (waitIn, memIn.fire && !shouldMemWork, waitOut),
+      (waitMemReq, Mux(memIsRead, memIO.readReq.fire, memIO.writeReq.fire), waitMemRes),
+      (waitMemRes, Mux(memIsRead, memIO.data.fire, memIO.writeRes.fire), waitOut),
+      (waitOut, memOut.fire, waitIn)
     )
   )
 
@@ -82,13 +68,13 @@ class MemRWUnit extends Module {
     1.U(1.W)
   )
 
-  memIO.readReq.valid      := memFSM.is(waitMemReq) && memIsRead
+  memIO.readReq.valid      := memFSM.is(waitMemReq) && memIsRead && shouldMemWork
   memIO.addr               := memInReg.data.alu
   memIO.data.ready         := memFSM.is(waitMemRes) && memIsRead
-  memIO.writeReq.valid     := memFSM.is(waitMemReq) && !memIsRead
+  memIO.writeReq.valid     := memFSM.is(waitMemReq) && !memIsRead && shouldMemWork
   memIO.writeReq.bits.data := memInReg.data.src2Data
   memIO.writeReq.bits.mask := memMask
-  memIO.writeRes.ready     := true.B
+  memIO.writeRes.ready     := memFSM.is(waitMemRes)
   memIO.debug              := memInReg.debug
 
   val memOutRaw = MuxLookup(memInReg.control.memlen, memIO.data.bits)(
@@ -99,46 +85,33 @@ class MemRWUnit extends Module {
       MemLen.eight -> memIO.data.asUInt
     )
   )
-  val memData = Mux(
-    memInReg.control.memmode === MemMode.read.asUInt,
-    Utils.signExtend(memOutRaw, memlen << 3),
-    Utils.zeroExtend(memOutRaw, memlen << 3)
+  val memData = Reg(UInt(64.W))
+  memData := Mux(
+    memFSM.willChangeTo(waitOut),
+    Mux(
+      memInReg.control.memmode === MemMode.read.asUInt,
+      Utils.signExtend(memOutRaw, memlen << 3),
+      Utils.zeroExtend(memOutRaw, memlen << 3)
+    ),
+    memData
   )
-  memIn.ready := memFSM.is(idle)
-  when(memIn.fire && !shouldMemWork) {
-    memOut.valid              := true.B
-    memOut.bits.debug         := memIn.bits.debug
-    memOut.bits.data.src1     := memIn.bits.data.src1
-    memOut.bits.data.src2     := memIn.bits.data.src2
-    memOut.bits.data.src1Data := memIn.bits.data.src1Data
-    memOut.bits.data.dst      := memIn.bits.data.dst
-    memOut.bits.data.mem      := DontCare
-    memOut.bits.data.alu      := memIn.bits.data.alu
-    memOut.bits.data.signals  := memIn.bits.data.signals
-    memOut.bits.data.pc       := memIn.bits.data.pc
-    memOut.bits.data.dnpc     := memIn.bits.data.dnpc
-    memOut.bits.data.imm      := memIn.bits.data.imm
-    memOut.bits.control       := memIn.bits.control
-    memOut.bits.enable        := memIn.bits.enable
+  memIn.ready := memFSM.is(waitIn)
 
-    toDecode := memIn.bits.data.dst
-  }.otherwise {
-    memOut.valid              := memFSM.is(waitOut)
-    memOut.bits.debug         := memInReg.debug
-    memOut.bits.data.src1     := memInReg.data.src1
-    memOut.bits.data.src2     := memInReg.data.src2
-    memOut.bits.data.src1Data := memInReg.data.src1Data
-    memOut.bits.data.dst      := memInReg.data.dst
-    memOut.bits.data.alu      := memInReg.data.alu
-    memOut.bits.data.mem      := memData
-    memOut.bits.data.signals  := memInReg.data.signals
-    memOut.bits.data.pc       := memInReg.data.pc
-    memOut.bits.data.dnpc     := memInReg.data.dnpc
-    memOut.bits.data.imm      := memInReg.data.imm
-    memOut.bits.control       := memInReg.control
-    memOut.bits.enable        := memInReg.enable
+  memOut.valid              := memFSM.is(waitOut)
+  memOut.bits.debug         := memInReg.debug
+  memOut.bits.data.src1     := memInReg.data.src1
+  memOut.bits.data.src2     := memInReg.data.src2
+  memOut.bits.data.src1Data := memInReg.data.src1Data
+  memOut.bits.data.dst      := memInReg.data.dst
+  memOut.bits.data.mem      := memData
+  memOut.bits.data.alu      := memInReg.data.alu
+  memOut.bits.data.mem      := memData
+  memOut.bits.data.signals  := memInReg.data.signals
+  memOut.bits.data.pc       := memInReg.data.pc
+  memOut.bits.data.dnpc     := memInReg.data.dnpc
+  memOut.bits.data.imm      := memInReg.data.imm
+  memOut.bits.control       := memInReg.control
+  memOut.bits.enable        := memInReg.enable
 
-    toDecode := Mux(!memIn.ready, memInReg.data.dst, 0.U)
-  }
-
+  toDecode := Mux(memFSM.is(waitIn), 0.U, memInReg.data.dst)
 }
