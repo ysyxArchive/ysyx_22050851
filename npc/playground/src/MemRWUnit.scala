@@ -49,7 +49,7 @@ class MemRWUnit extends Module {
   val dataValid       = RegInit(false.B)
 
   waitingReadBack := Mux(waitingReadBack, !memIO.data.fire, memIO.readReq.fire)
-  busy            := Mux(busy, Mux(memIsRead, !memIO.data.fire, !memIO.writeRes.fire), memIn.fire && shouldMemWork)
+  busy            := Mux(busy, Mux(memIsRead, !memIO.data.fire, !memIO.writeReq.fire), memIn.fire && shouldMemWork)
   dataValid       := Mux(dataValid, !memOut.fire, memIn.fire && shouldMemWork)
   // val waitIn :: waitMemReq :: waitMemRes :: waitOut :: other = Enum(10)
 
@@ -85,7 +85,7 @@ class MemRWUnit extends Module {
   memIO.readReq.valid      := busy && !waitingReadBack && memIsRead && shouldMemWork
   memIO.addr               := memInReg.data.alu
   memIO.data.ready         := busy && waitingReadBack && memIsRead
-  memIO.writeReq.valid     := busy && !memIsRead && shouldMemWork
+  memIO.writeReq.valid     := busy && !memIsRead
   memIO.writeReq.bits.data := memInReg.data.src2Data
   memIO.writeReq.bits.mask := memMask
   memIO.writeRes.ready     := true.B
