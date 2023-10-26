@@ -76,11 +76,11 @@ class InstructionDecodeUnit extends Module {
   decodeOut.bits.data.src2 := rs2
   decodeOut.bits.data.dst  := rd
 
-  decodeOut.valid        := decodeFSM.is(waitSend) && !shouldWait
+  decodeOut.valid        := decodeIn.fire && !shouldWait
   decodeOut.bits.data.pc := decodeInReg.pc
   decodeOut.bits.control := controlDecoder.output
 
-  decodeIn.ready := decodeou
+  decodeIn.ready := !shouldWait
 
   // regIO
   regIO.raddr0 := rs1
@@ -109,7 +109,7 @@ class InstructionDecodeUnit extends Module {
   decodeOut.bits.enable := !shouldWait
 
   // branch check
-  willTakeBranch := !shouldWait && decodeFSM.is(waitSend) && MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
+  willTakeBranch := !shouldWait && MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
     EnumSeq(
       PCAddrSrc.aluzero -> (src1Data === src2Data),
       PCAddrSrc.alunotneg -> (src1Data.asSInt >= src2Data.asSInt),
