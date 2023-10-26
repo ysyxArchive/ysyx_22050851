@@ -108,7 +108,6 @@ class InstructionDecodeUnit extends Module {
   // RAW check
   val dstVec = VecInit(fromExe, fromMemu, fromWbu)
   shouldWait            := (rs1 =/= 0.U && dstVec.contains(rs1)) || (rs2 =/= 0.U && dstVec.contains(rs2))
-  decodeOut.bits.enable := !shouldWait
 
   // branch check
   willTakeBranch := !shouldWait && MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(

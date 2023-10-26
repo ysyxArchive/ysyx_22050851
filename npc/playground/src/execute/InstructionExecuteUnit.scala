@@ -21,7 +21,6 @@ class ExeIn extends Bundle {
   val debug   = Output(new DebugInfo)
   val data    = Output(new ExeDataIn);
   val control = Output(new ExeControlIn);
-  val enable  = Output(Bool())
 }
 
 class InstructionExecuteUnit extends Module {
