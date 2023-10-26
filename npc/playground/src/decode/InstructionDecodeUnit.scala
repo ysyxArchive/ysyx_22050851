@@ -37,7 +37,7 @@ class InstructionDecodeUnit extends Module {
 
   val controlDecoder = Module(new InstContorlDecoder)
 
-  val decodeInReg = Reg(new DecodeIn())
+  val decodeInReg = RegInit(DecodeIn.default)
 
   val willTakeBranch = Wire(Bool())
   val shouldWait     = Wire(Bool())
