@@ -121,5 +121,5 @@ class MemRWUnit extends Module {
   memOut.bits.control       := memInReg.control
   memOut.bits.enable        := memInReg.enable
 
-  toDecode := Mux(!busy || !memIn.fire, 0.U, memInReg.data.dst)
+  toDecode := Mux(busy || memIn.fire, memInReg.data.dst, 0.U)
 }
