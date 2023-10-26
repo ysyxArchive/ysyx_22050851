@@ -9,6 +9,15 @@ class DecodeIn extends Bundle {
   val debug = Output(new DebugInfo)
   val pc    = Output(UInt(64.W))
   val inst  = Output(UInt(32.W))
+
+}
+
+object DecodeIn {
+  def default = {
+    val defaultWire = WireDefault(0.U.asTypeOf(new DecodeIn()))
+    defaultWire.pc := "h80000000".asUInt(64.W)
+    defaultWire
+  }
 }
 
 class DecodeBack extends Bundle {
