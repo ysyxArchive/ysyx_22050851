@@ -21,7 +21,6 @@ class ExeIn extends Bundle {
   val debug   = Output(new DebugInfo)
   val data    = Output(new ExeDataIn);
   val control = Output(new ExeControlIn);
-  val enable  = Output(Bool())
 }
 
 class InstructionExecuteUnit extends Module {
@@ -46,11 +45,12 @@ class InstructionExecuteUnit extends Module {
   val exeFSM = new FSM(
     waitDecode,
     List(
-      (waitDecode, exeIn.fire && !exeIn.bits.enable, waitDecode),
-      (waitDecode, exeIn.fire && exeIn.bits.enable && shouldWaitALU, sendALU),
-      (waitDecode, exeIn.fire && exeIn.bits.enable && !shouldWaitALU, waitSend),
+      (waitDecode, exeIn.fire && shouldWaitALU, sendALU),
+      (waitDecode, exeIn.fire && !shouldWaitALU, waitSend),
       (sendALU, alu.io.in.fire, waitALU),
       (waitALU, alu.io.out.fire, waitSend),
+      (waitSend, exeOut.fire && exeIn.fire && shouldWaitALU, sendALU),
+      (waitSend, exeOut.fire && exeIn.fire && !shouldWaitALU, waitSend),
       (waitSend, exeOut.fire, waitDecode)
     )
   )
@@ -76,7 +76,7 @@ class InstructionExecuteUnit extends Module {
   alu.io.out.ready      := alu.io.out.bits.isImmidiate || exeFSM.is(waitALU)
   alu.io.in.valid       := exeFSM.is(sendALU)
 
-  exeIn.ready := exeFSM.is(waitDecode)
+  exeIn.ready := exeFSM.is(waitDecode) || exeOut.fire
 
   val aluOut = Reg(UInt(64.W))
   aluOut := Mux(alu.io.out.fire, alu.io.out.bits.out, aluOut)
@@ -93,7 +93,7 @@ class InstructionExecuteUnit extends Module {
   exeOut.bits.data.imm      := exeInReg.data.imm
   exeOut.bits.data.src1Data := exeInReg.data.src1Data
   exeOut.bits.data.src2Data := exeInReg.data.src2Data
-  exeOut.bits.enable        := exeInReg.enable
+  exeOut.bits.enable        := true.B
 
   exeOut.bits.debug := exeInReg.debug
 

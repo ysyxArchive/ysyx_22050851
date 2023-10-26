@@ -68,10 +68,10 @@ class MemRWUnit extends Module {
     1.U(1.W)
   )
 
-  memIO.readReq.valid      := memFSM.is(waitMemReq) && memIsRead && shouldMemWork
+  memIO.readReq.valid      := memFSM.is(waitMemReq) && memIsRead 
   memIO.addr               := memInReg.data.alu
   memIO.data.ready         := memFSM.is(waitMemRes) && memIsRead
-  memIO.writeReq.valid     := memFSM.is(waitMemReq) && !memIsRead && shouldMemWork
+  memIO.writeReq.valid     := memFSM.is(waitMemReq) && !memIsRead
   memIO.writeReq.bits.data := memInReg.data.src2Data
   memIO.writeReq.bits.mask := memMask
   memIO.writeRes.ready     := memFSM.is(waitMemRes)
