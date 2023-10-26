@@ -104,22 +104,40 @@ class MemRWUnit extends Module {
     Utils.zeroExtend(memOutRaw, memlen << 3)
   )
   memIn.ready := !busy
+  when(memIn.fire && !shouldMemWork) {
+    memOut.valid              := true.B
+    memOut.bits.debug         := memIn.bits.debug
+    memOut.bits.data.src1     := memIn.bits.data.src1
+    memOut.bits.data.src2     := memIn.bits.data.src2
+    memOut.bits.data.src1Data := memIn.bits.data.src1Data
+    memOut.bits.data.dst      := memIn.bits.data.dst
+    memOut.bits.data.mem      := DontCare
+    memOut.bits.data.alu      := memIn.bits.data.alu
+    memOut.bits.data.signals  := memIn.bits.data.signals
+    memOut.bits.data.pc       := memIn.bits.data.pc
+    memOut.bits.data.dnpc     := memIn.bits.data.dnpc
+    memOut.bits.data.imm      := memIn.bits.data.imm
+    memOut.bits.control       := memIn.bits.control
+    memOut.bits.enable        := memIn.bits.enable
 
-  memOut.valid              := !busy
-  memOut.bits.debug         := memInReg.debug
-  memOut.bits.data.src1     := memInReg.data.src1
-  memOut.bits.data.src2     := memInReg.data.src2
-  memOut.bits.data.src1Data := memInReg.data.src1Data
-  memOut.bits.data.dst      := memInReg.data.dst
-  memOut.bits.data.mem      := memData
-  memOut.bits.data.alu      := memInReg.data.alu
-  memOut.bits.data.mem      := memData
-  memOut.bits.data.signals  := memInReg.data.signals
-  memOut.bits.data.pc       := memInReg.data.pc
-  memOut.bits.data.dnpc     := memInReg.data.dnpc
-  memOut.bits.data.imm      := memInReg.data.imm
-  memOut.bits.control       := memInReg.control
-  memOut.bits.enable        := memInReg.enable
+    toDecode := memIn.bits.data.dst
+  }.otherwise {
+    memOut.valid              := !busy
+    memOut.bits.debug         := memInReg.debug
+    memOut.bits.data.src1     := memInReg.data.src1
+    memOut.bits.data.src2     := memInReg.data.src2
+    memOut.bits.data.src1Data := memInReg.data.src1Data
+    memOut.bits.data.dst      := memInReg.data.dst
+    memOut.bits.data.alu      := memInReg.data.alu
+    memOut.bits.data.mem      := memData
+    memOut.bits.data.signals  := memInReg.data.signals
+    memOut.bits.data.pc       := memInReg.data.pc
+    memOut.bits.data.dnpc     := memInReg.data.dnpc
+    memOut.bits.data.imm      := memInReg.data.imm
+    memOut.bits.control       := memInReg.control
+    memOut.bits.enable        := memInReg.enable
 
-  toDecode := Mux(!memIn.valid, memInReg.data.dst, 0.U)
+    toDecode := Mux(!memIn.ready, memInReg.data.dst, 0.U)
+  }
+
 }
