@@ -76,7 +76,7 @@ class InstructionExecuteUnit extends Module {
   alu.io.out.ready      := alu.io.out.bits.isImmidiate || exeFSM.is(waitALU)
   alu.io.in.valid       := exeFSM.is(sendALU)
 
-  exeIn.ready := exeFSM.is(waitDecode) || exeFSM.willChangeTo(waitDecode)
+  exeIn.ready := exeFSM.is(waitDecode) || exeOut.fire
 
   val aluOut = Reg(UInt(64.W))
   aluOut := Mux(alu.io.out.fire, alu.io.out.bits.out, aluOut)
