@@ -9,7 +9,6 @@ class DecodeIn extends Bundle {
   val debug = Output(new DebugInfo)
   val pc    = Output(UInt(64.W))
   val inst  = Output(UInt(32.W))
-
 }
 
 object DecodeIn {
@@ -44,16 +43,6 @@ class InstructionDecodeUnit extends Module {
 
   val busy      = RegInit(false.B)
   val dataValid = RegInit(false.B)
-  // val waitFetch :: waitSend :: others = Enum(4)
-  // val decodeFSM = new FSM(
-  //   waitFetch,
-  //   List(
-  //     (waitSend, decodeOut.fire && shouldWait, waitSend),
-  //     (waitSend, decodeOut.fire && !willTakeBranch, waitFetch),
-  //     (waitSend, decodeOut.fire && willTakeBranch, waitFetch),
-  //     (waitFetch, decodeIn.fire, waitSend)
-  //   )
-  // )
 
   decodeInReg := Mux(decodeIn.fire, decodeIn.bits, decodeInReg)
 
