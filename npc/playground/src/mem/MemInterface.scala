@@ -115,10 +115,8 @@ class MemBurstInterface extends Module {
     counter,
     Seq(
       (memInterfaceFSM.is(waitReq) && !memInterfaceFSM.willChange()) -> 0.U,
-      axiS.AW.fire -> axiS.AW.bits.len,
-      axiS.AR.fire -> axiS.AR.bits.len,
-      (memInterfaceFSM.is(writeDataBack) && axiS.R.fire) -> (counter - 1.U),
-      (memInterfaceFSM.is(waitDataWrite) && axiS.W.fire) -> (counter - 1.U)
+      (memInterfaceFSM.is(writeDataBack) && axiS.R.fire) -> (counter + 1.U),
+      (memInterfaceFSM.is(waitDataWrite) && axiS.W.fire) -> (counter + 1.U)
     )
   )
 
