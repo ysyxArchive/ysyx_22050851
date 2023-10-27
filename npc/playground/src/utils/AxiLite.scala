@@ -278,7 +278,7 @@ class BurstLiteArbiter(val masterPort: Int) extends Module {
     )
   )
 
-  val chosenMaster = Wire(Flipped(AxiLiteIO(64, 64)))
+  val chosenMaster = Wire(Flipped(BurstLiteIO(64, 64)))
   chosenMaster := masterIO(workingMaster)
   // unchosen ports
   masterIO.zipWithIndex.foreach {
