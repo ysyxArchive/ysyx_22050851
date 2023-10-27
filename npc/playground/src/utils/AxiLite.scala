@@ -305,7 +305,7 @@ class BurstLiteArbiter(val masterPort: Int) extends Module {
 
   slaveIO.B.ready  := chosenMaster.B.ready && arbiterFSM.is(forwardWrite)
   slaveIO.R.ready  := chosenMaster.B.ready && arbiterFSM.is(forwardRead)
-  slaveIO.AW.ready := chosenMaster.AW.ready && arbiterFSM.is(forwardWrite)
+  slaveIO.AW.valid := chosenMaster.AW.valid && arbiterFSM.is(forwardWrite)
   slaveIO.AW.bits  := Mux(arbiterFSM.is(forwardWrite), chosenMaster.AW.bits, DontCare)
   slaveIO.AR.ready := chosenMaster.AR.ready && arbiterFSM.is(forwardRead)
   slaveIO.AR.bits  := Mux(arbiterFSM.is(forwardRead), chosenMaster.AR.bits, DontCare)
