@@ -226,8 +226,6 @@ class Cache(
   }
 }
 
-
-
 /**
   * @param cellByte 单个cache存储大小
   * @param wayCnt 路数
@@ -393,8 +391,12 @@ class Cache2(
   //when  waitWRes or directWRes
   axiIO.B.ready := cacheFSM.is(waitWRes) || cacheFSM.is(directWRes)
 
-  axiIO.AW.bits.id   := DontCare
-  axiIO.AW.bits.prot := DontCare
+  axiIO.AW.bits.id    := DontCare
+  axiIO.AW.bits.prot  := DontCare
+  axiIO.AW.bits.burst := 2.U
+  axiIO.AW.bits.len   := 0.U
+  axiIO.AR.bits.burst := 2.U
+  axiIO.AR.bits.len   := 0.U
 
   when(enableDebug) {
     when(cacheFSM.is(idle)) {
@@ -429,4 +431,5 @@ class Cache2(
       printf("data is %x\n", io.data.bits)
     }
   }
+
 }
