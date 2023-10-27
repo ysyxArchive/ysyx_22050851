@@ -7,6 +7,7 @@ class CPU extends Module {
   val enableDebug = IO(Input(Bool()))
 
   val mem         = Module(new MemInterface)
+  val mem2        = Module(new MemInterface)
   val regs        = Module(new RegisterFile)
   val csrregs     = Module(new ControlRegisterFile)
   val blackBoxOut = Module(new BlackBoxRegs)
@@ -17,10 +18,10 @@ class CPU extends Module {
   val memu    = Module(new MemRWUnit())
   val wbu     = Module(new WriteBackUnit())
 
-  val arbiter = Module(new AxiLiteArbiter(2))
-  val iCache  = Module(new Cache(name = "icache"))
-  val dCache  = Module(new Cache(name = "dcache"))
-
+  val arbiter  = Module(new AxiLiteArbiter(1))
+  val iCache   = Module(new Cache(name = "icache"))
+  val dCache   = Module(new Cache(name = "dcache"))
+  val arbiter2 = Module(new AxiLiteArbiter(1))
   ifu.fetchOut <> decoder.decodeIn
   decoder.decodeOut <> exe.exeIn
   exe.exeOut <> memu.memIn
@@ -29,7 +30,8 @@ class CPU extends Module {
   ifu.fromDecode <> decoder.decodeBack
 
   iCache.axiIO <> arbiter.slaveIO(0)
-  dCache.axiIO <> arbiter.slaveIO(1)
+  // dCache.axiIO <> arbiter.slaveIO(1)
+  dCache.axiIO <> arbiter2.slaveIO(0)
   mem.axiS <> arbiter.masterIO
 
   ifu.iCacheIO <> iCache.io
