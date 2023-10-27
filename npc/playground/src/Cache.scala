@@ -265,7 +265,7 @@ class Cache2(
   val isRead = Reg(Bool())
   val addr   = Reg(UInt(addrWidth.W))
 
-  val idle :: sendRes :: sendReq :: waitRes :: writeData :: sendWReq :: waitWRes :: directWReq :: directWRes :: directRReq :: directRRes :: directRBack :: others =
+  val idle :: sendRes :: sendReq :: waitRes :: writeData :: sendWReq :: sendWData :: waitWRes :: directWReq :: directWRes :: directRReq :: directRRes :: directRBack :: others =
     Enum(16)
 
   val counter    = RegInit(0.U(log2Ceil(slotsPerLine).W))
@@ -287,7 +287,8 @@ class Cache2(
       (sendReq, axiIO.AR.fire, waitRes),
       (waitRes, axiIO.R.fire && (counter === (slotsPerLine - 1).U) && isRead, sendRes),
       (waitRes, axiIO.R.fire && (counter === (slotsPerLine - 1).U) && !isRead, writeData),
-      (sendWReq, axiIO.AW.fire && axiIO.W.fire, waitWRes),
+      (sendWReq, axiIO.AW.fire, sendWData),
+      (sendWData, axiIO.W.fire && (counter === (slotsPerLine - 1).U), waitWRes),
       (waitWRes, axiIO.B.fire && (counter =/= (slotsPerLine - 1).U), sendWReq),
       (waitWRes, axiIO.B.fire && (counter === (slotsPerLine - 1).U), sendReq),
       (writeData, io.writeRes.fire, idle),
