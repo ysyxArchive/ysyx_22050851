@@ -19,7 +19,7 @@ class CPU extends Module {
   val wbu     = Module(new WriteBackUnit())
 
   val arbiter  = Module(new AxiLiteArbiter(1))
-  val iCache   = Module(new Cache(name = "icache"))
+  val iCache   = Module(new Cache2(name = "icache"))
   val dCache   = Module(new Cache(name = "dcache"))
   val arbiter2 = Module(new BurstLiteArbiter(1))
   ifu.fetchOut <> decoder.decodeIn
