@@ -6,7 +6,7 @@ import decode._
 class CPU extends Module {
   val enableDebug = IO(Input(Bool()))
 
-  val mem         = Module(new MemInterface)
+  val mem         = Module(new MemBurstInterface)
   val mem2        = Module(new MemBurstInterface)
   val regs        = Module(new RegisterFile)
   val csrregs     = Module(new ControlRegisterFile)
@@ -18,9 +18,9 @@ class CPU extends Module {
   val memu    = Module(new MemRWUnit())
   val wbu     = Module(new WriteBackUnit())
 
-  val arbiter  = Module(new AxiLiteArbiter(1))
+  val arbiter  = Module(new BurstLiteArbiter(1))
   val iCache   = Module(new Cache2(name = "icache"))
-  val dCache   = Module(new Cache(name = "dcache"))
+  val dCache   = Module(new Cache2(name = "dcache"))
   val arbiter2 = Module(new BurstLiteArbiter(1))
   ifu.fetchOut <> decoder.decodeIn
   decoder.decodeOut <> exe.exeIn
@@ -31,7 +31,7 @@ class CPU extends Module {
 
   iCache.axiIO <> arbiter2.masterIO(0)
   // dCache.axiIO <> arbiter.slaveIO(1)
-  dCache.axiIO <> arbiter.slaveIO(0)
+  dCache.axiIO <> arbiter.masterIO(0)
   mem.axiS <> arbiter.masterIO
   mem2.axiS <> arbiter2.slaveIO
 
