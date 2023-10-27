@@ -21,7 +21,7 @@ class CPU extends Module {
   val arbiter  = Module(new AxiLiteArbiter(1))
   val iCache   = Module(new Cache(name = "icache"))
   val dCache   = Module(new Cache(name = "dcache"))
-  val arbiter2 = Module(new AxiLiteArbiter(1))
+  val arbiter2 = Module(new BurstLiteArbiter(1))
   ifu.fetchOut <> decoder.decodeIn
   decoder.decodeOut <> exe.exeIn
   exe.exeOut <> memu.memIn
@@ -31,9 +31,9 @@ class CPU extends Module {
 
   iCache.axiIO <> arbiter.slaveIO(0)
   // dCache.axiIO <> arbiter.slaveIO(1)
-  dCache.axiIO <> arbiter2.slaveIO(0)
+  dCache.axiIO <> arbiter2.masterIO(0)
   mem.axiS <> arbiter.masterIO
-  mem2.axiS <> arbiter2.masterIO
+  mem2.axiS <> arbiter2.slaveIO
 
   ifu.iCacheIO <> iCache.io
   ifu.regIO := regs.readIO
