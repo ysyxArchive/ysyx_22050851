@@ -90,7 +90,7 @@ class MemBurstInterface extends Module {
 
   val waitReq :: writeDataBack :: waitDataWrite :: responseWrite :: others = Enum(5)
 
-  val counter = RegInit(0.U(8.W))
+  val counter = RegInit(0.U(9.W))
 
   val writeReq = Reg(MemBurstAxiLite().AW.bits)
   val readReq  = Reg(MemBurstAxiLite().AR.bits)
@@ -99,9 +99,9 @@ class MemBurstInterface extends Module {
     waitReq,
     List(
       (waitReq, axiS.AR.fire, writeDataBack),
-      (writeDataBack, axiS.R.fire && counter === readReq.len - 1.U, waitReq),
+      (writeDataBack, axiS.R.fire && counter === readReq.len, waitReq),
       (waitReq, axiS.AW.fire, waitDataWrite),
-      (waitDataWrite, axiS.R.fire && counter === writeReq.len - 1.U, responseWrite),
+      (waitDataWrite, axiS.R.fire && counter === writeReq.len, responseWrite),
       (responseWrite, axiS.B.fire, waitReq)
     )
   )
