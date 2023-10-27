@@ -90,7 +90,7 @@ class MemBurstInterface extends Module {
 
   val waitReq :: writeDataBack :: waitDataWrite :: responseWrite :: others = Enum(5)
 
-  val counter = RegInit(0.U(8.W))
+  val counter = RegInit(0.U(9.W))
 
   val writeReq = Reg(MemBurstAxiLite().AW.bits)
   val readReq  = Reg(MemBurstAxiLite().AR.bits)
@@ -115,27 +115,25 @@ class MemBurstInterface extends Module {
     counter,
     Seq(
       (memInterfaceFSM.is(waitReq) && !memInterfaceFSM.willChange()) -> 0.U,
-      axiS.AW.fire -> axiS.AW.bits.len,
-      axiS.AR.fire -> axiS.AR.bits.len,
-      (memInterfaceFSM.is(writeDataBack) && axiS.R.fire) -> (counter - 1.U),
-      (memInterfaceFSM.is(waitDataWrite) && axiS.W.fire) -> (counter - 1.U)
+      (memInterfaceFSM.is(writeDataBack)) -> (counter + 1.U),
+      (memInterfaceFSM.is(waitDataWrite) && axiS.W.fire) -> (counter + 1.U)
     )
   )
 
   mem.io.clock  := clock
-  mem.io.isRead := memInterfaceFSM.is(writeDataBack) || memInterfaceFSM.willChangeTo(writeDataBack)
+  mem.io.isRead := memInterfaceFSM.is(writeDataBack)
   mem.io.mask   := axiS.W.bits.strb
   mem.io.wdata  := axiS.W.bits.data
   mem.io.addr := MuxCase(
     0.U,
     Seq(
       memInterfaceFSM.is(writeDataBack) -> readReq.addr,
-      memInterfaceFSM.willChangeTo(writeDataBack) -> axiS.AR.bits.addr,
       axiS.W.fire -> writeReq.addr
     )
   ) + (counter << 3)
-  mem.io.enable := (memInterfaceFSM.willChangeTo(writeDataBack) && !memInterfaceFSM.willChangeTo(waitReq)) ||
-    (memInterfaceFSM.is(waitDataWrite) && axiS.W.fire)
+  mem.io.enable :=
+    memInterfaceFSM.is(writeDataBack) ||
+      (memInterfaceFSM.is(waitDataWrite) && axiS.W.fire)
   dataRet := Mux(mem.io.enable, mem.io.rdata, dataRet)
 
   axiS.W.ready     := memInterfaceFSM.is(waitDataWrite)
@@ -143,7 +141,7 @@ class MemBurstInterface extends Module {
   axiS.AR.ready    := memInterfaceFSM.is(waitReq) && axiS.AR.valid
   axiS.B.valid     := memInterfaceFSM.is(responseWrite)
   axiS.B.bits.id   := writeReq.id
-  axiS.R.valid     := memInterfaceFSM.is(writeDataBack)
+  axiS.R.valid     := memInterfaceFSM.is(writeDataBack) && RegNext(memInterfaceFSM.is(writeDataBack))
   axiS.R.bits.id   := readReq.id
   axiS.R.bits.data := dataRet
   axiS.R.bits.last := counter === readReq.len

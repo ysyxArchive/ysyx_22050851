@@ -285,7 +285,6 @@ class Cache2(
       (idle, io.writeReq.fire && !shoudDirectRW && !hit && isDirty, sendWReq),
       (sendRes, io.data.fire, idle),
       (sendReq, axiIO.AR.fire, waitRes),
-      (waitRes, axiIO.R.fire && (counter =/= (slotsPerLine - 1).U), sendReq),
       (waitRes, axiIO.R.fire && (counter === (slotsPerLine - 1).U) && isRead, sendRes),
       (waitRes, axiIO.R.fire && (counter === (slotsPerLine - 1).U) && !isRead, writeData),
       (sendWReq, axiIO.AW.fire && axiIO.W.fire, waitWRes),
@@ -336,10 +335,11 @@ class Cache2(
   io.data.bits  := Mux(cacheFSM.is(sendRes), PriorityMux(s), directData)
   io.data.valid := cacheFSM.is(sendRes) || cacheFSM.is(directRBack)
   // when sendReq or directRReq
-  axiIO.AR.bits.addr := Mux(cacheFSM.is(sendReq), Cat(Seq(tag, index, counter << log2Ceil(axiIO.dataWidth / 8))), addr)
+  axiIO.AR.bits.addr := Mux(cacheFSM.is(sendReq), Cat(Seq(tag, index, 0.U((log2Ceil(slotsPerLine) + 3).W))), addr)
   axiIO.AR.bits.id   := 0.U
   axiIO.AR.bits.prot := 0.U
   axiIO.AR.valid     := cacheFSM.is(sendReq) || cacheFSM.is(directRReq)
+  axiIO.AR.bits.len  := Mux(cacheFSM.is(sendReq), slotsPerLine.U, 0.U)
   // when waitRes
   val mask       = Reverse(Cat(Seq.tabulate(slotsPerLine)(index => Fill(axiIO.dataWidth, UIntToOH(counter)(index)))))
   val maskedData = Fill(slotsPerLine, axiIO.R.bits.data.asUInt) & mask
@@ -392,11 +392,10 @@ class Cache2(
   axiIO.B.ready := cacheFSM.is(waitWRes) || cacheFSM.is(directWRes)
 
   axiIO.AW.bits.id    := DontCare
-  axiIO.AW.bits.prot  := DontCare 
+  axiIO.AW.bits.prot  := DontCare
   axiIO.AW.bits.burst := 2.U
   axiIO.AW.bits.len   := 0.U
   axiIO.AR.bits.burst := 2.U
-  axiIO.AR.bits.len   := 0.U
 
   when(enableDebug) {
     when(cacheFSM.is(idle)) {
