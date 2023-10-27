@@ -392,8 +392,7 @@ class Cache2(
   axiIO.B.ready := cacheFSM.is(waitWRes) || cacheFSM.is(directWRes)
 
   axiIO.AW.bits.id    := DontCare
-  axiIO.AW.bits.prot  := DontCare
-  axiIO.AW.bits.burst := 2.U
+  axiIO.AW.bits.prot  := DontCare 
   axiIO.AW.bits.len   := 0.U
   axiIO.AR.bits.burst := 2.U
   axiIO.AR.bits.len   := 0.U
