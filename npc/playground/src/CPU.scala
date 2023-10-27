@@ -29,9 +29,9 @@ class CPU extends Module {
 
   ifu.fromDecode <> decoder.decodeBack
 
-  iCache.axiIO <> arbiter.slaveIO(0)
+  iCache.axiIO <> arbiter2.masterIO(0)
   // dCache.axiIO <> arbiter.slaveIO(1)
-  dCache.axiIO <> arbiter2.masterIO(0)
+  dCache.axiIO <> arbiter.slaveIO(0)
   mem.axiS <> arbiter.masterIO
   mem2.axiS <> arbiter2.slaveIO
 

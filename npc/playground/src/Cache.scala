@@ -45,7 +45,7 @@ class Cache(
   val tagOffset   = log2Ceil(cellByte) + log2Ceil(wayCnt)
 
   val io          = IO(new CacheIO(dataWidth, addrWidth))
-  val axiIO       = IO(new AxiLiteIO(UInt(dataWidth.W), addrWidth))
+  val axiIO       = IO(new BurstLiteIO(UInt(dataWidth.W), addrWidth))
   val enableDebug = IO(Input(Bool()))
 
   val slotsPerLine = cellByte * 8 / dataWidth

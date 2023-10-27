@@ -309,7 +309,7 @@ class BurstLiteArbiter(val masterPort: Int) extends Module {
   slaveIO.AW.bits  := Mux(arbiterFSM.is(forwardWrite), chosenMaster.AW.bits, DontCare)
   slaveIO.AR.valid := chosenMaster.AR.valid && arbiterFSM.is(forwardRead)
   slaveIO.AR.bits  := Mux(arbiterFSM.is(forwardRead), chosenMaster.AR.bits, DontCare)
-  slaveIO.W.ready  := chosenMaster.W.ready && arbiterFSM.is(forwardWrite)
+  slaveIO.W.valid  := chosenMaster.W.valid && arbiterFSM.is(forwardWrite)
   slaveIO.W.bits   := Mux(arbiterFSM.is(forwardWrite), chosenMaster.W.bits, DontCare)
 
   // val awbits = Reg(new AxiLiteWriteRequest(64, 1))
