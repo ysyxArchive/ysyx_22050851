@@ -268,11 +268,11 @@ class BurstLiteArbiter(val masterPort: Int) extends Module {
     case (elem, idx) =>
       elem.B.valid  := Mux(idx.U === workingMaster && arbiterFSM.is(forwardWrite), slaveIO.B.valid, false.B)
       elem.B.bits   := Mux(idx.U === workingMaster, slaveIO.B.bits, DontCare)
-      elem.R.valid  := Mux(idx.U === workingMaster, slaveIO.R.valid, false.B)
+      elem.R.valid  := Mux(idx.U === workingMaster&& arbiterFSM.is(forwardRead), slaveIO.R.valid, false.B)
       elem.R.bits   := Mux(idx.U === workingMaster, slaveIO.R.bits, DontCare)
-      elem.AW.ready := Mux(idx.U === workingMaster, slaveIO.AW.ready, false.B)
-      elem.AR.ready := Mux(idx.U === workingMaster, slaveIO.AR.ready, false.B)
-      elem.W.ready  := Mux(idx.U === workingMaster, slaveIO.W.ready, false.B)
+      elem.AW.ready := Mux(idx.U === workingMaster&& arbiterFSM.is(forwardWrite), slaveIO.AW.ready, false.B)
+      elem.AR.ready := Mux(idx.U === workingMaster&& arbiterFSM.is(forwardWrite), slaveIO.AR.ready, false.B)
+      elem.W.ready  := Mux(idx.U === workingMaster&& arbiterFSM.is(forwardWrite), slaveIO.W.ready, false.B)
   }
   // when waitMasterReq
   workingMaster := Mux(
