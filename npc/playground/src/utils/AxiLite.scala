@@ -304,7 +304,7 @@ class BurstLiteArbiter(val masterPort: Int) extends Module {
   ) // if chosen is unmasked, mask it
 
   slaveIO.B.ready  := chosenMaster.B.ready && arbiterFSM.is(forwardWrite)
-  slaveIO.R.ready  := chosenMaster.B.ready && arbiterFSM.is(forwardRead)
+  slaveIO.R.ready  := chosenMaster.R.ready && arbiterFSM.is(forwardRead)
   slaveIO.AW.valid := chosenMaster.AW.valid && arbiterFSM.is(forwardWrite)
   slaveIO.AW.bits  := Mux(arbiterFSM.is(forwardWrite), chosenMaster.AW.bits, DontCare)
   slaveIO.AR.valid := chosenMaster.AR.valid && arbiterFSM.is(forwardRead)
