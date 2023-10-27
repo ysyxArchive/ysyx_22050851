@@ -311,40 +311,4 @@ class BurstLiteArbiter(val masterPort: Int) extends Module {
   slaveIO.AR.bits  := Mux(arbiterFSM.is(forwardRead), chosenMaster.AR.bits, DontCare)
   slaveIO.W.valid  := chosenMaster.W.valid && arbiterFSM.is(forwardWrite)
   slaveIO.W.bits   := Mux(arbiterFSM.is(forwardWrite), chosenMaster.W.bits, DontCare)
-
-  // val awbits = Reg(new AxiLiteWriteRequest(64, 1))
-  // val arbits = Reg(new AxiLiteReadRequest(64, 1))
-  // val wbits  = Reg(new AxiLiteWriteData(UInt(64.W)))
-  // awbits := Mux(slaveReqFire(workingMaster) && arbiterFSM.is(waitMasterReq), chosenMaster.AW.bits, awbits)
-  // wbits  := Mux(slaveReqFire(workingMaster) && arbiterFSM.is(waitMasterReq), chosenMaster.W.bits, wbits)
-  // arbits := Mux(slaveReqFire(workingMaster) && arbiterFSM.is(waitMasterReq), chosenMaster.AR.bits, arbits)
-  // // when reqSlave
-  // slaveIO.AR.valid := arbiterFSM.is(reqSlave) && isRead
-  // slaveIO.AR.bits  := arbits
-  // slaveIO.AW.valid := arbiterFSM.is(reqSlave) && !isRead
-  // slaveIO.AW.bits  := awbits
-  // slaveIO.W.valid  := arbiterFSM.is(reqSlave) && !isRead
-  // slaveIO.W.bits   := wbits
-  // // when waitSlaveRes
-  // val resData   = Reg(new AxiLiteReadData(UInt(64.W), 1))
-  // val writeBack = Reg(new AxiLiteWriteResponse(1))
-  // resData := Mux(
-  //   masterResFire && arbiterFSM.is(waitSlaveRes),
-  //   slaveIO.R.bits,
-  //   resData
-  // )
-  // writeBack := Mux(
-  //   masterResFire && arbiterFSM.is(waitSlaveRes),
-  //   slaveIO.B.bits,
-  //   writeBack
-  // )
-  // slaveIO.B.ready := arbiterFSM.is(waitSlaveRes) && !isRead
-  // slaveIO.R.ready := arbiterFSM.is(waitSlaveRes) && isRead
-
-  // // when resMaster
-  // chosenMaster.R.bits  := resData
-  // chosenMaster.B.bits  := writeBack
-  // chosenMaster.R.valid := arbiterFSM.is(resMaster) && isRead
-  // chosenMaster.B.valid := arbiterFSM.is(resMaster) && !isRead
-
 }
