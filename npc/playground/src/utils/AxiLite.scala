@@ -91,7 +91,7 @@ class BurstLiteIO(dataType: Data, addr_width: Int, id_r_width: Int = 1, id_w_wid
     extends AxiLiteIO(dataType, addr_width, id_r_width, id_w_width) {
   override val AW = DecoupledIO(new BurstLiteWriteRequest(addr_width, id_w_width))
   override val AR = DecoupledIO(new BurstLiteReadRequest(addr_width, id_r_width))
-  override val R  = DecoupledIO(new BurstLiteReadData(dataType, id_r_width))
+  override val R  = Flipped(DecoupledIO(new BurstLiteReadData(dataType, id_r_width)))
 }
 
 object AxiLiteIO {
