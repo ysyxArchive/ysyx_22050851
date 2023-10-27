@@ -393,7 +393,7 @@ class Cache2(
 
   axiIO.AW.bits.id    := DontCare
   axiIO.AW.bits.prot  := DontCare 
-  axiIO.AR.bits.burst := 2.U
+  axiIO.AW.bits.burst := 2.U
   axiIO.AW.bits.len   := 0.U
   axiIO.AR.bits.burst := 2.U
   axiIO.AR.bits.len   := 0.U
