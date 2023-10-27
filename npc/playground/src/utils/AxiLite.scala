@@ -260,11 +260,6 @@ class BurstLiteArbiter(val masterPort: Int) extends Module {
   val chosenReq         = Mux(haveValidUnMaskedRequest, chosenUnMaskedReq, chosenMaskedReq)
 
   val chosenIsReadReq = masterReadRequestValid(chosenReq)
-  // val slaveReqFire  = VecInit(masterIO.map(io => io.AR.fire || io.AW.fire))
-  // val slaveResFire  = VecInit(masterIO.map(io => io.R.fire || io.B.fire))
-  // val masterReqFire = slaveIO.AR.fire || (slaveIO.AW.fire && slaveIO.W.fire)
-  // val masterResFire = slaveIO.R.fire || slaveIO.B.fire
-
   // if have Valid Masked req, choose unmasked, else masked
 
   val waitMasterReq :: forwardRead :: forwardWrite :: others = Enum(4)
