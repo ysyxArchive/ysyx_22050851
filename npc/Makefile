@@ -5,9 +5,9 @@ BUILD_DIR = ./build
 OBJ_DIR = $(BUILD_DIR)/obj_dir
 
 override VERILATOR =  verilator 
-VERILATOR_CFLAGS += -MMD --build -cc \
+VERILATOR_CFLAGS += -MMD --build -cc -j 0 \
 				-O3 --x-assign fast --x-initial fast --noassert --trace 
-VERILATOR_CFLAGS += -Wno-WIDTH -j # 记得删掉
+VERILATOR_CFLAGS += -Wno-WIDTH # 记得删掉
 BIN = $(BUILD_DIR)/$(TOPNAME)
 GEN_SCALA = $(abspath ./playground/src/decode/InstContorlDecoder.scala)
 VSRCS = $(shell find $(abspath ./build) -name "*.v" -or -name "*.sv")
