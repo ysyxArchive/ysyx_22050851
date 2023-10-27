@@ -32,7 +32,7 @@ class CPU extends Module {
   iCache.axiIO <> arbiter2.masterIO(0)
   // dCache.axiIO <> arbiter.slaveIO(1)
   dCache.axiIO <> arbiter.masterIO(0)
-  mem.axiS <> arbiter.masterIO
+  mem.axiS <> arbiter.slaveIO
   mem2.axiS <> arbiter2.slaveIO
 
   ifu.iCacheIO <> iCache.io
