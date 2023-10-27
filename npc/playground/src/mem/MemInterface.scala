@@ -88,7 +88,7 @@ class MemBurstInterface extends Module {
   val axiS = IO(Flipped(MemBurstAxiLite()))
   val mem  = Module(new BlackBoxMem)
 
-  val waitReq :: writeDataBack :: waitDataWrite :: responseWrite :: others = Enum(3)
+  val waitReq :: writeDataBack :: waitDataWrite :: responseWrite :: others = Enum(5)
 
   val counter = RegInit(0.U(8.W))
 
