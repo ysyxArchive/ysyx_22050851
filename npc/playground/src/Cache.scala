@@ -335,7 +335,7 @@ class Cache2(
   io.data.bits  := Mux(cacheFSM.is(sendRes), PriorityMux(s), directData)
   io.data.valid := cacheFSM.is(sendRes) || cacheFSM.is(directRBack)
   // when sendReq or directRReq
-  axiIO.AR.bits.addr := Mux(cacheFSM.is(sendReq), Cat(Seq(tag, index, 0.U(log2Ceil(slotsPerLine).W))), addr)
+  axiIO.AR.bits.addr := Mux(cacheFSM.is(sendReq), Cat(Seq(tag, index, 0.U((log2Ceil(slotsPerLine) + 3).W))), addr)
   axiIO.AR.bits.id   := 0.U
   axiIO.AR.bits.prot := 0.U
   axiIO.AR.valid     := cacheFSM.is(sendReq) || cacheFSM.is(directRReq)
