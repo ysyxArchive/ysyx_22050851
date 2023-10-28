@@ -100,7 +100,7 @@ class Cache(
     Seq(
       (counter === slotsPerLine.U) -> 0.U,
       (cacheFSM.is(waitRes) && axiIO.R.fire) -> (counter + 1.U),
-      (cacheFSM.is(sendWReq) && axiIO.W.fire) -> (counter + 1.U),
+      (cacheFSM.is(sendWData) && axiIO.W.fire) -> (counter + 1.U),
       true.B -> counter
     )
   )
