@@ -84,7 +84,7 @@ class SimpleDivider extends Module {
     ),
     Seq(
       (divFSM.is(idle) && io.divw) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 31),
-      (divFSM.is(idle) && !io.divw) -> Mux(inBNeg, Utils.signedReverse(inBCasted), inBCasted)(125, 63),
+      (divFSM.is(idle) && !io.divw) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 63),
       divFSM.willChangeTo(idle) -> Mux(canSub, subReg - inBReg, subReg)
     )
   )
