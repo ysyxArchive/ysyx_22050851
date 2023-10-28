@@ -101,7 +101,7 @@ class MemBurstInterface extends Module {
       (waitReq, axiS.AR.fire, writeDataBack),
       (writeDataBack, axiS.R.fire && counter === readReq.len, waitReq),
       (waitReq, axiS.AW.fire, waitDataWrite),
-      (waitDataWrite, axiS.W.fire && counter === (writeReq.len - 1.U), responseWrite),
+      (waitDataWrite, axiS.W.fire && counter === writeReq.len, responseWrite),
       (responseWrite, axiS.B.fire, waitReq)
     )
   )
