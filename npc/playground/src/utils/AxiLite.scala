@@ -276,7 +276,7 @@ class BurstLiteArbiter(val masterPort: Int) extends Module {
   }
   // when waitMasterReq
   workingMaster := Mux(
-    arbiterFSM.is(waitMasterReq) && haveValidRequest && !arbiterFSM.willChange(),
+    arbiterFSM.is(waitMasterReq) && haveValidRequest,
     chosenReq,
     workingMaster
   ) // choose the chosen master
