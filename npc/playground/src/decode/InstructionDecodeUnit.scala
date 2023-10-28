@@ -58,10 +58,7 @@ class InstructionDecodeUnit extends Module {
   val immS = Utils.signExtend(Cat(inst(31, 25), inst(11, 7)), 12)
   val immU = Utils.signExtend(inst(31, 12), 20) << 12
   val immB = Cat(Utils.signExtend(inst(31), 1), inst(7), inst(30, 25), inst(11, 8), 0.U(1.W))
-  val immJ = Utils.signExtend(
-    Cat(inst(31), inst(19, 12), inst(20), inst(30, 21), 0.U(1.W)),
-    21
-  );
+  val immJ = Cat(Utils.signExtend(inst(31), 1), inst(19, 12), inst(20), inst(30, 21), 0.U(1.W));
   val imm = MuxLookup(controlDecoder.output.insttype, immI)(
     EnumSeq(
       InstType.I -> immI,
@@ -107,7 +104,7 @@ class InstructionDecodeUnit extends Module {
 
   // RAW check
   val dstVec = VecInit(fromExe, fromMemu, fromWbu)
-  shouldWait            := (rs1 =/= 0.U && dstVec.contains(rs1)) || (rs2 =/= 0.U && dstVec.contains(rs2))
+  shouldWait := (rs1 =/= 0.U && dstVec.contains(rs1)) || (rs2 =/= 0.U && dstVec.contains(rs2))
 
   // branch check
   willTakeBranch := !shouldWait && MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
