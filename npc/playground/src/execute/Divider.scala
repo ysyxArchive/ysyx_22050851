@@ -91,8 +91,8 @@ class SimpleDivider extends Module {
       inAReg(62.U(7.W) - counter)
     ),
     Seq(
-      (divFSM.is(idle) && io.divw) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 31),
-      (divFSM.is(idle) && !io.divw) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 63),
+      (divFSM.is(idle) && isHalfDiv) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 31),
+      (divFSM.is(idle) && !isHalfDiv) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 63),
       divFSM.willChangeTo(idle) -> Mux(canSub, subReg - inBReg, subReg)
     )
   )
@@ -101,6 +101,7 @@ class SimpleDivider extends Module {
       outReg(i),
       Seq(
         divFSM.is(idle) -> 0.U,
+        (isHalfDiv && divFSM.is(working) && i > 31) -> 0.U,
         (!isHalfDiv && divFSM.is(working) && counter === (63 - i).U) -> canSub,
         (isHalfDiv && divFSM.is(working) && counter === Math.max(31 - i, 0).U) -> canSub
       )
