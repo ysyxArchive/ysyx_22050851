@@ -87,12 +87,12 @@ class SimpleDivider extends Module {
   subReg := MuxCase(
     (Mux(canSub, subReg - inBReg, subReg) << 1) + Mux(
       isHalfDiv,
-      inAReg(30.U(7.W) - counter),
+      (30.U(7.W) - counter),
       inAReg(62.U(7.W) - counter)
     ),
     Seq(
-      (divFSM.is(idle) && isHalfDiv) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 31),
-      (divFSM.is(idle) && !isHalfDiv) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 63),
+      (divFSM.is(idle) && io.divw) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 31),
+      (divFSM.is(idle) && !io.divw) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 63),
       divFSM.willChangeTo(idle) -> Mux(canSub, subReg - inBReg, subReg)
     )
   )
