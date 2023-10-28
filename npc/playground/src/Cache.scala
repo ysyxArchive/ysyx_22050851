@@ -386,7 +386,7 @@ class Cache2(
     cacheFSM.is(sendWReq),
     PriorityMux(
       Seq.tabulate(slotsPerLine)(i =>
-        ((i.U === counter) -> cacheMem(index)(replaceIndex).data)//((i + 1) * dataWidth - 1, i * dataWidth))
+        ((i.U === counter) -> cacheMem(index)(replaceIndex).data((i + 1) * dataWidth - 1, i * dataWidth))
       )
     ),
     dataWriteReq.data
