@@ -99,8 +99,7 @@ class Cache(
   counter := PriorityMux(
     Seq(
       (counter === slotsPerLine.U) -> 0.U,
-      (cacheFSM.is(waitRes) && axiIO.R.fire) -> (counter + 1.U),
-      (cacheFSM.is(sendWData) && axiIO.W.fire) -> (counter + 1.U),
+      ((cacheFSM.is(waitRes) && axiIO.R.fire) || (cacheFSM.is(waitWRes) && axiIO.B.fire)) -> (counter + 1.U),
       true.B -> counter
     )
   )
@@ -304,7 +303,8 @@ class Cache2(
   counter := PriorityMux(
     Seq(
       (counter === slotsPerLine.U) -> 0.U,
-      ((cacheFSM.is(waitRes) && axiIO.R.fire) || (cacheFSM.is(waitWRes) && axiIO.B.fire)) -> (counter + 1.U),
+      (cacheFSM.is(waitRes) && axiIO.R.fire) -> (counter + 1.U),
+      (cacheFSM.is(sendWData) && axiIO.W.fire) -> (counter + 1.U),
       true.B -> counter
     )
   )
