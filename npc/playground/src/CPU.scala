@@ -18,10 +18,10 @@ class CPU extends Module {
   val memu    = Module(new MemRWUnit())
   val wbu     = Module(new WriteBackUnit())
 
-  val arbiter  = Module(new BurstLiteArbiter(1))
+  val arbiter  = Module(new BurstLiteArbiter(2))
   val iCache   = Module(new Cache2(name = "icache"))
   val dCache   = Module(new Cache2(name = "dcache"))
-  val arbiter2 = Module(new BurstLiteArbiter(1))
+  // val arbiter2 = Module(new BurstLiteArbiter(1))
   ifu.fetchOut <> decoder.decodeIn
   decoder.decodeOut <> exe.exeIn
   exe.exeOut <> memu.memIn
@@ -29,11 +29,11 @@ class CPU extends Module {
 
   ifu.fromDecode <> decoder.decodeBack
 
-  iCache.axiIO <> arbiter2.masterIO(0)
+  iCache.axiIO <> arbiter.masterIO(1)
   // dCache.axiIO <> arbiter.slaveIO(1)
   dCache.axiIO <> arbiter.masterIO(0)
   mem.axiS <> arbiter.slaveIO
-  mem2.axiS <> arbiter2.slaveIO
+  // mem2.axiS <> arbiter.slaveIO
 
   ifu.iCacheIO <> iCache.io
   ifu.regIO := regs.readIO
