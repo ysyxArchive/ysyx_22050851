@@ -265,7 +265,7 @@ class Cache2(
   val isRead = Reg(Bool())
   val addr   = Reg(UInt(addrWidth.W))
 
-  val idle :: sendRes :: sendReq :: waitRes :: writeData :: sendWReq :: sendWData :: waitWRes :: directWReq :: directWRes :: directRReq :: directRRes :: directRBack :: others =
+  val idle :: sendRes :: sendReq :: waitRes :: writeData :: sendWReq :: sendWData :: waitWRes :: directWReq :: directWData :: directWRes :: directRReq :: directRRes :: directRBack :: others =
     Enum(16)
 
   val counter    = RegInit(0.U(log2Ceil(slotsPerLine).W))
@@ -292,7 +292,8 @@ class Cache2(
       (waitWRes, axiIO.B.fire && (counter =/= (slotsPerLine - 1).U), sendWReq),
       (waitWRes, axiIO.B.fire && (counter === (slotsPerLine - 1).U), sendReq),
       (writeData, io.writeRes.fire, idle),
-      (directWReq, axiIO.AW.fire && axiIO.W.fire, directWRes),
+      (directWReq, axiIO.AW.fire, directWData),
+      (directWData, axiIO.W.fire, directWRes),
       (directWRes, axiIO.B.fire, idle),
       (directRReq, axiIO.AR.fire, directRRes),
       (directRRes, axiIO.R.fire, directRBack),
@@ -378,7 +379,7 @@ class Cache2(
     Cat(cacheMem(index)(replaceIndex).tag, index, counter << log2Ceil(axiIO.dataWidth / 8)),
     addr
   )
-  axiIO.W.valid := cacheFSM.is(sendWReq) || cacheFSM.is(directWReq)
+  axiIO.W.valid := cacheFSM.is(sendWData) || cacheFSM.is(directWData)
   axiIO.W.bits.data := Mux(
     cacheFSM.is(sendWReq),
     PriorityMux(
