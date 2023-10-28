@@ -103,18 +103,6 @@ object BurstLiteIO {
   def apply(dataType:  Data, addr_width: Int) = new BurstLiteIO(dataType, addr_width)
 }
 
-// class AxiLiteReadIO(data_width: Int = 64, addr_width: Int = 64) extends Bundle {
-//   val AR = DecoupledIO(new AxiLiteReadRequest(addr_width))
-//   val R  = Flipped(DecoupledIO(new AxiLiteReadData(data_width)))
-
-// }
-
-// class AxiLiteWriteIO(data_width: Int = 64, addr_width: Int = 64) extends Bundle {
-//   val AW = DecoupledIO(new AxiLiteWriteRequest(addr_width))
-//   val W  = DecoupledIO(new AxiLiteWriteData(data_width))
-//   val B  = Flipped(DecoupledIO(new AxiLiteWriteResponse()))
-// }
-
 class AxiLiteArbiter(val masterPort: Int) extends Module {
   val slaveIO = IO(Vec(masterPort, Flipped(AxiLiteIO(64, 64))))
   // now just one master port
@@ -278,13 +266,13 @@ class BurstLiteArbiter(val masterPort: Int) extends Module {
   // unchosen ports
   masterIO.zipWithIndex.foreach {
     case (elem, idx) =>
-      elem.B.valid  := Mux(idx.U === workingMaster, slaveIO.B.valid, false.B)
+      elem.B.valid  := Mux(idx.U === workingMaster && arbiterFSM.is(forwardWrite), slaveIO.B.valid, false.B)
       elem.B.bits   := Mux(idx.U === workingMaster, slaveIO.B.bits, DontCare)
-      elem.R.valid  := Mux(idx.U === workingMaster, slaveIO.R.valid, false.B)
+      elem.R.valid  := Mux(idx.U === workingMaster && arbiterFSM.is(forwardRead), slaveIO.R.valid, false.B)
       elem.R.bits   := Mux(idx.U === workingMaster, slaveIO.R.bits, DontCare)
-      elem.AW.ready := Mux(idx.U === workingMaster, slaveIO.AW.ready, false.B)
-      elem.AR.ready := Mux(idx.U === workingMaster, slaveIO.AR.ready, false.B)
-      elem.W.ready  := Mux(idx.U === workingMaster, slaveIO.W.ready, false.B)
+      elem.AW.ready := Mux(idx.U === workingMaster && arbiterFSM.is(forwardWrite), slaveIO.AW.ready, false.B)
+      elem.AR.ready := Mux(idx.U === workingMaster && arbiterFSM.is(forwardRead), slaveIO.AR.ready, false.B)
+      elem.W.ready  := Mux(idx.U === workingMaster && arbiterFSM.is(forwardWrite), slaveIO.W.ready, false.B)
   }
   // when waitMasterReq
   workingMaster := Mux(
