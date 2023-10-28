@@ -383,7 +383,7 @@ class Cache2(
   axiIO.AW.bits.len := Mux(cacheFSM.is(sendWReq), slotsPerLine.U, 0.U)
   axiIO.W.valid     := cacheFSM.is(sendWData) || cacheFSM.is(directWData)
   axiIO.W.bits.data := Mux(
-    cacheFSM.is(sendWReq),
+    cacheFSM.is(sendWData),
     PriorityMux(
       Seq.tabulate(slotsPerLine)(i =>
         ((i.U === counter) -> cacheMem(index)(replaceIndex).data((i + 1) * dataWidth - 1, i * dataWidth))
