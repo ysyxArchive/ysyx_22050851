@@ -379,7 +379,7 @@ class Cache2(
     Cat(cacheMem(index)(replaceIndex).tag, index, counter << log2Ceil(axiIO.dataWidth / 8)),
     addr
   )
-  axiIO.AW.bits.len := Mux(cacheFSM.is(sendWData), slotsPerLine.U, 0.U)
+  axiIO.AW.bits.len := Mux(cacheFSM.is(sendWReq), slotsPerLine.U, 0.U)
   axiIO.W.valid     := cacheFSM.is(sendWData) || cacheFSM.is(directWData)
   axiIO.W.bits.data := Mux(
     cacheFSM.is(sendWReq),
