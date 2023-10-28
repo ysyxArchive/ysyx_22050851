@@ -379,7 +379,8 @@ class Cache2(
     Cat(cacheMem(index)(replaceIndex).tag, index, counter << log2Ceil(axiIO.dataWidth / 8)),
     addr
   )
-  axiIO.W.valid := cacheFSM.is(sendWData) || cacheFSM.is(directWData)
+  axiIO.AW.bits.len := Mux(cacheFSM.is(sendWData), slotsPerLine.U, 0.U)
+  axiIO.W.valid     := cacheFSM.is(sendWData) || cacheFSM.is(directWData)
   axiIO.W.bits.data := Mux(
     cacheFSM.is(sendWReq),
     PriorityMux(
@@ -396,7 +397,6 @@ class Cache2(
   axiIO.AW.bits.id    := DontCare
   axiIO.AW.bits.prot  := DontCare
   axiIO.AW.bits.burst := 2.U
-  axiIO.AW.bits.len   := 0.U
   axiIO.AR.bits.burst := 2.U
 
   when(enableDebug) {
