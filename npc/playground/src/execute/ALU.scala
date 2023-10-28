@@ -126,7 +126,7 @@ class ALU extends Module {
   divider.io.divisor         := io.in.bits.inB
   divider.io.flush           := false.B
   divider.io.divValid        := aluFSM.trigger(normal, busyDiv)
-  divider.io.divSigned       := false.B
+  divider.io.divSigned       := VecInit(Seq(AluMode.remw, AluMode.divw).map(t => t.asUInt)).contains(io.in.bits.opType.asUInt)
   divider.io.divw := VecInit(Seq(AluMode.remw, AluMode.remuw, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
     .contains(io.in.bits.opType.asUInt)
 

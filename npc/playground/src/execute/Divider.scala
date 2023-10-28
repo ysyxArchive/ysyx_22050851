@@ -51,8 +51,16 @@ class SimpleDivider extends Module {
     )
   )
 
-  val inACasted = Mux(io.divw, Utils.signExtend(io.dividend, 32, 128), Utils.signExtend(io.dividend, 64, 128))
-  val inBCasted = Mux(io.divw, Utils.signExtend(io.divisor, 32, 64), io.divisor)
+  val inACasted = Mux(
+    io.divw,
+    Mux(io.divSigned, Utils.signExtend(io.dividend, 32, 128), Utils.zeroExtend(io.dividend, 32, 128)),
+    Mux(io.divSigned, Utils.signExtend(io.dividend, 64, 128), Utils.zeroExtend(io.dividend, 64, 128))
+  )
+  val inBCasted = Mux(
+    io.divw,
+    Mux(io.divSigned, Utils.signExtend(io.divisor, 32, 64), Utils.zeroExtend(io.divisor, 32, 64)),
+    io.divisor
+  )
   inAReg    := Mux(divFSM.is(idle), Mux(inANeg, Utils.signedReverse(inACasted), inACasted), inAReg)
   inBReg    := Mux(divFSM.is(idle), Mux(inBNeg, Utils.signedReverse(inBCasted), inBCasted), inBReg)
   isHalfDiv := Mux(divFSM.is(idle), io.divw, isHalfDiv)
@@ -83,8 +91,8 @@ class SimpleDivider extends Module {
       inAReg(62.U(7.W) - counter)
     ),
     Seq(
-      (divFSM.is(idle) && io.divw) -> inACasted(125, 31),
-      (divFSM.is(idle) && !io.divw) -> inACasted(125, 63),
+      (divFSM.is(idle) && io.divw) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 31),
+      (divFSM.is(idle) && !io.divw) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 63),
       divFSM.willChangeTo(idle) -> Mux(canSub, subReg - inBReg, subReg)
     )
   )
@@ -93,6 +101,7 @@ class SimpleDivider extends Module {
       outReg(i),
       Seq(
         divFSM.is(idle) -> 0.U,
+        (isHalfDiv && divFSM.is(working) && i.U > 31.U) -> 0.U,
         (!isHalfDiv && divFSM.is(working) && counter === (63 - i).U) -> canSub,
         (isHalfDiv && divFSM.is(working) && counter === Math.max(31 - i, 0).U) -> canSub
       )
