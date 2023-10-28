@@ -48,7 +48,6 @@ static inline bool difftest_check_reg(const char* name,
                                       word_t ref,
                                       word_t dut) {
   // TODO: 问题有点大，在yield中如何规避？
-  Log("!23");
   if (ref != dut && (ref ^ dut) != 0x20000) {
     Log("%s is different after executing instruction at pc = " FMT_WORD
         ", right = " FMT_WORD ", wrong = " FMT_WORD ", diff = " FMT_WORD,
