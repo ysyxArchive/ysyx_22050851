@@ -151,8 +151,8 @@ void init_monitor(int argc, char *argv[]) {
   /* Initialize the simple debugger. */
   init_sdb();
 
-  /* test expr method*/
-  test_expr();
+  // /* test expr method*/
+  // test_expr();
 #ifdef CONFIG_TARGET_NATIVE_ELF
   init_disasm(MUXDEF(CONFIG_ISA_x86, "i686",
                      MUXDEF(CONFIG_ISA_mips32, "mipsel",
