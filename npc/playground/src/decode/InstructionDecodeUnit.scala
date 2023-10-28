@@ -60,7 +60,7 @@ class InstructionDecodeUnit extends Module {
   val immB = Cat(Utils.signExtend(inst(31), 1), inst(7), inst(30, 25), inst(11, 8), 0.U(1.W))
   val immJ = Utils.signExtend(
     Cat(inst(31), inst(19, 12), inst(20), inst(30, 21), 0.U(1.W)),
-    20
+    21
   );
   val imm = MuxLookup(controlDecoder.output.insttype, immI)(
     EnumSeq(
