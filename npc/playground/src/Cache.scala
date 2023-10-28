@@ -390,7 +390,7 @@ class Cache2(
     ),
     dataWriteReq.data
   )
-  axiIO.W.bits.strb := Mux(cacheFSM.is(sendWReq), Fill(8, true.B), dataWriteReq.mask)
+  axiIO.W.bits.strb := Mux(cacheFSM.is(sendWData), Fill(8, true.B), dataWriteReq.mask)
   //when  waitWRes or directWRes
   axiIO.B.ready := cacheFSM.is(waitWRes) || cacheFSM.is(directWRes)
 
