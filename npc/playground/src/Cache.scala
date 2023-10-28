@@ -224,6 +224,7 @@ class Cache(
       printf("data is %x\n", io.data.bits)
     }
   }
+
 }
 
 /**
