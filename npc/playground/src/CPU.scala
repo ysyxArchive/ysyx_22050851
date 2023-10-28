@@ -7,7 +7,7 @@ class CPU extends Module {
   val enableDebug = IO(Input(Bool()))
 
   val mem         = Module(new MemBurstInterface)
-  val mem2        = Module(new MemBurstInterface)
+  // val mem2        = Module(new MemBurstInterface)
   val regs        = Module(new RegisterFile)
   val csrregs     = Module(new ControlRegisterFile)
   val blackBoxOut = Module(new BlackBoxRegs)
