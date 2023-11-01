@@ -127,7 +127,7 @@ class Cache(
   )
   // when sendRes or directRBack
   val s = Seq.tabulate(cellByte)(o => ((o.U === offset) -> data(data.getWidth - 1, o * 8)))
-  io.data.bits  := Mux(cacheFSM.is(sendRes), PriorityMux(s), directData)
+  io.data.bits  := Mux(cacheFSM.is(directRRes), directData, PriorityMux(s))
   io.data.valid := cacheFSM.is(sendRes) || cacheFSM.is(directRBack) || (cacheFSM.is(idle) && io.readReq.fire && hit)
   // when sendReq or directRReq
   axiIO.AR.bits.addr := Mux(cacheFSM.is(sendReq), Cat(Seq(tag, index, 0.U((log2Ceil(slotsPerLine) + 3).W))), addr)
