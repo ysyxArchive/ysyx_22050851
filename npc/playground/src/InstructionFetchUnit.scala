@@ -11,7 +11,7 @@ class InstructionFetchUnit extends Module {
   val iCacheIO   = IO(Flipped(new CacheIO(64, 64)))
   val fromDecode = IO(Flipped(new DecodeBack()))
 
-  val inst           = WireInit(0x13.U(32.W))
+  val inst           = RegInit(0x13.U(32.W))
   val predictPC      = RegInit(regIO.pc)
   val lastPC         = RegInit(regIO.pc)
   val needTakeBranch = Wire(Bool())
@@ -30,8 +30,8 @@ class InstructionFetchUnit extends Module {
     )
   )
 
-  iCacheIO.data.ready    := fetchFSM.is(waitR) && fetchOut.ready
-  iCacheIO.readReq.valid := (fetchFSM.is(waitAR) && fromDecode.valid && !needTakeBranch) || fetchFSM.is(waitR)
+  iCacheIO.data.ready    := fetchFSM.is(waitR)
+  iCacheIO.readReq.valid := fetchFSM.is(waitAR) && fromDecode.valid && !needTakeBranch
   iCacheIO.addr          := predictPC
 
   // needTakeBranch := fromDecode.valid && fromDecode.willTakeBranch && fromDecode.branchPc =/= predictPC
