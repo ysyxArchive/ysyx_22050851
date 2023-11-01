@@ -129,7 +129,6 @@ void init_monitor(int argc, char *argv[]) {
 
   /* Open the log file. */
   init_log(log_file);
-  Log("123");
 
   /* init ftrace. */
   init_ftrace(elf_files, elf_file_cnt);
