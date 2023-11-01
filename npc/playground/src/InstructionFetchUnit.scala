@@ -46,7 +46,7 @@ class InstructionFetchUnit extends Module {
   )
   lastPC := Mux(fetchFSM.willChangeTo(waitR), predictPC, lastPC)
 
-  inst := iCacheIO.data.bits.asUInt
+  inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits, inst)
 
   fetchOut.valid := iCacheIO.data.valid
 
