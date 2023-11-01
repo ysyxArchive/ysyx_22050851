@@ -30,7 +30,7 @@ class InstructionFetchUnit extends Module {
     )
   )
 
-  iCacheIO.data.ready    := fetchFSM.is(waitR)
+  iCacheIO.data.ready    := fetchFSM.is(waitR) || fetchFSM.is(waitAR)
   iCacheIO.readReq.valid := fetchFSM.is(waitAR) && fromDecode.valid && !needTakeBranch
   iCacheIO.addr          := predictPC
 
