@@ -42,7 +42,7 @@ class InstructionFetchUnit extends Module {
   predictPC := Mux(
     needTakeBranch && fetchFSM.is(waitAR),
     fromDecode.branchPc,
-    Mux(fetchFSM.willChangeTo(waitR), predictPC + 4.U, predictPC)
+    Mux(iCacheIO.data.fire, predictPC + 4.U, predictPC)
   )
   lastPC := Mux(fetchFSM.willChangeTo(waitR), predictPC, lastPC)
 
