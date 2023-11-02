@@ -11,7 +11,7 @@ class InstructionFetchUnit extends Module {
   val iCacheIO   = IO(Flipped(new CacheIO(64, 64)))
   val fromDecode = IO(Flipped(new DecodeBack()))
 
-  val inst           = RegInit(0x13.U(32.W))
+  val inst           = WireInit(0x13.U(32.W))
   val predictPC      = RegInit(regIO.pc)
   val lastPC         = RegInit(regIO.pc)
   val needTakeBranch = Wire(Bool())
@@ -20,17 +20,17 @@ class InstructionFetchUnit extends Module {
   val fetchFSM = new FSM(
     waitAR,
     List(
-      (waitAR, iCacheIO.readReq.fire && !iCacheIO.data.fire, waitR),
-      (waitR, iCacheIO.data.fire, waitAR)
+      (waitAR, iCacheIO.readReq.fire, waitR),
+      (waitR, iCacheIO.data.fire, waitAR),
       // (waitR, iCacheIO.data.fire && needTakeBranch, waitAR),
       // (waitR, iCacheIO.data.fire && fromDecode.valid, waitAR),
       // (waitR, iCacheIO.data.fire && !fromDecode.valid, waitBranch),
-      // (waitBranch, fromDecode.valid && needTakeBranch, waitAR),
-      // (waitBranch, fromDecode.valid && !needTakeBranch, waitAR)
+      (waitBranch, fromDecode.valid && needTakeBranch, waitAR),
+      (waitBranch, fromDecode.valid && !needTakeBranch, waitAR)
     )
   )
 
-  iCacheIO.data.ready    := fetchFSM.is(waitR) || fetchFSM.is(waitAR)
+  iCacheIO.data.ready    := fetchFSM.is(waitR) && fetchOut.ready
   iCacheIO.readReq.valid := fetchFSM.is(waitAR) && fromDecode.valid && !needTakeBranch
   iCacheIO.addr          := predictPC
 
@@ -42,13 +42,13 @@ class InstructionFetchUnit extends Module {
   predictPC := Mux(
     needTakeBranch && fetchFSM.is(waitAR),
     fromDecode.branchPc,
-    Mux(iCacheIO.data.fire, predictPC + 4.U, predictPC)
+    Mux(fetchFSM.willChangeTo(waitR), predictPC + 4.U, predictPC)
   )
-  lastPC := Mux(needTakeBranch && fetchFSM.is(waitAR), predictPC, lastPC)
+  lastPC := Mux(fetchFSM.willChangeTo(waitR), predictPC, lastPC)
 
-  inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits, inst)
+  inst := iCacheIO.data.bits.asUInt
 
-  fetchOut.valid := iCacheIO.data.valid
+  fetchOut.valid := fetchFSM.is(waitR) && iCacheIO.data.valid
 
   // fetchout
   fetchOut.bits.debug.pc   := lastPC

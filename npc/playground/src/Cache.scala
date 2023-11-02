@@ -37,12 +37,15 @@ class Cache(
   dataWidth: Int    = 64,
   name:      String = "cache")
     extends Module {
+  assert(1 << log2Ceil(cellByte) == cellByte)
+  assert(1 << log2Ceil(wayCnt) == wayCnt)
+  assert(1 << log2Ceil(groupSize) == groupSize)
   val totalByte   = cellByte * groupSize * wayCnt
   val indexOffset = log2Ceil(cellByte)
   val tagOffset   = log2Ceil(cellByte) + log2Ceil(wayCnt)
 
   val io          = IO(new CacheIO(dataWidth, addrWidth))
-  val axiIO       = IO(new BurstLiteIO(UInt(dataWidth.W), addrWidth))
+  val axiIO       = IO(new AxiLiteIO(UInt(dataWidth.W), addrWidth))
   val enableDebug = IO(Input(Bool()))
 
   val slotsPerLine = cellByte * 8 / dataWidth
@@ -59,7 +62,7 @@ class Cache(
   val isRead = Reg(Bool())
   val addr   = Reg(UInt(addrWidth.W))
 
-  val idle :: sendRes :: sendReq :: waitRes :: writeData :: sendWReq :: sendWData :: waitWRes :: directWReq :: directWData :: directWRes :: directRReq :: directRRes :: directRBack :: others =
+  val idle :: sendRes :: sendReq :: waitRes :: writeData :: sendWReq :: waitWRes :: directWReq :: directWRes :: directRReq :: directRRes :: directRBack :: others =
     Enum(16)
 
   val counter    = RegInit(0.U(log2Ceil(slotsPerLine).W))
@@ -69,6 +72,7 @@ class Cache(
   val cacheFSM = new FSM(
     idle,
     List(
+      (idle, io.readReq.fire && hit, sendRes),
       (idle, io.readReq.fire && shoudDirectRW, directRReq),
       (idle, io.readReq.fire && !shoudDirectRW && !hit && !isDirty, sendReq),
       (idle, io.readReq.fire && !shoudDirectRW && !hit && isDirty, sendWReq),
@@ -78,14 +82,14 @@ class Cache(
       (idle, io.writeReq.fire && !shoudDirectRW && !hit && isDirty, sendWReq),
       (sendRes, io.data.fire, idle),
       (sendReq, axiIO.AR.fire, waitRes),
+      (waitRes, axiIO.R.fire && (counter =/= (slotsPerLine - 1).U), sendReq),
       (waitRes, axiIO.R.fire && (counter === (slotsPerLine - 1).U) && isRead, sendRes),
       (waitRes, axiIO.R.fire && (counter === (slotsPerLine - 1).U) && !isRead, writeData),
-      (sendWReq, axiIO.AW.fire, sendWData),
-      (sendWData, axiIO.W.fire && (counter === (slotsPerLine - 1).U), waitWRes),
-      (waitWRes, axiIO.B.fire, sendReq),
+      (sendWReq, axiIO.AW.fire && axiIO.W.fire, waitWRes),
+      (waitWRes, axiIO.B.fire && (counter =/= (slotsPerLine - 1).U), sendWReq),
+      (waitWRes, axiIO.B.fire && (counter === (slotsPerLine - 1).U), sendReq),
       (writeData, io.writeRes.fire, idle),
-      (directWReq, axiIO.AW.fire, directWData),
-      (directWData, axiIO.W.fire, directWRes),
+      (directWReq, axiIO.AW.fire && axiIO.W.fire, directWRes),
       (directWRes, axiIO.B.fire, idle),
       (directRReq, axiIO.AR.fire, directRRes),
       (directRRes, axiIO.R.fire, directRBack),
@@ -95,8 +99,7 @@ class Cache(
   counter := PriorityMux(
     Seq(
       (counter === slotsPerLine.U) -> 0.U,
-      (cacheFSM.is(waitRes) && axiIO.R.fire) -> (counter + 1.U),
-      (cacheFSM.is(sendWData) && axiIO.W.fire) -> (counter + 1.U),
+      ((cacheFSM.is(waitRes) && axiIO.R.fire) || (cacheFSM.is(waitWRes) && axiIO.B.fire)) -> (counter + 1.U),
       true.B -> counter
     )
   )
@@ -127,14 +130,13 @@ class Cache(
   )
   // when sendRes or directRBack
   val s = Seq.tabulate(cellByte)(o => ((o.U === offset) -> data(data.getWidth - 1, o * 8)))
-  io.data.bits  := Mux(cacheFSM.is(directRRes), directData, PriorityMux(s))
-  io.data.valid := cacheFSM.is(sendRes) || cacheFSM.is(directRBack) || (cacheFSM.is(idle) && io.readReq.fire && hit)
+  io.data.bits  := Mux(cacheFSM.is(sendRes), PriorityMux(s), directData)
+  io.data.valid := cacheFSM.is(sendRes) || cacheFSM.is(directRBack)
   // when sendReq or directRReq
-  axiIO.AR.bits.addr := Mux(cacheFSM.is(sendReq), Cat(Seq(tag, index, 0.U((log2Ceil(slotsPerLine) + 3).W))), addr)
+  axiIO.AR.bits.addr := Mux(cacheFSM.is(sendReq), Cat(Seq(tag, index, counter << log2Ceil(axiIO.dataWidth / 8))), addr)
   axiIO.AR.bits.id   := 0.U
   axiIO.AR.bits.prot := 0.U
   axiIO.AR.valid     := cacheFSM.is(sendReq) || cacheFSM.is(directRReq)
-  axiIO.AR.bits.len  := Mux(cacheFSM.is(sendReq), slotsPerLine.U, 0.U)
   // when waitRes
   val mask       = Reverse(Cat(Seq.tabulate(slotsPerLine)(index => Fill(axiIO.dataWidth, UIntToOH(counter)(index)))))
   val maskedData = Fill(slotsPerLine, axiIO.R.bits.data.asUInt) & mask
@@ -172,10 +174,9 @@ class Cache(
     Cat(cacheMem(index)(replaceIndex).tag, index, counter << log2Ceil(axiIO.dataWidth / 8)),
     addr
   )
-  axiIO.AW.bits.len := Mux(cacheFSM.is(sendWReq), slotsPerLine.U, 0.U)
-  axiIO.W.valid     := cacheFSM.is(sendWData) || cacheFSM.is(directWData)
+  axiIO.W.valid := cacheFSM.is(sendWReq) || cacheFSM.is(directWReq)
   axiIO.W.bits.data := Mux(
-    cacheFSM.is(sendWData),
+    cacheFSM.is(sendWReq),
     PriorityMux(
       Seq.tabulate(slotsPerLine)(i =>
         ((i.U === counter) -> cacheMem(index)(replaceIndex).data((i + 1) * dataWidth - 1, i * dataWidth))
@@ -183,14 +184,12 @@ class Cache(
     ),
     dataWriteReq.data
   )
-  axiIO.W.bits.strb := Mux(cacheFSM.is(sendWData), Fill(8, true.B), dataWriteReq.mask)
+  axiIO.W.bits.strb := Mux(cacheFSM.is(sendWReq), Fill(8, true.B), dataWriteReq.mask)
   //when  waitWRes or directWRes
   axiIO.B.ready := cacheFSM.is(waitWRes) || cacheFSM.is(directWRes)
 
-  axiIO.AW.bits.id    := DontCare
-  axiIO.AW.bits.prot  := DontCare
-  axiIO.AW.bits.burst := 2.U
-  axiIO.AR.bits.burst := 2.U
+  axiIO.AW.bits.id   := DontCare
+  axiIO.AW.bits.prot := DontCare
 
   when(enableDebug) {
     when(cacheFSM.is(idle)) {
@@ -225,6 +224,7 @@ class Cache(
       printf("data is %x\n", io.data.bits)
     }
   }
+
 }
 
 /**
@@ -241,6 +241,9 @@ class Cache2(
   dataWidth: Int    = 64,
   name:      String = "cache")
     extends Module {
+  assert(1 << log2Ceil(cellByte) == cellByte)
+  assert(1 << log2Ceil(wayCnt) == wayCnt)
+  assert(1 << log2Ceil(groupSize) == groupSize)
   val totalByte   = cellByte * groupSize * wayCnt
   val indexOffset = log2Ceil(cellByte)
   val tagOffset   = log2Ceil(cellByte) + log2Ceil(wayCnt)
