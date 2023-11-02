@@ -77,7 +77,7 @@ class InstructionDecodeUnit extends Module {
   decodeOut.bits.data.pc := decodeInReg.pc
   decodeOut.bits.control := controlDecoder.output
 
-  decodeIn.ready := !busy
+  decodeIn.ready := !shouldWait && !busy
 
   busy      := Mux(busy, !decodeOut.fire, decodeIn.fire && !decodeOut.fire)
   dataValid := Mux(dataValid, !decodeOut.fire, decodeIn.fire)
