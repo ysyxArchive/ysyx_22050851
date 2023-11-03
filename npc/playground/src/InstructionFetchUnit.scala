@@ -33,7 +33,7 @@ class InstructionFetchUnit extends Module {
   // )
 
   iCacheIO.data.ready    := !dataValid || fetchOut.fire
-  iCacheIO.readReq.valid := fromDecode.valid && !needTakeBranch
+  iCacheIO.readReq.valid := !dataValid || fetchOut.fire
   iCacheIO.addr          := predictPC
 
   dataValid := dataValid ^ iCacheIO.data.fire ^ fetchOut.fire
