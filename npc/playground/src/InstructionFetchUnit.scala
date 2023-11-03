@@ -16,6 +16,7 @@ class InstructionFetchUnit extends Module {
   val predictPC      = RegInit(regIO.pc)
   val lastPC         = RegInit(regIO.pc)
   // val needTakeBranch = Wire(Bool())
+  val needTakeBranch = false.B
   val dataValid      = RegInit(false.B)
 
   // val waitAR :: waitR :: waitBranch :: others = Enum(4)
