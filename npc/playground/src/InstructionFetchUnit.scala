@@ -4,6 +4,7 @@ import chisel3.util._
 import utils._
 import decode._
 import execute._
+import chisel3.experimental.prefix
 
 class InstructionFetchUnit extends Module {
   val regIO      = IO(Input(new RegReadIO()))
@@ -47,7 +48,9 @@ class InstructionFetchUnit extends Module {
     fromDecode.branchPc,
     Mux(fetchOut.fire, predictPC + 4.U, predictPC)
   )
-  lastPC := Mux(needTakeBranch || fetchFSM.is(waitAR), predictPC, lastPC)
+  val predictPCLast = RegNext(predictPC)
+  lastPC := Mux(predictPC === predictPCLast, lastPC, predictPCLast)
+  // lastPC := Mux(needTakeBranch || fetchFSM.is(waitAR), predictPC, lastPC)
 
   inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits, inst)
 
