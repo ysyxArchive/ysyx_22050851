@@ -80,7 +80,7 @@ class InstructionDecodeUnit extends Module {
   decodeIn.ready := !busy || decodeOut.fire
 
   // busy      := Mux(busy, !decodeOut.fire, decodeIn.fire && !decodeOut.fire)
-  busy := busy ^ decodeOut.fire
+  busy := busy ^ decodeOut.fire ^ decodeIn.fire
   // dataValid := Mux(dataValid, !decodeOut.fire, decodeIn.fire)
   // regIO
   regIO.raddr0 := rs1
