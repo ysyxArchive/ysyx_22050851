@@ -44,7 +44,7 @@ class InstructionFetchUnit extends Module {
 
   inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits, inst)
 
-  fetchOut.valid := dataValid
+  fetchOut.valid := dataValid && !needTakeBranch
 
   // fetchout
   fetchOut.bits.debug.pc   := lastPC
