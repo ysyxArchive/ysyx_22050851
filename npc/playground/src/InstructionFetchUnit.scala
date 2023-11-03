@@ -37,7 +37,7 @@ class InstructionFetchUnit extends Module {
 
   val needTakeBranch = fromDecode.valid && fromDecode.willTakeBranch && fromDecode.branchPc =/= predictPC
 
-  dataValid := (dataValid && !fetchOut.fire) || (!needTakeBranch && iCacheIO.data.fire && !(dataValid ^ fetchOut.valid))
+  dataValid := (dataValid && !fetchOut.fire && !iCacheIO.data.fire) || (!needTakeBranch && iCacheIO.data.fire && !(dataValid ^ fetchOut.valid))
 
   predictPC := Mux(needTakeBranch, fromDecode.branchPc, Mux(fetchOut.fire, predictPC + 4.U, predictPC))
   lastPC    := Mux(needTakeBranch, fromDecode.branchPc, Mux(fetchOut.fire, predictPC, lastPC))

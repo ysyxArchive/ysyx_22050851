@@ -42,7 +42,6 @@ class InstructionDecodeUnit extends Module {
   val shouldWait     = Wire(Bool())
 
   val busy = RegInit(false.B)
-  // val dataValid = RegInit(false.B)
 
   decodeInReg := Mux(decodeIn.fire, decodeIn.bits, decodeInReg)
 
