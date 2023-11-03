@@ -42,7 +42,7 @@ class InstructionDecodeUnit extends Module {
   val shouldWait     = Wire(Bool())
 
   val busy      = RegInit(false.B)
-  val dataValid = RegInit(false.B)
+  // val dataValid = RegInit(false.B)
 
   decodeInReg := Mux(decodeIn.fire, decodeIn.bits, decodeInReg)
 
@@ -73,7 +73,7 @@ class InstructionDecodeUnit extends Module {
   decodeOut.bits.data.src2 := rs2
   decodeOut.bits.data.dst  := rd
 
-  decodeOut.valid        := dataValid && !shouldWait
+  decodeOut.valid        := busy && !shouldWait
   decodeOut.bits.data.pc := decodeInReg.pc
   decodeOut.bits.control := controlDecoder.output
 
@@ -81,7 +81,7 @@ class InstructionDecodeUnit extends Module {
 
   // busy      := Mux(busy, !decodeOut.fire, decodeIn.fire && !decodeOut.fire)
   busy      := busy ^ decodeOut.fire
-  dataValid := Mux(dataValid, !decodeOut.fire, decodeIn.fire)
+  // dataValid := Mux(dataValid, !decodeOut.fire, decodeIn.fire)
   // regIO
   regIO.raddr0 := rs1
   regIO.raddr1 := rs2
