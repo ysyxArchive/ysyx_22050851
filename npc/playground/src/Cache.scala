@@ -59,7 +59,7 @@ class Cache(
   val isRead = Reg(Bool())
   val addr   = Reg(UInt(addrWidth.W))
 
-  val idle :: sendRes :: sendReq :: waitRes :: writeData :: sendWReq :: sendWData :: waitWRes :: directWReq :: directWData :: directWRes :: directRReq :: directRRes :: directRBack :: others =
+  val idle :: sendReq :: waitRes :: writeData :: sendWReq :: sendWData :: waitWRes :: directWReq :: directWData :: directWRes :: directRReq :: directRRes :: directRBack :: others =
     Enum(16)
 
   val counter    = RegInit(0.U(log2Ceil(slotsPerLine).W))
@@ -76,9 +76,8 @@ class Cache(
       (idle, io.writeReq.fire && !shoudDirectRW && hit, writeData),
       (idle, io.writeReq.fire && !shoudDirectRW && !hit && !isDirty, sendReq),
       (idle, io.writeReq.fire && !shoudDirectRW && !hit && isDirty, sendWReq),
-      (sendRes, io.data.fire, idle),
       (sendReq, axiIO.AR.fire, waitRes),
-      (waitRes, axiIO.R.fire && (counter === (slotsPerLine - 1).U) && isRead, sendRes),
+      (waitRes, axiIO.R.fire && (counter === (slotsPerLine - 1).U) && isRead, idle),
       (waitRes, axiIO.R.fire && (counter === (slotsPerLine - 1).U) && !isRead, writeData),
       (sendWReq, axiIO.AW.fire, sendWData),
       (sendWData, axiIO.W.fire && (counter === (slotsPerLine - 1).U), waitWRes),
@@ -128,7 +127,7 @@ class Cache(
   // when sendRes or directRBack
   val s = Seq.tabulate(cellByte)(o => ((o.U === offset) -> data(data.getWidth - 1, o * 8)))
   io.data.bits  := Mux(cacheFSM.is(directRRes), directData, PriorityMux(s))
-  io.data.valid := cacheFSM.is(sendRes) || cacheFSM.is(directRBack) || (cacheFSM.is(idle) && io.readReq.fire && hit)
+  io.data.valid := cacheFSM.is(directRBack) || (cacheFSM.is(idle) && io.readReq.fire && hit)
   // when sendReq or directRReq
   axiIO.AR.bits.addr := Mux(cacheFSM.is(sendReq), Cat(Seq(tag, index, 0.U((log2Ceil(slotsPerLine) + 3).W))), addr)
   axiIO.AR.bits.id   := 0.U
@@ -221,7 +220,7 @@ class Cache(
         )
       }
     }
-    when(cacheFSM.is(sendRes) && io.data.fire) {
+    when(io.data.fire) {
       printf("data is %x\n", io.data.bits)
     }
   }
