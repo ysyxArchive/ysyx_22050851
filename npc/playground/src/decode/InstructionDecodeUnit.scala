@@ -78,9 +78,7 @@ class InstructionDecodeUnit extends Module {
 
   decodeIn.ready := !dataValid || decodeOut.fire
 
-  // dataValid      := Mux(dataValid, !decodeOut.fire, decodeIn.fire && !decodeOut.fire)
   dataValid := dataValid ^ decodeOut.fire ^ decodeIn.fire
-  // dataValid := Mux(dataValid, !decodeOut.fire, decodeIn.fire)  
   // regIO
   regIO.raddr0 := rs1
   regIO.raddr1 := rs2

@@ -17,20 +17,6 @@ class InstructionFetchUnit extends Module {
   val lastPC    = RegInit(regIO.pc)
   val dataValid = RegInit(false.B)
 
-  // val waitAR :: waitR :: waitBranch :: others = Enum(4)
-  // val fetchFSM = new FSM(
-  //   waitAR,
-  //   List(
-  //     (waitAR, iCacheIO.readReq.fire && !iCacheIO.data.fire, waitR),
-  //     (waitR, iCacheIO.data.fire, waitAR)
-  //     // (waitR, iCacheIO.data.fire && needTakeBranch, waitAR),
-  //     // (waitR, iCacheIO.data.fire && fromDecode.valid, waitAR),
-  //     // (waitR, iCacheIO.data.fire && !fromDecode.valid, waitBranch),
-  //     // (waitBranch, fromDecode.valid && needTakeBranch, waitAR),
-  //     // (waitBranch, fromDecode.valid && !needTakeBranch, waitAR)
-  //   )
-  // )
-
   iCacheIO.data.ready    := !dataValid || fetchOut.fire
   iCacheIO.readReq.valid := !dataValid || fetchOut.fire
   iCacheIO.addr          := predictPC
