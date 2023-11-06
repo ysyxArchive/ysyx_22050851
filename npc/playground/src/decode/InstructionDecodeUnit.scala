@@ -41,7 +41,6 @@ class InstructionDecodeUnit extends Module {
   val willTakeBranch = Wire(Bool())
   val shouldWait     = Wire(Bool())
 
-  val busy      = RegInit(false.B)
   val dataValid = RegInit(false.B)
 
   decodeInReg := Mux(decodeIn.fire, decodeIn.bits, decodeInReg)
@@ -77,10 +76,9 @@ class InstructionDecodeUnit extends Module {
   decodeOut.bits.data.pc := decodeInReg.pc
   decodeOut.bits.control := controlDecoder.output
 
-  decodeIn.ready := !shouldWait && !busy
+  decodeIn.ready := !dataValid || decodeOut.fire
 
-  busy      := Mux(busy, !decodeOut.fire, decodeIn.fire && !decodeOut.fire)
-  dataValid := Mux(dataValid, !decodeOut.fire, decodeIn.fire)
+  dataValid := dataValid ^ decodeOut.fire ^ decodeIn.fire
   // regIO
   regIO.raddr0 := rs1
   regIO.raddr1 := rs2
