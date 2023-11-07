@@ -90,8 +90,8 @@ class SimpleDivider extends Module {
     subReg,
     Mux(
       isHalfDiv,
-      inAReg(31.U(7.W) - counter),
-      inAReg(63.U(7.W) - counter)
+      inAReg(30.U(7.W) - counter),
+      inAReg(62.U(7.W) - counter)
     )
   )
   val canSub = subNext >= inBReg
