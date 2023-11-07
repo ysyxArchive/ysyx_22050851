@@ -82,7 +82,7 @@ class Cache(
       (sendWReq, axiIO.AW.fire, sendWData),
       (sendWData, axiIO.W.fire && (counter === (slotsPerLine - 1).U), waitWRes),
       (waitWRes, axiIO.B.fire, sendReq),
-      (writeData, io.writeRes.fire, idle),
+      (writeData, true.B, idle),
       (directWReq, axiIO.AW.fire, directWData),
       (directWData, axiIO.W.fire, directWRes),
       (directWRes, axiIO.B.fire, idle),
