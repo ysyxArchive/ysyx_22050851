@@ -70,7 +70,7 @@ class InstructionExecuteUnit extends Module {
 
   exeOut.valid              := (dataValid && !shouldWaitALU) || (dataValid && alu.io.out.fire)
   exeOut.bits.control       := exeInReg.control
-  exeOut.bits.data.alu      := Mux(alu.io.out.bits.isImmidiate, alu.io.out.bits.out, aluOut)
+  exeOut.bits.data.alu      := aluOut
   exeOut.bits.data.src1     := exeInReg.data.src1
   exeOut.bits.data.src2     := exeInReg.data.src2
   exeOut.bits.data.dst      := exeInReg.data.dst
