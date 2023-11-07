@@ -38,12 +38,13 @@ class SimpleMultiplier extends Module {
   val inANeg   = io.mulSigned(1) && Mux(io.mulw, io.multiplicand(31), io.multiplicand(63))
   val inBNeg   = io.mulSigned(0) && Mux(io.mulw, io.multiplier(31), io.multiplier(63))
 
-  val idle :: working :: others = Enum(2)
+  val idle :: working :: output :: others = Enum(3)
   val mulFSM = new FSM(
     idle,
     List(
       (idle, !io.flush && mulFire, working),
-      (working, willDone || io.flush, idle)
+      (working, willDone || io.flush, output),
+      (output, true.B, idle)
     )
   )
 
@@ -68,13 +69,6 @@ class SimpleMultiplier extends Module {
       mulFSM.is(working) -> (counter + 1.U)
     )
   )
-  outValidReg := PriorityMux(
-    Seq(
-      (io.flush || mulFire) -> false.B,
-      willDone -> true.B,
-      true.B -> outValidReg
-    )
-  )
 
   outReg := Mux(
     mulFSM.is(working),
@@ -83,7 +77,7 @@ class SimpleMultiplier extends Module {
   )
 
   io.mulReady := mulFSM.is(idle) && !io.flush
-  io.outValid := outValidReg
+  io.outValid := mulFSM.is(output)
   val out = Mux(outNeg, Utils.signedReverse(outReg), outReg)
   io.resultHigh := out >> 64
   io.resultLow  := out
