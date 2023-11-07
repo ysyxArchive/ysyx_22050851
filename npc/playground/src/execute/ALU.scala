@@ -71,7 +71,6 @@ class ALUIO extends Bundle {
     val opType = AluMode()
   }))
   val out = Decoupled(new Bundle {
-    val isImmidiate = Bool()
     val out         = UInt(64.W)
     val signals     = new SignalIO()
   })
@@ -84,53 +83,49 @@ class ALU extends Module {
   val multiplier  = Module(new SimpleMultiplier())
   val divider     = Module(new SimpleDivider())
 
-  val immOut = Wire(UInt(64.W))
-
   val mulOps = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt))
   val divOps = VecInit(Seq(AluMode.div, AluMode.divu, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
   val remOps = VecInit(Seq(AluMode.rem, AluMode.remu, AluMode.remw, AluMode.remuw).map(t => t.asUInt))
   val ops    = VecInit(mulOps ++ divOps ++ remOps)
 
-  val inA        = io.in.bits.inA
-  val inB        = io.in.bits.inB
-  val opType     = io.in.bits.opType
-  val inANotZero = inA.orR;
-  val inBNotZero = inB.orR;
-  val isImm      = !ops.contains(io.in.bits.opType.asUInt)
-  val isRem      = Reg(Bool())
+  val inA          = io.in.bits.inA
+  val inB          = io.in.bits.inB
+  val opType       = io.in.bits.opType
+  val inANotZero   = inA.orR;
+  val inBNotZero   = inB.orR;
+  val isImm        = !ops.contains(io.in.bits.opType.asUInt)
+  val isRem        = Reg(Bool())
+  val shouldMulReg = Reg(Bool())
+  val shouldDivReg = Reg(Bool())
+
+  val dataValid = RegInit(false.B)
+  dataValid := dataValid ^ io.in.fire ^ io.out.fire
 
   simpleAdder.io.inA := inA
   simpleAdder.io.inB := Mux(opType === AluMode.sub, ~inB, inB)
   simpleAdder.io.inC := opType === AluMode.sub
 
-  val normal :: busyMul :: busyDiv :: others = util.Enum(3)
-  val aluFSM = new FSM(
-    normal,
-    List(
-      (normal, io.in.fire && mulOps.contains(io.in.bits.opType.asUInt), busyMul),
-      (normal, io.in.fire && VecInit(divOps ++ remOps).contains(io.in.bits.opType.asUInt), busyDiv),
-      (busyMul, multiplier.io.outValid, normal),
-      (busyDiv, divider.io.outValid, normal)
-    )
-  )
-
-  isRem := Mux(aluFSM.trigger(normal, busyDiv), remOps.contains(io.in.bits.opType.asUInt), isRem)
+  val shouldMul = mulOps.contains(io.in.bits.opType.asUInt)
+  val shouldDiv = VecInit(divOps ++ remOps).contains(io.in.bits.opType.asUInt)
+  shouldMulReg := Mux(io.in.fire, shouldMul, shouldMulReg)
+  shouldDivReg := Mux(io.in.fire, shouldDiv, shouldDivReg)
+  isRem        := Mux(io.in.fire, remOps.contains(io.in.bits.opType.asUInt), isRem)
 
   multiplier.io.multiplicand := io.in.bits.inA
   multiplier.io.multiplier   := io.in.bits.inB
   multiplier.io.flush        := false.B
-  multiplier.io.mulValid     := aluFSM.trigger(normal, busyMul)
+  multiplier.io.mulValid     := io.in.fire && shouldMul
   multiplier.io.mulSigned    := false.B
   multiplier.io.mulw         := io.in.bits.opType.asUInt === AluMode.mulw.asUInt
   divider.io.dividend        := io.in.bits.inA
   divider.io.divisor         := io.in.bits.inB
   divider.io.flush           := false.B
-  divider.io.divValid        := aluFSM.trigger(normal, busyDiv)
+  divider.io.divValid        := io.in.fire && shouldDiv
   divider.io.divSigned       := VecInit(Seq(AluMode.remw, AluMode.divw).map(t => t.asUInt)).contains(io.in.bits.opType.asUInt)
   divider.io.divw := VecInit(Seq(AluMode.remw, AluMode.remuw, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
     .contains(io.in.bits.opType.asUInt)
 
-  immOut := MuxLookup(opType.asUInt, 0.U)(
+  val out = MuxLookup(opType.asUInt, 0.U)(
     EnumSeq(
       AluMode.add -> simpleAdder.io.out,
       AluMode.and -> (inA & inB),
@@ -145,25 +140,16 @@ class ALU extends Module {
       AluMode.rl -> (inA >> inB(5, 0)),
       AluMode.rlw -> (inA(31, 0) >> inB(5, 0)),
       AluMode.xor -> (inA ^ inB)
-    )
+    ) ++ mulOps.map(op => op -> multiplier.io.resultLow)
+      ++ divOps.map(op => op -> divider.io.quotient)
+      ++ remOps.map(op => op -> divider.io.remainder)
   )
-  val out = MuxCase(
-    immOut,
-    Seq(
-      aluFSM.trigger(busyMul, normal) -> multiplier.io.resultLow,
-      (aluFSM.trigger(busyDiv, normal) && !isRem) -> divider.io.quotient,
-      (aluFSM.trigger(busyDiv, normal) && isRem) -> divider.io.remainder
-    )
-  )
-  io.out.valid := (aluFSM.is(normal) && io.in.fire && isImm) || aluFSM.trigger(busyMul, normal) || aluFSM.trigger(
-    busyDiv,
-    normal
-  )
-  io.out.bits.isImmidiate        := isImm
+
+  io.out.valid                   := (io.in.fire && isImm) || (shouldDivReg && divider.io.outValid) || (shouldMulReg && multiplier.io.outValid)
   io.out.bits.out                := out
   io.out.bits.signals.isCarry    := simpleAdder.io.outC
   io.out.bits.signals.isNegative := out(63)
   io.out.bits.signals.isZero     := !out.orR
 
-  io.in.ready := aluFSM.is(normal)
+  io.in.ready := !dataValid
 }
