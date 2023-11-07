@@ -33,7 +33,7 @@ class MemRWUnit extends Module {
   val toDecode = IO(Output(UInt(5.W)))
 
   val memInReg = Reg(new MemRWIn())
-memInReg := Mux(memIn.fire, memIn.bits, memInReg)
+  memInReg := Mux(memIn.fire, memIn.bits, memInReg)
 
   val shouldMemWork = memIn.bits.control.memmode =/= MemMode.no.asUInt
   val memIsRead     = memInReg.control.memmode === MemMode.read.asUInt || memInReg.control.memmode === MemMode.readu.asUInt
@@ -98,7 +98,7 @@ memInReg := Mux(memIn.fire, memIn.bits, memInReg)
   memOut.bits.control       := memInReg.control
   memOut.bits.enable        := memInReg.enable
 
-  toDecode := Mux(dataValid, 0.U, memInReg.data.dst)
+  toDecode := Mux(dataValid, memInReg.data.dst, 0.U)
 
   memIO.writeRes.ready := false.B
 }
