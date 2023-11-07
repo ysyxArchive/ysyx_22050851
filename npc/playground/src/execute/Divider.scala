@@ -28,7 +28,7 @@ class SimpleDivider extends Module {
   val inAReg = Reg(UInt(128.W))
   val inBReg = Reg(UInt(64.W))
   val subReg = Reg(UInt(64.W))
-  val outReg = RegInit(VecInit(Seq.fill(64)(0.U(1.W))))
+  val outReg = RegInit(0.U(64.W))
 
   val isHalfDiv = Reg(Bool())
   val outNeg    = Reg(Bool())
@@ -103,17 +103,7 @@ class SimpleDivider extends Module {
       divFSM.willChangeTo(output) -> Mux(canSub, subNext - inBReg, subReg)
     )
   )
-  for (i <- 0 to 62) {
-    outReg(i) := MuxCase(
-      outReg(i),
-      Seq(
-        divFSM.is(idle) -> 0.U,
-        (isHalfDiv && divFSM.is(working) && i.U > 31.U) -> 0.U,
-        (!isHalfDiv && divFSM.is(working) && counter === (62 - i).U) -> canSub,
-        (isHalfDiv && divFSM.is(working) && counter === Math.max(30 - i, 0).U) -> canSub
-      )
-    )
-  }
+  outReg      := Mux(divFSM.is(working), Cat(outReg, canSub), Mux(divFSM.is(idle), 0.U, outReg))
   io.divReady := divFSM.is(idle) && !io.flush
   io.outValid := divFSM.is(output)
   val out = Mux(outNeg, Utils.signedReverse(outReg.asUInt), outReg.asUInt)
