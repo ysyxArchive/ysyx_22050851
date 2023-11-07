@@ -103,7 +103,7 @@ class SimpleDivider extends Module {
       divFSM.willChangeTo(output) -> Mux(canSub, subNext - inBReg, subReg)
     )
   )
-  for (i <- 0 to 63) {
+  for (i <- 0 to 62) {
     outReg(i) := MuxCase(
       outReg(i),
       Seq(
