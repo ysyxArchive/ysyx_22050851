@@ -100,10 +100,10 @@ class SimpleDivider extends Module {
     Seq(
       (divFSM.is(idle) && io.divw) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 31),
       (divFSM.is(idle) && !io.divw) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 63),
-      divFSM.willChangeTo(output) -> Mux(canSub, subNext - inBReg, subReg)
+      divFSM.willChangeTo(output) -> subReg,
     )
   )
-  outReg      := Mux(divFSM.is(working) && !divFSM.willChange(), Cat(outReg, canSub), Mux(divFSM.is(idle), 0.U, outReg))
+  outReg      := Mux(divFSM.is(working) && !willDone, Cat(outReg, canSub), Mux(divFSM.is(idle), 0.U, outReg))
   io.divReady := divFSM.is(idle) && !io.flush
   io.outValid := divFSM.is(output)
   val out = Mux(outNeg, Utils.signedReverse(outReg.asUInt), outReg.asUInt)
