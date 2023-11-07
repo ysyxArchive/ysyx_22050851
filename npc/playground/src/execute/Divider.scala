@@ -108,7 +108,7 @@ class SimpleDivider extends Module {
     )
   }
   io.divReady := divFSM.is(idle) && !io.flush
-  io.outValid := outValidReg
+  io.outValid := divFSM.is(idle)
   val out = Mux(outNeg, Utils.signedReverse(outReg.asUInt), outReg.asUInt)
   val sub = Mux(remNeg, Utils.signedReverse(subReg), subReg)
   io.quotient  := out
