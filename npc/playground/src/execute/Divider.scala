@@ -42,7 +42,7 @@ class SimpleDivider extends Module {
   val inANeg   = io.divSigned && Mux(io.divw, io.dividend(31), io.dividend(63))
   val inBNeg   = io.divSigned && Mux(io.divw, io.divisor(31), io.divisor(63))
 
-  val idle :: working :: output :: others = Enum(2)
+  val idle :: working :: output :: others = Enum(10)
   val divFSM = new FSM(
     idle,
     List(
