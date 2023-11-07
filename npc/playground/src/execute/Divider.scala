@@ -94,7 +94,7 @@ class SimpleDivider extends Module {
       inAReg(62.U(7.W) - counter)
     )
   )
-  val canSub = sunNext >= inBReg
+  val canSub = subNext >= inBReg
   subReg := MuxCase(
     Mux(canSub, subNext - inBReg, subNext),
     Seq(
