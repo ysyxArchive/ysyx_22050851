@@ -38,7 +38,7 @@ class SimpleDivider extends Module {
   val outValidReg = RegInit(false.B)
 
   val divFire  = io.divValid && io.divReady
-  val willDone = (!isHalfDiv && !counter.orR) || (isHalfDiv && !counter(counter.getWidth - 2, 0).orR)
+  val willDone = (!isHalfDiv && counter.andR) || (isHalfDiv && counter(counter.getWidth - 2, 0).andR)
   val inANeg   = io.divSigned && Mux(io.divw, io.dividend(31), io.dividend(63))
   val inBNeg   = io.divSigned && Mux(io.divw, io.divisor(31), io.divisor(63))
 
