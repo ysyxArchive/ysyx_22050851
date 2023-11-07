@@ -78,6 +78,7 @@ class SimpleDivider extends Module {
   outValidReg := PriorityMux(
     Seq(
       (io.flush || divFire) -> false.B,
+      outValidReg -> false.B
       willDone -> true.B,
       true.B -> outValidReg
     )
