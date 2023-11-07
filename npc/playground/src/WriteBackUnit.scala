@@ -38,15 +38,6 @@ class WriteBackUnit extends Module {
   val wbInReg   = Reg(new WBIn())
   val wbInValid = Reg(new Bool())
 
-  // val idle :: busy :: other = Enum(3)
-
-  // val wbFSM = new FSM(
-  //   idle,
-  //   List(
-  //     (idle, wbIn.fire, busy),
-  //     (busy, true.B, idle)
-  //   )
-  // )
   wbInValid := wbIn.valid
   wbInReg   := Mux(wbIn.valid, wbIn.bits, wbInReg)
 

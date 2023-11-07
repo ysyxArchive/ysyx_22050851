@@ -29,33 +29,20 @@ class InstructionExecuteUnit extends Module {
   val csrIn    = IO(Input(UInt(64.W)))
   val toDecode = IO(Output(UInt(5.W)))
 
-  val exeInReg = Reg(new ExeIn())
-
   val alu = Module(new ALU)
+
+  val exeInReg = Reg(new ExeIn())
+  exeInReg := Mux(exeIn.fire, exeIn.bits, exeInReg)
+
+  val dataValid = RegInit(false.B)
+  dataValid := dataValid ^ exeIn.fire ^ exeOut.fire
 
   val mulOps = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt))
   val divOps = VecInit(Seq(AluMode.div, AluMode.divu, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
   val remOps = VecInit(Seq(AluMode.rem, AluMode.remu, AluMode.remw, AluMode.remuw).map(t => t.asUInt))
   val ops    = VecInit(mulOps ++ divOps ++ remOps)
 
-  val shouldWaitALU = ops.contains(exeIn.bits.control.alumode.asUInt)
-
-  val waitDecode :: sendALU :: waitALU :: waitSend :: other = Enum(10)
-
-  val exeFSM = new FSM(
-    waitDecode,
-    List(
-      (waitDecode, exeIn.fire && shouldWaitALU, sendALU),
-      (waitDecode, exeIn.fire && !shouldWaitALU, waitSend),
-      (sendALU, alu.io.in.fire, waitALU),
-      (waitALU, alu.io.out.fire, waitSend),
-      (waitSend, exeOut.fire && exeIn.fire && shouldWaitALU, sendALU),
-      (waitSend, exeOut.fire && exeIn.fire && !shouldWaitALU, waitSend),
-      (waitSend, exeOut.fire, waitDecode)
-    )
-  )
-
-  exeInReg := Mux(exeIn.fire, exeIn.bits, exeInReg)
+  val shouldWaitALU = ops.contains(exeInReg.control.alumode.asUInt)
 
   // alu
   alu.io.in.bits.inA := MuxLookup(exeInReg.control.alumux1, 0.U)(
@@ -73,15 +60,15 @@ class InstructionExecuteUnit extends Module {
   )
   val res = AluMode.safe(exeInReg.control.alumode)
   alu.io.in.bits.opType := res._1
-  alu.io.out.ready      := alu.io.out.bits.isImmidiate || exeFSM.is(waitALU)
-  alu.io.in.valid       := exeFSM.is(sendALU)
+  alu.io.out.ready      := true.B
+  alu.io.in.valid       := dataValid
 
-  exeIn.ready := exeFSM.is(waitDecode) || exeOut.fire
+  exeIn.ready := !dataValid || exeOut.fire
 
   val aluOut = Reg(UInt(64.W))
   aluOut := Mux(alu.io.out.fire, alu.io.out.bits.out, aluOut)
 
-  exeOut.valid              := exeFSM.is(waitSend)
+  exeOut.valid              := (dataValid && shouldWaitALU) || (dataValid && alu.io.out.fire)
   exeOut.bits.control       := exeInReg.control
   exeOut.bits.data.alu      := Mux(alu.io.out.bits.isImmidiate, alu.io.out.bits.out, aluOut)
   exeOut.bits.data.src1     := exeInReg.data.src1
@@ -97,5 +84,5 @@ class InstructionExecuteUnit extends Module {
 
   exeOut.bits.debug := exeInReg.debug
 
-  toDecode := Mux(exeFSM.is(waitDecode), 0.U, exeInReg.data.dst)
+  toDecode := Mux(dataValid, exeInReg.data.dst, 0.U)
 }
