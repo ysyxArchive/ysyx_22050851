@@ -151,5 +151,5 @@ class ALU extends Module {
   io.out.bits.signals.isNegative := out(63)
   io.out.bits.signals.isZero     := !out.orR
 
-  io.in.ready := !dataValid || io.out.fire
+  io.in.ready := !dataValid
 }
