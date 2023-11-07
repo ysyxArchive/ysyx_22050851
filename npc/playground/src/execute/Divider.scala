@@ -96,7 +96,7 @@ class SimpleDivider extends Module {
   )
   val canSub = sunNext >= inBReg
   subReg := MuxCase(
-    Mux(canSub, subNext - inBReg, sunNext),
+    Mux(canSub, subNext - inBReg, subNext),
     Seq(
       (divFSM.is(idle) && io.divw) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 31),
       (divFSM.is(idle) && !io.divw) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 63),
