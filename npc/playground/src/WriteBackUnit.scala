@@ -87,8 +87,8 @@ class WriteBackUnit extends Module {
 
   // blackBoxHalt
   val blackBox = Module(new BlackBoxHalt);
-  blackBox.io.halt     := !wbIn.valid && wbInReg.control.goodtrap
-  blackBox.io.bad_halt := !wbIn.valid && wbInReg.control.badtrap
+  blackBox.io.halt     := wbIn.valid && wbInReg.control.goodtrap
+  blackBox.io.bad_halt := wbIn.valid && wbInReg.control.badtrap
 
   wbIn.ready := true.B
 
