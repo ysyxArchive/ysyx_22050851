@@ -7,6 +7,8 @@ import decode._
 import os.read
 import execute._
 import utils._
+import _empty_.PrivMode
+import javax.smartcardio.Card
 
 class MultiplierIO extends Bundle {
   val mulValid     = Input(Bool()) //为高表示输入的数据有效，如果没有新的乘法输入，在乘法被接受的下一个周期要置低
@@ -30,8 +32,7 @@ class SimpleMultiplier extends Module {
   val isHalfMul = Reg(Bool())
   val outNeg    = Reg(Bool())
 
-  val counter     = RegInit(0.U(6.W))
-  val outValidReg = RegInit(false.B)
+  val counter = RegInit(0.U(6.W))
 
   val mulFire  = io.mulValid && io.mulReady
   val willDone = (!isHalfMul && counter.andR) || (isHalfMul && counter(counter.getWidth - 2, 0).andR)
@@ -43,7 +44,8 @@ class SimpleMultiplier extends Module {
     idle,
     List(
       (idle, !io.flush && mulFire, working),
-      (working, willDone || io.flush, output),
+      (working, willDone, output),
+      (working, io.flush, idle),
       (output, true.B, idle)
     )
   )
@@ -81,4 +83,77 @@ class SimpleMultiplier extends Module {
   val out = Mux(outNeg, Utils.signedReverse(outReg), outReg)
   io.resultHigh := out >> 64
   io.resultLow  := out
+}
+
+class BoothModule extends Module {
+  val io = IO(new Bundle {
+    val in          = Input(UInt(3.W))
+    val isNeg       = Output(Bool())
+    val isWork      = Output(Bool())
+    val shouldShift = Output(Bool())
+  })
+  io.isNeg       := io.in(2)
+  io.isWork      := io.in(0) ^ io.in(1)
+  io.shouldShift := (io.in(0) && io.in(1)) ^ io.in(2)
+}
+
+class BoothMultiplier extends Module {
+  val io = IO(new MultiplierIO())
+
+  val booth = new BoothModule()
+
+  val inAReg    = Reg(UInt(64.W))
+  val inBReg    = Reg(UInt(64.W))
+  val outReg    = Reg(UInt(128.W))
+  val isHalfMul = Reg(Bool())
+
+  val counter = RegInit(0.U(5.W))
+
+  val mulFire  = io.mulValid && io.mulReady
+  val willDone = (!isHalfMul && counter.andR) || (isHalfMul && counter(counter.getWidth - 2, 0).andR)
+
+  val idle :: working :: output :: others = Enum(3)
+  val mulFSM = new FSM(
+    idle,
+    List(
+      (idle, !io.flush && mulFire, working),
+      (working, willDone, output),
+      (working, io.flush, idle),
+      (output, true.B, idle)
+    )
+  )
+
+  inAReg    := Mux(mulFSM.is(idle), io.multiplicand, inAReg)
+  inBReg    := Mux(mulFSM.is(idle), Mux(io.multiplier), inBReg)
+  isHalfMul := Mux(mulFSM.is(idle), io.mulw, isHalfMul)
+
+  val inBNeg = Utils.signedReverse(inBReg)
+
+  counter := MuxCase(
+    counter,
+    Seq(
+      willDone -> 0.U,
+      io.flush -> 0.U,
+      mulFSM.is(working) -> (counter + 1.U)
+    )
+  )
+
+  booth.io.in := Cat(inBReg, 0.U(1.W))(counter / 2 + 2, counter / 2)
+
+  outReg := Mux(
+    mulFSM.is(working),
+    Cat(Mux(counter === 0.U, 0.U, outReg), 0.U(2.W))
+      + (MuxCase(
+        0.U,
+        Seq(
+          (booth.io.isWork && booth.io.isNeg) -> inBNeg,
+          (booth.io.isWork && !booth.io.isNeg) -> inBReg
+        )
+      ) << Mux(booth.io.shouldShift, 1.U, 0.U))
+  )
+
+  io.mulReady   := mulFSM.is(idle) && !io.flush
+  io.outValid   := mulFSM.is(output)
+  io.resultHigh := outReg >> 64
+  io.resultLow  := outReg
 }
