@@ -98,7 +98,7 @@ class BoothModule extends Module {
 class BoothMultiplier extends Module {
   val io = IO(new MultiplierIO())
 
-  val booth = new BoothModule()
+  val booth = Module(new BoothModule())
 
   val inAReg    = Reg(UInt(64.W))
   val inBReg    = Reg(UInt(65.W))
