@@ -91,7 +91,7 @@ class BoothModule extends Module {
     val shouldShift = Output(Bool())
   })
   io.isNeg       := io.in(2)
-  io.isWork      := io.in(0) ^ io.in(1)
+  io.isWork      := !io.in.andR && !(~io.in).andR
   io.shouldShift := (io.in(0) && io.in(1)) ^ io.in(2)
 }
 
