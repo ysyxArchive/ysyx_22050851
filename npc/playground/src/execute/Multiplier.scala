@@ -138,17 +138,13 @@ class BoothMultiplier extends Module {
 
   booth.io.in := inBReg
 
-  outReg := Mux(
-    mulFSM.is(working),
-    Cat(Mux(counter === 0.U, 0.U, outReg), 0.U(2.W))
-      + (MuxCase(
-        0.U,
-        Seq(
-          (booth.io.isWork && booth.io.isNeg) -> inBNeg,
-          (booth.io.isWork && !booth.io.isNeg) -> inBReg
-        )
-      ) << Mux(booth.io.shouldShift, 1.U, 0.U)),
-    outReg
+  outReg := MuxCase(
+    outReg,
+    Seq(
+      mulFSM.is(idle) -> 0.U,
+      !booth.io.isWork -> Cat(outReg, 0.U(2.W)),
+      mulFSM.is(working) -> (Cat(outReg, 0.U(2.W)) + Mux(booth.io.isNeg, inBNeg, inBReg)) << booth.io.shouldShift
+    )
   )
 
   io.mulReady   := mulFSM.is(idle) && !io.flush
