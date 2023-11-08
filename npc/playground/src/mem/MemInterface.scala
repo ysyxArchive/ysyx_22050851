@@ -5,6 +5,10 @@ object MemAxiLite {
   def apply() = AxiLiteIO(64, 64)
 }
 
+object MemBurstAxiLite {
+  def apply() = BurstLiteIO(64, 64)
+}
+
 object MemReadOnlyAxiLiteIO {
   def slave() = {
     val io = IO(Flipped(MemAxiLite()))
@@ -78,4 +82,67 @@ class MemInterface extends Module {
   axiS.R.valid     := memInterfaceFSM.is(writeBack) && isReading
   axiS.R.bits.id   := readResId
   axiS.R.bits.data := dataRet
+}
+
+class MemBurstInterface extends Module {
+  val axiS = IO(Flipped(MemBurstAxiLite()))
+  val mem  = Module(new BlackBoxMem)
+
+  val waitReq :: writeDataBack :: waitDataWrite :: responseWrite :: others = Enum(5)
+
+  val counter = RegInit(0.U(9.W))
+
+  val writeReq = Reg(MemBurstAxiLite().AW.bits)
+  val readReq  = Reg(MemBurstAxiLite().AR.bits)
+
+  val memInterfaceFSM = new FSM(
+    waitReq,
+    List(
+      (waitReq, axiS.AR.fire, writeDataBack),
+      (writeDataBack, axiS.R.fire && counter === readReq.len, waitReq),
+      (waitReq, axiS.AW.fire, waitDataWrite),
+      (waitDataWrite, axiS.W.fire && counter === Mux(writeReq.len === 0.U, 0.U, (writeReq.len - 1.U)), responseWrite),
+      (responseWrite, axiS.B.fire, waitReq)
+    )
+  )
+
+  val dataRet = RegInit(0.U(64.W))
+
+  writeReq := Mux(axiS.AW.fire, axiS.AW.bits, writeReq)
+  readReq  := Mux(axiS.AR.fire, axiS.AR.bits, readReq)
+
+  counter := MuxCase(
+    counter,
+    Seq(
+      (memInterfaceFSM.is(waitReq) && !memInterfaceFSM.willChange()) -> 0.U,
+      (memInterfaceFSM.is(writeDataBack)) -> (counter + 1.U),
+      (memInterfaceFSM.is(waitDataWrite) && axiS.W.fire) -> (counter + 1.U)
+    )
+  )
+
+  mem.io.clock  := clock
+  mem.io.isRead := memInterfaceFSM.is(writeDataBack)
+  mem.io.mask   := axiS.W.bits.strb
+  mem.io.wdata  := axiS.W.bits.data
+  mem.io.addr := MuxCase(
+    0.U,
+    Seq(
+      memInterfaceFSM.is(writeDataBack) -> readReq.addr,
+      axiS.W.fire -> writeReq.addr
+    )
+  ) + (counter << 3)
+  mem.io.enable :=
+    memInterfaceFSM.is(writeDataBack) ||
+      (memInterfaceFSM.is(waitDataWrite) && axiS.W.fire)
+  dataRet := Mux(mem.io.enable, mem.io.rdata, dataRet)
+
+  axiS.W.ready     := memInterfaceFSM.is(waitDataWrite)
+  axiS.AW.ready    := memInterfaceFSM.is(waitReq) && !axiS.AR.valid
+  axiS.AR.ready    := memInterfaceFSM.is(waitReq)
+  axiS.B.valid     := memInterfaceFSM.is(responseWrite)
+  axiS.B.bits.id   := writeReq.id
+  axiS.R.valid     := memInterfaceFSM.is(writeDataBack) && RegNext(memInterfaceFSM.is(writeDataBack))
+  axiS.R.bits.id   := readReq.id
+  axiS.R.bits.data := dataRet
+  axiS.R.bits.last := counter === readReq.len
 }

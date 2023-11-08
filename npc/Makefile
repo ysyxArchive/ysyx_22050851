@@ -5,23 +5,22 @@ BUILD_DIR = ./build
 OBJ_DIR = $(BUILD_DIR)/obj_dir
 
 override VERILATOR =  verilator 
-VERILATOR_CFLAGS += -MMD --build -cc \
+VERILATOR_CFLAGS += -MMD --build -cc -j 0 \
 				-O3 --x-assign fast --x-initial fast --noassert --trace 
-VERILATOR_CFLAGS += -Wno-WIDTH  # 记得删掉
+VERILATOR_CFLAGS += -Wno-WIDTH # 记得删掉
 BIN = $(BUILD_DIR)/$(TOPNAME)
-
 GEN_SCALA = $(abspath ./playground/src/decode/InstContorlDecoder.scala)
-MILL = ./mill
 VSRCS = $(shell find $(abspath ./build) -name "*.v" -or -name "*.sv")
 CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
 INCLUDES = $(shell find $(abspath ./include) -name "*.h")
 SCALAS = $(shell find $(abspath ./playground/src) -name "*.scala") $(GEN_SCALA)
+SCALATESTS = $(shell find $(abspath ./playground/src) -name "*.scala")
 INC_PATH = $(abspath ./include)
 INCFLAGS = $(addprefix -I, $(INC_PATH))
 CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" 
 LDFLAGS += -lSDL2 -lSDL2_image -ldl
 override ARGS += --diff=${NEMU_HOME}/build/riscv64-nemu-interpreter-so
-export PATH := $(PATH):$(abspath ./utils)
+export PATH := $(PATH):$(abspath ./tools)
 
 default: $(BIN)
 
@@ -43,22 +42,22 @@ $(GEN_SCALA): playground/scripts/codemap.csv playground/scripts/parsedecode.py
 verilog: $(SCALAS)
 	$(call git_commit, "generate verilog")
 	mkdir -p $(BUILD_DIR)
-	$(MILL) -i __.test.runMain Elaborate -td $(BUILD_DIR) --split-verilog --warnings-as-errors
+	mill -i __.test.runMain Elaborate -td $(BUILD_DIR) --split-verilog --warnings-as-errors
 
 help:
-	$(MILL) -i __.test.runMain Elaborate --help
+	mill -i __.test.runMain Elaborate --help
 
 compile:
-	$(MILL) -i __.compile
+	mill -i __.compile
 
 bsp:
-	$(MILL) -i mill.bsp.BSP/install
+	mill -i mill.bsp.BSP/install
 
 reformat:
-	$(MILL) -i __.reformat
+	mill -i __.reformat
 
 checkformat:
-	$(MILL) -i __.checkFormat
+	mill -i __.checkFormat
 
 clean:
 	-rm -rf $(BUILD_DIR)
@@ -72,8 +71,8 @@ sim: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 	$(BIN) $(IMG) $(ARGS) 
 
-test: $(BIN)
-	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
+test: $(SCALATESTS)
+	mill -i __.test
 
 run:
 	make sim

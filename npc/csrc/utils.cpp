@@ -62,7 +62,10 @@ int parse_args(int argc, char* argv[]) {
 }
 
 void load_files() {
-  Assert(img_file, "img file not found!");
+  if (!img_file) {
+    Log("not detected img file, use default file %s", "tools/default-raw.bin");
+    img_file = "tools/default-raw.bin";
+  }
   Log("detected img file: %s", img_file);
   init_memory(img_file);
 

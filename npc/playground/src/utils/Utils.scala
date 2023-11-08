@@ -50,6 +50,8 @@ object Utils {
     }
     ret
   }
+
+  def signedReverse(num: UInt): UInt = ~num + 1.U
 }
 
 object EnumSeq {
@@ -59,7 +61,8 @@ object EnumSeq {
 }
 
 class FSM(val initState: UInt, val elems: List[(UInt, Bool, UInt)]) {
-  val status = RegInit(initState)
+  val status     = RegInit(initState)
+  val lastStatus = RegNext(status)
   status := nextState(status)
 
   def nextState(current: UInt): UInt = {
@@ -81,7 +84,16 @@ class FSM(val initState: UInt, val elems: List[(UInt, Bool, UInt)]) {
     return s === status
   }
 
+  def changedFrom(s: UInt): Bool = {
+    return s === lastStatus
+  }
+
   def willChange(): Bool = {
     elems.map({ case tri => (tri._1 === status && tri._2) }).reduce(_ || _)
   }
+}
+
+class DebugInfo extends Bundle {
+  val pc   = Output(UInt(64.W))
+  val inst = Output(UInt(32.W))
 }

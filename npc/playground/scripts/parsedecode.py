@@ -60,7 +60,7 @@ for colIndex in range(3, len(df.columns)):
 df_new["concat"] = df_new.apply(lambda row: " ".join(row[3:]), axis=1)
 
 
-def genEnum(colName: str, values: list[str]):
+def genEnum(colName: str, values: 'list[str]'):
     if len(values) == 0:
         return ""
     # TODO: yesno -> 10
@@ -71,7 +71,7 @@ def genEnum(colName: str, values: list[str]):
 
 
 def genIOClass():
-    ret = "class DecodeControlOut extends Bundle {\n"
+    ret = "class ExeControlIn extends Bundle {\n"
     for colName, _ in codemap:
         ret += f"\tval {colName.lower()} = Output({ 'Bool()' if len(df_new[colName].iloc[0]) == 1 else f'UInt({len(df_new[colName].iloc[0])}.W)'})\n"
     return ret + "}\n"
@@ -79,9 +79,9 @@ def genIOClass():
 
 def genIOObject():
     ret = """
-object DecodeControlOut{
+object ExeControlIn{
   def default() = {
-    val defaultout = Wire(new DecodeControlOut);
+    val defaultout = Wire(new ExeControlIn);
 """
     for colName, _ in codemap:
         defaultValue = defaultDict[colName]
@@ -114,7 +114,7 @@ with open(
         f"\t),\n    BitPat(\"b{df_new.loc[df_new['name'] == 'inv', 'concat'].iloc[0]}\") // inv\n  )\n"
     )
     f.write("  val input  = IO(Input(UInt(32.W)))\n")
-    f.write("  val output  = IO(new DecodeControlOut)\n")
+    f.write("  val output  = IO(new ExeControlIn)\n")
     f.write("  val decodeOut = decoder(input, table)\n")
     offset = 0
     for colName, _ in reversed(codemap):

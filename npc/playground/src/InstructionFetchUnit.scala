@@ -1,34 +1,48 @@
-import chisel3.DontCare.:=
 import chisel3._
-import chisel3.experimental.{BaseModule, ChiselEnum}
-import chisel3.util.Enum
-import dataclass.data
+import chisel3.experimental.BundleLiterals._
+import chisel3.util._
+import utils._
+import decode._
+import execute._
+import chisel3.experimental.prefix
 
 class InstructionFetchUnit extends Module {
-  val instOut = MemReadOnlyAxiLiteIO.slave()
+  val regIO      = IO(Input(new RegReadIO()))
+  val fetchOut   = IO(Decoupled(new DecodeIn()))
+  val iCacheIO   = IO(Flipped(new CacheIO(64, 64)))
+  val fromDecode = IO(Flipped(new DecodeBack()))
 
-  val mem = Module(new BlackBoxMem)
+  val inst      = RegInit(0x13.U(32.W))
+  val predictPC = RegInit(regIO.pc)
+  val lastPC    = RegInit(regIO.pc)
+  val dataValid = RegInit(false.B)
 
-  val instValid = RegInit(false.B)
-  val inst      = RegInit(0x13.U(32.W)) // addi
+  iCacheIO.data.ready    := !dataValid || fetchOut.fire
+  iCacheIO.readReq.valid := !dataValid || fetchOut.fire
+  iCacheIO.addr          := predictPC
 
-  val outData = Wire(MemAxiLite().R.bits)
-  outData.id   := 0.U
-  outData.data := inst
+  val needTakeBranch = fromDecode.valid && fromDecode.willTakeBranch && fromDecode.branchPc =/= lastPC
 
-  mem.io.clock  := clock
-  mem.io.isRead := true.B
-  mem.io.mask   := DontCare
-  mem.io.addr   := instOut.AR.bits.addr
-  mem.io.enable := instOut.AR.fire
+  dataValid := (dataValid && !fetchOut.fire && !needTakeBranch) || (!needTakeBranch && iCacheIO.data.fire && !(dataValid ^ fetchOut.valid))
 
-  inst := Mux(instOut.AR.fire, mem.io.rdata, inst)
+  predictPC := Mux(needTakeBranch, fromDecode.branchPc, Mux(iCacheIO.data.fire, predictPC + 4.U, predictPC))
+  lastPC    := Mux(needTakeBranch, fromDecode.branchPc, Mux(iCacheIO.data.fire, predictPC, lastPC))
 
-  instValid := Mux(instValid, !instOut.R.fire, instOut.AR.fire)
+  inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits, inst)
 
-  instOut.AR.ready := !instValid
-  instOut.R.valid  := instValid
+  fetchOut.valid := dataValid && !needTakeBranch
 
-  instOut.R.bits := outData
+  // fetchout
+  fetchOut.bits.debug.pc   := lastPC
+  fetchOut.bits.debug.inst := inst
+  fetchOut.bits.pc         := lastPC
+  fetchOut.bits.inst       := inst
 
+  iCacheIO.debug.pc   := predictPC
+  iCacheIO.debug.inst := inst
+
+  iCacheIO.writeReq.valid     := false.B
+  iCacheIO.writeReq.bits.data := DontCare
+  iCacheIO.writeReq.bits.mask := DontCare
+  iCacheIO.writeRes.ready     := false.B
 }
