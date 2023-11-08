@@ -125,7 +125,7 @@ class BoothMultiplier extends Module {
   inBReg    := Mux(mulFSM.is(idle), Cat(io.multiplier, 0.U(1.W)), Mux(mulFSM.is(working), inBReg >> 2, inBReg))
   isHalfMul := Mux(mulFSM.is(idle), io.mulw, isHalfMul)
 
-  val inBNeg = Utils.signedReverse(inBReg)
+  val inANeg = Utils.signedReverse(inAReg)
 
   counter := MuxCase(
     counter,
@@ -143,7 +143,7 @@ class BoothMultiplier extends Module {
     Seq(
       mulFSM.is(idle) -> 0.U,
       !booth.io.isWork -> Cat(outReg, 0.U(2.W)),
-      mulFSM.is(working) -> (Cat(outReg, 0.U(2.W)) + (Mux(booth.io.isNeg, inBNeg, inBReg) << booth.io.shouldShift))
+      mulFSM.is(working) -> (Cat(outReg, 0.U(2.W)) + (Mux(booth.io.isNeg, inANeg, inAReg) << booth.io.shouldShift))
     )
   )
 
