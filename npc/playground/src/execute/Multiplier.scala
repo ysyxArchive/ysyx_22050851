@@ -136,7 +136,7 @@ class BoothMultiplier extends Module {
     )
   )
 
-  booth.io.in := Cat(inBReg, 0.U(1.W))(counter / 2 + 2, counter / 2)
+  booth.io.in := Cat(inBReg, 0.U(1.W))(counter / 2.U + 2.U, counter / 2.U)
 
   outReg := Mux(
     mulFSM.is(working),
