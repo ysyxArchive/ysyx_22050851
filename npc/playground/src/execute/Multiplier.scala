@@ -101,7 +101,7 @@ class BoothMultiplier extends Module {
   val booth = new BoothModule()
 
   val inAReg    = Reg(UInt(64.W))
-  val inBReg    = Reg(UInt(64.W))
+  val inBReg    = Reg(UInt(65.W))
   val outReg    = Reg(UInt(128.W))
   val isHalfMul = Reg(Bool())
 
@@ -122,7 +122,7 @@ class BoothMultiplier extends Module {
   )
 
   inAReg    := Mux(mulFSM.is(idle), io.multiplicand, inAReg)
-  inBReg    := Mux(mulFSM.is(idle), io.multiplier, inBReg)
+  inBReg    := Mux(mulFSM.is(idle), Cat(io.multiplier, 0.U(1.W)), Mux(mulFSM.is(working), inBReg >> 2, inBReg))
   isHalfMul := Mux(mulFSM.is(idle), io.mulw, isHalfMul)
 
   val inBNeg = Utils.signedReverse(inBReg)
@@ -136,7 +136,7 @@ class BoothMultiplier extends Module {
     )
   )
 
-  booth.io.in := Cat(inBReg, 0.U(1.W))(counter / 2.U + 2.U, counter / 2.U)
+  booth.io.in := inBReg
 
   outReg := Mux(
     mulFSM.is(working),
