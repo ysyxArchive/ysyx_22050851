@@ -30,8 +30,7 @@ class SimpleMultiplier extends Module {
   val isHalfMul = Reg(Bool())
   val outNeg    = Reg(Bool())
 
-  val counter     = RegInit(0.U(6.W))
-  val outValidReg = RegInit(false.B)
+  val counter = RegInit(0.U(6.W))
 
   val mulFire  = io.mulValid && io.mulReady
   val willDone = (!isHalfMul && counter.andR) || (isHalfMul && counter(counter.getWidth - 2, 0).andR)
@@ -43,7 +42,8 @@ class SimpleMultiplier extends Module {
     idle,
     List(
       (idle, !io.flush && mulFire, working),
-      (working, willDone || io.flush, output),
+      (working, willDone, output),
+      (working, io.flush, idle),
       (output, true.B, idle)
     )
   )
@@ -81,4 +81,75 @@ class SimpleMultiplier extends Module {
   val out = Mux(outNeg, Utils.signedReverse(outReg), outReg)
   io.resultHigh := out >> 64
   io.resultLow  := out
+}
+
+class BoothModule extends Module {
+  val io = IO(new Bundle {
+    val in          = Input(UInt(3.W))
+    val isNeg       = Output(Bool())
+    val isWork      = Output(Bool())
+    val shouldShift = Output(Bool())
+  })
+  io.isNeg       := io.in(2)
+  io.isWork      := !io.in.andR && !(~io.in).andR
+  io.shouldShift := (io.in(0) ^ io.in(2)) && (io.in(0) ^ io.in(1))
+}
+
+class BoothMultiplier extends Module {
+  val io = IO(new MultiplierIO())
+
+  val booth = Module(new BoothModule())
+
+  val outReg    = Reg(UInt(128.W))
+  val isHalfMul = Reg(Bool())
+
+  val counter = RegInit(0.U(5.W))
+
+  val mulFire  = io.mulValid && io.mulReady
+  val willDone = (!isHalfMul && counter.andR) || (isHalfMul && counter(counter.getWidth - 2, 0).andR)
+
+  val idle :: working :: output :: others = Enum(3)
+  val mulFSM = new FSM(
+    idle,
+    List(
+      (idle, !io.flush && mulFire, working),
+      (working, willDone, output),
+      (working, io.flush, idle),
+      (output, true.B, idle)
+    )
+  )
+
+  val inA = io.multiplicand
+  val inB = Cat(io.multiplier, 0.U(1.W))
+  isHalfMul := Mux(mulFSM.is(idle), io.mulw, isHalfMul)
+
+  val inANeg = Utils.signedReverse(inA)
+
+  counter := MuxCase(
+    counter,
+    Seq(
+      (mulFSM.is(working) || mulFSM.willChangeTo(working)) -> (counter + 1.U),
+      willDone -> 0.U,
+      io.flush -> 0.U
+    )
+  )
+
+  booth.io.in := inB
+
+  outReg := MuxCase(
+    outReg,
+    Seq(
+      (mulFSM.is(idle) && !mulFSM.willChange()) -> 0.U,
+      (mulFSM.is(working) || mulFSM.willChangeTo(working)) -> (outReg + (Mux(
+        booth.io.isNeg,
+        inANeg,
+        inA
+      ) << (booth.io.shouldShift + counter * 2.U)))
+    )
+  )
+
+  io.mulReady   := mulFSM.is(idle) && !io.flush
+  io.outValid   := mulFSM.is(output)
+  io.resultHigh := outReg >> 64
+  io.resultLow  := outReg
 }
