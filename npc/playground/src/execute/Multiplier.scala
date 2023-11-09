@@ -142,8 +142,11 @@ class BoothMultiplier extends Module {
     outReg,
     Seq(
       (mulFSM.is(idle) && !mulFSM.willChange()) -> 0.U,
-      !booth.io.isWork -> outReg,
-      mulFSM.is(working) -> (outReg + (Mux(booth.io.isNeg, inANeg, inAReg) << (booth.io.shouldShift + counter * 2.U)))
+      (mulFSM.is(working) || mulFSM.willChangeTo(working)) -> (outReg + (Mux(
+        booth.io.isNeg,
+        inANeg,
+        inAReg
+      ) << (booth.io.shouldShift + counter * 2.U)))
     )
   )
 
