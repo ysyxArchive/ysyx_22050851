@@ -149,6 +149,6 @@ class BoothMultiplier extends Module {
 
   io.mulReady   := mulFSM.is(idle) && !io.flush
   io.outValid   := mulFSM.is(output)
-  io.resultHigh := outReg >> 64
-  io.resultLow  := outReg
+  io.resultHigh := Reverse(outReg) >> 64
+  io.resultLow  :=  Reverse(outReg)
 }
