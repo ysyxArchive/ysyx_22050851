@@ -71,8 +71,8 @@ class ALUIO extends Bundle {
     val opType = AluMode()
   }))
   val out = Decoupled(new Bundle {
-    val out         = UInt(64.W)
-    val signals     = new SignalIO()
+    val out     = UInt(64.W)
+    val signals = new SignalIO()
   })
 }
 
@@ -80,8 +80,9 @@ class ALU extends Module {
   val io = IO(new ALUIO())
 
   val simpleAdder = Module(new SimpleAdder())
-  val multiplier  = Module(new SimpleMultiplier())
-  val divider     = Module(new SimpleDivider())
+  // val multiplier  = Module(new SimpleMultiplier())
+  val multiplier = Module(new BoothMultiplier())
+  val divider    = Module(new SimpleDivider())
 
   val mulOps = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt))
   val divOps = VecInit(Seq(AluMode.div, AluMode.divu, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
