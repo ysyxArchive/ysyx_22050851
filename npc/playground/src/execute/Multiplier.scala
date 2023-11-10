@@ -219,10 +219,10 @@ class BHMultiplier extends Module {
 
   val booths = Seq.fill(32)(Module(new BoothModule()))
 
-  val boothWork  = Wire(Vec(32, Bool()))
-  val boothNeg   = Wire(Vec(32, Bool()))
-  val boothShift = Wire(Vec(32, Bool()))
-  val addBuffer  = Wire(Vec(32, UInt(128.W)))
+  val boothWork  = Reg(Vec(32, Bool()))
+  val boothNeg   = Reg(Vec(32, Bool()))
+  val boothShift = Reg(Vec(32, Bool()))
+  val addBuffer  = Reg(Vec(32, UInt(128.W)))
 
   for (i <- 0 until 32) {
     booths(i).io.in := inB(i * 2 + 2, i * 2)
