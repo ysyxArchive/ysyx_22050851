@@ -92,7 +92,7 @@ class BoothModule extends Module {
   })
   io.isNeg       := io.in(2)
   io.isWork      := !(io.in.andR || (~io.in).andR)
-  io.shouldShift := (io.in(0) ^ io.in(2)) && (io.in(0) ^ io.in(1))
+  io.shouldShift := (io.in(0) ^ io.in(2)) && (io.in(1) ^ io.in(2))
 }
 
 class BoothMultiplier extends Module {
