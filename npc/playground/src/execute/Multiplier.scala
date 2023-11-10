@@ -224,7 +224,7 @@ class BHMultiplier extends Module {
   val boothShift = Wire(Vec(32, Bool()))
   val addBuffer  = Wire(Vec(32, UInt(128.W)))
 
-  for (i <- 0 until 31) {
+  for (i <- 0 until 32) {
     booths(i).io.in := inB(i * 2 + 2, i * 2)
     val out = booths(i).io
     boothWork(i)  := Mux(mulFSM.is(idle), out.isWork, boothWork(i))
