@@ -260,11 +260,11 @@ class BHMultiplier extends Module {
   val cBuffer3      = Reg(Vec(128, UInt(5.W)))
   for (i <- 0 until 128) {
     if (i == 0) {
-      wallaceLayer3(i).io.bits := Mux(io.mulw, VecInit(addBuffer.map(v => v(i))).asUInt(0, 15), sBuffer2(i))
+      wallaceLayer3(i).io.bits := Mux(io.mulw, VecInit(addBuffer.map(v => v(i))).asUInt, sBuffer2(i))
     } else {
       wallaceLayer3(i).io.bits := Mux(
         io.mulw,
-        VecInit(addBuffer.map(v => v(i))).asUInt(0, 15),
+        VecInit(addBuffer.map(v => v(i))).asUInt,
         Cat(cBuffer2(i - 1), sBuffer2(i))
       )
     }
