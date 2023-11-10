@@ -100,13 +100,12 @@ class BoothMultiplier extends Module {
 
   val booth = Module(new BoothModule())
 
-  val outReg    = Reg(UInt(128.W))
-  val isHalfMul = Reg(Bool())
+  val outReg = Reg(UInt(128.W))
 
   val counter = RegInit(0.U(5.W))
 
   val mulFire  = io.mulValid && io.mulReady
-  val willDone = (!isHalfMul && counter.andR) || (isHalfMul && counter(counter.getWidth - 2, 0).andR)
+  val willDone = (!io.mulw && counter.andR) || (io.mulw && counter(counter.getWidth - 2, 0).andR)
 
   val idle :: working :: output :: others = Enum(3)
   val mulFSM = new FSM(
@@ -121,7 +120,7 @@ class BoothMultiplier extends Module {
 
   val inA = io.multiplicand
   val inB = Cat(io.multiplier, 0.U(1.W))
-  isHalfMul := Mux(mulFSM.is(idle), io.mulw, isHalfMul)
+  io.mulw := Mux(mulFSM.is(idle), io.mulw, io.mulw)
 
   val inANeg = Utils.signedReverse(inA)
 
@@ -134,7 +133,7 @@ class BoothMultiplier extends Module {
     )
   )
 
-  booth.io.in := inB >> (counter * 2.U)
+  booth.io.in := inB >> (Mux(io.mulw, 32.U, 64.U) - (counter * 2.U))
 
   outReg := MuxCase(
     outReg,
