@@ -125,9 +125,9 @@ class BoothMultiplier extends Module {
   counter := MuxCase(
     counter,
     Seq(
-      (mulFSM.is(working) || mulFSM.willChangeTo(working)) -> (counter + 1.U),
       willDone -> 0.U,
-      io.flush -> 0.U
+      io.flush -> 0.U,
+      (mulFSM.is(working) || mulFSM.willChangeTo(working)) -> (counter + 1.U),
     )
   )
 
