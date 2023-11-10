@@ -131,7 +131,7 @@ class BoothMultiplier extends Module {
     )
   )
 
-  booth.io.in := inB >> (Mux(io.mulw, 31.U, 63.U) - (counter * 2.U))
+  booth.io.in := inB >> ((Mux(io.mulw, 31.U, 63.U) - counter) * 2.U)
 
   outReg := MuxCase(
     outReg,
