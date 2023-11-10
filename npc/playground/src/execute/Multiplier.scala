@@ -138,14 +138,14 @@ class BoothMultiplier extends Module {
     Seq(
       (mulFSM.is(idle) && !mulFSM.willChange()) -> 0.U,
       (mulFSM.is(working) || mulFSM.willChangeTo(working)) ->
-        ((outReg << (booth.io.shouldShift + 2.U)) + MuxCase(
+        ((outReg << 2.U) + (MuxCase(
           0.U,
           Seq(
             !booth.io.isWork -> 0.U,
             (booth.io.isWork && booth.io.isNeg) -> inANeg,
             (booth.io.isWork && !booth.io.isNeg) -> inA
           )
-        ))
+        ) << booth.io.shouldShift))
     )
   )
 
