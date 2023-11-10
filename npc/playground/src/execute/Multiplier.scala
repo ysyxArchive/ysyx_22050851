@@ -186,6 +186,8 @@ class WallaceLayer(inputCnt: Int) extends Module {
   if (inputCnt % 3 % 2 > 0) {
     outS(fullAdderCnt + halfAdderCnt) := io.bits(fullAdderCnt * 3 + halfAdderCnt * 2)
   }
+  io.outC := outC
+  io.outS := outS
 }
 class BHMultiplier extends Module {
   val io = IO(new MultiplierIO())
