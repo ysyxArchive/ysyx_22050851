@@ -171,7 +171,7 @@ class WallaceLayer(inputCnt: Int) extends Module {
   val outC = Wire(Vec(outCWidth, Bool()))
 
   val fullAdders = Seq.fill(fullAdderCnt)(Module(new FullAdder()))
-  for (i <- 0 to fullAdderCnt) {
+  for (i <- 0 until fullAdderCnt) {
     val adder = fullAdders(i)
     adder.io.inA := io.bits(i * 3)
     adder.io.inB := io.bits(i * 3 + 1)
@@ -222,7 +222,7 @@ class BHMultiplier extends Module {
   val boothShift = Wire(Vec(32, Bool()))
   val addBuffer  = Wire(Vec(32, UInt(128.W)))
 
-  for (i <- 0 to 31) {
+  for (i <- 0 until 31) {
     booths(i).io.in := inB(i * 2 + 2, i * 2)
     val out = booths(i).io
     boothWork(i)  := Mux(mulFSM.is(idle), out.isWork, boothWork(i))
@@ -237,7 +237,7 @@ class BHMultiplier extends Module {
   val wallaceLayer1 = Seq.fill(128)(Module(new WallaceLayer(32)))
   val sBuffer1      = Reg(Vec(128, UInt(11.W)))
   val cBuffer1      = Reg(Vec(128, UInt(11.W)))
-  for (i <- 0 to 128) {
+  for (i <- 0 until 128) {
     wallaceLayer1(i).io.bits := VecInit(addBuffer.map(v => v(i))).asUInt
     sBuffer1(i)              := wallaceLayer1(i).io.outS
     cBuffer1(i)              := wallaceLayer1(i).io.outC
@@ -245,7 +245,7 @@ class BHMultiplier extends Module {
   val wallaceLayer2 = Seq.fill(128)(Module(new WallaceLayer(22)))
   val sBuffer2      = Reg(Vec(128, UInt(8.W)))
   val cBuffer2      = Reg(Vec(128, UInt(7.W)))
-  for (i <- 0 to 128) {
+  for (i <- 0 until 128) {
     if (i == 0) {
       wallaceLayer2(i).io.bits := sBuffer1(i)
     } else {
@@ -258,7 +258,7 @@ class BHMultiplier extends Module {
   val wallaceLayer3 = Seq.fill(128)(Module(new WallaceLayer(16)))
   val sBuffer3      = Reg(Vec(128, UInt(6.W)))
   val cBuffer3      = Reg(Vec(128, UInt(5.W)))
-  for (i <- 0 to 128) {
+  for (i <- 0 until 128) {
     if (i == 0) {
       wallaceLayer3(i).io.bits := Mux(io.mulw, VecInit(addBuffer.map(v => v(i))).asUInt(0, 15), sBuffer2(i))
     } else {
@@ -275,7 +275,7 @@ class BHMultiplier extends Module {
   val wallaceLayer4 = Seq.fill(128)(Module(new WallaceLayer(11)))
   val sBuffer4      = Reg(Vec(128, UInt(4.W)))
   val cBuffer4      = Reg(Vec(128, UInt(4.W)))
-  for (i <- 0 to 128) {
+  for (i <- 0 until 128) {
     if (i == 0) {
       wallaceLayer4(i).io.bits := sBuffer3(i)
     } else {
@@ -288,7 +288,7 @@ class BHMultiplier extends Module {
   val wallaceLayer5 = Seq.fill(128)(Module(new WallaceLayer(8)))
   val sBuffer5      = Reg(Vec(128, UInt(3.W)))
   val cBuffer5      = Reg(Vec(128, UInt(3.W)))
-  for (i <- 0 to 128) {
+  for (i <- 0 until 128) {
     if (i == 0) {
       wallaceLayer5(i).io.bits := sBuffer4(i)
     } else {
@@ -301,7 +301,7 @@ class BHMultiplier extends Module {
   val wallaceLayer6 = Seq.fill(128)(Module(new WallaceLayer(6)))
   val sBuffer6      = Reg(Vec(128, UInt(2.W)))
   val cBuffer6      = Reg(Vec(128, UInt(2.W)))
-  for (i <- 0 to 128) {
+  for (i <- 0 until 128) {
     if (i == 0) {
       wallaceLayer6(i).io.bits := sBuffer5(i)
     } else {
@@ -314,7 +314,7 @@ class BHMultiplier extends Module {
   val wallaceLayer7 = Seq.fill(128)(Module(new WallaceLayer(4)))
   val sBuffer7      = Reg(Vec(128, UInt(2.W)))
   val cBuffer7      = Reg(Vec(128, UInt(1.W)))
-  for (i <- 0 to 128) {
+  for (i <- 0 until 128) {
     if (i == 0) {
       wallaceLayer7(i).io.bits := sBuffer6(i)
     } else {
@@ -327,7 +327,7 @@ class BHMultiplier extends Module {
   val wallaceLayer8 = Seq.fill(128)(Module(new WallaceLayer(3)))
   val sBuffer8      = Reg(Vec(128, UInt(1.W)))
   val cBuffer8      = Reg(Vec(128, UInt(1.W)))
-  for (i <- 0 to 128) {
+  for (i <- 0 until 128) {
     if (i == 0) {
       wallaceLayer8(i).io.bits := sBuffer6(i)
     } else {
