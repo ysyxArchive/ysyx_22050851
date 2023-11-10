@@ -120,8 +120,6 @@ class BoothMultiplier extends Module {
 
   val inA = io.multiplicand
   val inB = Cat(io.multiplier, 0.U(1.W))
-  io.mulw := Mux(mulFSM.is(idle), io.mulw, io.mulw)
-
   val inANeg = Utils.signedReverse(inA)
 
   counter := MuxCase(
