@@ -132,20 +132,20 @@ class BoothMultiplier extends Module {
   )
 
   booth.io.in := inB >> ((Mux(io.mulw, 15.U, 31.U) - counter) * 2.U)
-
-  outReg := MuxCase(
-    outReg,
-    Seq(
-      (mulFSM.is(idle) && !mulFSM.willChange()) -> 0.U,
-      (mulFSM.is(working) || mulFSM.willChangeTo(working)) ->
-        ((outReg << 2.U) + (MuxCase(
+   val aaaa = MuxCase(
           0.U,
           Seq(
             !booth.io.isWork -> 0.U,
             (booth.io.isWork && booth.io.isNeg) -> inANeg,
             (booth.io.isWork && !booth.io.isNeg) -> inA
           )
-        ) << booth.io.shouldShift))
+        ) << booth.io.shouldShift
+  outReg := MuxCase(
+    outReg,
+    Seq(
+      (mulFSM.is(idle) && !mulFSM.willChange()) -> 0.U,
+      (mulFSM.is(working) || mulFSM.willChangeTo(working)) ->
+        ((outReg << 2.U) + (aaaa))
     )
   )
 
