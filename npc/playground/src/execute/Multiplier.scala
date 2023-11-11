@@ -339,7 +339,7 @@ class BHMultiplier extends Module {
     cBuffer8(i) := wallaceLayer8(i).io.outC
   }
 
-  val out = sBuffer8.asUInt + cBuffer8.asUInt
+  val out = sBuffer8.asUInt + (cBuffer8.asUInt << 1)
 
   io.mulReady   := mulFSM.is(idle) && !io.flush
   io.outValid   := mulFSM.is(output)
