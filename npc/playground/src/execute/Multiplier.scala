@@ -348,7 +348,6 @@ class BHMultiplier extends Module {
     io.multiplier
   )
   val groundTruth = Mux(io.multiplicand(63) ^ io.multiplier(63), Utils.signedReverse(t1), t1)
-  println(groundTruth.getWidth)
   when(mulFSM.is(step1)) {
     for (i <- 0 until 32) {
       printf("input %d is %x\n", i.U, addBuffer(i))
