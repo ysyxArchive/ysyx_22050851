@@ -345,4 +345,9 @@ class BHMultiplier extends Module {
   io.outValid   := mulFSM.is(output)
   io.resultHigh := out >> 64
   io.resultLow  := out
+
+  val groundTruth = io.multiplicand * io.multiplier
+  when(mulFSM.is(step1)) {
+    assert(addBuffer.reduce(_ + _)(127, 0) === groundTruth)
+  }
 }
