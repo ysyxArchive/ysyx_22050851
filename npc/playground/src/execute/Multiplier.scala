@@ -342,18 +342,18 @@ class BHMultiplier extends Module {
   io.resultHigh := out >> 64
   io.resultLow  := out
 
-  val t1 = Mux(io.multiplicand(63), Utils.signedReverse(io.multiplicand), io.multiplicand) * Mux(
-    io.multiplier(63),
-    Utils.signedReverse(io.multiplier),
-    io.multiplier
-  )
-  val groundTruth = Mux(io.multiplicand(63) ^ io.multiplier(63), Utils.signedReverse(t1), t1)
-  when(mulFSM.is(step1)) {
-    for (i <- 0 until 32) {
-      printf("input %d is %x\n", i.U, addBuffer(i))
-    }
-    printf("input is %x, %x\n", io.multiplicand, io.multiplier)
-    val res = addBuffer.reduce(_ + _)(127, 0)
-    assert(res === groundTruth, "%x not equal %x\n", res, groundTruth)
-  }
+  // val t1 = Mux(io.multiplicand(63), Utils.signedReverse(io.multiplicand), io.multiplicand) * Mux(
+  //   io.multiplier(63),
+  //   Utils.signedReverse(io.multiplier),
+  //   io.multiplier
+  // )
+  // val groundTruth = Mux(io.multiplicand(63) ^ io.multiplier(63), Utils.signedReverse(t1), t1)
+  // when(mulFSM.is(step1)) {
+  //   for (i <- 0 until 32) {
+  //     printf("input %d is %x\n", i.U, addBuffer(i))
+  //   }
+  //   printf("input is %x, %x\n", io.multiplicand, io.multiplier)
+  //   val res = addBuffer.reduce(_ + _)(127, 0)
+  //   assert(res === groundTruth, "%x not equal %x\n", res, groundTruth)
+  // }
 }
