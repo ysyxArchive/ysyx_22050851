@@ -348,6 +348,10 @@ class BHMultiplier extends Module {
 
   val groundTruth = io.multiplicand * io.multiplier
   when(mulFSM.is(step1)) {
+    for(i <- 0 until 32){
+      printf("input %d is %x\n", i.U, addBuffer(i))
+    }
+    println("input is %x, %x", io.multiplicand, io.multiplier)
     val res = addBuffer.reduce(_ + _)(127, 0)
     assert(res === groundTruth, "%x not equal %x\n", res, groundTruth)
   }
