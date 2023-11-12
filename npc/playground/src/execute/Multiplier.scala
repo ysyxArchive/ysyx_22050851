@@ -232,7 +232,7 @@ class BHMultiplier extends Module {
     boothShift(i) := Mux(mulFSM.is(idle), out.shouldShift, boothShift(i))
     addBuffer(i) := Mux(
       mulFSM.is(idle),
-      Mux(out.isWork, Mux(out.isNeg, inANeg, inA), 0.U) << out.shouldShift,
+      Mux(out.isWork, Mux(out.isNeg, inANeg, inA), 0.U) << (out.shouldShift + (i * 2).U),
       addBuffer(i)
     )
   }
@@ -262,13 +262,9 @@ class BHMultiplier extends Module {
   val cBuffer3      = Reg(Vec(128, UInt(5.W)))
   for (i <- 0 until 128) {
     if (i == 0) {
-      wallaceLayer3(i).io.bits := Mux(io.mulw, VecInit(addBuffer.map(v => v(i))).asUInt, sBuffer2(i))
+      wallaceLayer3(i).io.bits := sBuffer2(i)
     } else {
-      wallaceLayer3(i).io.bits := Mux(
-        io.mulw,
-        VecInit(addBuffer.map(v => v(i))).asUInt,
-        Cat(cBuffer2(i - 1), sBuffer2(i))
-      )
+      wallaceLayer3(i).io.bits := Cat(cBuffer2(i - 1), sBuffer2(i))
     }
     sBuffer3(i) := wallaceLayer3(i).io.outS
     cBuffer3(i) := wallaceLayer3(i).io.outC
@@ -348,7 +344,7 @@ class BHMultiplier extends Module {
 
   val groundTruth = io.multiplicand * io.multiplier
   when(mulFSM.is(step1)) {
-    for(i <- 0 until 32){
+    for (i <- 0 until 32) {
       printf("input %d is %x\n", i.U, addBuffer(i))
     }
     printf("input is %x, %x\n", io.multiplicand, io.multiplier)
