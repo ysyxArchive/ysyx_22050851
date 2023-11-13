@@ -77,7 +77,7 @@ class SimpleDivider extends Module {
   val canSub = subNext >= inB
   subReg := Mux(canSub, subNext - inB, subNext)
 
-  outReg      := Mux(divFSM.is(working) && !willDone, Cat(outReg, canSub), Mux(divFSM.is(idle), 0.U, outReg))
+  outReg      := Mux(divFSM.is(working), Cat(outReg, canSub), Mux(divFSM.is(idle), 0.U, outReg))
   
   io.divReady := divFSM.is(idle) && !io.flush
   io.outValid := divFSM.is(output)
