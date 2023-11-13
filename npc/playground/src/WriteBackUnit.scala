@@ -33,7 +33,7 @@ class WriteBackUnit extends Module {
   val regReadIO  = IO(Input(new RegReadIO()))
   val csrIn      = IO(Input(UInt(64.W)))
   val csrControl = IO(Flipped(new CSRFileControl()))
-  val csrData    = IO(Flipped(new WBDataIn()))
+  val csrData    = IO(new WBDataIn())
   val toDecode   = IO(Output(UInt(5.W)))
 
   val wbInReg   = Reg(new WBIn())
