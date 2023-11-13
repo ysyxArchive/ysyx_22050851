@@ -5,30 +5,11 @@
 int width, height;
 void __am_gpu_init() {
   int i;
-  uint32_t data = inl(VGACTL_ADDR);
-  width = (data >> 16) & 0xFFFF;
-  height = data & 0xFFFF;
+  width = inl(VGACTL_ADDR) >> 16;
+  height = inl(VGACTL_ADDR) & 0xFFFF;
   uint32_t* fb = (uint32_t*)(uintptr_t)FB_ADDR;
-  uint32_t a;
-  a = data;
-  while (a > 0) {
-    putch(a % 10 + '0');
-    a /= 10;
-  }
-  putch('\n');
-  a = width;
-  while (a > 0) {
-    putch(a % 10 + '0');
-    a /= 10;
-  }
-  putch('\n');
-
-  a = height;
-  while (a > 0) {
-    putch(a % 10 + '0');
-    a /= 10;
-  }
-  for (i = 0; i < width * height; i++) fb[i] = i;
+  for (i = 0; i < width * height; i++)
+    fb[i] = i;
   outl(SYNC_ADDR, 1);
 }
 
@@ -52,4 +33,6 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T* ctl) {
   }
 }
 
-void __am_gpu_status(AM_GPU_STATUS_T* status) { status->ready = true; }
+void __am_gpu_status(AM_GPU_STATUS_T* status) {
+  status->ready = true;
+}
