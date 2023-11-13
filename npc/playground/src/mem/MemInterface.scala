@@ -144,5 +144,5 @@ class MemBurstInterface extends Module {
   axiS.R.valid     := memInterfaceFSM.is(writeDataBack) && RegNext(memInterfaceFSM.is(writeDataBack))
   axiS.R.bits.id   := readReq.id
   axiS.R.bits.data := dataRet
-  axiS.R.bits.last := counter === readReq.len
+  axiS.R.bits.last := counter - 1.U === readReq.len
 }
