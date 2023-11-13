@@ -77,11 +77,15 @@ class SimpleDivider extends Module {
   val canSub = subNext >= inB
   subReg := Mux(canSub, subNext - inB, subNext)
 
-  outReg      := Mux(divFSM.is(working), Cat(outReg, canSub), Mux(divFSM.is(idle), 0.U, outReg))
-  
+  outReg := Mux(
+    divFSM.is(working) || divFSM.willChangeTo(working),
+    Cat(outReg, canSub),
+    Mux(divFSM.is(idle), 0.U, outReg)
+  )
+
   io.divReady := divFSM.is(idle) && !io.flush
   io.outValid := divFSM.is(output)
-  
+
   val out = Mux(outNeg, Utils.signedReverse(outReg.asUInt), outReg.asUInt)
   val sub = Mux(remNeg, Utils.signedReverse(subReg), subReg)
   io.quotient  := out
