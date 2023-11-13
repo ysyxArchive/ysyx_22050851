@@ -65,6 +65,7 @@ class SimpleDivider extends Module {
     counter,
     Seq(
       io.flush -> 0.U,
+      divFSM.is(output) -> 0.U,
       (divFSM.is(working) || divFSM.willChangeTo(working)) -> (counter + 1.U)
     )
   )
