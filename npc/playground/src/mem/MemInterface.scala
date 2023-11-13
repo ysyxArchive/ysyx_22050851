@@ -132,7 +132,7 @@ class MemBurstInterface extends Module {
     )
   ) + (counter << 3)
   mem.io.enable :=
-    memInterfaceFSM.is(writeDataBack) ||
+    memInterfaceFSM.is(writeDataBack) && !memInterfaceFSM.willChange() ||
       (memInterfaceFSM.is(waitDataWrite) && axiS.W.fire)
   dataRet := Mux(mem.io.enable, mem.io.rdata, dataRet)
 
