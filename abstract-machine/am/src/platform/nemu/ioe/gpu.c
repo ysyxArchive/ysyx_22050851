@@ -8,11 +8,6 @@ void __am_gpu_init() {
   width = inl(VGACTL_ADDR) >> 16;
   height = inl(VGACTL_ADDR) & 0xFFFF;
   uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;
-  int a = width * height;
-  while (a > 0) {
-    putch(a % 10 + '0');
-    a /= 10;
-  }
   for (i = 0; i < width * height; i++) fb[i] = i;
   outl(SYNC_ADDR, 1);
 }
