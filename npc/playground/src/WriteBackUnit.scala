@@ -76,7 +76,7 @@ class WriteBackUnit extends Module {
   csrControl.csrBehave  := Mux(wbIn.valid, wbInReg.control.csrbehave, CsrBehave.no.asUInt)
   csrControl.csrSetmode := Mux(wbIn.valid, wbInReg.control.csrsetmode, CsrSetMode.origin.asUInt)
   csrControl.csrSource  := wbInReg.control.csrsource
-  csrData               := wbInReg
+  csrData               := wbInReg.data
 
   // blackBoxHalt
   val blackBox = Module(new BlackBoxHalt);
