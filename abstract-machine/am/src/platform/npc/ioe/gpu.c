@@ -9,7 +9,7 @@ void __am_gpu_init() {
   width = (data >> 16) & 0xFFFF;
   height = data & 0xFFFF;
   uint32_t* fb = (uint32_t*)(uintptr_t)FB_ADDR;
-  int a;
+  uint32_t a;
   a = data;
   while (a > 0) {
     putch(a % 10 + '0');
