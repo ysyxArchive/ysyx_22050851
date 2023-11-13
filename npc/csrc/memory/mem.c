@@ -40,7 +40,7 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
   } else if (addr == VGACTL_ADDR) {
     Assert(length == 4 || length == 8,
            "read VGACTL with length == %ld not allowed", length);
-    ret = VGA_WIDTH << 16 | VGA_HEIGHT;
+    ret = (VGA_WIDTH << 16) | VGA_HEIGHT;
     difftest_skip();
   } else if (addr == RTC_ADDR || addr == RTC_ADDR + 4) {
     Assert(length == 4 || length == 8,
@@ -77,19 +77,15 @@ void write_mem(uint64_t addr, size_t length, uint64_t data) {
     Assert(length == 4 || length == 8, "output to FB with length == %ld, not 4",
            length);
     vga_data[(addr - FB_ADDR) / 4] = data;
-    difftest_skip();
   } else if (addr == SYNC_ADDR) {
     Assert(length == 4 || length == 8,
            "output to FBCTL with length == %ld, not 4", length);
     Assert(data == 1, "data %ld not valid for SYNC", data);
-    printf("trigger!\n");
     update_vga();
-    difftest_skip();
   } else if (addr == SERIAL_PORT) {
     Assert(length == 1, "output to Serial Port with length == %ld, not 1",
            length);
     printf("%c", (char)data);
-    difftest_skip();
   } else if (addr >= MEM_START && addr + length <= MEM_START + MEM_LEN) {
     if (length == 1) {
       *((uint8_t*)(mem + (addr - MEM_START))) = (uint8_t)data;
