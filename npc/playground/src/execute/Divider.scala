@@ -71,7 +71,7 @@ class SimpleDivider extends Module {
 
   val subNext = Mux(
     divFSM.is(working),
-    Cat(subReg, Mux(io.divw, inA(30.U(7.W) - counter), inA(62.U(7.W) - counter))),
+    Cat(subReg, Mux(io.divw, inA(31.U(7.W) - counter), inA(63.U(7.W) - counter))),
     Mux(io.divw, inA(62, 31), inA(126, 63))
   )
   val canSub = subNext >= inB
