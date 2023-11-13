@@ -38,7 +38,7 @@ class SimpleDivider extends Module {
   val outValidReg = RegInit(false.B)
 
   val divFire  = io.divValid && io.divReady
-  val willDone = (!isHalfDiv && counter.andR) || (isHalfDiv && counter(counter.getWidth - 2, 0).andR)
+  val willDone = (!isHalfDiv && !counter.orR) || (isHalfDiv && !counter(counter.getWidth - 2, 0).orR)
   val inANeg   = io.divSigned && Mux(io.divw, io.dividend(31), io.dividend(63))
   val inBNeg   = io.divSigned && Mux(io.divw, io.divisor(31), io.divisor(63))
 
@@ -74,7 +74,7 @@ class SimpleDivider extends Module {
     Seq(
       willDone -> 0.U,
       io.flush -> 0.U,
-      divFSM.is(working) -> (counter + 1.U)
+      (divFSM.is(working) || divFSM.willChangeTo(working)) -> (counter + 1.U)
     )
   )
   outValidReg := PriorityMux(
@@ -100,7 +100,7 @@ class SimpleDivider extends Module {
     Seq(
       (divFSM.is(idle) && io.divw) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 31),
       (divFSM.is(idle) && !io.divw) -> Mux(inANeg, Utils.signedReverse(inACasted), inACasted)(125, 63),
-      divFSM.willChangeTo(output) -> subReg,
+      divFSM.willChangeTo(output) -> subReg
     )
   )
   outReg      := Mux(divFSM.is(working) && !willDone, Cat(outReg, canSub), Mux(divFSM.is(idle), 0.U, outReg))
