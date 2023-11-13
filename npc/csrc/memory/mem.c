@@ -86,6 +86,7 @@ void write_mem(uint64_t addr, size_t length, uint64_t data) {
     update_vga();
     difftest_skip();
   } else if (addr == SERIAL_PORT) {
+    Log("123123%c", (char)data);
     Assert(length == 1, "output to Serial Port with length == %ld, not 1",
            length);
     printf("%c", (char)data);
