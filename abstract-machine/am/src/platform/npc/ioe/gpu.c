@@ -5,7 +5,7 @@
 int width, height;
 void __am_gpu_init() {
   int i;
-  uint32_t data = (VGACTL_ADDR);
+  uint32_t data = inl(VGACTL_ADDR);
   width = (data >> 16) & 0xFFFF;
   height = data & 0xFFFF;
   uint32_t* fb = (uint32_t*)(uintptr_t)FB_ADDR;
