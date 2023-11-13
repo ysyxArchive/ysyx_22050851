@@ -71,5 +71,7 @@ void paddr_write(paddr_t addr, int len, word_t data) {
     return;
   }
   IFDEF(CONFIG_DEVICE, mmio_write(addr, len, data); return);
+#ifndef CONFIG_TARGET_SHARE
   out_of_bound(addr);
+#endif
 }
