@@ -20,7 +20,7 @@
 
 #if defined(CONFIG_PMEM_MALLOC)
 static uint8_t *pmem = NULL;
-#else // CONFIG_PMEM_GARRAY
+#else  // CONFIG_PMEM_GARRAY
 static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 #endif
 uint8_t *guest_to_host(paddr_t paddr) { return pmem + paddr - CONFIG_MBASE; }
@@ -58,8 +58,7 @@ void init_mem() {
 }
 
 word_t paddr_read(paddr_t addr, int len) {
-  if (likely(in_pmem(addr)))
-    return pmem_read(addr, len);
+  if (likely(in_pmem(addr))) return pmem_read(addr, len);
   IFDEF(CONFIG_DEVICE, return mmio_read(addr, len));
   out_of_bound(addr);
   return 0;
@@ -71,5 +70,7 @@ void paddr_write(paddr_t addr, int len, word_t data) {
     return;
   }
   IFDEF(CONFIG_DEVICE, mmio_write(addr, len, data); return);
+#ifndef CONFIG_TARGET_SHARE
   out_of_bound(addr);
+#endif
 }
