@@ -135,7 +135,6 @@ class BoothMultiplier extends Module {
   val valToAdd = MuxCase(
     0.U,
     Seq(
-      !booth.io.isWork -> 0.U,
       (booth.io.isWork && booth.io.isNeg) -> inANeg,
       (booth.io.isWork && !booth.io.isNeg) -> inA
     )
