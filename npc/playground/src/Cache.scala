@@ -133,7 +133,7 @@ class Cache(
   axiIO.AR.bits.id   := 0.U
   axiIO.AR.bits.prot := 0.U
   axiIO.AR.valid     := cacheFSM.is(sendReq) || cacheFSM.is(directRReq)
-  axiIO.AR.bits.len  := Mux(cacheFSM.is(sendReq), slotsPerLine.U, 0.U)
+  axiIO.AR.bits.len  := Mux(cacheFSM.is(sendReq), (slotsPerLine - 1).U, 0.U)
   // when waitRes
   val mask       = Reverse(Cat(Seq.tabulate(slotsPerLine)(index => Fill(axiIO.dataWidth, UIntToOH(counter)(index)))))
   val maskedData = Fill(slotsPerLine, axiIO.R.bits.data.asUInt) & mask
@@ -171,7 +171,7 @@ class Cache(
     Cat(cacheMem(index)(replaceIndex).tag, index, counter << log2Ceil(axiIO.dataWidth / 8)),
     addr
   )
-  axiIO.AW.bits.len := Mux(cacheFSM.is(sendWReq), slotsPerLine.U, 0.U)
+  axiIO.AW.bits.len := Mux(cacheFSM.is(sendWReq), (slotsPerLine - 1).U, 0.U)
   axiIO.W.valid     := cacheFSM.is(sendWData) || cacheFSM.is(directWData)
   axiIO.W.bits.data := Mux(
     cacheFSM.is(sendWData),
