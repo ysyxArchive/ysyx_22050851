@@ -145,7 +145,7 @@ class R2Divider extends Module {
     divFSM.is(working),
     Cat(
       subReg,
-      (inA >> Mux(io.divw, 31.U(7.W) - counter * 2.U, 63.U(7.W) - counter * 2.U))(1, 0)
+      (inA >> Mux(io.divw, 30.U(7.W) - counter * 2.U, 62.U(7.W) - counter * 2.U))(1, 0)
     ),
     Mux(io.divw, inA(62, 30), inA(126, 62))
   )
