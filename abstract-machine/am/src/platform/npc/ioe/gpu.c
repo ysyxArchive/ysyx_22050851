@@ -8,7 +8,15 @@ void __am_gpu_init() {
   width = inl(VGACTL_ADDR) >> 16;
   height = inl(VGACTL_ADDR) & 0xFFFF;
   uint32_t* fb = (uint32_t*)(uintptr_t)FB_ADDR;
-  int a = width * height;
+  int a;
+  a = width;
+  while (a > 0) {
+    putch(a % 10 + '0');
+    a /= 10;
+  }
+  putch('\n');
+  
+  a = height;
   while (a > 0) {
     putch(a % 10 + '0');
     a /= 10;
