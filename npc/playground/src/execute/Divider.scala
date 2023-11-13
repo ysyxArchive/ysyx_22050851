@@ -147,7 +147,7 @@ class R2Divider extends Module {
       subReg,
       (inA >> Mux(io.divw, 31.U(7.W) - counter * 2.U, 63.U(7.W) - counter * 2.U))(1, 0)
     ),
-    Mux(io.divw, inA(62, 31), inA(126, 63))
+    Mux(io.divw, inA(62, 30), inA(126, 62))
   )
   val canSub     = inBs.map(b => subNext >= b)
   val partialQuo = PriorityMux(canSub.zipWithIndex.map(pair => (pair._1, pair._2.U)).reverse)
