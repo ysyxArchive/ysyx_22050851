@@ -96,10 +96,10 @@ static void execute(uint64_t n) {
       break;
     IFDEF(CONFIG_DEVICE, device_update());
     // TODO: 退版本暂时取消时钟中断
-    // word_t intr = isa_query_intr();
-    // if (intr != INTR_EMPTY) {
-    //   cpu.pc = isa_raise_intr(intr, csrs("mtvec"));
-    // }
+    word_t intr = isa_query_intr();
+    if (intr != INTR_EMPTY) {
+      cpu.pc = isa_raise_intr(intr, csrs("mtvec"));
+    }
   }
 }
 
