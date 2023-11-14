@@ -118,7 +118,7 @@ class InstructionDecodeUnit extends Module {
       ))
 
   // branch check
-  willTakeBranch := !shouldWait && MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
+  willTakeBranch := MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
     EnumSeq(
       PCAddrSrc.aluzero -> (src1Data === src2Data),
       PCAddrSrc.alunotneg -> (src1Data.asSInt >= src2Data.asSInt),
