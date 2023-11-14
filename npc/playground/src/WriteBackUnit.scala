@@ -27,11 +27,11 @@ class WBIn extends Bundle {
 }
 
 class WriteBackUnit extends Module {
-  val wbIn = IO(Flipped(Decoupled(new WBIn())))
+  val wbIn       = IO(Flipped(Decoupled(new WBIn())))
   val regWriteIO = IO(Flipped(new RegWriteIO()))
   val regReadIO  = IO(Input(new RegReadIO()))
   val csrControl = IO(Flipped(new ControlRegisterFileControlIO()))
-  val toDecode   = IO(Output(UInt(5.W)))
+  val toDecode   = IO(Flipped(new ToDecode()))
 
   val wbInReg   = Reg(new WBIn())
   val wbInValid = Reg(new Bool())
@@ -80,5 +80,10 @@ class WriteBackUnit extends Module {
 
   wbIn.ready := true.B
 
-  toDecode := Mux(wbInValid, wbInReg.data.dst, 0.U)
+  toDecode.regIndex := Mux(wbInValid, wbInReg.data.dst, 0.U)
+  toDecode.csrIndex := Mux(
+    wbInValid,
+    ControlRegisters.behaveDependency(wbInReg.control.csrbehave, wbInReg.control.csrsetmode, wbInReg.data.imm),
+    0.U
+  )
 }

@@ -80,5 +80,10 @@ class InstructionExecuteUnit extends Module {
 
   exeOut.bits.debug := exeInReg.debug
 
-  toDecode := Mux(dataValid, exeInReg.data.dst, 0.U)
+  toDecode.regIndex := Mux(dataValid, exeInReg.data.dst, 0.U)
+  toDecode.csrIndex := Mux(
+    dataValid,
+    ControlRegisters.behaveDependency(exeInReg.control.csrbehave, exeInReg.control.csrsetmode, exeInReg.data.imm),
+    0.U
+  )
 }
