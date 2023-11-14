@@ -84,6 +84,6 @@ class WriteBackUnit extends Module {
   toDecode.csrIndex := Mux(
     wbInValid,
     ControlRegisters.behaveDependency(wbInReg.control.csrbehave, wbInReg.control.csrsetmode, wbInReg.data.imm),
-    0.U
+    VecInit.fill(3)(0.U(12.W))
   )
 }

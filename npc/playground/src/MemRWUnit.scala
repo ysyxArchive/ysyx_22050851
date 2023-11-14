@@ -98,11 +98,12 @@ class MemRWUnit extends Module {
   memOut.bits.control       := memInReg.control
   memOut.bits.enable        := memInReg.enable
 
+  memIO.writeRes.ready := false.B
+
   toDecode.regIndex := Mux(dataValid, memInReg.data.dst, 0.U)
   toDecode.csrIndex := Mux(
     dataValid,
     ControlRegisters.behaveDependency(memInReg.control.csrbehave, memInReg.control.csrsetmode, memInReg.data.imm),
-    0.U
+    VecInit.fill(3)(0.U(12.W))
   )
-  memIO.writeRes.ready := false.B
 }

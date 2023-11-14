@@ -84,6 +84,6 @@ class InstructionExecuteUnit extends Module {
   toDecode.csrIndex := Mux(
     dataValid,
     ControlRegisters.behaveDependency(exeInReg.control.csrbehave, exeInReg.control.csrsetmode, exeInReg.data.imm),
-    0.U
+    VecInit.fill(3)(0.U(12.W))
   )
 }
