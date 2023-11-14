@@ -97,18 +97,23 @@ class CSRFileControl extends Bundle {
   val csrSetmode = Input(UInt(CsrSetMode.getWidth.W))
 }
 
-class ControlRegisterFileIO extends Bundle {
+class ControlRegisterFileControlIO extends Bundle {
   val data    = Flipped(new WBDataIn())
   val control = new CSRFileControl()
-  val output  = Output(UInt(64.W))
+
+}
+class ControlRegisterFileDataIO extends Bundle {
+  val output    = Output(UInt(64.W))
+  val csrBehave = Input(UInt(CsrBehave.getWidth.W))
 }
 
 class ControlRegisterFile extends Module {
-  val io       = IO(new ControlRegisterFileIO())
-  val debugOut = IO(Output(Vec(6, UInt(64.W))))
+  val controlIO = IO(new ControlRegisterFileControlIO())
+  val dataIO    = IO(new ControlRegisterFileDataIO())
+  val debugOut  = IO(Output(Vec(6, UInt(64.W))))
 
-  val uimm  = io.data.src1
-  val csrId = io.data.imm
+  val uimm  = controlIO.data.src1
+  val csrId = controlIO.data.imm
 
   val register = new ControlRegisters()
 
@@ -117,13 +122,13 @@ class ControlRegisterFile extends Module {
   val mstatus = new Mstatus(register("mstatus"))
 
   val currentMode = RegInit(PrivMode.M)
-  currentMode := MuxLookup(io.control.csrBehave, currentMode)(
+  currentMode := MuxLookup(controlIO.control.csrBehave, currentMode)(
     EnumSeq(CsrBehave.ecall -> PrivMode.M, CsrBehave.mret -> mstatus("MPP"))
   )
 
-  val mask = MuxLookup(io.control.csrSource, io.data.src1Data)(
+  val mask = MuxLookup(controlIO.control.csrSource, controlIO.data.src1Data)(
     EnumSeq(
-      CsrSource.src1 -> io.data.src1Data,
+      CsrSource.src1 -> controlIO.data.src1Data,
       CsrSource.uimm -> uimm
     )
   )
@@ -138,7 +143,7 @@ class ControlRegisterFile extends Module {
         register.set(
           "mstatus",
           MuxLookup(
-            io.control.csrBehave,
+            controlIO.control.csrBehave,
             Mux(csrId === id.U, writeBack, register("mstatus"))
           )(
             EnumSeq(
@@ -152,8 +157,8 @@ class ControlRegisterFile extends Module {
         register.set(
           "mepc",
           Mux(
-            io.control.csrBehave === CsrBehave.ecall.asUInt,
-            io.data.pc,
+            controlIO.control.csrBehave === CsrBehave.ecall.asUInt,
+            controlIO.data.pc,
             Mux(csrId === id.U, writeBack, register("mepc"))
           )
         )
@@ -162,7 +167,7 @@ class ControlRegisterFile extends Module {
         register.set(
           "mcause",
           Mux(
-            io.control.csrBehave === CsrBehave.ecall.asUInt,
+            controlIO.control.csrBehave === CsrBehave.ecall.asUInt,
             Mux(currentMode === PrivMode.U, 0x8.U, 0xb.U),
             Mux(csrId === id.U, writeBack, register("mcause"))
           )
@@ -174,7 +179,7 @@ class ControlRegisterFile extends Module {
     }
   }
 
-  writeBack := MuxLookup(io.control.csrSetmode, outputVal)(
+  writeBack := MuxLookup(controlIO.control.csrSetmode, outputVal)(
     EnumSeq(
       CsrSetMode.clear -> (outputVal & ~mask),
       CsrSetMode.set -> (outputVal | mask),
@@ -182,7 +187,7 @@ class ControlRegisterFile extends Module {
     )
   )
 
-  io.output := MuxLookup(io.control.csrBehave, outputVal)(
+  dataIO.output := MuxLookup(dataIO.csrBehave, outputVal)(
     EnumSeq(
       CsrBehave.no -> outputVal,
       CsrBehave.ecall -> register("mtvec"),

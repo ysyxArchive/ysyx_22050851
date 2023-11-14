@@ -32,8 +32,7 @@ class WriteBackUnit extends Module {
   val regWriteIO = IO(Flipped(new RegWriteIO()))
   val regReadIO  = IO(Input(new RegReadIO()))
   val csrIn      = IO(Input(UInt(64.W)))
-  val csrControl = IO(Flipped(new CSRFileControl()))
-  val csrData    = IO(new WBDataIn())
+  val csrControl = IO(Flipped(new ControlRegisterFileControlIO()))
   val toDecode   = IO(Output(UInt(5.W)))
 
   val wbInReg   = Reg(new WBIn())
@@ -73,10 +72,10 @@ class WriteBackUnit extends Module {
   )
   regWriteIO.wdata := Mux(wbInReg.control.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)
   // csr
-  csrControl.csrBehave  := Mux(wbIn.valid, wbInReg.control.csrbehave, CsrBehave.no.asUInt)
-  csrControl.csrSetmode := Mux(wbIn.valid, wbInReg.control.csrsetmode, CsrSetMode.origin.asUInt)
-  csrControl.csrSource  := wbInReg.control.csrsource
-  csrData               := wbInReg.data
+  csrControl.control.csrBehave  := Mux(wbIn.valid, wbInReg.control.csrbehave, CsrBehave.no.asUInt)
+  csrControl.control.csrSetmode := Mux(wbIn.valid, wbInReg.control.csrsetmode, CsrSetMode.origin.asUInt)
+  csrControl.control.csrSource  := wbInReg.control.csrsource
+  csrControl.data               := wbInReg.data
 
   // blackBoxHalt
   val blackBox = Module(new BlackBoxHalt);

@@ -27,6 +27,7 @@ class DecodeBack extends Bundle {
 
 class InstructionDecodeUnit extends Module {
   val regIO      = IO(Flipped(new RegReadIO()))
+  val csrIO      = IO(Flipped(new ControlRegisterFileDataIO()))
   val decodeIn   = IO(Flipped(Decoupled(new DecodeIn())))
   val decodeOut  = IO(Decoupled(new ExeIn()))
   val decodeBack = IO(new DecodeBack())
@@ -118,16 +119,19 @@ class InstructionDecodeUnit extends Module {
   )
   val branchPc = MuxLookup(controlDecoder.output.pcsrc, 0.U)(
     EnumSeq(
-      PcSrc.pc -> decodeInReg.pc,
-      PcSrc.src1 -> src1Data
+      PcSrc.pc -> (decodeInReg.pc + imm),
+      PcSrc.src1 -> (src1Data + imm),
+            
     )
-  ) + imm
+  )
 
   decodeBack.valid          := !shouldWait
   decodeBack.willTakeBranch := willTakeBranch
   decodeBack.branchPc       := branchPc
 
   decodeOut.bits.data.dnpc := Mux(shouldWait, decodeInReg.pc, Mux(willTakeBranch, branchPc, decodeInReg.pc + 4.U))
+
+  csrIO.csrBehave := controlDecoder.output.csrbehave
   // debug
   decodeOut.bits.debug.pc   := decodeInReg.debug.pc
   decodeOut.bits.debug.inst := inst

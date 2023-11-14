@@ -26,7 +26,6 @@ class ExeIn extends Bundle {
 class InstructionExecuteUnit extends Module {
   val exeIn    = IO(Flipped(Decoupled(new ExeIn())))
   val exeOut   = IO(Decoupled(new MemRWIn()))
-  val csrIn    = IO(Input(UInt(64.W)))
   val toDecode = IO(Output(UInt(5.W)))
 
   val alu = Module(new ALU)
