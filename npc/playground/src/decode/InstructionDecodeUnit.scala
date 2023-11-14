@@ -112,7 +112,7 @@ class InstructionDecodeUnit extends Module {
     Seq(fromExe, fromMemu, fromWbu).map(bundle => bundle.csrIndex).reduce((prev, s) => VecInit(prev ++ s))
   shouldWait := (rs1 =/= 0.U && regVec.contains(rs1)) ||
     (rs2 =/= 0.U && regVec.contains(rs2)) ||
-    (controlDecoder.output.pcsrc === PcSrc.csr.asUInt &&
+    (willTakeBranch && controlDecoder.output.pcsrc === PcSrc.csr.asUInt &&
       csrVec.contains(
         ControlRegisters.behaveReadDependency(controlDecoder.output.csrbehave)
       ))
