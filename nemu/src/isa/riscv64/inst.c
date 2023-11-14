@@ -98,7 +98,7 @@ static int decode_exec(Decode *s) {
   INSTPAT("??????? ????? ????? 111 ????? 11100 11", csrrci , I, Reg(dest) = Csr(imm); Csr(imm) &= uimm);
   INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , I, 
     word_t mstatus = csrs("mstatus"); 
-    csrs("mstatus") = ((mstatus & 0xFFFFF0000) | 0x0080 | (BITS(mstatus, 7, 7) << 3)); 
+    csrs("mstatus") = ((mstatus & 0xFFFFF0000) | (BITS(mstatus, 7, 7) << 3)); //| 0x80;
     s->dnpc = csrs("mepc"); 
     current_status = ((mstatus >> 11) & 3); 
     etrace(false, cpu.pc, mstatus);
