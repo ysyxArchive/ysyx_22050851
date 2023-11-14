@@ -25,15 +25,20 @@ class DecodeBack extends Bundle {
   val branchPc       = Output(UInt(64.W))
 }
 
+class ToDecode extends Bundle {
+  val regIndex = Input(UInt(5.W))
+  val csrIndex = Input(Vec(3, UInt(12.W)))
+}
+
 class InstructionDecodeUnit extends Module {
   val regIO      = IO(Flipped(new RegReadIO()))
   val csrIO      = IO(Flipped(new ControlRegisterFileDataIO()))
   val decodeIn   = IO(Flipped(Decoupled(new DecodeIn())))
   val decodeOut  = IO(Decoupled(new ExeIn()))
   val decodeBack = IO(new DecodeBack())
-  val fromExe    = IO(Input(UInt(5.W)))
-  val fromMemu   = IO(Input(UInt(5.W)))
-  val fromWbu    = IO(Input(UInt(5.W)))
+  val fromExe    = IO(new ToDecode())
+  val fromMemu   = IO(new ToDecode())
+  val fromWbu    = IO(new ToDecode())
 
   val controlDecoder = Module(new InstContorlDecoder)
 
@@ -102,8 +107,15 @@ class InstructionDecodeUnit extends Module {
   )
 
   // RAW check
-  val dstVec = VecInit(fromExe, fromMemu, fromWbu)
-  shouldWait := (rs1 =/= 0.U && dstVec.contains(rs1)) || (rs2 =/= 0.U && dstVec.contains(rs2))
+  val regVec = VecInit(Seq(fromExe, fromMemu, fromWbu).map(bundle => bundle.regIndex))
+  val csrVec =
+    Seq(fromExe, fromMemu, fromWbu).map(bundle => bundle.csrIndex).reduce((prev, s) => VecInit(prev ++ s))
+  shouldWait := (rs1 =/= 0.U && regVec.contains(rs1)) ||
+    (rs2 =/= 0.U && regVec.contains(rs2)) ||
+    (controlDecoder.output.pcsrc === PcSrc.csr.asUInt &&
+      csrVec.contains(
+        ControlRegisters.behaveReadDependency(controlDecoder.output.csrbehave)
+      ))
 
   // branch check
   willTakeBranch := !shouldWait && MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
@@ -121,7 +133,7 @@ class InstructionDecodeUnit extends Module {
     EnumSeq(
       PcSrc.pc -> (decodeInReg.pc + imm),
       PcSrc.src1 -> (src1Data + imm),
-            
+      PcSrc.csr -> csrIO.output
     )
   )
 

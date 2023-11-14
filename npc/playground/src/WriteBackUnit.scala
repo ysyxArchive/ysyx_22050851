@@ -28,10 +28,8 @@ class WBIn extends Bundle {
 
 class WriteBackUnit extends Module {
   val wbIn = IO(Flipped(Decoupled(new WBIn())))
-  // val memIO      = IO(Flipped(new CacheIO(64, 64)))
   val regWriteIO = IO(Flipped(new RegWriteIO()))
   val regReadIO  = IO(Input(new RegReadIO()))
-  val csrIn      = IO(Input(UInt(64.W)))
   val csrControl = IO(Flipped(new ControlRegisterFileControlIO()))
   val toDecode   = IO(Output(UInt(5.W)))
 
@@ -56,8 +54,6 @@ class WriteBackUnit extends Module {
       PCAddrSrc.one -> true.B
     )
   )
-  val csrInReg = RegInit(csrIn)
-  csrInReg        := Mux(wbIn.valid, csrIn, csrInReg)
   regWriteIO.dnpc := Mux(wbInValid, wbInReg.data.dnpc, regReadIO.pc)
   val regwdata = MuxLookup(wbInReg.control.regwritemux, wbInReg.data.alu)(
     EnumSeq(
@@ -67,7 +63,7 @@ class WriteBackUnit extends Module {
       RegWriteMux.aluneg -> Utils.zeroExtend(wbInReg.data.signals.isNegative, 1, 64),
       RegWriteMux.alunotcarryandnotzero -> Utils
         .zeroExtend(!wbInReg.data.signals.isCarry && !wbInReg.data.signals.isZero, 1, 64),
-      RegWriteMux.csr -> csrIn
+      RegWriteMux.csr -> csrControl.output
     )
   )
   regWriteIO.wdata := Mux(wbInReg.control.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)
