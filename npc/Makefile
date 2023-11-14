@@ -17,7 +17,7 @@ SCALAS = $(shell find $(abspath ./playground/src) -name "*.scala") $(GEN_SCALA)
 SCALATESTS = $(shell find $(abspath ./playground/src) -name "*.scala")
 INC_PATH = $(abspath ./include)
 INCFLAGS = $(addprefix -I, $(INC_PATH))
-CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" 
+CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" -O2
 LDFLAGS += -lSDL2 -lSDL2_image -ldl
 override ARGS += --diff=${NEMU_HOME}/build/riscv64-nemu-interpreter-so
 export PATH := $(PATH):$(abspath ./tools)
