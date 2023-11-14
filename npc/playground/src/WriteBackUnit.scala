@@ -68,15 +68,15 @@ class WriteBackUnit extends Module {
   )
   regWriteIO.wdata := Mux(wbInReg.control.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)
   // csr
-  csrControl.control.csrBehave  := Mux(wbIn.valid, wbInReg.control.csrbehave, CsrBehave.no.asUInt)
-  csrControl.control.csrSetmode := Mux(wbIn.valid, wbInReg.control.csrsetmode, CsrSetMode.origin.asUInt)
+  csrControl.control.csrBehave  := Mux(wbInValid, wbInReg.control.csrbehave, CsrBehave.no.asUInt)
+  csrControl.control.csrSetmode := Mux(wbInValid, wbInReg.control.csrsetmode, CsrSetMode.origin.asUInt)
   csrControl.control.csrSource  := wbInReg.control.csrsource
   csrControl.data               := wbInReg.data
 
   // blackBoxHalt
   val blackBox = Module(new BlackBoxHalt);
-  blackBox.io.halt     := wbIn.valid && wbInReg.control.goodtrap
-  blackBox.io.bad_halt := wbIn.valid && wbInReg.control.badtrap
+  blackBox.io.halt     := wbInValid && wbInReg.control.goodtrap
+  blackBox.io.bad_halt := wbInValid && wbInReg.control.badtrap
 
   wbIn.ready := true.B
 
