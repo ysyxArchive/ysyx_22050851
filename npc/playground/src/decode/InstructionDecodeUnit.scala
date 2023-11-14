@@ -110,15 +110,15 @@ class InstructionDecodeUnit extends Module {
   val regVec = VecInit(Seq(fromExe, fromMemu, fromWbu).map(bundle => bundle.regIndex))
   val csrVec =
     Seq(fromExe, fromMemu, fromWbu).map(bundle => bundle.csrIndex).reduce((prev, s) => VecInit(prev ++ s))
-  shouldWait := (rs1 =/= 0.U && regVec.contains(rs1)) ||
+  shouldWait := dataValid && ((rs1 =/= 0.U && regVec.contains(rs1)) ||
     (rs2 =/= 0.U && regVec.contains(rs2)) ||
     (willTakeBranch && controlDecoder.output.pcsrc === PcSrc.csr.asUInt &&
       csrVec.contains(
         ControlRegisters.behaveReadDependency(controlDecoder.output.csrbehave)
-      ))
+      )))
 
   // branch check
-  willTakeBranch := MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
+  willTakeBranch := dataValid && MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
     EnumSeq(
       PCAddrSrc.aluzero -> (src1Data === src2Data),
       PCAddrSrc.alunotneg -> (src1Data.asSInt >= src2Data.asSInt),
@@ -137,7 +137,7 @@ class InstructionDecodeUnit extends Module {
     )
   )
 
-  decodeBack.valid          := !shouldWait
+  decodeBack.valid          := dataValid && !shouldWait
   decodeBack.willTakeBranch := willTakeBranch
   decodeBack.branchPc       := branchPc
 
