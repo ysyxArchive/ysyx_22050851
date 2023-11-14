@@ -27,14 +27,11 @@ class WBIn extends Bundle {
 }
 
 class WriteBackUnit extends Module {
-  val wbIn = IO(Flipped(Decoupled(new WBIn())))
-  // val memIO      = IO(Flipped(new CacheIO(64, 64)))
+  val wbIn       = IO(Flipped(Decoupled(new WBIn())))
   val regWriteIO = IO(Flipped(new RegWriteIO()))
   val regReadIO  = IO(Input(new RegReadIO()))
-  val csrIn      = IO(Input(UInt(64.W)))
-  val csrControl = IO(Flipped(new CSRFileControl()))
-  val csrData    = IO(new WBDataIn())
-  val toDecode   = IO(Output(UInt(5.W)))
+  val csrControl = IO(Flipped(new ControlRegisterFileControlIO()))
+  val toDecode   = IO(Flipped(new ToDecode()))
 
   val wbInReg   = Reg(new WBIn())
   val wbInValid = Reg(new Bool())
@@ -57,8 +54,6 @@ class WriteBackUnit extends Module {
       PCAddrSrc.one -> true.B
     )
   )
-  val csrInReg = RegInit(csrIn)
-  csrInReg        := Mux(wbIn.valid, csrIn, csrInReg)
   regWriteIO.dnpc := Mux(wbInValid, wbInReg.data.dnpc, regReadIO.pc)
   val regwdata = MuxLookup(wbInReg.control.regwritemux, wbInReg.data.alu)(
     EnumSeq(
@@ -68,22 +63,27 @@ class WriteBackUnit extends Module {
       RegWriteMux.aluneg -> Utils.zeroExtend(wbInReg.data.signals.isNegative, 1, 64),
       RegWriteMux.alunotcarryandnotzero -> Utils
         .zeroExtend(!wbInReg.data.signals.isCarry && !wbInReg.data.signals.isZero, 1, 64),
-      RegWriteMux.csr -> csrIn
+      RegWriteMux.csr -> csrControl.output
     )
   )
   regWriteIO.wdata := Mux(wbInReg.control.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)
   // csr
-  csrControl.csrBehave  := Mux(wbIn.valid, wbInReg.control.csrbehave, CsrBehave.no.asUInt)
-  csrControl.csrSetmode := Mux(wbIn.valid, wbInReg.control.csrsetmode, CsrSetMode.origin.asUInt)
-  csrControl.csrSource  := wbInReg.control.csrsource
-  csrData               := wbInReg.data
+  csrControl.control.csrBehave  := Mux(wbInValid, wbInReg.control.csrbehave, CsrBehave.no.asUInt)
+  csrControl.control.csrSetmode := Mux(wbInValid, wbInReg.control.csrsetmode, CsrSetMode.origin.asUInt)
+  csrControl.control.csrSource  := wbInReg.control.csrsource
+  csrControl.data               := wbInReg.data
 
   // blackBoxHalt
   val blackBox = Module(new BlackBoxHalt);
-  blackBox.io.halt     := wbIn.valid && wbInReg.control.goodtrap
-  blackBox.io.bad_halt := wbIn.valid && wbInReg.control.badtrap
+  blackBox.io.halt     := wbInValid && wbInReg.control.goodtrap
+  blackBox.io.bad_halt := wbInValid && wbInReg.control.badtrap
 
   wbIn.ready := true.B
 
-  toDecode := Mux(wbInValid, wbInReg.data.dst, 0.U)
+  toDecode.regIndex := Mux(wbInValid, wbInReg.data.dst, 0.U)
+  toDecode.csrIndex := Mux(
+    wbInValid,
+    ControlRegisters.behaveDependency(wbInReg.control.csrbehave, wbInReg.control.csrsetmode, wbInReg.data.imm),
+    VecInit.fill(3)(0.U(12.W))
+  )
 }

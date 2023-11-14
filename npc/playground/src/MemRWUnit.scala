@@ -30,7 +30,7 @@ class MemRWUnit extends Module {
   val memIO    = IO(Flipped(new CacheIO(64, 64)))
   val memIn    = IO(Flipped(Decoupled(new MemRWIn())))
   val memOut   = IO(Decoupled(new WBIn()))
-  val toDecode = IO(Output(UInt(5.W)))
+  val toDecode = IO(Flipped(new ToDecode()))
 
   val memInReg = Reg(new MemRWIn())
   memInReg := Mux(memIn.fire, memIn.bits, memInReg)
@@ -98,7 +98,12 @@ class MemRWUnit extends Module {
   memOut.bits.control       := memInReg.control
   memOut.bits.enable        := memInReg.enable
 
-  toDecode := Mux(dataValid, memInReg.data.dst, 0.U)
-
   memIO.writeRes.ready := false.B
+
+  toDecode.regIndex := Mux(dataValid, memInReg.data.dst, 0.U)
+  toDecode.csrIndex := Mux(
+    dataValid,
+    ControlRegisters.behaveDependency(memInReg.control.csrbehave, memInReg.control.csrsetmode, memInReg.data.imm),
+    VecInit.fill(3)(0.U(12.W))
+  )
 }

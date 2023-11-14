@@ -7,6 +7,7 @@ import decode._
 import utils._
 import chisel3.util.Fill
 import chisel3.internal.firrtl.Index
+import chisel3.util.MuxCase
 
 class Mstatus(val value: UInt) {
   class OffsetWidth(val offset: Int, val width: Int) {
@@ -57,6 +58,22 @@ class Mstatus(val value: UInt) {
 }
 
 class ControlRegisters {
+
+  val registers = ControlRegisters.list.map(info => RegInit(info.initVal.U(64.W)))
+
+  def apply(id: UInt): UInt = MuxLookup(id, 0.U)(
+    ControlRegisters.list.zipWithIndex.map {
+      case (info, index) => info.id.U -> registers(index)
+    }.toSeq
+  )
+
+  def apply(name: String): UInt = apply(ControlRegisters.getInfoByName(name).id.U)
+
+  def set(name: String, value: UInt) = registers(ControlRegisters.getIndexByName(name)) := value
+
+}
+
+object ControlRegisters {
   class ControlRegisterInfo(val name: String, val id: Int, val initVal: Int = 0)
   val list = List(
     new ControlRegisterInfo("mepc", 0x341),
@@ -67,22 +84,32 @@ class ControlRegisters {
     new ControlRegisterInfo("mscratch", 0x340)
   )
 
-  val registers = list.map(info => RegInit(info.initVal.U(64.W)))
-
   def getIndexByName(name: String) = list.indexWhere(info => { info.name == name })
 
   def getInfoByName(name: String) = list(getIndexByName(name))
 
-  def apply(id: UInt): UInt = MuxLookup(id, 0.U)(
-    list.zipWithIndex.map {
-      case (info, index) => info.id.U -> registers(index)
-    }.toSeq
-  )
+  def namesToId(names: Seq[String]) = names.map(name => getInfoByName(name).id.U(12.W))
 
-  def apply(name: String): UInt = apply(getInfoByName(name).id.U)
+  def behaveDependency(behave: UInt, setMode: UInt, imm: UInt) =
+    MuxLookup(behave, VecInit.fill(3)(0.U(12.W)))(
+      EnumSeq(
+        CsrBehave.ecall -> VecInit(namesToId(Seq("mepc", "mstatus", "mcause"))),
+        CsrBehave.mret -> VecInit(namesToId(Seq("mstatus")) ++ Seq(0.U(12.W), 0.U(12.W))),
+        CsrBehave.no -> Mux(
+          setMode =/= CsrSetMode.origin.asUInt,
+          VecInit(imm(11, 0), 0.U(12.W), 0.U(12.W)),
+          VecInit.fill(3)(0.U(12.W))
+        )
+      )
+    )
 
-  def set(name: String, value: UInt) = registers(getIndexByName(name)) := value
-
+  def behaveReadDependency(behave: UInt) =
+    MuxLookup(behave, 0.U(12.W))(
+      EnumSeq(
+        CsrBehave.ecall -> getInfoByName("mtvec").id.U(12.W),
+        CsrBehave.mret -> getInfoByName("mepc").id.U(12.W)
+      )
+    )
 }
 
 object PrivMode {
@@ -97,18 +124,23 @@ class CSRFileControl extends Bundle {
   val csrSetmode = Input(UInt(CsrSetMode.getWidth.W))
 }
 
-class ControlRegisterFileIO extends Bundle {
+class ControlRegisterFileControlIO extends Bundle {
   val data    = Flipped(new WBDataIn())
   val control = new CSRFileControl()
   val output  = Output(UInt(64.W))
 }
+class ControlRegisterFileDataIO extends Bundle {
+  val output    = Output(UInt(64.W))
+  val csrBehave = Input(UInt(CsrBehave.getWidth.W))
+}
 
 class ControlRegisterFile extends Module {
-  val io       = IO(new ControlRegisterFileIO())
-  val debugOut = IO(Output(Vec(6, UInt(64.W))))
+  val controlIO = IO(new ControlRegisterFileControlIO())
+  val dataIO    = IO(new ControlRegisterFileDataIO())
+  val debugOut  = IO(Output(Vec(6, UInt(64.W))))
 
-  val uimm  = io.data.src1
-  val csrId = io.data.imm
+  val uimm  = controlIO.data.src1
+  val csrId = controlIO.data.imm
 
   val register = new ControlRegisters()
 
@@ -117,13 +149,13 @@ class ControlRegisterFile extends Module {
   val mstatus = new Mstatus(register("mstatus"))
 
   val currentMode = RegInit(PrivMode.M)
-  currentMode := MuxLookup(io.control.csrBehave, currentMode)(
+  currentMode := MuxLookup(controlIO.control.csrBehave, currentMode)(
     EnumSeq(CsrBehave.ecall -> PrivMode.M, CsrBehave.mret -> mstatus("MPP"))
   )
 
-  val mask = MuxLookup(io.control.csrSource, io.data.src1Data)(
+  val mask = MuxLookup(controlIO.control.csrSource, controlIO.data.src1Data)(
     EnumSeq(
-      CsrSource.src1 -> io.data.src1Data,
+      CsrSource.src1 -> controlIO.data.src1Data,
       CsrSource.uimm -> uimm
     )
   )
@@ -131,14 +163,14 @@ class ControlRegisterFile extends Module {
   val outputVal = register(csrId)
 
   for (i <- 0 to register.registers.length - 1) {
-    val name = register.list(i).name
-    val id   = register.list(i).id
+    val name = ControlRegisters.list(i).name
+    val id   = ControlRegisters.list(i).id
     name match {
       case "mstatus" => {
         register.set(
           "mstatus",
           MuxLookup(
-            io.control.csrBehave,
+            controlIO.control.csrBehave,
             Mux(csrId === id.U, writeBack, register("mstatus"))
           )(
             EnumSeq(
@@ -152,8 +184,8 @@ class ControlRegisterFile extends Module {
         register.set(
           "mepc",
           Mux(
-            io.control.csrBehave === CsrBehave.ecall.asUInt,
-            io.data.pc,
+            controlIO.control.csrBehave === CsrBehave.ecall.asUInt,
+            controlIO.data.pc,
             Mux(csrId === id.U, writeBack, register("mepc"))
           )
         )
@@ -162,7 +194,7 @@ class ControlRegisterFile extends Module {
         register.set(
           "mcause",
           Mux(
-            io.control.csrBehave === CsrBehave.ecall.asUInt,
+            controlIO.control.csrBehave === CsrBehave.ecall.asUInt,
             Mux(currentMode === PrivMode.U, 0x8.U, 0xb.U),
             Mux(csrId === id.U, writeBack, register("mcause"))
           )
@@ -174,7 +206,7 @@ class ControlRegisterFile extends Module {
     }
   }
 
-  writeBack := MuxLookup(io.control.csrSetmode, outputVal)(
+  writeBack := MuxLookup(controlIO.control.csrSetmode, outputVal)(
     EnumSeq(
       CsrSetMode.clear -> (outputVal & ~mask),
       CsrSetMode.set -> (outputVal | mask),
@@ -182,7 +214,7 @@ class ControlRegisterFile extends Module {
     )
   )
 
-  io.output := MuxLookup(io.control.csrBehave, outputVal)(
+  controlIO.output := MuxLookup(controlIO.control.csrBehave, 0.U)(
     EnumSeq(
       CsrBehave.no -> outputVal,
       CsrBehave.ecall -> register("mtvec"),
@@ -190,4 +222,10 @@ class ControlRegisterFile extends Module {
     )
   )
 
+  dataIO.output := MuxLookup(dataIO.csrBehave, 0.U)(
+    EnumSeq(
+      CsrBehave.ecall -> register("mtvec"),
+      CsrBehave.mret -> register("mepc")
+    )
+  )
 }
