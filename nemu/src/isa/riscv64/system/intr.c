@@ -22,10 +22,10 @@ clock_t start = 0;
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   word_t mstatus = csrs("mstatus");
   csrs("mepc") = cpu.pc;
-  csrs("mstatus") = ((mstatus | (current_status << 11))  // set MPP to priv mode
-                     & (0xFFFFFFFFFFFFFF77))             // set MIE MPIE 0
-                    | (BITS(mstatus, 3, 3) << 7)         // set MIE to MPIE
-      ;
+  csrs("mstatus") = ((mstatus | (current_status << 11)) // set MPP to priv mode
+                    & (0xFFFFFFFFFFFFFF77))          // set MIE MPIE 0
+                    | (BITS(mstatus, 3, 3) << 7)   // set MIE to MPIE
+                    ;
   csrs("mcause") = NO;
   current_status = PRIV_M;
   etrace(true, cpu.pc, mstatus);
@@ -35,12 +35,12 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
 #define IRQ_TIMER 0x8000000000000007
 
 word_t isa_query_intr() {
-  // if (!(csrs("mstatus") & 0x8)) {
+  if (!(csrs("mstatus") & 0x8)) {
     return INTR_EMPTY;
-  // }
+  }
   clock_t end = clock();
-  double elapsed = ((double)(end - start)) / CLOCKS_PER_SEC;  // 计算经过的秒数
-  if (elapsed >= 1) {  // 每秒一次的时钟中断
+  double elapsed = ((double)(end - start)) / CLOCKS_PER_SEC; // 计算经过的秒数
+  if (elapsed >= 1) { // 每秒一次的时钟中断
     Log("trigger!");
     start = end;
     cpu.INTR = false;

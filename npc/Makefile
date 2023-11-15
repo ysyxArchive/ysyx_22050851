@@ -3,12 +3,15 @@ TOPNAME = CPU
 BUILD_DIR = ./build
 # verilator build files
 OBJ_DIR = $(BUILD_DIR)/obj_dir
+OBJ_DIR_DEBUG = $(BUILD_DIR)/obj_dir_debug
 
 override VERILATOR =  verilator 
 VERILATOR_CFLAGS += -MMD --build -cc -j 0 \
-				-O3 --x-assign fast --x-initial fast --noassert --trace 
+				-O3 --x-assign fast --x-initial fast --noassert 
 VERILATOR_CFLAGS += -Wno-WIDTH # 记得删掉
+VERILATOR_DEBUG_CFLAGS = $(VERILATOR_CFLAGS) --trace 
 BIN = $(BUILD_DIR)/$(TOPNAME)
+BIN_DEBUG = $(BUILD_DIR)/$(TOPNAME)_debug
 GEN_SCALA = $(abspath ./playground/src/decode/InstContorlDecoder.scala)
 VSRCS = $(shell find $(abspath ./build) -name "*.v" -or -name "*.sv")
 CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
@@ -17,25 +20,31 @@ SCALAS = $(shell find $(abspath ./playground/src) -name "*.scala") $(GEN_SCALA)
 SCALATESTS = $(shell find $(abspath ./playground/src) -name "*.scala")
 INC_PATH = $(abspath ./include)
 INCFLAGS = $(addprefix -I, $(INC_PATH))
-CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" -O3
+CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" 
 LDFLAGS += -lSDL2 -lSDL2_image -ldl
-override ARGS += --diff=${NEMU_HOME}/build/riscv64-nemu-interpreter-so
+ARGS_DEBUG = $(ARGS) --diff=${NEMU_HOME}/build/riscv64-nemu-interpreter-so
 export PATH := $(PATH):$(abspath ./tools)
 
 default: $(BIN)
 
 $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 	$(VERILATOR) $(VERILATOR_CFLAGS) \
-		--top-module $(TOPNAME) $(CSRCS) -sv $(VSRCS)\
+		--top-module $(TOPNAME) $(CSRCS) -sv $(VSRCS) \
 		$(addprefix -CFLAGS , $(CFLAGS))   \
 		$(addprefix -LDFLAGS , $(LDFLAGS)) \
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
 
+$(BIN_DEBUG): $(INCLUDES) $(CSRCS) $(VSRCS)
+	$(VERILATOR) $(VERILATOR_DEBUG_CFLAGS) \
+		--top-module $(TOPNAME) $(CSRCS) -sv $(VSRCS)\
+		$(addprefix -CFLAGS , $(CFLAGS))   \
+		$(addprefix -LDFLAGS , $(LDFLAGS)) \
+		--Mdir $(OBJ_DIR_DEBUG) --exe -o $(abspath $(BIN_DEBUG))
+
+
 $(VSRCS): $(SCALAS)
 	make verilog
-	touch $(VSRCS)
-
 $(GEN_SCALA): playground/scripts/codemap.csv playground/scripts/parsedecode.py
 	python playground/scripts/parsedecode.py
 
@@ -67,18 +76,22 @@ build: $(BIN)
 	
 
 
-sim: $(BIN)
+run: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 	$(BIN) $(IMG) $(ARGS) 
+
+debug: $(BIN_DEBUG)
+	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
+	$(BIN_DEBUG) $(IMG) $(ARGS_DEBUG) 
+
 
 test: $(SCALATESTS)
 	mill -i __.test
 
-run:
-	make sim
+
 
 gdb: $(BIN)
 	gdb -s $(BIN) --args $(BIN) $(IMG) $(ARGS) h 
 	
-.PHONY: test verilog help compile bsp reformat checkformat clean sim build gdb
+.PHONY: test verilog help compile bsp reformat checkformat clean build gdb debug
 include ../Makefile
