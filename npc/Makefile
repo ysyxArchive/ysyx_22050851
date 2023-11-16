@@ -13,7 +13,7 @@ VERILOG_DIR = $(if $(IS_DEBUG), $(join $(BUILD_DIR), /veri_debug), $(join $(BUIL
 VERILATOR_FLAGS += -MMD --build -cc -j 0 -O3 --x-assign fast --x-initial fast --noassert -Wno-WIDTH $(if $(IS_DEBUG), --trace) 
 
 # source files
-VSRCS = $(shell find $(abspath ./build) -name "*.v" -or -name "*.sv")
+VSRCS = $(shell find $(abspath $(VERILOG_DIR)) -name "*.v" -or -name "*.sv")
 CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
 INCLUDES = $(shell find $(abspath ./include) -name "*.h")
 GEN_SCALA = $(abspath ./playground/src/decode/InstContorlDecoder.scala)
@@ -26,7 +26,7 @@ INCFLAGS = $(addprefix -I, $(INC_PATH))
 CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" $(if $(IS_DEBUG), -DDEBUG,)   
 LDFLAGS += -lSDL2 -lSDL2_image -ldl
 ARGS += $(if $(IS_DEBUG), --diff=${NEMU_HOME}/build/riscv64-nemu-interpreter-so)
-MILL_FLAGS = -td $(BUILD_DIR) $(if $(IS_DEBUG), --debug,)
+MILL_FLAGS = -td $(VERILOG_DIR) $(if $(IS_DEBUG), --debug,)
 export PATH := $(PATH):$(abspath ./tools)
 $(shell mkdir -p $(BUILD_DIR))
 
