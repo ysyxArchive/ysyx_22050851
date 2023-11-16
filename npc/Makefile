@@ -45,7 +45,7 @@ $(VSRCS): $(SCALAS)
 	$(call git_commit, "generate verilog")
 	@if [ -n "$(IS_DEBUG)" ]; then \
         alias firtool=firtool_debug;\
-		which firtool\
+		which firtool;\
     fi
 	mill -i __.test.runMain Elaborate --split-verilog --warnings-as-errors $(MILL_FLAGS)
 	touch $(VSRCS)
