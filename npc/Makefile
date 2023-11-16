@@ -4,7 +4,7 @@ TOPNAME = $(if $(IS_DEBUG), CPU_DEBUG, CPU)
 
 BUILD_DIR = ./build  # all build files dir
 
-BIN = $(join $(BUILD_DIR), /, $(TOPNAME)) 
+BIN = $(join $(BUILD_DIR), $(join /, $(TOPNAME))) 
 
 
 # verilator build files
