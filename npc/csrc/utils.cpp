@@ -68,10 +68,11 @@ void load_files() {
   }
   Log("detected img file: %s", img_file);
   init_memory(img_file);
-
+#ifdef DEBUG
   Assert(diff_so_file, "difftest ref file not found!");
   Log("detected so file: %s", diff_so_file);
   load_difftest_so(diff_so_file);
+#endif
 }
 
 VerilatedVcdC* tfp;

@@ -154,9 +154,11 @@ int main(int argc, char* argv[]) {
   } else {
     Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
   }
+#ifdef DEBUG
   if (!lightSSS.is_child()) {
     lightSSS.wakeup_child(npc_clock);
   }
+#endif
   Log("execute speed: %.2lf inst/s,  %ld insts, %.3f seconds",
       (double)inst_count * 1000 / duration, inst_count,
       (double)duration / 1000);
