@@ -85,7 +85,7 @@ void one_step() {
 #ifdef DEBUG
   update_cpu();
 #endif
-
+  Log("123");
   static int lastpcchange = 0;
   static uint64_t lastpc = 0;
   if (lastpc == cpu.pc) {
