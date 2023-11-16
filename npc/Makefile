@@ -43,7 +43,7 @@ $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 
 $(VSRCS): $(SCALAS)
 	$(call git_commit, "generate verilog")
-	@if [ -n "$(IS_DEBUG)" ]; then \
+	if [ -n "$(IS_DEBUG)" ]; then \
         alias firtool=firtool_debug;\
 		which firtool;\
     fi
