@@ -27,6 +27,7 @@ LDFLAGS += -lSDL2 -lSDL2_image -ldl
 ARGS += $(if $(IS_DEBUG), --diff=${NEMU_HOME}/build/riscv64-nemu-interpreter-so)
 MILL_FLAGS = -td $(BUILD_DIR) $(if $(IS_DEBUG) --debug,)
 export PATH := $(PATH):$(abspath ./tools)
+$(shell mkdir -p $(BUILD_DIR))
 
 default: $(BIN)
 
@@ -39,13 +40,16 @@ $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 
 $(VSRCS): $(SCALAS)
 	$(call git_commit, "generate verilog")
-	mkdir -p $(BUILD_DIR)
 	mill -i __.test.runMain Elaborate --split-verilog --warnings-as-errors $(MILL_FLAGS)
 	touch $(VSRCS)
 
 $(GEN_SCALA): playground/scripts/codemap.csv playground/scripts/parsedecode.py
 	python playground/scripts/parsedecode.py
 
+verilog:
+	$(call git_commit, "generate verilog")
+	mill -i __.test.runMain Elaborate --split-verilog --warnings-as-errors $(MILL_FLAGS)
+	touch $(VSRCS)
 
 help:
 	mill -i __.test.runMain Elaborate --help
