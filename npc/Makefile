@@ -35,6 +35,7 @@ $(shell mkdir -p $(BUILD_DIR))
 default: $(BIN)
 
 $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
+	which firtool
 	$(VERILATOR) $(VERILATOR_FLAGS) \
 		--top-module $(TOPNAME) $(CSRCS) -sv $(VSRCS) \
 		$(addprefix -CFLAGS , $(CFLAGS))   \
