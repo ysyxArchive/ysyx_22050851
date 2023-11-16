@@ -34,7 +34,6 @@ $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 		$(addprefix -LDFLAGS , $(LDFLAGS)) \
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
-
 $(BIN_DEBUG): $(INCLUDES) $(CSRCS) $(VSRCS)
 	$(VERILATOR) $(VERILATOR_DEBUG_CFLAGS) \
 		--top-module $(TOPNAME) $(CSRCS) -sv $(VSRCS)\
@@ -87,8 +86,6 @@ debug: $(BIN_DEBUG)
 
 test: $(SCALATESTS)
 	mill -i __.test
-
-
 
 gdb: $(BIN)
 	gdb -s $(BIN) --args $(BIN) $(IMG) $(ARGS) h 
