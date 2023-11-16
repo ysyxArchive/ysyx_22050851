@@ -5,11 +5,11 @@ TOPNAME = CPU
 
 BUILD_DIR = ./build  # all build files dir
 
-BIN = $(join $(BUILD_DIR), $(join /, $(if $(IS_DEBUG) $(join $(TOPNAME), _DEBUG), $(TOPNAME)))) 
+BIN = $(join $(BUILD_DIR), $(join /, $(if $(IS_DEBUG), $(join $(TOPNAME), _DEBUG), $(TOPNAME)))) 
 
 $(shell "echo $(BIN)")
 # verilator build files
-OBJ_DIR = $(if $(IS_DEBUG) $(join $(BUILD_DIR), /obj_dir_debug), $(join $(BUILD_DIR), /obj_dir_debug)) 
+OBJ_DIR = $(if $(IS_DEBUG), $(join $(BUILD_DIR), /obj_dir_debug), $(join $(BUILD_DIR), /obj_dir_debug)) 
 
 VERILATOR_FLAGS += -MMD --build -cc -j 0 -O3 --x-assign fast --x-initial fast --noassert -Wno-WIDTH $(if $(IS_DEBUG), --trace) 
 
