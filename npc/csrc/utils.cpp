@@ -78,17 +78,19 @@ void load_files() {
 VerilatedVcdC* tfp;
 VCPU* top;
 extern LightSSS lightSSS;
-#ifdef DEBUG
 void init_vcd_trace() {
   VerilatedContext* contextp = new VerilatedContext;
+#ifdef DEBUG
   Verilated::traceEverOn(true);  // 导出vcd波形需要加此语句
   tfp = new VerilatedVcdC();     // 导出vcd波形需要加此语句
+#endif
   top = new VCPU{contextp};
   top->reset = false;
+#ifdef DEBUG
   top->trace(tfp, 0);
   tfp->open("wave.vcd");  // 打开vcd
-}
 #endif
+}
 
 extern int npc_clock;
 int tfp_clock = 0;
