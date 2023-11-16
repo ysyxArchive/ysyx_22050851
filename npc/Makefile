@@ -35,7 +35,7 @@ $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
 $(BIN_DEBUG): $(INCLUDES) $(CSRCS) $(VSRCS)
-	$(VERILATOR) $(VERILATOR_DEBUG_'FLAGS) \
+	$(VERILATOR) $(VERILATOR_DEBUG_FLAGS) \
 		--top-module $(TOPNAME) $(CSRCS) -sv $(VSRCS)\
 		$(addprefix -CFLAGS , $(CFLAGS))   \
 		$(addprefix -LDFLAGS , $(LDFLAGS)) \
