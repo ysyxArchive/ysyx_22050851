@@ -79,7 +79,7 @@ run: $(BIN)
 
 debug: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-	echo $(MAKECMDGOALS) 
+	echo $(IS_DEBUG) 
 	$(BIN) $(IMG) $(ARGS) 
 
 test: $(SCALATESTS)
