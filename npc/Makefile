@@ -7,7 +7,7 @@ BUILD_DIR = ./build  # all build files dir
 BIN = $(BUILD_DIR)/$(TOPNAME)
 
 # verilator build files
-OBJ_DIR = $(if $(IS_DEBUG), $(BUILD_DIR)/obj_dir_debug, $(BUILD_DIR)/obj_dir) 
+OBJ_DIR = $(if $(IS_DEBUG), $(addsuffix, $(BUILD_DIR), /obj_dir_debug), $(addsuffix, $(BUILD_DIR), /obj_dir_debug)) 
 
 VERILATOR_FLAGS += -MMD --build -cc -j 0 -O3 --x-assign fast --x-initial fast --noassert -Wno-WIDTH $(if $(IS_DEBUG), --trace) 
 
