@@ -105,10 +105,12 @@ void one_step() {
   }
   top->clock = 0;
   eval_trace();
-  update_device();
+#ifdef DEBUG
   if ((npc_clock / 2) % LIGHT_SSS_CYCLE_INTERVAL == 0) {
     lightSSS.do_fork();
   }
+#endif
+  update_device();
   cycle_count++;
 }
 
