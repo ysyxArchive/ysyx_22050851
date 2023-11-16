@@ -1,3 +1,2 @@
 #!/usr/bin/env bash
 firtool.elf.strip --lowering-options=disallowLocalVariables,disallowPackedArrays,locationInfoStyle=wrapInAtSquareBracket --split-verilog --preserve-values=all -O=debug $@
-
