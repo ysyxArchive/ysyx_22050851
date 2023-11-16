@@ -25,8 +25,7 @@ uint64_t* cpu_regs = NULL;
 uint64_t* cpu_pc = NULL;
 
 void haltop(unsigned char good_halt) {
-  if (top->reset)
-    return;
+  if (top->reset) return;
   Log("halt from npc, is %s halt", good_halt ? "good" : "bad");
   is_halt = true;
   is_bad_halt = !good_halt;
@@ -55,8 +54,7 @@ extern "C" void mem_read(const svLogicVecVal* addr, svLogicVecVal* ret) {
   ret[1].aval = data >> 32;
 }
 
-extern "C" void mem_write(const svLogicVecVal* addr,
-                          const svLogicVecVal* mask,
+extern "C" void mem_write(const svLogicVecVal* addr, const svLogicVecVal* mask,
                           const svLogicVecVal* data) {
   uint8_t len = 0;
   auto val = mask->aval;
@@ -83,11 +81,12 @@ void one_step() {
   // 记录波形
   top->clock = 1;
   eval_trace();
+#ifdef DEBUG
   update_cpu();
-
+#endif
   static int lastpcchange = 0;
   static uint64_t lastpc = 0;
-  if (lastpc == cpu.pc) {
+  if (lastpc == cpu_regs[32]) {
     lastpcchange++;
     if (lastpcchange > MAX_WAIT_ROUND) {
       Log("error pc not changed for %d cycles", MAX_WAIT_ROUND);
@@ -98,31 +97,42 @@ void one_step() {
     inst_count++;
     lastpcchange = 0;
   }
-  lastpc = cpu.pc;
+  lastpc = cpu_regs[32];
+#ifdef DEBUG
   if (!difftest_check(&cpu)) {
     is_halt = true;
     is_bad_halt = true;
     return;
   }
+#endif
   top->clock = 0;
   eval_trace();
-  update_device();
+#ifdef DEBUG
   if ((npc_clock / 2) % LIGHT_SSS_CYCLE_INTERVAL == 0) {
     lightSSS.do_fork();
   }
+#endif
+  update_device();
   cycle_count++;
 }
 
 int main(int argc, char* argv[]) {
+  Log("running in " MUXDEF(DEBUG, ANSI_FMT("DEBUG", ANSI_FG_YELLOW),
+                           ANSI_FMT("PRODUCT", ANSI_FG_GREEN))
+          ANSI_FMT(" mode", ANSI_FG_BLUE));
   parse_args(argc, argv);
   load_files();
   init_vcd_trace();
   top->reset = false;
   init_device();
+#ifdef DEBUG
   lightSSS.do_fork();
+#endif
   init_npc();
   update_cpu();
+#ifdef DEBUG
   difftest_initial(&cpu);
+#endif
   Log("init_done");
 
   auto start = std::chrono::high_resolution_clock::now();
@@ -146,14 +156,18 @@ int main(int argc, char* argv[]) {
   } else {
     Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
   }
+#ifdef DEBUG
   if (!lightSSS.is_child()) {
     lightSSS.wakeup_child(npc_clock);
   }
+#endif
   Log("execute speed: %.2lf inst/s,  %ld insts, %.3f seconds",
       (double)inst_count * 1000 / duration, inst_count,
       (double)duration / 1000);
   Log("IPC: %.2lf inst/cycle, freq: %.2lf KHz",
       (double)inst_count / cycle_count, (double)cycle_count / duration);
+#ifdef DEBUG
   lightSSS.do_clear();
+#endif
   return (is_bad_halt || ret_value != 0);
 }

@@ -17,6 +17,7 @@ void init_device() {
   texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
                               SDL_TEXTUREACCESS_STATIC, VGA_WIDTH, VGA_HEIGHT);
   init_keyboard();
+  Log("init device done");
 }
 
 void update_vga() {
