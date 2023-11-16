@@ -53,7 +53,7 @@ extern "C" void mem_read(const svLogicVecVal* addr, svLogicVecVal* ret) {
   uint64_t data = read_mem(*(uint64_t*)addr, 8);
   ret[0].aval = data;
   ret[1].aval = data >> 32;
-} 
+}
 
 extern "C" void mem_write(const svLogicVecVal* addr, const svLogicVecVal* mask,
                           const svLogicVecVal* data) {
@@ -82,7 +82,9 @@ void one_step() {
   // 记录波形
   top->clock = 1;
   eval_trace();
+#ifdef DEBUG
   update_cpu();
+#endif
   static int lastpcchange = 0;
   static uint64_t lastpc = 0;
   if (lastpc == cpu_regs[32]) {
