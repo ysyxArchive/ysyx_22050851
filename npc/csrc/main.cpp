@@ -82,11 +82,10 @@ void one_step() {
   // 记录波形
   top->clock = 1;
   eval_trace();
-#ifdef DEBUG
   update_cpu();
   static int lastpcchange = 0;
   static uint64_t lastpc = 0;
-  if (lastpc == cpu.pc) {
+  if (lastpc == cpu_regs[32]) {
     lastpcchange++;
     if (lastpcchange > MAX_WAIT_ROUND) {
       Log("error pc not changed for %d cycles", MAX_WAIT_ROUND);
@@ -97,7 +96,8 @@ void one_step() {
     inst_count++;
     lastpcchange = 0;
   }
-  lastpc = cpu.pc;
+  lastpc = cpu_regs[32];
+#ifdef DEBUG
   if (!difftest_check(&cpu)) {
     is_halt = true;
     is_bad_halt = true;
