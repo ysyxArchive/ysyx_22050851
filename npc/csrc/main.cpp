@@ -82,7 +82,9 @@ void one_step() {
   // 记录波形
   top->clock = 1;
   eval_trace();
+#ifdef DEBUG
   update_cpu();
+#endif
 
   static int lastpcchange = 0;
   static uint64_t lastpc = 0;
