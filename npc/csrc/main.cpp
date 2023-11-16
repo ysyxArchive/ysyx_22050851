@@ -84,7 +84,6 @@ void one_step() {
   eval_trace();
 #ifdef DEBUG
   update_cpu();
-#endif
   static int lastpcchange = 0;
   static uint64_t lastpc = 0;
   if (lastpc == cpu.pc) {
@@ -99,7 +98,6 @@ void one_step() {
     lastpcchange = 0;
   }
   lastpc = cpu.pc;
-#ifdef DEBUG
   if (!difftest_check(&cpu)) {
     is_halt = true;
     is_bad_halt = true;
