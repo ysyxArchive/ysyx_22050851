@@ -114,7 +114,7 @@ void one_step() {
 }
 
 int main(int argc, char* argv[]) {
-  Log("running in " MUXDEF(DEBUG, ANSI_FMT("DEBUG", ANSI_FG_YELLOW), ANSI_FMT("PRODUCT", ANSI_FG_GREEN)) ANSI_FMT("mode ", ANSI_FG_GREEN));
+  Log("running in " MUXDEF(DEBUG, ANSI_FMT("DEBUG", ANSI_FG_YELLOW), ANSI_FMT("PRODUCT", ANSI_FG_GREEN)) ANSI_FMT(" mode", ANSI_FG_BLUE));
   parse_args(argc, argv);
   load_files();
   init_vcd_trace();
