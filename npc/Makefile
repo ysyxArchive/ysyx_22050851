@@ -13,7 +13,7 @@ VERILOG_DIR = $(if $(IS_DEBUG), $(join $(BUILD_DIR), /veri_debug), $(join $(BUIL
 VERILATOR_FLAGS += -MMD --build -cc -j 0 -O3 --x-assign fast --x-initial fast --noassert -Wno-WIDTH $(if $(IS_DEBUG), --trace) 
 
 # source files
-VSRCS = $(shell find $(abspath $(VERILOG_DIR)) -name "*.v" -or -name "*.sv")
+VSRCS = $(shell find $(abspath $(VERILOG_DIR)) -name "*.v" -or -name "*.sv") $(join $(VERILOG_DIR), /CPU.sv)
 CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
 INCLUDES = $(shell find $(abspath ./include) -name "*.h")
 GEN_SCALA = $(abspath ./playground/src/decode/InstContorlDecoder.scala)
