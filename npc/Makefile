@@ -42,6 +42,7 @@ $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
 $(VSRCS): $(SCALAS)
+	echo $(PATH)
 	$(call git_commit, "generate verilog")
 	mill -i __.test.runMain Elaborate --split-verilog --warnings-as-errors $(MILL_FLAGS) 
 	touch $(VSRCS)
