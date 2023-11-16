@@ -43,18 +43,12 @@ $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 
 $(VSRCS): $(SCALAS)
 	$(call git_commit, "generate verilog")
-	alias 
 	if [ -n "$(IS_DEBUG)" ]; then alias firtool=firtool_debug;fi
-	mill -i __.test.runMain Elaborate --split-verilog --warnings-as-errors $(MILL_FLAGS)
+	mill -i __.test.runMain Elaborate --split-verilog --warnings-as-errors $(MILL_FLAGS) --split-verilog -O=release
 	touch $(VSRCS)
 
 $(GEN_SCALA): playground/scripts/codemap.csv playground/scripts/parsedecode.py
 	python playground/scripts/parsedecode.py
-
-verilog:
-	$(call git_commit, "generate verilog")
-	mill -i __.test.runMain Elaborate --split-verilog --warnings-as-errors $(MILL_FLAGS)
-	touch $(VSRCS)
 
 help:
 	mill -i __.test.runMain Elaborate --help
