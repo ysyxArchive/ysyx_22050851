@@ -6,10 +6,10 @@ OBJ_DIR = $(BUILD_DIR)/obj_dir
 OBJ_DIR_DEBUG = $(BUILD_DIR)/obj_dir_debug
 
 override VERILATOR =  verilator 
-VERILATOR_CFLAGS += -MMD --build -cc -j 0 \
+VERILATOR_FLAGS += -MMD --build -cc -j 0 \
 				-O3 --x-assign fast --x-initial fast --noassert 
-VERILATOR_CFLAGS += -Wno-WIDTH # 记得删掉
-VERILATOR_DEBUG_CFLAGS = $(VERILATOR_CFLAGS) --trace -DDEBUG
+VERILATOR_FLAGS += -Wno-WIDTH # 记得删掉
+VERILATOR_DEBUG_FLAGS = $(VERILATOR_FLAGS) --trace
 BIN = $(BUILD_DIR)/$(TOPNAME)
 BIN_DEBUG = $(BUILD_DIR)/$(TOPNAME)_debug
 GEN_SCALA = $(abspath ./playground/src/decode/InstContorlDecoder.scala)
@@ -20,7 +20,7 @@ SCALAS = $(shell find $(abspath ./playground/src) -name "*.scala") $(GEN_SCALA)
 SCALATESTS = $(shell find $(abspath ./playground/src) -name "*.scala")
 INC_PATH = $(abspath ./include)
 INCFLAGS = $(addprefix -I, $(INC_PATH))
-CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" 
+CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" -DDEBUG 
 LDFLAGS += -lSDL2 -lSDL2_image -ldl
 ARGS_DEBUG = $(ARGS) --diff=${NEMU_HOME}/build/riscv64-nemu-interpreter-so
 export PATH := $(PATH):$(abspath ./tools)
@@ -28,14 +28,14 @@ export PATH := $(PATH):$(abspath ./tools)
 default: $(BIN)
 
 $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
-	$(VERILATOR) $(VERILATOR_CFLAGS) \
+	$(VERILATOR) $(VERILATOR_FLAGS) \
 		--top-module $(TOPNAME) $(CSRCS) -sv $(VSRCS) \
 		$(addprefix -CFLAGS , $(CFLAGS))   \
 		$(addprefix -LDFLAGS , $(LDFLAGS)) \
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
 $(BIN_DEBUG): $(INCLUDES) $(CSRCS) $(VSRCS)
-	$(VERILATOR) $(VERILATOR_DEBUG_CFLAGS) \
+	$(VERILATOR) $(VERILATOR_DEBUG_'FLAGS) \
 		--top-module $(TOPNAME) $(CSRCS) -sv $(VSRCS)\
 		$(addprefix -CFLAGS , $(CFLAGS))   \
 		$(addprefix -LDFLAGS , $(LDFLAGS)) \
