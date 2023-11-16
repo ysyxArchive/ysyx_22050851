@@ -1,10 +1,10 @@
 override VERILATOR =  verilator 
 IS_DEBUG = $(filter debug,$(MAKECMDGOALS))
-TOPNAME = $(if $(IS_DEBUG), CPU_DEBUG, CPU)  
+TOPNAME = CPU  
 
 BUILD_DIR = ./build  # all build files dir
 
-BIN = $(join $(BUILD_DIR), $(join /, $(TOPNAME))) 
+BIN = $(join $(BUILD_DIR), $(join /, $(if $(IS_DEBUG) $(join $(TOPNAME), _DEBUG), $(TOPNAME)))) 
 
 
 # verilator build files
