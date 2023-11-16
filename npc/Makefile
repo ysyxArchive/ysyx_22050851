@@ -1,5 +1,7 @@
 override VERILATOR =  verilator 
 IS_DEBUG = $(filter debug,$(MAKECMDGOALS))
+
+$(shell "echo $(IS_DEBUG)")
 TOPNAME = CPU  
 
 BUILD_DIR = ./build  # all build files dir
