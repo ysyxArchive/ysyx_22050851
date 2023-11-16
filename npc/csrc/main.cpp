@@ -118,9 +118,7 @@ int main(int argc, char* argv[]) {
           ANSI_FMT(" mode", ANSI_FG_BLUE));
   parse_args(argc, argv);
   load_files();
-#ifdef DEBUG
   init_vcd_trace();
-#endif
   top->reset = false;
   init_device();
 #ifdef DEBUG
