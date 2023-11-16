@@ -45,8 +45,6 @@ $(VSRCS): $(SCALAS)
 $(GEN_SCALA): playground/scripts/codemap.csv playground/scripts/parsedecode.py
 	python playground/scripts/parsedecode.py
 
-verilog: $(SCALAS)
-
 
 help:
 	mill -i __.test.runMain Elaborate --help
