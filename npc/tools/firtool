@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-echo $@
-firtool.elf.strip --split-verilog -O=release $@
