@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <macros.h>
 
 typedef uint64_t paddr_t;
 typedef uint64_t word_t;
