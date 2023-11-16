@@ -27,7 +27,7 @@ CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" $(if $(IS_DEBUG), -DDEBUG,)
 LDFLAGS += -lSDL2 -lSDL2_image -ldl
 override ARGS += $(if $(IS_DEBUG), --diff=${NEMU_HOME}/build/riscv64-nemu-interpreter-so)
 MILL_FLAGS = -td $(VERILOG_DIR) 
-PATH := $(PATH):$(if $(IS_DEBUG),$(abspath ./tools/firtool_debug),$(abspath ./tools/firtool))   
+export PATH := $(PATH):$(if $(IS_DEBUG),$(abspath ./tools/firtool_debug),$(abspath ./tools/firtool))   
 
 
 $(shell mkdir -p $(BUILD_DIR))
