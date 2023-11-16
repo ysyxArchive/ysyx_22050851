@@ -1,4 +1,5 @@
 #include <chrono>
+
 #include "VCPU.h"
 #include "VCPU__Dpi.h"
 #include "common.h"
@@ -25,8 +26,7 @@ uint64_t* cpu_regs = NULL;
 uint64_t* cpu_pc = NULL;
 
 void haltop(unsigned char good_halt) {
-  if (top->reset)
-    return;
+  if (top->reset) return;
   Log("halt from npc, is %s halt", good_halt ? "good" : "bad");
   is_halt = true;
   is_bad_halt = !good_halt;
@@ -55,8 +55,7 @@ extern "C" void mem_read(const svLogicVecVal* addr, svLogicVecVal* ret) {
   ret[1].aval = data >> 32;
 }
 
-extern "C" void mem_write(const svLogicVecVal* addr,
-                          const svLogicVecVal* mask,
+extern "C" void mem_write(const svLogicVecVal* addr, const svLogicVecVal* mask,
                           const svLogicVecVal* data) {
   uint8_t len = 0;
   auto val = mask->aval;
@@ -114,16 +113,24 @@ void one_step() {
 }
 
 int main(int argc, char* argv[]) {
-  Log("running in " MUXDEF(DEBUG, ANSI_FMT("DEBUG", ANSI_FG_YELLOW), ANSI_FMT("PRODUCT", ANSI_FG_GREEN)) ANSI_FMT(" mode", ANSI_FG_BLUE));
+  Log("running in " MUXDEF(DEBUG, ANSI_FMT("DEBUG", ANSI_FG_YELLOW),
+                           ANSI_FMT("PRODUCT", ANSI_FG_GREEN))
+          ANSI_FMT(" mode", ANSI_FG_BLUE));
   parse_args(argc, argv);
   load_files();
+#ifdef DEBUG
   init_vcd_trace();
+#endif
   top->reset = false;
   init_device();
+#ifdef DEBUG
   lightSSS.do_fork();
+#endif
   init_npc();
   update_cpu();
+#ifdef DEBUG
   difftest_initial(&cpu);
+#endif
   Log("init_done");
 
   auto start = std::chrono::high_resolution_clock::now();

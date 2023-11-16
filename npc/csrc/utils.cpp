@@ -77,7 +77,7 @@ void load_files() {
 VerilatedVcdC* tfp;
 VCPU* top;
 extern LightSSS lightSSS;
-
+#ifdef DEBUG
 void init_vcd_trace() {
   VerilatedContext* contextp = new VerilatedContext;
   Verilated::traceEverOn(true);  // 导出vcd波形需要加此语句
@@ -87,15 +87,18 @@ void init_vcd_trace() {
   top->trace(tfp, 0);
   tfp->open("wave.vcd");  // 打开vcd
 }
+#endif
 
 extern int npc_clock;
 int tfp_clock = 0;
 void eval_trace() {
   top->eval();
+#ifdef DEBUG
   if (lightSSS.is_child() && lightSSS.is_not_good() &&
       lightSSS.get_end_cycles() - npc_clock < WAVE_TRACE_CLOCKS) {
     tfp->dump(tfp_clock++);
     tfp->flush();
   }
+#endif
   npc_clock++;
 }
