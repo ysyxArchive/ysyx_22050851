@@ -28,6 +28,8 @@ LDFLAGS += -lSDL2 -lSDL2_image -ldl
 override ARGS += $(if $(IS_DEBUG), --diff=${NEMU_HOME}/build/riscv64-nemu-interpreter-so)
 MILL_FLAGS = -td $(VERILOG_DIR) 
 export PATH := $(PATH):$(abspath ./tools)
+
+
 $(shell mkdir -p $(BUILD_DIR))
 
 default: $(BIN)
@@ -41,6 +43,9 @@ $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 
 $(VSRCS): $(SCALAS)
 	$(call git_commit, "generate verilog")
+	@if [ -n "$(IS_DEBUG)" ]; then \
+        alias firtool=firtool_debug;\
+    fi
 	mill -i __.test.runMain Elaborate --split-verilog --warnings-as-errors $(MILL_FLAGS)
 	touch $(VSRCS)
 
