@@ -22,7 +22,7 @@ SCALATESTS = $(shell find $(abspath ./playground/src) -name "*.scala")
 INC_PATH = $(abspath ./include)
 INCFLAGS = $(addprefix -I, $(INC_PATH))
 
-CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" $(if $(IS_DEBUG) -DDEBUG)   
+CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" $(if $(IS_DEBUG) -DDEBUG,)   
 LDFLAGS += -lSDL2 -lSDL2_image -ldl
 ARGS += $(if $(IS_DEBUG), --diff=${NEMU_HOME}/build/riscv64-nemu-interpreter-so)
 MILL_FLAGS = -td $(BUILD_DIR) $(if $(IS_DEBUG) --debug,)
