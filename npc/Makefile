@@ -9,7 +9,7 @@ override VERILATOR =  verilator
 VERILATOR_CFLAGS += -MMD --build -cc -j 0 \
 				-O3 --x-assign fast --x-initial fast --noassert 
 VERILATOR_CFLAGS += -Wno-WIDTH # 记得删掉
-VERILATOR_DEBUG_CFLAGS = $(VERILATOR_CFLAGS) --trace 
+VERILATOR_DEBUG_CFLAGS = $(VERILATOR_CFLAGS) --trace -DDBUG
 BIN = $(BUILD_DIR)/$(TOPNAME)
 BIN_DEBUG = $(BUILD_DIR)/$(TOPNAME)_debug
 GEN_SCALA = $(abspath ./playground/src/decode/InstContorlDecoder.scala)

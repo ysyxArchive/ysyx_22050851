@@ -114,6 +114,9 @@ void one_step() {
 }
 
 int main(int argc, char* argv[]) {
+  #ifdef DEBUG
+  printf("running in debug mode\n");
+  #endif
   parse_args(argc, argv);
   load_files();
   init_vcd_trace();
