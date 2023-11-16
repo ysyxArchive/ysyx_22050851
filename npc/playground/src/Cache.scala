@@ -43,7 +43,9 @@ class Cache(
 
   val io          = IO(new CacheIO(dataWidth, addrWidth))
   val axiIO       = IO(new BurstLiteIO(UInt(dataWidth.W), addrWidth))
+  val io          = 
   val enableDebug = IO(Input(Bool()))
+  
 
   val slotsPerLine = cellByte * 8 / dataWidth
 

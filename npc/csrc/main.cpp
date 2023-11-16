@@ -114,7 +114,7 @@ void one_step() {
 
 int main(int argc, char* argv[]) {
 #ifdef DEBUG
-  Log(ANSI_FMT("running in debug mode\n", ANSI_FG_YELLOW));
+  Log(ANSI_FMT("running in debug mode", ANSI_FG_YELLOW));
 #endif
   parse_args(argc, argv);
   load_files();
