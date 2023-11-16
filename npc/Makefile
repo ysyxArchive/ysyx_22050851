@@ -35,7 +35,6 @@ $(shell mkdir -p $(BUILD_DIR))
 default: $(BIN)
 
 $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
-	which firtool
 	$(VERILATOR) $(VERILATOR_FLAGS) \
 		--top-module $(TOPNAME) $(CSRCS) -sv $(VSRCS) \
 		$(addprefix -CFLAGS , $(CFLAGS))   \
@@ -43,7 +42,7 @@ $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
 $(VSRCS): $(SCALAS)
-	echo $(PATH)
+	echo $$PATH
 	$(call git_commit, "generate verilog")
 	mill -i __.test.runMain Elaborate --split-verilog --warnings-as-errors $(MILL_FLAGS) 
 	touch $(VSRCS)
