@@ -39,8 +39,8 @@ class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4, name: String = "cache")
         .reduce(_ ++ _) +
       s"""|  input clock
           |);
-          |  wire valids [0:${wayCnt * groupSize - 1}];
-          |  wire dirty [0:${wayCnt * groupSize - 1}];
+          |  wire [0:${wayCnt * groupSize - 1}] valids;
+          |  wire [0:${wayCnt * groupSize - 1}] dirty;
       """ + Seq
       .tabulate(wayCnt)(i =>
         Seq
