@@ -39,7 +39,7 @@ class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4, name: String = "cache")
         .reduce(_ ++ _) +
       s"""|  input clock
           |);
-          |  wire [0:0] valids [0:${wayCnt * groupSize - 1}];
+          |  wire [0:0] valid [0:${wayCnt * groupSize - 1}];
           |  wire [0:0] dirty [0:${wayCnt * groupSize - 1}];
       """ + Seq
       .tabulate(wayCnt)(i =>
@@ -54,7 +54,7 @@ class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4, name: String = "cache")
          |  always @(posedge clock) begin
          |    if(changed) cache_change("${name}");
          |  end
-         |  initial set_cacheinfo_ptr("${name}", dirty, valids);
+         |  initial set_cacheinfo_ptr("${name}", dirty, valid);
          |endmodule""").stripMargin
   )
 }
