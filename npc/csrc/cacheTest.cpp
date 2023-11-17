@@ -12,18 +12,11 @@ void cache_change(svLogic isDCache, const svLogic* d, const svLogic* v) {
       printf("%x ", d[j]);
     }
     printf("\n");
-    // for (int i = 0; i < 4; i++) {
-    //   for (int j = 0; j < 4; j++) {
-    //     printf("%x ", (((bool*)icache_valid)[j]));
-    //   }
-    // }
-    // printf("\n");
-    // for (int i = 0; i < 4; i++) {
-    //   for (int j = 0; j < 4; j++) {
-    //     printf("%x ", (((bool*)icache_dirty)[j]));
-    //   }
-    // }
-    // printf("\n");
+    for (int j = 0; j < 16; j++) {
+      printf("%x ", v[j]);
+    }
+    printf("\n");
+  
   } else {
     Log("dcache change");
   }
