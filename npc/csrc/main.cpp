@@ -6,6 +6,7 @@
 #include "mem.h"
 #include "time.h"
 #include "tools/lightsss.h"
+void printCacheRate();
 
 bool is_halt = false;
 bool is_bad_halt = false;
@@ -164,5 +165,6 @@ int main(int argc, char* argv[]) {
 #ifdef DEBUG
   lightSSS.do_clear();
 #endif
+  printCacheRate();
   return (is_bad_halt || ret_value != 0);
 }
