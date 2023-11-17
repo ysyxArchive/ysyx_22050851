@@ -1,15 +1,11 @@
 #include <chrono>
-#include "VCPU.h"
-#include "VCPU__Dpi.h"
+
 #include "common.h"
 #include "device.h"
 #include "difftest.h"
 #include "mem.h"
 #include "time.h"
 #include "tools/lightsss.h"
-#include "verilated.h"
-#include "verilated_dpi.h"
-#include "verilated_vcd_c.h"
 
 bool is_halt = false;
 bool is_bad_halt = false;
@@ -17,7 +13,6 @@ bool is_bad_halt = false;
 uint64_t inst_count = 0;
 uint64_t cycle_count = 0;
 
-extern VCPU* top;
 CPU cpu;
 LightSSS lightSSS;
 int npc_clock = 0;

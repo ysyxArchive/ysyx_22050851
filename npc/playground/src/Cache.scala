@@ -40,8 +40,6 @@ class CacheDebugIO(
     )
   
   val working = Bool()
-  // val gpsize  = groupSize.U
-  // val waycnt  = wayCnt.U
 }
 
 /**
