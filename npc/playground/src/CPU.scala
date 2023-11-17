@@ -5,8 +5,6 @@ import decode._
 
 class CPU extends Module {
   val enableDebug = IO(Input(Bool()))
-  val iCacheInfo  = IO(new CacheDebugIO())
-  val dCacheInfo  = IO(new CacheDebugIO())
 
   val mem         = Module(new MemBurstInterface)
   val regs        = Module(new RegisterFile)
@@ -54,7 +52,4 @@ class CPU extends Module {
 
   iCache.enableDebug := enableDebug
   dCache.enableDebug := enableDebug
-  iCacheInfo         := iCache.debugIO
-  dCacheInfo         := dCache.debugIO
-
 }

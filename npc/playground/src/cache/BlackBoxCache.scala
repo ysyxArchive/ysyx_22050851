@@ -19,12 +19,14 @@ class CacheDebugIO(
   val changed = Bool()
 }
 
-class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4) extends BlackBox with HasBlackBoxInline {
+class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4, name: String = "cache")
+    extends BlackBox
+    with HasBlackBoxInline {
   val io = IO(new CacheDebugIO(wayCnt, groupSize));
   setInline(
     "BlackBoxCache.v",
-    """import "DPI-C" function void cache_change();
-        import "DPI-C" function void set_cacheinfo_ptr(input logic [63:0] d [], input logic [63:0] v []);
+    """import "DPI-C" function void cache_change(input string name);
+        import "DPI-C" function void set_cacheinfo_ptr(input string name, input logic [63:0] d [], input logic [63:0] v []);
        |module BlackBoxCache (
        |  input changed,
        """ +
@@ -48,11 +50,11 @@ class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4) extends BlackBox with H
           .reduce(_ ++ _)
       )
       .reduce(_ ++ _) +
-      """  
-        |  always @(posedge clock) begin
-        |    if(changed) cache_change();
-        |  end
-        |  initial set_cacheinfo_ptr(dirty, valids);
-        |endmodule""".stripMargin
+      s"""  
+         |  always @(posedge clock) begin
+         |    if(changed) cache_change("${name}");
+         |  end
+         |  initial set_cacheinfo_ptr("${name}", dirty, valids);
+         |endmodule""".stripMargin
   )
 }
