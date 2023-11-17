@@ -233,4 +233,5 @@ class Cache(
     }
   }
   blackBoxCache.io.changed := RegNext(!cacheFSM.is(idle)) && cacheFSM.is(idle)
+  blackBoxCache.io.clock := clock
 }
