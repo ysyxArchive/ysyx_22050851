@@ -10,11 +10,11 @@ bool* icache_dirty = NULL;
 extern "C" void set_cacheinfo_ptr(const char* name, const svOpenArrayHandle d,
                                   const svOpenArrayHandle v) {
   if (strcmp(name, "icache") == 0) {
-    icache_valid = (bool*)v;
-    icache_dirty = (bool*)d;
+    icache_valid = (bool*)(((VerilatedDpiOpenVar*)v)->datap());
+    icache_dirty = (bool*)(((VerilatedDpiOpenVar*)d)->datap());
   } else if (strcmp(name, "dcache") == 0) {
-    dcache_valid = (bool*)v;
-    dcache_dirty = (bool*)d;
+    dcache_valid = (bool*)(((VerilatedDpiOpenVar*)v)->datap());
+    dcache_dirty = (bool*)(((VerilatedDpiOpenVar*)d)->datap());
   } else {
     panic("unkonown cache name %s", name);
   }
