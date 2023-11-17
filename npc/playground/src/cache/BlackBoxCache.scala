@@ -59,7 +59,7 @@ class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4) extends BlackBox with H
       // .reduce(_ ++ _) +
       s"""  
          |  always @(posedge clock) begin
-         |    if(changed) cache_change(isDCache, dirty,valid);
+         |    // if(changed) cache_change(isDCache, dirty,valid);
          |    if(reqValid) cache_req(isDCache, isHit, reqWrite);
          |  end
          |    
