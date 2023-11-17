@@ -9,6 +9,7 @@ svOpenArrayHandle icache_dirty = NULL;
 
 extern "C" void set_cacheinfo_ptr(svLogic isDCache, const svOpenArrayHandle d,
                                   const svOpenArrayHandle v) {
+  printf("%d\n", svSize(d, 1));
   if (!isDCache) {
     icache_valid = v;
     icache_dirty = d;
