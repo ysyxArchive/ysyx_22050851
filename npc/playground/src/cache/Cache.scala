@@ -41,9 +41,10 @@ class Cache(
   val indexOffset = log2Ceil(cellByte)
   val tagOffset   = log2Ceil(cellByte) + log2Ceil(wayCnt)
 
+  val blackBoxCache = Module(new BlackBoxCache(wayCnt, groupSize, name))
+
   val io          = IO(new CacheIO(dataWidth, addrWidth))
   val axiIO       = IO(new BurstLiteIO(UInt(dataWidth.W), addrWidth))
-  val debugIO     = IO(Output(new CacheDebugIO(wayCnt, groupSize)))
   val enableDebug = IO(Input(Bool()))
 
   val slotsPerLine = cellByte * 8 / dataWidth
@@ -227,9 +228,9 @@ class Cache(
   }
   for (i <- 0 until wayCnt) {
     for (j <- 0 until groupSize) {
-      debugIO.cacheStatus(i)(j).dirty := cacheMem(i)(j).dirty
-      debugIO.cacheStatus(i)(j).valid := cacheMem(i)(j).valid
+      blackBoxCache.io.cacheStatus(i)(j).dirty := cacheMem(i)(j).dirty
+      blackBoxCache.io.cacheStatus(i)(j).valid := cacheMem(i)(j).valid
     }
   }
-  debugIO.changed := RegNext(!cacheFSM.is(idle)) && cacheFSM.is(idle)
+  blackBoxCache.io.changed := RegNext(!cacheFSM.is(idle)) && cacheFSM.is(idle)
 }
