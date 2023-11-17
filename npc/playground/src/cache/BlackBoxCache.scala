@@ -22,7 +22,7 @@ class CacheDebugIO(
 class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4, name: String = "cache")
     extends BlackBox
     with HasBlackBoxInline {
-  val io = IO(new CacheDebugIO(wayCnt, groupSize));
+  val io = IO(Flipped(new CacheDebugIO(wayCnt, groupSize)));
   setInline(
     "BlackBoxCache.v",
     """import "DPI-C" function void cache_change(input string name);
