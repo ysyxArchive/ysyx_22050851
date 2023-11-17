@@ -92,3 +92,78 @@ class SimpleDivider extends Module {
   io.quotient  := out
   io.remainder := sub
 }
+class R2Divider extends Module {
+  val io = IO(new DividerIO())
+
+  val subReg = Reg(UInt(64.W))
+  val outReg = RegInit(0.U(64.W))
+
+  val counter = RegInit(0.U(5.W))
+
+  val divFire  = io.divValid && io.divReady
+  val willDone = (!io.divw && counter.andR) || (io.divw && counter(counter.getWidth - 2, 0).andR)
+  val inANeg   = io.divSigned && Mux(io.divw, io.dividend(31), io.dividend(63))
+  val inBNeg   = io.divSigned && Mux(io.divw, io.divisor(31), io.divisor(63))
+  val outNeg   = inANeg ^ inBNeg
+  val remNeg   = inANeg
+
+  val idle :: working :: output :: others = Enum(10)
+  val divFSM = new FSM(
+    idle,
+    List(
+      (idle, !io.flush && divFire, working),
+      (working, willDone, output),
+      (working, io.flush, idle),
+      (output, true.B, idle)
+    )
+  )
+
+  val inACasted = Mux(
+    io.divw,
+    Mux(io.divSigned, Utils.signExtend(io.dividend, 32, 128), Utils.zeroExtend(io.dividend, 32, 128)),
+    Mux(io.divSigned, Utils.signExtend(io.dividend, 64, 128), Utils.zeroExtend(io.dividend, 64, 128))
+  )
+  val inBCasted = Mux(
+    io.divw,
+    Mux(io.divSigned, Utils.signExtend(io.divisor, 32, 64), Utils.zeroExtend(io.divisor, 32, 64)),
+    io.divisor
+  )
+  val inA  = Mux(inANeg, Utils.signedReverse(inACasted), inACasted)
+  val inB  = Mux(inBNeg, Utils.signedReverse(inBCasted), inBCasted)
+  val inBs = VecInit(Seq.tabulate(4)(index => inB * index.U))
+
+  counter := MuxCase(
+    counter,
+    Seq(
+      io.flush -> 0.U,
+      divFSM.is(output) -> 0.U,
+      (divFSM.is(working) || divFSM.willChangeTo(working)) -> (counter + 1.U)
+    )
+  )
+
+  val subNext = Mux(
+    divFSM.is(working),
+    Cat(
+      subReg,
+      (inA >> Mux(io.divw, 30.U(7.W) - counter * 2.U, 62.U(7.W) - counter * 2.U))(1, 0)
+    ),
+    Mux(io.divw, inA(62, 30), inA(126, 62))
+  )
+  val canSub     = inBs.map(b => subNext >= b)
+  val partialQuo = PriorityMux(canSub.zipWithIndex.map(pair => (pair._1, pair._2.U)).reverse)
+  subReg := subNext - inB * partialQuo
+
+  outReg := Mux(
+    divFSM.is(working) || divFSM.willChangeTo(working),
+    Cat(outReg, partialQuo),
+    Mux(divFSM.is(idle), 0.U, outReg)
+  )
+
+  io.divReady := divFSM.is(idle) && !io.flush
+  io.outValid := divFSM.is(output)
+
+  val out = Mux(outNeg, Utils.signedReverse(outReg.asUInt), outReg.asUInt)
+  val sub = Mux(remNeg, Utils.signedReverse(subReg), subReg)
+  io.quotient  := out
+  io.remainder := sub
+}

@@ -1,48 +1,53 @@
-TOPNAME = CPU
-# all build files
-BUILD_DIR = ./build
-# verilator build files
-OBJ_DIR = $(BUILD_DIR)/obj_dir
-
 override VERILATOR =  verilator 
-VERILATOR_CFLAGS += -MMD --build -cc -j 0 \
-				-O3 --x-assign fast --x-initial fast --noassert --trace 
-VERILATOR_CFLAGS += -Wno-WIDTH # 记得删掉
-BIN = $(BUILD_DIR)/$(TOPNAME)
-GEN_SCALA = $(abspath ./playground/src/decode/InstContorlDecoder.scala)
-VSRCS = $(shell find $(abspath ./build) -name "*.v" -or -name "*.sv")
+IS_DEBUG = $(filter debug,$(MAKECMDGOALS))
+
+TOPNAME = CPU  
+
+BUILD_DIR = ./build  # all build files dir
+
+BIN = $(join $(BUILD_DIR), $(join /, $(if $(IS_DEBUG), $(join $(TOPNAME), _DEBUG), $(TOPNAME)))) 
+# verilator build files
+OBJ_DIR = $(if $(IS_DEBUG), $(join $(BUILD_DIR), /obj_dir_debug), $(join $(BUILD_DIR), /obj_dir)) 
+VERILOG_DIR = $(if $(IS_DEBUG), $(join $(BUILD_DIR), /veri_debug), $(join $(BUILD_DIR), /veri)) 
+
+VERILATOR_FLAGS += -MMD --build -cc -j 0 -O3 --x-assign fast --x-initial fast --noassert -Wno-WIDTH $(if $(IS_DEBUG), --trace) 
+
+# source files
+VSRCS = $(sort $(shell find $(abspath $(VERILOG_DIR)) -name "*.v" -or -name "*.sv") $(abspath $(join $(VERILOG_DIR), /CPU.sv)))
 CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
 INCLUDES = $(shell find $(abspath ./include) -name "*.h")
+GEN_SCALA = $(abspath ./playground/src/decode/InstContorlDecoder.scala)
 SCALAS = $(shell find $(abspath ./playground/src) -name "*.scala") $(GEN_SCALA)
 SCALATESTS = $(shell find $(abspath ./playground/src) -name "*.scala")
+
 INC_PATH = $(abspath ./include)
 INCFLAGS = $(addprefix -I, $(INC_PATH))
-CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" 
+
+CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" $(if $(IS_DEBUG), -DDEBUG,)   
 LDFLAGS += -lSDL2 -lSDL2_image -ldl
-override ARGS += --diff=${NEMU_HOME}/build/riscv64-nemu-interpreter-so
-export PATH := $(PATH):$(abspath ./tools)
+override ARGS += $(if $(IS_DEBUG), --diff=${NEMU_HOME}/build/riscv64-nemu-interpreter-so)
+MILL_FLAGS = -td $(VERILOG_DIR) 
+export PATH := $(PATH):$(if $(IS_DEBUG),$(abspath ./tools/firtool_debug),$(abspath ./tools/firtool))
+
+
+$(shell mkdir -p $(BUILD_DIR))
 
 default: $(BIN)
 
 $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
-	$(VERILATOR) $(VERILATOR_CFLAGS) \
-		--top-module $(TOPNAME) $(CSRCS) -sv $(VSRCS)\
+	$(VERILATOR) $(VERILATOR_FLAGS) \
+		--top-module $(TOPNAME) $(CSRCS) -sv $(VSRCS) \
 		$(addprefix -CFLAGS , $(CFLAGS))   \
 		$(addprefix -LDFLAGS , $(LDFLAGS)) \
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
-
 $(VSRCS): $(SCALAS)
-	make verilog
+	$(call git_commit, "generate verilog")
+	mill -i __.test.runMain Elaborate --split-verilog --warnings-as-errors $(MILL_FLAGS) 
 	touch $(VSRCS)
 
 $(GEN_SCALA): playground/scripts/codemap.csv playground/scripts/parsedecode.py
 	python playground/scripts/parsedecode.py
-
-verilog: $(SCALAS)
-	$(call git_commit, "generate verilog")
-	mkdir -p $(BUILD_DIR)
-	mill -i __.test.runMain Elaborate -td $(BUILD_DIR) --split-verilog --warnings-as-errors
 
 help:
 	mill -i __.test.runMain Elaborate --help
@@ -64,21 +69,20 @@ clean:
 
 build: $(BIN)
 	@rm -rf $(OBJ_DIR)
-	
 
+run: $(BIN)
+	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
+	$(BIN) $(IMG) $(ARGS) 
 
-sim: $(BIN)
+debug: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 	$(BIN) $(IMG) $(ARGS) 
 
 test: $(SCALATESTS)
 	mill -i __.test
 
-run:
-	make sim
-
 gdb: $(BIN)
 	gdb -s $(BIN) --args $(BIN) $(IMG) $(ARGS) h 
 	
-.PHONY: test verilog help compile bsp reformat checkformat clean sim build gdb
+.PHONY: test verilog help compile bsp reformat checkformat clean build gdb debug
 include ../Makefile

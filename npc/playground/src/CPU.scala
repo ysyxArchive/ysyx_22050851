@@ -35,20 +35,16 @@ class CPU extends Module {
   ifu.regIO := regs.readIO
 
   decoder.regIO <> regs.readIO
+  decoder.csrIO <> csrregs.dataIO
   decoder.fromExe  := exe.toDecode
   decoder.fromMemu := memu.toDecode
   decoder.fromWbu  := wbu.toDecode
 
-  exe.csrIn := csrregs.io.output
-
   memu.memIO <> dCache.io
 
-  wbu.csrIn := csrregs.io.output
   wbu.regWriteIO <> regs.writeIO
   wbu.regReadIO := regs.readIO
-
-  csrregs.io.data := memu.memOut.bits.data
-  csrregs.io.control <> wbu.csrControl
+  wbu.csrControl <> csrregs.controlIO
 
   blackBoxOut.io.pc      := regs.debugPCOut;
   blackBoxOut.io.regs    := regs.debugOut;
