@@ -46,8 +46,8 @@ extern "C" void cache_req(svLogic isDCache, svLogic isHit, svLogic reqWrite) {
 }
 
 void printCacheRate() {
-  Log("iCache hit rate: %.2lf%%\n",
+  Log("iCache hit rate: %.2lf%%",
       (double)iCacheHit / (iCacheHit + iCacheMiss) * 100);
-  Log("dCache hit rate: %.2lf%%\n",
+  Log("dCache hit rate: %.2lf%%",
       (double)dCacheHit / (dCacheHit + dCacheMiss));
 }
