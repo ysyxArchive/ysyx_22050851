@@ -23,6 +23,27 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
   val data  = UInt((dataByte * 8).W)
 }
 
+class CacheDebugIO(
+  wayCnt:    Int = 4,
+  groupSize: Int = 4)
+    extends Bundle {
+  val cacheStatus = IO(
+    Vec(
+      wayCnt,
+      Vec(
+        groupSize,
+        new Bundle {
+          val valid = Bool()
+          val dirty = Bool()
+        }
+      )
+    )
+  )
+  val working = Bool()
+  val gpsize  = groupSize.U
+  val waycnt  = wayCnt.U
+}
+
 /**
   * @param cellByte 单个cache存储大小
   * @param wayCnt 路数
@@ -43,6 +64,7 @@ class Cache(
 
   val io          = IO(new CacheIO(dataWidth, addrWidth))
   val axiIO       = IO(new BurstLiteIO(UInt(dataWidth.W), addrWidth))
+  val debugIO     = IO(Output(new CacheDebugIO(wayCnt, groupSize)))
   val enableDebug = IO(Input(Bool()))
 
   val slotsPerLine = cellByte * 8 / dataWidth
@@ -224,4 +246,11 @@ class Cache(
       printf("data is %x\n", io.data.bits)
     }
   }
+  for (i <- 0 until wayCnt) {
+    for (j <- 0 until groupSize) {
+      debugIO.cacheStatus(i)(j).dirty := cacheMem(i)(j).dirty
+      debugIO.cacheStatus(i)(j).valid := cacheMem(i)(j).valid
+    }
+  }
+  debugIO.working := !cacheFSM.is(idle)
 }
