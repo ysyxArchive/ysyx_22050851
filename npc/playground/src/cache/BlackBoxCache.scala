@@ -25,8 +25,7 @@ class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4) extends BlackBox with H
   val io = IO(Flipped(new CacheDebugIO(wayCnt, groupSize)));
   setInline(
     "BlackBoxCache.v",
-    (s"""import "DPI-C" function void cache_change(input logic isDCache);
-        import "DPI-C" function void set_cacheinfo_ptr(input logic isDCache, input logic d [], input logic v []);
+    (s"""import "DPI-C" function void cache_change(input logic isDCache, input logic d [0:15], input logic v [0:15]);
        |module BlackBoxCache (
        |  input isDCache,
        |  input changed,
@@ -53,9 +52,8 @@ class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4) extends BlackBox with H
       .reduce(_ ++ _) +
       s"""  
          |  always @(posedge clock) begin
-         |    if(changed) cache_change(isDCache);
+         |    if(changed) cache_change(isDCache, dirty,valid);
          |  end
-         |  initial set_cacheinfo_ptr(isDCache, dirty, valid);
          |endmodule""").stripMargin
   )
 }
