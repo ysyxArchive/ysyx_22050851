@@ -49,5 +49,5 @@ void printCacheRate() {
   Log("iCache hit rate: %.2lf%% (%ld / %ld)",
       (double)iCacheHit / (iCacheHit + iCacheMiss) * 100, iCacheHit, (iCacheHit + iCacheMiss));
   Log("dCache hit rate: %.2lf%% (%ld / %ld)",
-      (double)dCacheHit / (dCacheHit + dCacheMiss), dCacheHit, (dCacheHit + dCacheMiss));
+      (double)dCacheHit / (dCacheHit + dCacheMiss) * 100, dCacheHit, (dCacheHit + dCacheMiss));
 }
