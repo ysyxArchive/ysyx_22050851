@@ -4,6 +4,8 @@
 !Makefile
 !*.mk
 !*.scala
+!*.py
+!*.csv
 !*.[cSh]
 !*.v
 !*.cpp
@@ -12,6 +14,7 @@
 !.scalafmt.conf
 !build.sc
 !README.md
+!tools/**
 build/
 
 # mill

@@ -16,17 +16,18 @@
 #include <isa.h>
 #include <time.h>
 #include <tracers.h>
-uint8_t priv_status = PRIV_M;
+uint8_t current_status = PRIV_M;
 clock_t start = 0;
 
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   word_t mstatus = csrs("mstatus");
   csrs("mepc") = cpu.pc;
-  csrs("mstatus") = ((mstatus | (priv_status << 11)) // set MPP to priv mode
-                     | (BITS(mstatus, 3, 3) << 7))   // set MIE to MPIE
-                    & (0xFFFFFFFFFFFFFFF7);          // set MIE 0
+  csrs("mstatus") = ((mstatus | (current_status << 11)) // set MPP to priv mode
+                    & (0xFFFFFFFFFFFFFF77))          // set MIE MPIE 0
+                    | (BITS(mstatus, 3, 3) << 7)   // set MIE to MPIE
+                    ;
   csrs("mcause") = NO;
-  priv_status = PRIV_M;
+  current_status = PRIV_M;
   etrace(true, cpu.pc, mstatus);
   return epc;
 }
@@ -39,7 +40,7 @@ word_t isa_query_intr() {
   }
   clock_t end = clock();
   double elapsed = ((double)(end - start)) / CLOCKS_PER_SEC; // 计算经过的秒数
-  if (elapsed >= 0.01) {
+  if (elapsed >= 1) { // 每秒一次的时钟中断
     Log("trigger!");
     start = end;
     cpu.INTR = false;

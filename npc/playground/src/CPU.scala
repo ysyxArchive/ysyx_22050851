@@ -3,30 +3,53 @@ import chisel3.util.Enum
 import chisel3.util.Decoupled
 import decode._
 
-/**
-  * Compute GCD using subtraction method.
-  * Subtracts the smaller from the larger until register y is zero.
-  * value in register x is then the GCD
-  */
-
 class CPU extends Module {
-  val pcio = IO(new Bundle {
-    val inst = Input(UInt(32.W))
-    val pc   = Output(UInt(64.W))
-  })
+  val enableDebug = IO(Input(Bool()))
 
-  val regs    = Module(new RegisterFile);
+  val mem         = Module(new MemBurstInterface)
+  val regs        = Module(new RegisterFile)
+  val csrregs     = Module(new ControlRegisterFile)
+  val blackBoxOut = Module(new BlackBoxRegs)
+
+  val ifu     = Module(new InstructionFetchUnit)
   val decoder = Module(new InstructionDecodeUnit)
   val exe     = Module(new InstructionExecuteUnit)
-  val mem     = Module(new BlackBoxMem)
+  val memu    = Module(new MemRWUnit())
+  val wbu     = Module(new WriteBackUnit())
 
-  pcio.pc := regs.io.pc
+  val arbiter = Module(new BurstLiteArbiter(2))
+  val iCache  = Module(new Cache(name = "icache"))
+  val dCache  = Module(new Cache(name = "dcache"))
+  ifu.fetchOut <> decoder.decodeIn
+  decoder.decodeOut <> exe.exeIn
+  exe.exeOut <> memu.memIn
+  memu.memOut <> wbu.wbIn
 
-  decoder.io.inst   := pcio.inst
-  decoder.io.enable := true.B
+  ifu.fromDecode <> decoder.decodeBack
 
-  exe.in <> decoder.output
-  exe.regIO <> regs.io
-  exe.memIO <> mem.io
+  iCache.axiIO <> arbiter.masterIO(1)
+  dCache.axiIO <> arbiter.masterIO(0)
+  mem.axiS <> arbiter.slaveIO
 
+  ifu.iCacheIO <> iCache.io
+  ifu.regIO := regs.readIO
+
+  decoder.regIO <> regs.readIO
+  decoder.csrIO <> csrregs.dataIO
+  decoder.fromExe  := exe.toDecode
+  decoder.fromMemu := memu.toDecode
+  decoder.fromWbu  := wbu.toDecode
+
+  memu.memIO <> dCache.io
+
+  wbu.regWriteIO <> regs.writeIO
+  wbu.regReadIO := regs.readIO
+  wbu.csrControl <> csrregs.controlIO
+
+  blackBoxOut.io.pc      := regs.debugPCOut;
+  blackBoxOut.io.regs    := regs.debugOut;
+  blackBoxOut.io.csrregs := csrregs.debugOut;
+
+  iCache.enableDebug := enableDebug
+  dCache.enableDebug := enableDebug
 }

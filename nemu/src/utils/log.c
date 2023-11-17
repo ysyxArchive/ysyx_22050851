@@ -25,7 +25,7 @@ void init_log(const char *log_file) {
     Assert(fp, "Can not open '%s'", log_file);
     log_fp = fp;
   }
-  Log("Log is written to %s", log_file ? log_file : "stdout");
+  printf("Log is written to %s\n", log_file ? log_file : "stdout");
 }
 
 bool log_enable() {

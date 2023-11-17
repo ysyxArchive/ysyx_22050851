@@ -17,7 +17,7 @@
 #define __RISCV64_REG_H__
 
 #include <common.h>
-
+#include "isa-def.h"
 static inline int check_reg_idx(int idx) {
   IFDEF(CONFIG_RT_CHECK, assert(idx >= 0 && idx < 32));
   return idx;
@@ -33,18 +33,13 @@ static inline const char *reg_name(int idx, int width) {
 
 static inline const char *csr_name(int idx) {
   switch (idx) {
-  case 0x300:
-    return "mstatus";
-  case 0x305:
-    return "mtvec";
-  case 0x341:
-    return "mepc";
-  case 0x342:
-    return "mcause";
-  case 0x180:
-    return "satp";
-  default:
-    panic("csr index %x not implemented", idx);
+  case 0x180: return "satp";
+  case 0x300: return "mstatus";
+  case 0x305: return "mtvec";
+  case 0x340: return "mscratch";
+  case 0x341: return "mepc";
+  case 0x342: return "mcause";
+  default: panic("csr index %x not implemented", idx);
   }
 }
 
@@ -52,7 +47,7 @@ static inline int check_csr_idx(int idx) {
   IFDEF(CONFIG_RT_CHECK, assert(idx >= 0 && idx <= 0xfff));
   const char *name = csr_name(idx);
   extern const char *csrregs[];
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < CSR_CNT; i++) {
     if (strcmp(name, csrregs[i]) == 0) {
       return i;
     }
