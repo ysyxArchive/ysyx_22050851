@@ -42,7 +42,7 @@ void cache_change(svLogic isDCache) {
     printf("\n");
     for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
-        printf("%x", icache_valid[i * 4 + j] ? 1 : 0);
+        printf("%x ", icache_valid[i * 4 + j] );
       }
     }
     printf("\n");
