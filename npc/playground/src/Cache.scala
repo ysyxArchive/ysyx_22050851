@@ -24,8 +24,8 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
 }
 
 class CacheDebugIO(
-  wayCnt:    Int = 4,
-  groupSize: Int = 4)
+  val wayCnt:    Int = 4,
+  val groupSize: Int = 4)
     extends Bundle {
   val cacheStatus = IO(
     Vec(
