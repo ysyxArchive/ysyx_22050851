@@ -103,7 +103,7 @@ void init_proc() {
   char* args[] = {"/bin/pal", NULL};
   char* envp[] = {NULL};
   // context_kload(getPCB(), hello_fun, args);
-  context_uload(getPCB(), "/bin/pal", args, envp);
+  context_uload(getPCB(), "/bin/nslider", args, envp);
   switch_boot_pcb();
 
 }
