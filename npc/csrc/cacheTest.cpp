@@ -13,7 +13,7 @@ extern "C" void set_cacheinfo_ptr(svLogic isDCache, const svLogic* d,
     icache_valid = v;
     icache_dirty = d;
     for (int j = 0; j < 4; j++) {
-      printf("%x", icache_valid[j] ? 1 : 0);
+      printf("%x", icache_valid[j]);
     }
     printf("\n");
 
