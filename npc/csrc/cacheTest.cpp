@@ -9,23 +9,9 @@ svOpenArrayHandle icache_dirty = NULL;
 
 extern "C" void set_cacheinfo_ptr(svLogic isDCache, const svOpenArrayHandle d,
                                   const svOpenArrayHandle v) {
-  printf("%d\n", svSize(d, 1));
   if (!isDCache) {
     icache_valid = v;
     icache_dirty = d;
-
-    // for (int i = 0; i < 4; i++) {
-    //   for (int j = 0; j < 4; j++) {
-    //     printf("%x", icache_valid[i * 4 + j] ? 1 : 0);
-    //   }
-    // }
-    // printf("\n");
-    // for (int i = 0; i < 4; i++) {
-    //   for (int j = 0; j < 4; j++) {
-    //     printf("%x", icache_dirty[i * 4 + j] ? 1 : 0);
-    //   }
-    // }
-    // printf("\n");
   } else {
     dcache_valid = v;
     dcache_dirty = d;
@@ -38,21 +24,22 @@ extern "C" void set_cacheinfo_ptr(svLogic isDCache, const svOpenArrayHandle d,
 void cache_change(svLogic isDCache) {
   if (!isDCache) {
     for (int j = 0; j < 4; j++) {
-      printf("%x", (((bool*)icache_valid)[j]));
+      printf("%x",
+             ((uint64_t*)(((VerilatedDpiOpenVar*)icache_valid)->datap()))[j]);
     }
     printf("\n");
-    for (int i = 0; i < 4; i++) {
-      for (int j = 0; j < 4; j++) {
-        printf("%x ", (((bool*)icache_valid)[j]));
-      }
-    }
-    printf("\n");
-    for (int i = 0; i < 4; i++) {
-      for (int j = 0; j < 4; j++) {
-        printf("%x ", (((bool*)icache_dirty)[j]));
-      }
-    }
-    printf("\n");
+    // for (int i = 0; i < 4; i++) {
+    //   for (int j = 0; j < 4; j++) {
+    //     printf("%x ", (((bool*)icache_valid)[j]));
+    //   }
+    // }
+    // printf("\n");
+    // for (int i = 0; i < 4; i++) {
+    //   for (int j = 0; j < 4; j++) {
+    //     printf("%x ", (((bool*)icache_dirty)[j]));
+    //   }
+    // }
+    // printf("\n");
   } else {
     Log("dcache change");
   }
