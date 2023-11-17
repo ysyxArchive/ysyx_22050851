@@ -17,6 +17,7 @@ class CacheDebugIO(
       )
     )
   val changed = Bool()
+  val clock  = Input(Clock())
 }
 
 class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4, name: String = "cache")
