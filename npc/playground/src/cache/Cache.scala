@@ -226,13 +226,16 @@ class Cache(
       printf("data is %x\n", io.data.bits)
     }
   }
-  for (i <- 0 until wayCnt) {
-    for (j <- 0 until groupSize) {
-      blackBoxCache.io.cacheStatus(i)(j).dirty := cacheMem(i)(j).dirty
-      blackBoxCache.io.cacheStatus(i)(j).valid := cacheMem(i)(j).valid
-    }
-  }
-  blackBoxCache.io.changed := RegNext(!cacheFSM.is(idle)) && cacheFSM.is(idle)
-  blackBoxCache.io.clock := clock
+  // for (i <- 0 until wayCnt) {
+  //   for (j <- 0 until groupSize) {
+  //     blackBoxCache.io.cacheStatus(i)(j).dirty := cacheMem(i)(j).dirty
+  //     blackBoxCache.io.cacheStatus(i)(j).valid := cacheMem(i)(j).valid
+  //   }
+  // }
+  blackBoxCache.io.changed  := RegNext(!cacheFSM.is(idle)) && cacheFSM.is(idle)
+  blackBoxCache.io.clock    := clock
   blackBoxCache.io.isDCache := name.equals("dcache").B
+  blackBoxCache.io.reqValid := io.readReq.fire || io.writeReq.fire
+  blackBoxCache.io.reqWrite := io.writeReq.fire
+  blackBoxCache.io.isHit    := hit
 }
