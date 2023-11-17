@@ -25,7 +25,18 @@ extern "C" void set_cacheinfo_ptr(const char* name, const svOpenArrayHandle d,
 //     logic [63:0] d [], input logic [63:0] v []);
 void cache_change(const char* name) {
   if (strcmp(name, "icache") == 0) {
-    Log("icache change");
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        printf("%d", icache_valid[i * 4 + j]);
+      }
+    }
+    printf("\n");
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        printf("%d", icache_dirty[i * 4 + j]);
+      }
+    }
+    printf("\n");
   } else if (strcmp(name, "dcache") == 0) {
     Log("dcache change");
   } else {
