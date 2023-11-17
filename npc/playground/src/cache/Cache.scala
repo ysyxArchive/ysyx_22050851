@@ -23,7 +23,6 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
   val data  = UInt((dataByte * 8).W)
 }
 
-
 /**
   * @param cellByte 单个cache存储大小
   * @param wayCnt 路数
@@ -232,5 +231,5 @@ class Cache(
       debugIO.cacheStatus(i)(j).valid := cacheMem(i)(j).valid
     }
   }
-  debugIO.working := !cacheFSM.is(idle)
+  debugIO.changed := RegNext(!cacheFSM.is(idle)) && cacheFSM.is(idle)
 }
