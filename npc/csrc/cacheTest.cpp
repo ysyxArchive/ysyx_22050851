@@ -2,19 +2,19 @@
 
 // void cache_
 
-bool* dcache_valid = NULL;
-bool* dcache_dirty = NULL;
-bool* icache_valid = NULL;
-bool* icache_dirty = NULL;
+const svLogicVecVal* dcache_valid = NULL;
+const svLogicVecVal* dcache_dirty = NULL;
+const svLogicVecVal* icache_valid = NULL;
+const svLogicVecVal* icache_dirty = NULL;
 
-extern "C" void set_cacheinfo_ptr(const char* name, const svOpenArrayHandle d,
-                                  const svOpenArrayHandle v) {
+extern "C" void set_cacheinfo_ptr(const char* name, const svLogicVecVal* d,
+                                  const svLogicVecVal* v) {
   if (strcmp(name, "icache") == 0) {
-    icache_valid = (bool*)(((VerilatedDpiOpenVar*)v)->datap());
-    icache_dirty = (bool*)(((VerilatedDpiOpenVar*)d)->datap());
+    icache_valid = v;
+    icache_dirty = d;
   } else if (strcmp(name, "dcache") == 0) {
-    dcache_valid = (bool*)(((VerilatedDpiOpenVar*)v)->datap());
-    dcache_dirty = (bool*)(((VerilatedDpiOpenVar*)d)->datap());
+    dcache_valid = v;
+    dcache_dirty = d;
   } else {
     panic("unkonown cache name %s", name);
   }
