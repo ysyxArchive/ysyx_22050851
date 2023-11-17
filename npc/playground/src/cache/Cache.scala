@@ -41,7 +41,7 @@ class Cache(
   val indexOffset = log2Ceil(cellByte)
   val tagOffset   = log2Ceil(cellByte) + log2Ceil(wayCnt)
 
-  val blackBoxCache = Module(new BlackBoxCache(wayCnt, groupSize, name))
+  val blackBoxCache = Module(new BlackBoxCache(wayCnt, groupSize))
 
   val io          = IO(new CacheIO(dataWidth, addrWidth))
   val axiIO       = IO(new BurstLiteIO(UInt(dataWidth.W), addrWidth))
@@ -234,4 +234,5 @@ class Cache(
   }
   blackBoxCache.io.changed := RegNext(!cacheFSM.is(idle)) && cacheFSM.is(idle)
   blackBoxCache.io.clock := clock
+  blackBoxCache.io.isDCache := name.equals("dcache").B
 }
