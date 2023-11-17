@@ -10,10 +10,7 @@
 #include <debug.h>
 #include <klib-macros.h>
 #include <klib.h>
-#include <macros.h>
 
 typedef struct Context Context;
-
-
 
 #endif
