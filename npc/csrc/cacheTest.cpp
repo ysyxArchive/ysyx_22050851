@@ -9,11 +9,6 @@ svOpenArrayHandle icache_dirty = NULL;
 
 extern "C" void set_cacheinfo_ptr(svLogic isDCache, const svOpenArrayHandle d,
                                   const svOpenArrayHandle v) {
-  for (int j = 0; j < 16; j++) {
-    printf("%x ",
-           ((uint64_t*)(((VerilatedDpiOpenVar*)icache_valid)->datap()))[j]);
-  }
-  printf("\n");
   if (!isDCache) {
     icache_valid = v;
     icache_dirty = d;
@@ -21,6 +16,11 @@ extern "C" void set_cacheinfo_ptr(svLogic isDCache, const svOpenArrayHandle d,
     dcache_valid = v;
     dcache_dirty = d;
   }
+  for (int j = 0; j < 16; j++) {
+    printf("%x ",
+           ((uint64_t*)(((VerilatedDpiOpenVar*)icache_valid)->datap()))[j]);
+  }
+  printf("\n");
 }
 
 // ("""import "DPI-C" function void cache_change(input string name);
