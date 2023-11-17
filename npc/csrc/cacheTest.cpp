@@ -25,7 +25,7 @@ void cache_change(svLogic isDCache) {
   if (!isDCache) {
     for (int j = 0; j < 16; j++) {
       printf("%x",
-             ((uint64_t*)(((VerilatedDpiOpenVar*)icache_valid)->datap()))[j]);
+             ((bool*)(((VerilatedDpiOpenVar*)icache_valid)->datap()))[j]);
     }
     printf("\n");
     // for (int i = 0; i < 4; i++) {
