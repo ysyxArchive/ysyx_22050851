@@ -162,9 +162,9 @@ int main(int argc, char* argv[]) {
       (double)duration / 1000);
   Log("IPC: %.2lf inst/cycle, freq: %.2lf KHz",
       (double)inst_count / cycle_count, (double)cycle_count / duration);
+  printCacheRate();
 #ifdef DEBUG
   lightSSS.do_clear();
 #endif
-  printCacheRate();
   return (is_bad_halt || ret_value != 0);
 }
