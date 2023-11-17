@@ -40,8 +40,8 @@ class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4) extends BlackBox with H
         .reduce(_ ++ _) +
       s"""|  input clock
           |);
-          |  wire [0:0] valid [0:${wayCnt * groupSize - 1}];
-          |  wire [0:0] dirty [0:${wayCnt * groupSize - 1}];
+          |  wire valid [0:${wayCnt * groupSize - 1}];
+          |  wire dirty [0:${wayCnt * groupSize - 1}];
       """ + Seq
       .tabulate(wayCnt)(i =>
         Seq
