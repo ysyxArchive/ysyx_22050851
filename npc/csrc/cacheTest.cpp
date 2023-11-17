@@ -2,13 +2,13 @@
 
 // void cache_
 
-const svLogicVecVal* dcache_valid = NULL;
-const svLogicVecVal* dcache_dirty = NULL;
-const svLogicVecVal* icache_valid = NULL;
-const svLogicVecVal* icache_dirty = NULL;
+const svLogic* dcache_valid = NULL;
+const svLogic* dcache_dirty = NULL;
+const svLogic* icache_valid = NULL;
+const svLogic* icache_dirty = NULL;
 
-extern "C" void set_cacheinfo_ptr(svLogic isDCache, const svLogicVecVal* d,
-                                  const svLogicVecVal* v) {
+extern "C" void set_cacheinfo_ptr(svLogic isDCache, const svLogic* d,
+                                  const svLogic* v) {
   if (!isDCache) {
     icache_valid = v;
     icache_dirty = d;
@@ -25,13 +25,13 @@ void cache_change(svLogic isDCache) {
   if (!isDCache) {
     for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
-        printf("%x", icache_valid[i * 4 + j].aval ? 1 : 0);
+        printf("%x", icache_valid[i * 4 + j] ? 1 : 0);
       }
     }
     printf("\n");
     for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
-        printf("%x", icache_dirty[i * 4 + j].aval ? 1 : 0);
+        printf("%x", icache_dirty[i * 4 + j] ? 1 : 0);
       }
     }
     printf("\n");
