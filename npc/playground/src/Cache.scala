@@ -27,7 +27,7 @@ class CacheDebugIO(
   val wayCnt:    Int = 4,
   val groupSize: Int = 4)
     extends Bundle {
-  val cacheStatus = IO(
+  val cacheStatus = 
     Vec(
       wayCnt,
       Vec(
@@ -38,10 +38,10 @@ class CacheDebugIO(
         }
       )
     )
-  )
+  
   val working = Bool()
-  val gpsize  = groupSize.U
-  val waycnt  = wayCnt.U
+  // val gpsize  = groupSize.U
+  // val waycnt  = wayCnt.U
 }
 
 /**
