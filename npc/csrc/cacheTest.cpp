@@ -27,13 +27,13 @@ void cache_change(const char* name) {
   if (strcmp(name, "icache") == 0) {
     for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
-        printf("%d", icache_valid[i * 4 + j]);
+        printf("%d", icache_valid[i * 4 + j].aval);
       }
     }
     printf("\n");
     for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
-        printf("%d", icache_dirty[i * 4 + j]);
+        printf("%d", icache_dirty[i * 4 + j].aval);
       }
     }
     printf("\n");
