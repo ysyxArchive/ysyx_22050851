@@ -139,7 +139,7 @@ int main(int argc, char* argv[]) {
   auto start = std::chrono::high_resolution_clock::now();
   while (!is_halt) {
     one_step();
-    if (inst_count % (int)1e6 == 0) {
+    if (inst_count % (int)1e5 == 0) {
       Log("%ld", inst_count);
       auto end = std::chrono::high_resolution_clock::now();
       auto dur =
