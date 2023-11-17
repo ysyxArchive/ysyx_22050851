@@ -26,7 +26,7 @@ class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4) extends BlackBox with H
   setInline(
     "BlackBoxCache.v",
     (s"""import "DPI-C" function void cache_change(input logic isDCache);
-        import "DPI-C" function void set_cacheinfo_ptr(input logic isDCache, output logic d [0:${wayCnt * groupSize - 1}], output logic v [0:${wayCnt * groupSize - 1}]);
+        import "DPI-C" function void set_cacheinfo_ptr(input logic isDCache, input logic d [], input logic v []);
        |module BlackBoxCache (
        |  input isDCache,
        |  input changed,
