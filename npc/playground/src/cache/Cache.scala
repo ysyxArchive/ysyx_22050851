@@ -23,24 +23,6 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
   val data  = UInt((dataByte * 8).W)
 }
 
-class CacheDebugIO(
-  val wayCnt:    Int = 4,
-  val groupSize: Int = 4)
-    extends Bundle {
-  val cacheStatus = 
-    Vec(
-      wayCnt,
-      Vec(
-        groupSize,
-        new Bundle {
-          val valid = Bool()
-          val dirty = Bool()
-        }
-      )
-    )
-  
-  val working = Bool()
-}
 
 /**
   * @param cellByte 单个cache存储大小
