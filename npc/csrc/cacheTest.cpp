@@ -24,8 +24,8 @@ extern "C" void set_cacheinfo_ptr(svLogic isDCache, const svOpenArrayHandle d,
 void cache_change(svLogic isDCache) {
   if (!isDCache) {
     for (int j = 0; j < 16; j++) {
-      printf("%x",
-             ((bool*)(((VerilatedDpiOpenVar*)icache_valid)->datap()))[j]);
+      printf("%x ",
+             ((uint64_t*)(((VerilatedDpiOpenVar*)icache_valid)->datap()))[j]);
     }
     printf("\n");
     // for (int i = 0; i < 4; i++) {
