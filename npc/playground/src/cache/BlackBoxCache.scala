@@ -25,7 +25,7 @@ class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4, name: String = "cache")
   val io = IO(Flipped(new CacheDebugIO(wayCnt, groupSize)));
   setInline(
     "BlackBoxCache.v",
-    """import "DPI-C" function void cache_change(input string name);
+    ("""import "DPI-C" function void cache_change(input string name);
         import "DPI-C" function void set_cacheinfo_ptr(input string name, input logic [63:0] d [], input logic [63:0] v []);
        |module BlackBoxCache (
        |  input changed,
@@ -55,6 +55,6 @@ class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4, name: String = "cache")
          |    if(changed) cache_change("${name}");
          |  end
          |  initial set_cacheinfo_ptr("${name}", dirty, valids);
-         |endmodule""".stripMargin
+         |endmodule""").stripMargin
   )
 }
