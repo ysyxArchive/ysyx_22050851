@@ -45,7 +45,7 @@ class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4, name: String = "cache")
       .tabulate(wayCnt)(i =>
         Seq
           .tabulate(groupSize)(j =>
-            s"| assign valid[${i * groupSize + j}] = cacheStatus_${i}_${j}_valid;\n| assign dirty[${i * groupSize + j}] cacheStatus_${i}_${j}_dirty;\n"
+            s"| assign valid[${i * groupSize + j}] = cacheStatus_${i}_${j}_valid;\n| assign dirty[${i * groupSize + j}] = cacheStatus_${i}_${j}_dirty;\n"
           )
           .reduce(_ ++ _)
       )
