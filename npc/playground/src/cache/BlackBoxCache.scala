@@ -17,7 +17,7 @@ class CacheDebugIO(
       )
     )
   val changed = Bool()
-  val clock  = Clock()
+  val clock   = Clock()
 }
 
 class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4, name: String = "cache")
@@ -26,8 +26,8 @@ class BlackBoxCache(wayCnt: Int = 4, groupSize: Int = 4, name: String = "cache")
   val io = IO(Flipped(new CacheDebugIO(wayCnt, groupSize)));
   setInline(
     "BlackBoxCache.v",
-    ("""import "DPI-C" function void cache_change(input string name);
-        import "DPI-C" function void set_cacheinfo_ptr(input string name, input logic [63:0] d [], input logic [63:0] v []);
+    (s"""import "DPI-C" function void cache_change(input string name);
+        import "DPI-C" function void set_cacheinfo_ptr(input string name, input logic [0:0] d [0:${wayCnt * groupSize - 1}], input logic [0:0] v [0:${wayCnt * groupSize - 1}]);
        |module BlackBoxCache (
        |  input changed,
        """ +
