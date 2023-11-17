@@ -12,6 +12,18 @@ extern "C" void set_cacheinfo_ptr(svLogic isDCache, const svLogic* d,
   if (!isDCache) {
     icache_valid = v;
     icache_dirty = d;
+     for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        printf("%x", icache_valid[i * 4 + j] ? 1 : 0);
+      }
+    }
+    printf("\n");
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        printf("%x", icache_dirty[i * 4 + j] ? 1 : 0);
+      }
+    }
+    printf("\n");
   } else {
     dcache_valid = v;
     dcache_dirty = d;
