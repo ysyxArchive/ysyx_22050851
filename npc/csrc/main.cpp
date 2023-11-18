@@ -1,15 +1,11 @@
 #include <chrono>
-#include "VCPU.h"
-#include "VCPU__Dpi.h"
+
 #include "common.h"
 #include "device.h"
 #include "difftest.h"
 #include "mem.h"
 #include "time.h"
 #include "tools/lightsss.h"
-#include "verilated.h"
-#include "verilated_dpi.h"
-#include "verilated_vcd_c.h"
 
 bool is_halt = false;
 bool is_bad_halt = false;
@@ -17,7 +13,6 @@ bool is_bad_halt = false;
 uint64_t inst_count = 0;
 uint64_t cycle_count = 0;
 
-extern VCPU* top;
 CPU cpu;
 LightSSS lightSSS;
 int npc_clock = 0;
@@ -116,6 +111,14 @@ void one_step() {
   cycle_count++;
 }
 
+void printInfo(int64_t dur) {
+  Log("execute speed: %.2lf inst/s,  %ld insts, %.3f seconds",
+      (double)inst_count * 1000 / dur, inst_count, (double)dur / 1000);
+  Log("IPC: %.2lf inst/cycle, freq: %.2lf KHz",
+      (double)inst_count / cycle_count, (double)cycle_count / dur);
+  printCacheRate();
+}
+
 int main(int argc, char* argv[]) {
   Log("running in " MUXDEF(DEBUG, ANSI_FMT("DEBUG", ANSI_FG_YELLOW),
                            ANSI_FMT("PRODUCT", ANSI_FG_GREEN))
@@ -138,11 +141,16 @@ int main(int argc, char* argv[]) {
   auto start = std::chrono::high_resolution_clock::now();
   while (!is_halt) {
     one_step();
+    if (cycle_count % PROFILE_LOG_INTERVAL == 0) {
+      auto end = std::chrono::high_resolution_clock::now();
+      auto dur =
+          std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+              .count();
+    }
   }
   auto end = std::chrono::high_resolution_clock::now();
-  auto duration =
-      std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
-          .count();
+  auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+                 .count();
   int ret_value = cpu.gpr[10];
   if (is_bad_halt || ret_value != 0) {
     if ((int64_t)cpu.pc - MEM_START <= 0) {
@@ -161,11 +169,8 @@ int main(int argc, char* argv[]) {
     lightSSS.wakeup_child(npc_clock);
   }
 #endif
-  Log("execute speed: %.2lf inst/s,  %ld insts, %.3f seconds",
-      (double)inst_count * 1000 / duration, inst_count,
-      (double)duration / 1000);
-  Log("IPC: %.2lf inst/cycle, freq: %.2lf KHz",
-      (double)inst_count / cycle_count, (double)cycle_count / duration);
+  printInfo(dur);
+  printCacheRate();
 #ifdef DEBUG
   lightSSS.do_clear();
 #endif

@@ -31,4 +31,6 @@ extern bool is_bad_halt, is_halt;
 
 #define TODO() panic("please implement me")
 
+void printCacheRate();
+
 #endif

@@ -41,6 +41,8 @@ class Cache(
   val indexOffset = log2Ceil(cellByte)
   val tagOffset   = log2Ceil(cellByte) + log2Ceil(wayCnt)
 
+  val blackBoxCache = Module(new BlackBoxCache(wayCnt, groupSize))
+
   val io          = IO(new CacheIO(dataWidth, addrWidth))
   val axiIO       = IO(new BurstLiteIO(UInt(dataWidth.W), addrWidth))
   val enableDebug = IO(Input(Bool()))
@@ -224,4 +226,16 @@ class Cache(
       printf("data is %x\n", io.data.bits)
     }
   }
+  // for (i <- 0 until wayCnt) {
+  //   for (j <- 0 until groupSize) {
+  //     blackBoxCache.io.cacheStatus(i)(j).dirty := cacheMem(i)(j).dirty
+  //     blackBoxCache.io.cacheStatus(i)(j).valid := cacheMem(i)(j).valid
+  //   }
+  // }
+  blackBoxCache.io.changed  := RegNext(!cacheFSM.is(idle)) && cacheFSM.is(idle)
+  blackBoxCache.io.clock    := clock
+  blackBoxCache.io.isDCache := name.equals("dcache").B
+  blackBoxCache.io.reqValid := io.readReq.fire || io.writeReq.fire
+  blackBoxCache.io.reqWrite := io.writeReq.fire
+  blackBoxCache.io.isHit    := hit
 }
