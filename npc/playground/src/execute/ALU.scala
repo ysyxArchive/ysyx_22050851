@@ -86,7 +86,8 @@ class ALUIO extends Bundle {
 class ALU extends Module {
   val io = IO(new ALUIO())
 
-  val simpleAdder = Module(new SimpleAdder())
+  // val simpleAdder = Module(new SimpleAdder())
+  val simpleAdder = Module(new FastAdder())
   // val multiplier  = Module(new SimpleMultiplier())
   // val multiplier = Module(new BoothMultiplier())
   val multiplier = Module(new BHMultiplier())
