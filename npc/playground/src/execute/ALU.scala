@@ -29,7 +29,7 @@ class FullAdder extends Module {
   io.out  := io.inA ^ io.inB ^ io.inC;
   io.outC := (io.inA & (io.inB ^ io.inC)) | (io.inB & io.inC)
 }
-class SimpleAdderIO extends Bundle {
+class AdderIO extends Bundle {
   val inA  = Input(UInt(64.W))
   val inB  = Input(UInt(64.W))
   val inC  = Input(Bool())
@@ -38,7 +38,7 @@ class SimpleAdderIO extends Bundle {
 }
 
 class SimpleAdder extends Module {
-  val io = IO(new SimpleAdderIO())
+  val io = IO(new AdderIO())
 
   val adders = for (i <- 0 to 63) yield {
     val adder = Module(new FullAdder())
@@ -56,6 +56,13 @@ class SimpleAdder extends Module {
   }
   io.outC := adders(63).io.outC
   io.out  := VecInit(adders.map(adder => adder.io.out)).asUInt
+}
+
+class FastAdder extends Module {
+  val io = IO(new AdderIO())
+  val c  = io.inA + io.inB
+  io.out  := c
+  io.outC := c(64)
 }
 
 class SignalIO extends Bundle {
