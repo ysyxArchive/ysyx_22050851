@@ -60,9 +60,8 @@ class SimpleAdder extends Module {
 
 class FastAdder extends Module {
   val io = IO(new AdderIO())
-  val c  = io.inA + io.inB
-  io.out  := c
-  io.outC := c(64)
+  io.out  := io.inA + io.inB
+  io.outC := io.inA(63) && io.inB(63)
 }
 
 class SignalIO extends Bundle {
