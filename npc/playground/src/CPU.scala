@@ -2,6 +2,7 @@ import chisel3._
 import chisel3.util.Enum
 import chisel3.util.Decoupled
 import decode._
+import os.group
 
 class CPU extends Module {
   val enableDebug = IO(Input(Bool()))
@@ -18,8 +19,8 @@ class CPU extends Module {
   val wbu     = Module(new WriteBackUnit())
 
   val arbiter = Module(new BurstLiteArbiter(2))
-  val iCache  = Module(new Cache(name = "icache"))
-  val dCache  = Module(new Cache(name = "dcache"))
+  val iCache  = Module(new Cache(name = "icache", cellByte = 16, wayCnt = 2, groupSize = 2))
+  val dCache  = Module(new Cache(name = "dcache", cellByte = 16, wayCnt = 2, groupSize = 2))
   ifu.fetchOut <> decoder.decodeIn
   decoder.decodeOut <> exe.exeIn
   exe.exeOut <> memu.memIn
