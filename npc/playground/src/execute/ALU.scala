@@ -60,8 +60,9 @@ class SimpleAdder extends Module {
 
 class FastAdder extends Module {
   val io = IO(new AdderIO())
-  io.out  := io.inA + io.inB
-  io.outC := io.inA(63) && io.inB(63)
+  val result = io.inA +& io.inB + io.inC
+  io.out  := result
+  io.outC := result(64)
 }
 
 class SignalIO extends Bundle {
@@ -85,8 +86,8 @@ class ALUIO extends Bundle {
 class ALU extends Module {
   val io = IO(new ALUIO())
 
-  // val simpleAdder = Module(new SimpleAdder())
-  val simpleAdder = Module(new FastAdder())
+  // val adder = Module(new SimpleAdder())
+  val adder = Module(new FastAdder())
   // val multiplier  = Module(new SimpleMultiplier())
   val multiplier = Module(new BoothMultiplier())
   // val multiplier = Module(new BHMultiplier())
@@ -111,9 +112,9 @@ class ALU extends Module {
   val dataValid = RegInit(false.B)
   dataValid := dataValid ^ io.in.fire ^ io.out.fire
 
-  simpleAdder.io.inA := inA
-  simpleAdder.io.inB := Mux(opType === AluMode.sub, ~inB, inB)
-  simpleAdder.io.inC := opType === AluMode.sub
+  adder.io.inA := inA
+  adder.io.inB := Mux(opType === AluMode.sub, ~inB, inB)
+  adder.io.inC := opType === AluMode.sub
 
   val shouldMul = mulOps.contains(io.in.bits.opType.asUInt)
   val shouldDiv = VecInit(divOps ++ remOps).contains(io.in.bits.opType.asUInt)
@@ -137,9 +138,9 @@ class ALU extends Module {
 
   val out = MuxLookup(opType.asUInt, 0.U)(
     EnumSeq(
-      AluMode.add -> simpleAdder.io.out,
+      AluMode.add -> adder.io.out,
       AluMode.and -> (inA & inB),
-      AluMode.sub -> simpleAdder.io.out,
+      AluMode.sub -> adder.io.out,
       AluMode.div -> (inA.asSInt / inB.asSInt).asUInt,
       AluMode.divu -> inA / inB,
       AluMode.or -> (inA | inB),
@@ -157,7 +158,7 @@ class ALU extends Module {
 
   io.out.valid                   := (io.in.fire && isImm) || (shouldDivReg && divider.io.outValid) || (shouldMulReg && multiplier.io.outValid)
   io.out.bits.out                := out
-  io.out.bits.signals.isCarry    := simpleAdder.io.outC
+  io.out.bits.signals.isCarry    := adder.io.outC
   io.out.bits.signals.isNegative := out(63)
   io.out.bits.signals.isZero     := !out.orR
 
