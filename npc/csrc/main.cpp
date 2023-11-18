@@ -1,12 +1,10 @@
 #include <chrono>
-
 #include "common.h"
 #include "device.h"
 #include "difftest.h"
 #include "mem.h"
 #include "time.h"
 #include "tools/lightsss.h"
-void printCacheRate();
 
 bool is_halt = false;
 bool is_bad_halt = false;
