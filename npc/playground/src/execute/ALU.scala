@@ -29,7 +29,7 @@ class FullAdder extends Module {
   io.out  := io.inA ^ io.inB ^ io.inC;
   io.outC := (io.inA & (io.inB ^ io.inC)) | (io.inB & io.inC)
 }
-class SimpleAdderIO extends Bundle {
+class AdderIO extends Bundle {
   val inA  = Input(UInt(64.W))
   val inB  = Input(UInt(64.W))
   val inC  = Input(Bool())
@@ -38,7 +38,7 @@ class SimpleAdderIO extends Bundle {
 }
 
 class SimpleAdder extends Module {
-  val io = IO(new SimpleAdderIO())
+  val io = IO(new AdderIO())
 
   val adders = for (i <- 0 to 63) yield {
     val adder = Module(new FullAdder())
@@ -56,6 +56,13 @@ class SimpleAdder extends Module {
   }
   io.outC := adders(63).io.outC
   io.out  := VecInit(adders.map(adder => adder.io.out)).asUInt
+}
+
+class FastAdder extends Module {
+  val io = IO(new AdderIO())
+  val result = io.inA +& io.inB + io.inC
+  io.out  := result
+  io.outC := result(64)
 }
 
 class SignalIO extends Bundle {
@@ -79,10 +86,11 @@ class ALUIO extends Bundle {
 class ALU extends Module {
   val io = IO(new ALUIO())
 
-  val simpleAdder = Module(new SimpleAdder())
+  // val adder = Module(new SimpleAdder())
+  val adder = Module(new FastAdder())
   // val multiplier  = Module(new SimpleMultiplier())
-  // val multiplier = Module(new BoothMultiplier())
-  val multiplier = Module(new BHMultiplier())
+  val multiplier = Module(new BoothMultiplier())
+  // val multiplier = Module(new BHMultiplier())
   // val divider    = Module(new SimpleDivider())
   val divider = Module(new R2Divider())
 
@@ -104,9 +112,9 @@ class ALU extends Module {
   val dataValid = RegInit(false.B)
   dataValid := dataValid ^ io.in.fire ^ io.out.fire
 
-  simpleAdder.io.inA := inA
-  simpleAdder.io.inB := Mux(opType === AluMode.sub, ~inB, inB)
-  simpleAdder.io.inC := opType === AluMode.sub
+  adder.io.inA := inA
+  adder.io.inB := Mux(opType === AluMode.sub, ~inB, inB)
+  adder.io.inC := opType === AluMode.sub
 
   val shouldMul = mulOps.contains(io.in.bits.opType.asUInt)
   val shouldDiv = VecInit(divOps ++ remOps).contains(io.in.bits.opType.asUInt)
@@ -130,9 +138,9 @@ class ALU extends Module {
 
   val out = MuxLookup(opType.asUInt, 0.U)(
     EnumSeq(
-      AluMode.add -> simpleAdder.io.out,
+      AluMode.add -> adder.io.out,
       AluMode.and -> (inA & inB),
-      AluMode.sub -> simpleAdder.io.out,
+      AluMode.sub -> adder.io.out,
       AluMode.div -> (inA.asSInt / inB.asSInt).asUInt,
       AluMode.divu -> inA / inB,
       AluMode.or -> (inA | inB),
@@ -150,7 +158,7 @@ class ALU extends Module {
 
   io.out.valid                   := (io.in.fire && isImm) || (shouldDivReg && divider.io.outValid) || (shouldMulReg && multiplier.io.outValid)
   io.out.bits.out                := out
-  io.out.bits.signals.isCarry    := simpleAdder.io.outC
+  io.out.bits.signals.isCarry    := adder.io.outC
   io.out.bits.signals.isNegative := out(63)
   io.out.bits.signals.isZero     := !out.orR
 
