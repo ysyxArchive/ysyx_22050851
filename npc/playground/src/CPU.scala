@@ -19,8 +19,8 @@ class CPU extends Module {
   val wbu     = Module(new WriteBackUnit())
 
   val arbiter = Module(new BurstLiteArbiter(2))
-  val iCache  = Module(new Cache(name = "icache", cellByte = 16, wayCnt = 1, groupSize = 1))
-  val dCache  = Module(new Cache(name = "dcache", cellByte = 16, wayCnt = 1, groupSize = 1))
+  val iCache  = Module(new Cache(name = "icache", cellByte = 16, wayCnt = 2, groupSize = 1))
+  val dCache  = Module(new Cache(name = "dcache", cellByte = 16, wayCnt = 2, groupSize = 1))
   ifu.fetchOut <> decoder.decodeIn
   decoder.decodeOut <> exe.exeIn
   exe.exeOut <> memu.memIn
