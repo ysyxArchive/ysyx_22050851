@@ -146,6 +146,7 @@ int main(int argc, char* argv[]) {
       auto dur =
           std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
               .count();
+      printInfo(dur);
     }
   }
   auto end = std::chrono::high_resolution_clock::now();
@@ -170,7 +171,6 @@ int main(int argc, char* argv[]) {
   }
 #endif
   printInfo(dur);
-  printCacheRate();
 #ifdef DEBUG
   lightSSS.do_clear();
 #endif
