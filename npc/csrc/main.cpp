@@ -1,4 +1,5 @@
 #include <chrono>
+
 #include "common.h"
 #include "device.h"
 #include "difftest.h"
@@ -111,8 +112,11 @@ void one_step() {
 }
 
 void printInfo(int64_t dur) {
+  Log("execute speed: %.2lf inst/s,  %ld insts, %.3f seconds",
+      (double)inst_count * 1000 / dur, inst_count, (double)dur / 1000);
   Log("IPC: %.2lf inst/cycle, freq: %.2lf KHz",
       (double)inst_count / cycle_count, (double)cycle_count / dur);
+  printCacheRate();
 }
 
 int main(int argc, char* argv[]) {
@@ -137,13 +141,11 @@ int main(int argc, char* argv[]) {
   auto start = std::chrono::high_resolution_clock::now();
   while (!is_halt) {
     one_step();
-    if (cycle_count % (int)1e5 == 0) {
+    if (cycle_count % PROFILE_LOG_INTERVAL == 0) {
       auto end = std::chrono::high_resolution_clock::now();
       auto dur =
           std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
               .count();
-      printInfo(dur);
-      printCacheRate();
     }
   }
   auto end = std::chrono::high_resolution_clock::now();
@@ -167,8 +169,6 @@ int main(int argc, char* argv[]) {
     lightSSS.wakeup_child(npc_clock);
   }
 #endif
-  Log("execute speed: %.2lf inst/s,  %ld insts, %.3f seconds",
-      (double)inst_count * 1000 / dur, inst_count, (double)dur / 1000);
   printInfo(dur);
   printCacheRate();
 #ifdef DEBUG
