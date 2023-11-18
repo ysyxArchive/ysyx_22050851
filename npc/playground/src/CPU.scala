@@ -2,7 +2,6 @@ import chisel3._
 import chisel3.util.Enum
 import chisel3.util.Decoupled
 import decode._
-import os.group
 
 class CPU extends Module {
   val enableDebug = IO(Input(Bool()))
