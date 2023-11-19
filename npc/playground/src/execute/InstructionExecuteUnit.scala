@@ -15,12 +15,15 @@ class ExeDataIn extends Bundle {
   val imm      = Output(UInt(64.W))
   val pc       = Output(UInt(64.W))
   val dnpc     = Output(UInt(64.W))
+  val wdata    = Output(UInt(64.W))
 }
 
 class ExeIn extends Bundle {
-  val debug   = Output(new DebugInfo)
-  val data    = Output(new ExeDataIn);
-  val control = Output(new ExeControlIn);
+  val debug         = Output(new DebugInfo)
+  val data          = Output(new ExeDataIn);
+  val control       = Output(new ExeControlIn);
+  val toDecodeValid = Output(Bool())
+
 }
 
 class InstructionExecuteUnit extends Module {
@@ -92,12 +95,12 @@ class InstructionExecuteUnit extends Module {
   exeOut.bits.debug := exeInReg.debug
 
   toDecode.regIndex := Mux(dataValid, exeInReg.data.dst, 0.U)
-  toDecode.dataValid := dataValid && (!shouldWaitALU || alu.io.out.fire) && VecInit(
+  toDecode.dataValid := dataValid && (exeInReg.toDecodeValid || ((!shouldWaitALU || alu.io.out.fire) && VecInit(
     RegWriteMux.alu.asUInt,
     RegWriteMux.aluneg.asUInt,
     RegWriteMux.alunotcarryandnotzero.asUInt
-  ).contains(exeInReg.control.regwritemux)
-  toDecode.data := wdataExtended
+  ).contains(exeInReg.control.regwritemux)))
+  toDecode.data := Mux(exeInReg.toDecodeValid, exeInReg.data.wdata, wdataExtended)
   toDecode.csrIndex := Mux(
     dataValid,
     ControlRegisters.behaveDependency(exeInReg.control.csrbehave, exeInReg.control.csrsetmode, exeInReg.data.imm),
