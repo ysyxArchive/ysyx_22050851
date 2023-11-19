@@ -17,13 +17,14 @@ class WBDataIn extends Bundle {
   val signals  = new SignalIO()
   val pc       = Output(UInt(64.W))
   val dnpc     = Output(UInt(64.W))
+  val wdata    = Output(UInt(64.W))
 }
 
 class WBIn extends Bundle {
-  val debug   = Output(new DebugInfo)
-  val data    = Output(new WBDataIn);
-  val control = Output(new ExeControlIn);
-  val enable  = Output(Bool())
+  val debug         = Output(new DebugInfo)
+  val data          = Output(new WBDataIn);
+  val control       = Output(new ExeControlIn);
+  val toDecodeValid = Output(Bool())
 }
 
 class WriteBackUnit extends Module {
@@ -57,13 +58,13 @@ class WriteBackUnit extends Module {
   regWriteIO.dnpc := Mux(wbInValid, wbInReg.data.dnpc, regReadIO.pc)
   val regwdata = MuxLookup(wbInReg.control.regwritemux, wbInReg.data.alu)(
     EnumSeq(
-      RegWriteMux.alu -> wbInReg.data.alu,
-      RegWriteMux.snpc -> snpc,
-      RegWriteMux.mem -> wbInReg.data.mem,
-      RegWriteMux.aluneg -> Utils.zeroExtend(wbInReg.data.signals.isNegative, 1, 64),
+      RegWriteMux.alu -> wbInReg.data.alu, // from EXU
+      RegWriteMux.snpc -> snpc, // from IDU
+      RegWriteMux.mem -> wbInReg.data.mem, // from MEMU
+      RegWriteMux.aluneg -> Utils.zeroExtend(wbInReg.data.signals.isNegative, 1, 64), // from EXU
       RegWriteMux.alunotcarryandnotzero -> Utils
-        .zeroExtend(!wbInReg.data.signals.isCarry && !wbInReg.data.signals.isZero, 1, 64),
-      RegWriteMux.csr -> csrControl.output
+        .zeroExtend(!wbInReg.data.signals.isCarry && !wbInReg.data.signals.isZero, 1, 64), // from EXU
+      RegWriteMux.csr -> csrControl.output // from WBU
     )
   )
   regWriteIO.wdata := Mux(wbInReg.control.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)
@@ -80,7 +81,9 @@ class WriteBackUnit extends Module {
 
   wbIn.ready := true.B
 
-  toDecode.regIndex := Mux(wbInValid, wbInReg.data.dst, 0.U)
+  toDecode.regIndex  := Mux(wbInValid, wbInReg.data.dst, 0.U)
+  toDecode.dataValid := true.B
+  toDecode.data      := regWriteIO.wdata
   toDecode.csrIndex := Mux(
     wbInValid,
     ControlRegisters.behaveDependency(wbInReg.control.csrbehave, wbInReg.control.csrsetmode, wbInReg.data.imm),

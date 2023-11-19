@@ -91,8 +91,8 @@ class ALU extends Module {
   // val multiplier  = Module(new SimpleMultiplier())
   val multiplier = Module(new BoothMultiplier())
   // val multiplier = Module(new BHMultiplier())
-  val divider    = Module(new SimpleDivider())
-  // val divider = Module(new R2Divider())
+  // val divider    = Module(new SimpleDivider())
+  val divider = Module(new R2Divider())
 
   val mulOps = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt))
   val divOps = VecInit(Seq(AluMode.div, AluMode.divu, AluMode.divw, AluMode.divuw).map(t => t.asUInt))

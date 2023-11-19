@@ -57,6 +57,16 @@ class InstructionExecuteUnit extends Module {
       AluMux2.src2 -> exeInReg.data.src2Data
     )
   )
+  val wdata = MuxLookup(exeInReg.control.regwritemux, 0.U)(
+    EnumSeq(
+      RegWriteMux.alu -> alu.io.out.bits.out,
+      RegWriteMux.aluneg -> Utils.zeroExtend(alu.io.out.bits.signals.isNegative, 1, 64), // from EXU
+      RegWriteMux.alunotcarryandnotzero -> Utils
+        .zeroExtend(!alu.io.out.bits.signals.isCarry && !alu.io.out.bits.signals.isZero, 1, 64) // from EXU
+    )
+  )
+  val wdataExtended = Mux(exeInReg.control.regwsext, Utils.signExtend(wdata, 32), wdata)
+
   val res = AluMode.safe(exeInReg.control.alumode)
   alu.io.in.bits.opType := res._1
   alu.io.out.ready      := true.B
@@ -76,11 +86,18 @@ class InstructionExecuteUnit extends Module {
   exeOut.bits.data.imm      := exeInReg.data.imm
   exeOut.bits.data.src1Data := exeInReg.data.src1Data
   exeOut.bits.data.src2Data := exeInReg.data.src2Data
-  exeOut.bits.enable        := true.B
+  exeOut.bits.data.wdata    := wdataExtended
+  exeOut.bits.toDecodeValid := toDecode.dataValid
 
   exeOut.bits.debug := exeInReg.debug
 
   toDecode.regIndex := Mux(dataValid, exeInReg.data.dst, 0.U)
+  toDecode.dataValid := dataValid && (!shouldWaitALU || alu.io.out.fire) && VecInit(
+    RegWriteMux.alu.asUInt,
+    RegWriteMux.aluneg.asUInt,
+    RegWriteMux.alunotcarryandnotzero.asUInt
+  ).contains(exeInReg.control.regwritemux)
+  toDecode.data := wdataExtended
   toDecode.csrIndex := Mux(
     dataValid,
     ControlRegisters.behaveDependency(exeInReg.control.csrbehave, exeInReg.control.csrsetmode, exeInReg.data.imm),

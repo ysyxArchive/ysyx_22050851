@@ -26,8 +26,10 @@ class DecodeBack extends Bundle {
 }
 
 class ToDecode extends Bundle {
-  val regIndex = Input(UInt(5.W))
-  val csrIndex = Input(Vec(3, UInt(12.W)))
+  val regIndex  = Input(UInt(5.W))
+  val dataValid = Input(Bool())
+  val data      = Input(UInt(64.W))
+  val csrIndex  = Input(Vec(3, UInt(12.W)))
 }
 
 class InstructionDecodeUnit extends Module {
@@ -88,26 +90,29 @@ class InstructionDecodeUnit extends Module {
   // regIO
   regIO.raddr0 := rs1
   regIO.raddr1 := rs2
+  val src1RawData = MuxCase(
+    regIO.out0,
+    Seq(fromExe, fromMemu, fromWbu).map(bundle => (bundle.regIndex === rs1 && bundle.dataValid) -> bundle.data)
+  )
+  val src2RawData = MuxCase(
+    regIO.out1,
+    Seq(fromExe, fromMemu, fromWbu).map(bundle => (bundle.regIndex === rs2 && bundle.dataValid) -> bundle.data)
+  )
   val src1Data = Mux(
     controlDecoder.output.srccast1,
-    Utils.cast(regIO.out0, 32, 64),
+    Utils.cast(src1RawData, 32, 64),
     regIO.out0
   )
   val src2Data = Mux(
     controlDecoder.output.srccast2,
-    Utils.cast(regIO.out1, 32, 64),
+    Utils.cast(src2RawData, 32, 64),
     regIO.out1
   )
   decodeOut.bits.data.src1Data := src1Data
   decodeOut.bits.data.src2Data := src2Data
-  Mux(
-    controlDecoder.output.srccast2,
-    Utils.cast(regIO.out1, 32, 64),
-    regIO.out1
-  )
 
   // RAW check
-  val regVec = VecInit(Seq(fromExe, fromMemu, fromWbu).map(bundle => bundle.regIndex))
+  val regVec = VecInit(Seq(fromExe, fromMemu, fromWbu).map(bundle => Mux(bundle.dataValid, 0.U, bundle.regIndex)))
   val csrVec =
     Seq(fromExe, fromMemu, fromWbu).map(bundle => bundle.csrIndex).reduce((prev, s) => VecInit(prev ++ s))
   shouldWait := dataValid && ((rs1 =/= 0.U && regVec.contains(rs1)) ||
