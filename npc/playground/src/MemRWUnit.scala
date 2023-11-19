@@ -97,6 +97,7 @@ class MemRWUnit extends Module {
   memOut.bits.data.dnpc     := memInReg.data.dnpc
   memOut.bits.data.imm      := memInReg.data.imm
   memOut.bits.data.wdata    := Mux(memInReg.toDecodeValid, memInReg.data.wdata, memIO.data.bits)
+  memOut.bits.toDecodeValid := toDecode.dataValid
 
   memOut.bits.control := memInReg.control
 
