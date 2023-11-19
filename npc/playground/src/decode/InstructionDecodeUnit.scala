@@ -163,5 +163,4 @@ class InstructionDecodeUnit extends Module {
   // debug
   decodeOut.bits.debug.pc   := decodeInReg.debug.pc
   decodeOut.bits.debug.inst := inst
-
 }
