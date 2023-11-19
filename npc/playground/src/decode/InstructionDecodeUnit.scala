@@ -94,13 +94,13 @@ class InstructionDecodeUnit extends Module {
   val src1RawData = MuxCase(
     regIO.out0,
     Seq(fromExe, fromMemu, fromWbu, fromSelf).map(bundle =>
-      (bundle.regIndex === rs1 && bundle.dataValid) -> bundle.data
+      (bundle.regIndex === rs1 && rs1.orR && bundle.dataValid) -> bundle.data
     )
   )
   val src2RawData = MuxCase(
     regIO.out1,
     Seq(fromExe, fromMemu, fromWbu, fromSelf).map(bundle =>
-      (bundle.regIndex === rs2 && bundle.dataValid) -> bundle.data
+      (bundle.regIndex === rs2 && rs2.orR && bundle.dataValid) -> bundle.data
     )
   )
   val src1Data = Mux(
