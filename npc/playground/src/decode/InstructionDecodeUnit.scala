@@ -119,6 +119,7 @@ class InstructionDecodeUnit extends Module {
   fromSelf.regIndex  := rd
   fromSelf.dataValid := controlDecoder.output.regwritemux === RegWriteMux.snpc.asUInt
   fromSelf.data      := decodeInReg.pc + 4.U
+  fromself.csrIndex  := dontCare
 
   // RAW check
   val regVec = VecInit(Seq(fromExe, fromMemu, fromWbu).map(bundle => Mux(bundle.dataValid, 0.U, bundle.regIndex)))
