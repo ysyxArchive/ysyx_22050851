@@ -82,7 +82,7 @@ class WriteBackUnit extends Module {
   wbIn.ready := true.B
 
   toDecode.regIndex  := Mux(wbInValid, wbInReg.data.dst, 0.U)
-  toDecode.dataValid := true.B
+  toDecode.dataValid := wbInValid && wbInReg.control.regwrite
   toDecode.data      := regWriteIO.wdata
   toDecode.csrIndex := Mux(
     wbInValid,
