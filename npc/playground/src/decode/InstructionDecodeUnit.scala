@@ -106,12 +106,12 @@ class InstructionDecodeUnit extends Module {
   val src1Data = Mux(
     controlDecoder.output.srccast1,
     Utils.cast(src1RawData, 32, 64),
-    regIO.out0
+    src1RawData
   )
   val src2Data = Mux(
     controlDecoder.output.srccast2,
     Utils.cast(src2RawData, 32, 64),
-    regIO.out1
+    src2RawData
   )
   decodeOut.bits.data.src1Data := src1Data
   decodeOut.bits.data.src2Data := src2Data
