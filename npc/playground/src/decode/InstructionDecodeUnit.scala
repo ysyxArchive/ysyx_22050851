@@ -41,7 +41,7 @@ class InstructionDecodeUnit extends Module {
   val fromExe        = IO(new ToDecode())
   val fromMemu       = IO(new ToDecode())
   val fromWbu        = IO(new ToDecode())
-  val fromSelf       = new ToDecode()
+  val fromSelf       = Wire(new ToDecode())
   val controlDecoder = Module(new InstContorlDecoder)
 
   val decodeInReg = RegInit(DecodeIn.default)
