@@ -56,18 +56,11 @@ class WriteBackUnit extends Module {
     )
   )
   regWriteIO.dnpc := Mux(wbInValid, wbInReg.data.dnpc, regReadIO.pc)
-  val regwdata = MuxLookup(wbInReg.control.regwritemux, wbInReg.data.alu)(
-    EnumSeq(
-      RegWriteMux.alu -> wbInReg.data.alu, // from EXU
-      RegWriteMux.snpc -> snpc, // from IDU
-      RegWriteMux.mem -> wbInReg.data.mem, // from MEMU
-      RegWriteMux.aluneg -> Utils.zeroExtend(wbInReg.data.signals.isNegative, 1, 64), // from EXU
-      RegWriteMux.alunotcarryandnotzero -> Utils
-        .zeroExtend(!wbInReg.data.signals.isCarry && !wbInReg.data.signals.isZero, 1, 64), // from EXU
-      RegWriteMux.csr -> csrControl.output // from WBU
-    )
+  regWriteIO.wdata := Mux(
+    wbInReg.control.regwritemux === RegWriteMux.csr.asUInt,
+    csrControl.output,
+    wbInReg.data.wdata
   )
-  regWriteIO.wdata := Mux(wbInReg.control.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)
   // csr
   csrControl.control.csrBehave  := Mux(wbInValid, wbInReg.control.csrbehave, CsrBehave.no.asUInt)
   csrControl.control.csrSetmode := Mux(wbInValid, wbInReg.control.csrsetmode, CsrSetMode.origin.asUInt)
