@@ -94,7 +94,7 @@ class InstructionExecuteUnit extends Module {
   exeOut.bits.debug := exeInReg.debug
 
   toDecode.regIndex := Mux(dataValid, exeInReg.data.dst, 0.U)
-  toDecode.dataValid := dataValid && (exeInReg.toDecodeValid || ((!shouldWaitALU || alu.io.out.fire) && VecInit(
+  toDecode.dataValid := dataValid && exeInReg.control.regwrite && (exeInReg.toDecodeValid || ((!shouldWaitALU || alu.io.out.fire) && VecInit(
     RegWriteMux.alu.asUInt,
     RegWriteMux.aluneg.asUInt,
     RegWriteMux.alunotcarryandnotzero.asUInt
