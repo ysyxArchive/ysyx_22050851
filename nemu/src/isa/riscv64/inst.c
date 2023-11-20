@@ -94,9 +94,6 @@ sword_t MULHSU(sword_t a, word_t b) {
   int64_t multhi = a_x_b_hi + (a_x_b_mid >> 32) + (b_x_a_mid >> 32) + carry_bit;
   return multhi;
 }
-
-
-
 static int decode_exec(Decode *s) {
   int dest = 0;
   int uimm = BITS(s->isa.inst.val, 19, 15);
