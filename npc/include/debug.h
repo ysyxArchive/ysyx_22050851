@@ -18,7 +18,6 @@ extern LightSSS lightSSS;
   }
 #else
 #define WAKE_CHILD() ;
-
 #endif
 extern bool is_bad_halt, is_halt;
 #define Log(format, ...)                                                      \
