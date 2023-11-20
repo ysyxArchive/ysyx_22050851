@@ -23,7 +23,6 @@ class ExeIn extends Bundle {
   val data          = Output(new ExeDataIn);
   val control       = Output(new ExeControlIn);
   val toDecodeValid = Output(Bool())
-
 }
 
 class InstructionExecuteUnit extends Module {

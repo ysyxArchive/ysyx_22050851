@@ -9,6 +9,7 @@ class DecodeIn extends Bundle {
   val debug = Output(new DebugInfo)
   val pc    = Output(UInt(64.W))
   val inst  = Output(UInt(32.W))
+  val snpc  = Output(UInt(64.W))
 }
 
 object DecodeIn {
@@ -79,7 +80,7 @@ class InstructionDecodeUnit extends Module {
   decodeOut.bits.data.src1  := rs1
   decodeOut.bits.data.src2  := rs2
   decodeOut.bits.data.dst   := rd
-  decodeOut.bits.data.wdata := decodeInReg.pc + 4.U
+  decodeOut.bits.data.wdata := decodeInReg.snpc
 
   decodeOut.valid        := dataValid && !shouldWait
   decodeOut.bits.data.pc := decodeInReg.pc
@@ -118,7 +119,7 @@ class InstructionDecodeUnit extends Module {
 
   fromSelf.regIndex  := rd
   fromSelf.dataValid := controlDecoder.output.regwritemux === RegWriteMux.snpc.asUInt
-  fromSelf.data      := decodeInReg.pc + 4.U
+  fromSelf.data      := decodeInReg.snpc
   fromSelf.csrIndex  := DontCare
 
   // RAW check
@@ -156,7 +157,7 @@ class InstructionDecodeUnit extends Module {
   decodeBack.willTakeBranch := willTakeBranch
   decodeBack.branchPc       := branchPc
 
-  decodeOut.bits.data.dnpc     := Mux(shouldWait, decodeInReg.pc, Mux(willTakeBranch, branchPc, decodeInReg.pc + 4.U))
+  decodeOut.bits.data.dnpc     := Mux(shouldWait, decodeInReg.pc, Mux(willTakeBranch, branchPc, decodeInReg.snpc))
   decodeOut.bits.toDecodeValid := fromSelf.dataValid
 
   csrIO.csrBehave := controlDecoder.output.csrbehave
