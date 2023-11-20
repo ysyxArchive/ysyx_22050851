@@ -103,7 +103,7 @@ class MemRWUnit extends Module {
   memIO.writeRes.ready := false.B
 
   toDecode.regIndex  := Mux(dataValid, memInReg.data.dst, 0.U)
-  toDecode.dataValid := dataValid && memInReg.control.regwrite && (memInReg.toDecodeValid || (memInReg.control.regwritemux === RegWriteMux.mem.asUInt && memIO.data.fire))
+  toDecode.dataValid := dataValid && (memInReg.toDecodeValid || (memInReg.control.regwritemux === RegWriteMux.mem.asUInt && memIO.data.fire))
   toDecode.data      := memOut.bits.data.wdata
   toDecode.csrIndex := Mux(
     dataValid,
