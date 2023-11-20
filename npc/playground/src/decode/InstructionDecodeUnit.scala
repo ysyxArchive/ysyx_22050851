@@ -118,7 +118,7 @@ class InstructionDecodeUnit extends Module {
   decodeOut.bits.data.src2Data := src2Data
 
   fromSelf.regIndex  := rd
-  fromSelf.dataValid := controlDecoder.output.regwritemux === RegWriteMux.snpc.asUInt
+  fromSelf.dataValid := controlDecoder.output.regwritemux === RegWriteMux.snpc.asUInt && controlDecoder.output.regwrite
   fromSelf.data      := decodeInReg.snpc
   fromSelf.csrIndex  := DontCare
 
