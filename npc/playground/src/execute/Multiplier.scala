@@ -22,68 +22,6 @@ class MultiplierIO extends Bundle {
   val resultLow    = Output(UInt(64.W)) //低 xlen bits 结果
 }
 
-class SimpleMultiplier extends Module {
-  val io = IO(new MultiplierIO())
-
-  val inAReg    = Reg(UInt(64.W))
-  val inBReg    = Reg(UInt(64.W))
-  val outReg    = Reg(UInt(128.W))
-  val isHalfMul = Reg(Bool())
-  val outNeg    = Reg(Bool())
-
-  val counter = RegInit(0.U(6.W))
-
-  val mulFire  = io.mulValid && io.mulReady
-  val willDone = (!isHalfMul && counter.andR) || (isHalfMul && counter(counter.getWidth - 2, 0).andR)
-  val inANeg   = io.mulSigned(1) && Mux(io.mulw, io.multiplicand(31), io.multiplicand(63))
-  val inBNeg   = io.mulSigned(0) && Mux(io.mulw, io.multiplier(31), io.multiplier(63))
-
-  val idle :: working :: output :: others = Enum(3)
-  val mulFSM = new FSM(
-    idle,
-    List(
-      (idle, !io.flush && mulFire, working),
-      (working, willDone, output),
-      (working, io.flush, idle),
-      (output, true.B, idle)
-    )
-  )
-
-  inAReg := Mux(
-    mulFSM.is(idle),
-    Mux(inANeg, Utils.signedReverse(io.multiplicand), io.multiplicand),
-    inAReg
-  )
-  inBReg := Mux(
-    mulFSM.is(idle),
-    Mux(inBNeg, Utils.signedReverse(io.multiplier), io.multiplier),
-    inBReg
-  )
-  isHalfMul := Mux(mulFSM.is(idle), io.mulw, isHalfMul)
-  outNeg    := Mux(mulFSM.is(idle), inANeg ^ inBNeg, outNeg)
-
-  counter := MuxCase(
-    counter,
-    Seq(
-      willDone -> 0.U,
-      io.flush -> 0.U,
-      mulFSM.is(working) -> (counter + 1.U)
-    )
-  )
-
-  outReg := Mux(
-    mulFSM.is(working),
-    Mux(counter === 0.U, 0.U, outReg) + Mux(inBReg(counter), inAReg << counter, 0.U),
-    outReg
-  )
-
-  io.mulReady := mulFSM.is(idle) && !io.flush
-  io.outValid := mulFSM.is(output)
-  val out = Mux(outNeg, Utils.signedReverse(outReg), outReg)
-  io.resultHigh := out >> 64
-  io.resultLow  := out
-}
-
 class BoothModule extends Module {
   val io = IO(new Bundle {
     val in          = Input(UInt(3.W))
@@ -207,7 +145,7 @@ class BHMultiplier extends Module {
   )
 
   val inA    = Mux(io.mulSigned(1), Utils.signExtend(io.multiplicand, 64, 128), Utils.zeroExtend(io.multiplicand, 64, 128))
-  val inB    = Utils.signExtend(Cat(io.multiplier, 0.U(1.W)), 65, 128)
+  val inB    = Cat(io.multiplier, 0.U(1.W))
   val inANeg = Utils.signedReverse(inA)
 
   val booths = Seq.fill(32)(Module(new BoothModule()))
@@ -336,7 +274,7 @@ class BHMultiplier extends Module {
 
   io.mulReady   := mulFSM.is(idle) && !io.flush
   io.outValid   := mulFSM.is(output)
-  io.resultHigh := out >> 64
+  io.resultHigh := (out >> 64) + Mux(!io.mulSigned(0) && inB(64), inA, 0.U)
   io.resultLow  := out
 
   // val t1 = Mux(io.multiplicand(63), Utils.signedReverse(io.multiplicand), io.multiplicand) * Mux(
