@@ -7,7 +7,6 @@ import decode._
 import os.read
 import execute._
 import utils._
-import upickle.core.Util
 
 class MultiplierIO extends Bundle {
   val mulValid     = Input(Bool()) //为高表示输入的数据有效，如果没有新的乘法输入，在乘法被接受的下一个周期要置低
