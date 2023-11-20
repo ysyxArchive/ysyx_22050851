@@ -15,10 +15,6 @@ _start:
     # 将结果存储在寄存器a3中，用于输出
     mv a3, a2
 
-    # 调用自定义的输出函数
-    # 这里假设你已经实现了一个名为print_hex的输出函数
-    call print_hex
-
     # 退出程序
     li a7, 10
     ebreak
