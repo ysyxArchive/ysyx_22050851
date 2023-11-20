@@ -67,7 +67,7 @@ class WriteBackUnit extends Module {
       RegWriteMux.csr -> csrControl.output // from WBU
     )
   )
-  regWriteIO.wdata := Mux(wbInReg.control.regwsext, Utils.signExtend(regwdata.asUInt, 32), regwdata)
+  regWriteIO.wdata := Mux(wbInReg.control.regwritemux === RegWriteMux.csr.asUInt, csrControl.output, wbInReg.data.wdata)
   // csr
   csrControl.control.csrBehave  := Mux(wbInValid, wbInReg.control.csrbehave, CsrBehave.no.asUInt)
   csrControl.control.csrSetmode := Mux(wbInValid, wbInReg.control.csrsetmode, CsrSetMode.origin.asUInt)
