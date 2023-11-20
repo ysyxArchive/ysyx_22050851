@@ -144,15 +144,14 @@ class BoothMultiplier extends Module {
   outReg := MuxCase(
     outReg,
     Seq(
-      (mulFSM.is(idle) && !mulFSM.willChange()) -> 0.U,
-      (mulFSM.is(working) || mulFSM.willChangeTo(working)) ->
-        ((outReg << 2.U) + valToAdd)
+      (mulFSM.is(idle) && !mulFSM.willChange()) -> valToAdd,
+      mulFSM.is(working) -> ((outReg << 2.U) + valToAdd)
     )
   )
 
   io.mulReady   := mulFSM.is(idle) && !io.flush
   io.outValid   := mulFSM.is(output)
-  io.resultHigh := (outReg >> 64) + Mux(!io.mulSigned(0) && inB(63), inA, 0.U)
+  io.resultHigh := (outReg >> 64) + Mux(!io.mulSigned(0) && inB(64), inA, 0.U)
   io.resultLow  := outReg
 }
 
