@@ -88,7 +88,7 @@ class InstructionExecuteUnit extends Module {
   exeOut.bits.data.imm      := exeInReg.data.imm
   exeOut.bits.data.src1Data := exeInReg.data.src1Data
   exeOut.bits.data.src2Data := exeInReg.data.src2Data
-  exeOut.bits.data.wdata    := wdataExtended
+  exeOut.bits.data.wdata    := Mux(exeInReg.toDecodeValid, exeInReg.data.wdata, wdataExtended)
   exeOut.bits.toDecodeValid := toDecode.dataValid
 
   exeOut.bits.debug := exeInReg.debug
