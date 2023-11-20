@@ -41,7 +41,7 @@ class WriteBackUnit extends Module {
   wbInReg   := Mux(wbIn.valid, wbIn.bits, wbInReg)
 
   // regWriteIO
-  regWriteIO.waddr := Mux(wbInValid && wbInReg.control.regwrite, wbInReg.data.dst, 0.U)
+  regWriteIO.waddr := Mux(wbInValid && wbInReg.control.regwritemux =/= RegWriteMux.no.asUInt, wbInReg.data.dst, 0.U)
   val snpc = wbInReg.data.pc + 4.U
   val pcBranch = MuxLookup(wbInReg.control.pcaddrsrc, false.B)(
     EnumSeq(
@@ -82,7 +82,7 @@ class WriteBackUnit extends Module {
   wbIn.ready := true.B
 
   toDecode.regIndex  := Mux(wbInValid, wbInReg.data.dst, 0.U)
-  toDecode.dataValid := wbInValid && wbInReg.control.regwrite
+  toDecode.dataValid := wbInValid && wbInReg.control.regwritemux =/= RegWriteMux.no.asUInt
   toDecode.data      := regWriteIO.wdata
   toDecode.csrIndex := Mux(
     wbInValid,
