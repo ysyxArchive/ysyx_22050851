@@ -7,6 +7,7 @@ import decode._
 import os.read
 import execute._
 import utils._
+import upickle.core.Util
 
 class MultiplierIO extends Bundle {
   val mulValid     = Input(Bool()) //为高表示输入的数据有效，如果没有新的乘法输入，在乘法被接受的下一个周期要置低
@@ -118,7 +119,7 @@ class BoothMultiplier extends Module {
     )
   )
 
-  val inA    = io.multiplicand
+  val inA    = Mux(io.mulSigned(1), Utils.signExtend(io.multiplicand, 64, 128), Utils.zeroExtend(io.multiplicand, 64, 128))
   val inB    = Cat(io.multiplier, 0.U(1.W))
   val inANeg = Utils.signedReverse(inA)
 
@@ -263,7 +264,11 @@ class BHMultiplier extends Module {
     if (i == 0) {
       wallaceLayer3(i).io.bits := Mux(io.mulw, VecInit(addBuffer.map(v => v(i))).asUInt, sBuffer2(i))
     } else {
-      wallaceLayer3(i).io.bits := Mux(io.mulw, VecInit(addBuffer.map(v => v(i))).asUInt, Cat(cBuffer2(i - 1), sBuffer2(i)))
+      wallaceLayer3(i).io.bits := Mux(
+        io.mulw,
+        VecInit(addBuffer.map(v => v(i))).asUInt,
+        Cat(cBuffer2(i - 1), sBuffer2(i))
+      )
     }
     sBuffer3(i) := wallaceLayer3(i).io.outS
     cBuffer3(i) := wallaceLayer3(i).io.outC
