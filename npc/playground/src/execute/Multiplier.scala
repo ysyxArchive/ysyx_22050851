@@ -206,7 +206,7 @@ class BHMultiplier extends Module {
     )
   )
 
-  val inA    = Utils.signExtend(io.multiplicand, 64, 128)
+  val inA    = Mux(io.mulSigned(1), Utils.signExtend(io.multiplicand, 64, 128), Utils.zeroExtend(io.multiplicand, 64, 128))
   val inB    = Utils.signExtend(Cat(io.multiplier, 0.U(1.W)), 65, 128)
   val inANeg = Utils.signedReverse(inA)
 
