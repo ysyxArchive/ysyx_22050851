@@ -53,6 +53,50 @@ static void decode_operand(Decode *s, int *dest, word_t *src1, word_t *src2, wor
   }
 }
 
+word_t MULHU(word_t a, word_t b) {
+  uint64_t a_lo = (uint32_t)a;
+  uint64_t a_hi = a >> 32;
+  uint64_t b_lo = (uint32_t)b;
+  uint64_t b_hi = b >> 32;
+  uint64_t a_x_b_hi = a_hi * b_hi;
+  uint64_t a_x_b_mid = a_hi * b_lo;
+  uint64_t b_x_a_mid = b_hi * a_lo;
+  uint64_t a_x_b_lo = a_lo * b_lo;
+  uint64_t carry_bit = ((uint64_t)(uint32_t)a_x_b_mid + (uint64_t)(uint32_t)b_x_a_mid + (a_x_b_lo >> 32) ) >> 32;
+  uint64_t multhi = a_x_b_hi + (a_x_b_mid >> 32) + (b_x_a_mid >> 32) + carry_bit;
+  return multhi;
+}
+
+sword_t MULH(sword_t a, sword_t b) {
+  int64_t a_lo = (int32_t)a;
+  int64_t a_hi = a >> 32;
+  int64_t b_lo = (int32_t)b;
+  int64_t b_hi = b >> 32;
+  int64_t a_x_b_hi = a_hi * b_hi;
+  int64_t a_x_b_mid = a_hi * b_lo;
+  int64_t b_x_a_mid = b_hi * a_lo;
+  int64_t a_x_b_lo = a_lo * b_lo;
+  int64_t carry_bit = ((int64_t)(int32_t)a_x_b_mid + (int64_t)(int32_t)b_x_a_mid + (a_x_b_lo >> 32) ) >> 32;
+  int64_t multhi = a_x_b_hi + (a_x_b_mid >> 32) + (b_x_a_mid >> 32) + carry_bit;
+  return multhi;
+}
+
+sword_t MULHSU(sword_t a, word_t b) {
+  int64_t a_lo = (int32_t)a;
+  int64_t a_hi = a >> 32;
+  uint64_t b_lo = (uint32_t)b;
+  uint64_t b_hi = b >> 32;
+  int64_t a_x_b_hi = a_hi * b_hi;
+  int64_t a_x_b_mid = a_hi * b_lo;
+  int64_t b_x_a_mid = b_hi * a_lo;
+  int64_t a_x_b_lo = a_lo * b_lo;
+  int64_t carry_bit = ((int64_t)(int32_t)a_x_b_mid + (int64_t)(int32_t)b_x_a_mid + (a_x_b_lo >> 32) ) >> 32;
+  int64_t multhi = a_x_b_hi + (a_x_b_mid >> 32) + (b_x_a_mid >> 32) + carry_bit;
+  return multhi;
+}
+
+
+
 static int decode_exec(Decode *s) {
   int dest = 0;
   int uimm = BITS(s->isa.inst.val, 19, 15);
@@ -115,9 +159,9 @@ static int decode_exec(Decode *s) {
   INSTPAT("0100000 ????? ????? 000 ????? 01110 11", subw   , R, Reg(dest) = SEXT(BITS(src1, 31, 0) - BITS(src2, 31, 0), 32));
   INSTPAT("0000001 ????? ????? 000 ????? 01100 11", mul    , R, Reg(dest) = src1 * src2);
   INSTPAT("0000001 ????? ????? 000 ????? 01110 11", mulw   , R, Reg(dest) = SEXT(BITS(src1, 31, 0) * BITS(src2, 31, 0), 32));
-  INSTPAT("0000001 ????? ????? 001 ????? 01100 11", mulh   , R, Reg(dest) = ((__int128_t)src1 * (__int128_t)src2) >> 64);
-  INSTPAT("0000001 ????? ????? 010 ????? 01100 11", mulhsu , R, Reg(dest) = ((__int128_t)src1 * (__uint128_t)src2) >> 64);
-  INSTPAT("0000001 ????? ????? 011 ????? 01100 11", mulhu  , R, Reg(dest) = ((__uint128_t)src1 * (__uint128_t)src2) >> 64);
+  INSTPAT("0000001 ????? ????? 001 ????? 01100 11", mulh   , R, Reg(dest) = MULH((sword_t)src1, (sword_t)src2));
+  INSTPAT("0000001 ????? ????? 010 ????? 01100 11", mulhsu , R, Reg(dest) = MULHSU((sword_t)src1, src2));
+  INSTPAT("0000001 ????? ????? 011 ????? 01100 11", mulhu  , R, Reg(dest) = MULHU(src1, src2));
   INSTPAT("0000001 ????? ????? 100 ????? 01100 11", div    , R, Reg(dest) = (sword_t)src1 / (sword_t)src2);
   INSTPAT("0000001 ????? ????? 101 ????? 01100 11", divu   , R, Reg(dest) = src1 / src2);
   INSTPAT("0000001 ????? ????? 110 ????? 01100 11", rem    , R, Reg(dest) = (sword_t)src1 % (sword_t)src2);
