@@ -144,7 +144,7 @@ class BoothMultiplier extends Module {
   outReg := MuxCase(
     outReg,
     Seq(
-      (mulFSM.is(idle) && !mulFSM.willChange()) -> valToAdd,
+      mulFSM.is(idle) -> valToAdd,
       mulFSM.is(working) -> ((outReg << 2.U) + valToAdd)
     )
   )
