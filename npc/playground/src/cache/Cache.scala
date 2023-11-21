@@ -142,7 +142,7 @@ class Cache(
   io.writeReq.ready := cacheFSM.is(idle) && io.writeReq.valid
   replaceIndex := Mux(
     cacheFSM.is(idle) || cacheFSM.willChangeTo(idle),
-    lineToChangeIfNotHit,
+    lineToChange,
     replaceIndex
   )
   // when sendRes or directRBack
