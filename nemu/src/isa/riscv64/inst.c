@@ -54,47 +54,6 @@ static void decode_operand(Decode *s, int *dest, word_t *src1, word_t *src2, wor
   }
 }
 
-word_t MULHU(word_t a, word_t b) {
-  uint64_t a_lo = (uint32_t)a;
-  uint64_t a_hi = a >> 32;
-  uint64_t b_lo = (uint32_t)b;
-  uint64_t b_hi = b >> 32;
-  uint64_t a_x_b_hi = a_hi * b_hi;
-  uint64_t a_x_b_mid = a_hi * b_lo;
-  uint64_t b_x_a_mid = b_hi * a_lo;
-  uint64_t a_x_b_lo = a_lo * b_lo;
-  uint64_t carry_bit = ((uint64_t)(uint32_t)a_x_b_mid + (uint64_t)(uint32_t)b_x_a_mid + (a_x_b_lo >> 32) ) >> 32;
-  uint64_t multhi = a_x_b_hi + (a_x_b_mid >> 32) + (b_x_a_mid >> 32) + carry_bit;
-  return multhi;
-}
-
-sword_t MULH(sword_t a, sword_t b) {
-  uint64_t a_lo = (uint32_t)a;
-  uint64_t a_hi = a >> 32;
-  uint64_t b_lo = (uint32_t)b;
-  uint64_t b_hi = b >> 32;
-  int64_t a_x_b_hi = a_hi * b_hi;
-  int64_t a_x_b_mid = a_hi * b_lo;
-  int64_t b_x_a_mid = b_hi * a_lo;
-  int64_t a_x_b_lo = a_lo * b_lo;
-  uint64_t carry_bit = ((uint64_t)(uint32_t)a_x_b_mid + (uint64_t)(uint32_t)b_x_a_mid + (a_x_b_lo >> 32) ) >> 32;
-  int64_t multhi = a_x_b_hi + (a_x_b_mid >> 32) + (b_x_a_mid >> 32) + carry_bit;
-  return multhi;
-}
-
-sword_t MULHSU(sword_t a, word_t b) {
-  uint64_t a_lo = (uint32_t)a;
-  uint64_t a_hi = a >> 32;
-  uint64_t b_lo = (uint32_t)b;
-  uint64_t b_hi = b >> 32;
-  int64_t a_x_b_hi = a_hi * b_hi;
-  int64_t a_x_b_mid = a_hi * b_lo;
-  int64_t b_x_a_mid = b_hi * a_lo;
-  int64_t a_x_b_lo = a_lo * b_lo;
-  uint64_t carry_bit = ((uint64_t)(uint32_t)a_x_b_mid + (uint64_t)(uint32_t)b_x_a_mid + (a_x_b_lo >> 32) ) >> 32;
-  int64_t multhi = a_x_b_hi + (a_x_b_mid >> 32) + (b_x_a_mid >> 32) + carry_bit;
-  return multhi;
-}
 static int decode_exec(Decode *s) {
   int dest = 0;
   int uimm = BITS(s->isa.inst.val, 19, 15);
