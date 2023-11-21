@@ -18,6 +18,7 @@
 #include <cpu/ifetch.h>
 #include <cpu/decode.h>
 #include <tracers.h>
+#include <stdint.h>
 
 #define Reg(i) gpr(i)
 #define Csr(i) csr(i)
