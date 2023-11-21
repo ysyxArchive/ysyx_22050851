@@ -121,7 +121,7 @@ class Cache(
     for (j <- 0 until groupSize) {
       when((io.readReq.fire || io.writeReq.fire) && index === i.U) {
         val allIsUsed =
-          cacheUsed(i).zipWithIndex.map(pred => (pred._2.U =/= lineToChange) ^ pred._1).reduce(_ && _)
+          cacheUsed(i).zipWithIndex.map(pred => (pred._2.U === lineToChange) ^ pred._1).reduce(_ && _)
         when(lineToChange === j.U) {
           cacheUsed(i)(j) := Mux(allIsUsed, false.B, true.B)
         }.elsewhen(allIsUsed) {
