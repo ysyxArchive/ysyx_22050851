@@ -3,6 +3,7 @@ import chisel3.util._
 import utils.FSM
 import utils.Utils
 import utils.DebugInfo
+import java.awt.font.TextHitInfo
 
 class CacheIO(dataWidth: Int, addrWidth: Int) extends Bundle {
   val addr    = Input(UInt(addrWidth.W))
@@ -54,6 +55,7 @@ class Cache(
       Seq.fill(wayCnt)(VecInit(Seq.fill(groupSize)(0.U.asTypeOf(new CacheLine(addrWidth - tagOffset, cellByte)))))
     )
   )
+  val cacheUsed = RegInit(VecInit(Seq.fill(wayCnt)(VecInit(Seq.fill(groupSize)(false.B)))))
 
   val hit     = Wire(Bool())
   val isDirty = Wire(Bool())
@@ -102,6 +104,24 @@ class Cache(
     )
   )
 
+  // LFUPolicy
+  val lineToChangeIfHit    = PriorityMux(Seq.tabulate(groupSize)(o => (cacheMem(index)(o).tag === tag) -> o.U))
+  val lineToChangeIfNotHit = PriorityMux(Seq.tabulate(groupSize)(o => !cacheUsed(index)(o) -> o.U))
+  val lineToChange         = Mux(hit, lineToChangeIfHit, lineToChangeIfNotHit)
+  for (i <- 0 until wayCnt) {
+    for (j <- 0 until groupSize) {
+      when((io.readReq.fire || io.writeReq.fire) && index === i.U) {
+        val allIsUsed =
+          cacheUsed(i).zipWithIndex.map(pred => (pred._2.U =/= lineToChange) ^ pred._1).reduce(_ && _)
+        when(lineToChange === j.U) {
+          cacheUsed(i)(j) := Mux(allIsUsed, false.B, true.B)
+        }.elsewhen(allIsUsed) {
+          cacheUsed(i)(j) := false.B
+        }
+      }
+    }
+  }
+
   isRead := Mux(cacheFSM.is(idle), io.readReq.fire, isRead)
 
   val replaceIndex = RegInit(0.U(log2Ceil(groupSize).W))
@@ -122,8 +142,8 @@ class Cache(
   io.readReq.ready  := cacheFSM.is(idle) && io.readReq.valid
   io.writeReq.ready := cacheFSM.is(idle) && io.writeReq.valid
   replaceIndex := Mux(
-    cacheFSM.willChangeTo(idle),
-    Mux(replaceIndex === (groupSize - 1).U, 0.U, replaceIndex + 1.U),
+    cacheFSM.is(idle),
+    lineToChangeIfNotHit,
     replaceIndex
   )
   // when sendRes or directRBack
@@ -166,6 +186,7 @@ class Cache(
       cacheMem(i)(targetIndex).dirty := true.B
     }
   }
+
   // when sendWReq or directWReq
   axiIO.AW.valid := cacheFSM.is(sendWReq) || cacheFSM.is(directWReq)
   axiIO.AW.bits.addr := Mux(
@@ -226,12 +247,6 @@ class Cache(
       printf("data is %x\n", io.data.bits)
     }
   }
-  // for (i <- 0 until wayCnt) {
-  //   for (j <- 0 until groupSize) {
-  //     blackBoxCache.io.cacheStatus(i)(j).dirty := cacheMem(i)(j).dirty
-  //     blackBoxCache.io.cacheStatus(i)(j).valid := cacheMem(i)(j).valid
-  //   }
-  // }
   blackBoxCache.io.changed  := RegNext(!cacheFSM.is(idle)) && cacheFSM.is(idle)
   blackBoxCache.io.clock    := clock
   blackBoxCache.io.isDCache := name.equals("dcache").B
