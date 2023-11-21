@@ -9,7 +9,7 @@
 // 最大pc变化间隔周期，超过会触发bad halt
 #define MAX_WAIT_ROUND 300
 // 性能输出频率
-#define PROFILE_LOG_INTERVAL 10000000
+#define PROFILE_LOG_INTERVAL 1000000
 // #define MTRACE
 // npc 内部debug
 // #define ENABLE_DEBUG
