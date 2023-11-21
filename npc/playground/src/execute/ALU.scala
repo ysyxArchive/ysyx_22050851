@@ -59,7 +59,7 @@ class SimpleAdder extends Module {
 }
 
 class FastAdder extends Module {
-  val io = IO(new AdderIO())
+  val io     = IO(new AdderIO())
   val result = io.inA +& io.inB + io.inC
   io.out  := result
   io.outC := result(64)
@@ -88,16 +88,17 @@ class ALU extends Module {
 
   // val adder = Module(new SimpleAdder())
   val adder = Module(new FastAdder())
-  // val multiplier  = Module(new SimpleMultiplier())
   val multiplier = Module(new BoothMultiplier())
   // val multiplier = Module(new BHMultiplier())
   // val divider    = Module(new SimpleDivider())
   val divider = Module(new R2Divider())
 
-  val mulOps = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt))
-  val divOps = VecInit(Seq(AluMode.div, AluMode.divu, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
-  val remOps = VecInit(Seq(AluMode.rem, AluMode.remu, AluMode.remw, AluMode.remuw).map(t => t.asUInt))
-  val ops    = VecInit(mulOps ++ divOps ++ remOps)
+  val mulLOps = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt))
+  val mulHOps = VecInit(Seq(AluMode.mulh, AluMode.mulhsu, AluMode.mulhu).map(t => t.asUInt))
+  val mulOps  = VecInit(mulLOps ++ mulHOps)
+  val divOps  = VecInit(Seq(AluMode.div, AluMode.divu, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
+  val remOps  = VecInit(Seq(AluMode.rem, AluMode.remu, AluMode.remw, AluMode.remuw).map(t => t.asUInt))
+  val ops     = VecInit(mulOps ++ divOps ++ remOps)
 
   val inA          = io.in.bits.inA
   val inB          = io.in.bits.inB
@@ -126,13 +127,18 @@ class ALU extends Module {
   multiplier.io.multiplier   := io.in.bits.inB
   multiplier.io.flush        := false.B
   multiplier.io.mulValid     := io.in.fire && shouldMul
-  multiplier.io.mulSigned    := false.B
-  multiplier.io.mulw         := io.in.bits.opType.asUInt === AluMode.mulw.asUInt
-  divider.io.dividend        := io.in.bits.inA
-  divider.io.divisor         := io.in.bits.inB
-  divider.io.flush           := false.B
-  divider.io.divValid        := io.in.fire && shouldDiv
-  divider.io.divSigned       := VecInit(Seq(AluMode.remw, AluMode.divw).map(t => t.asUInt)).contains(io.in.bits.opType.asUInt)
+  multiplier.io.mulSigned := MuxLookup(io.in.bits.opType.asUInt, 0.U)(
+    EnumSeq(
+      AluMode.mulhsu -> 2.U,
+      AluMode.mulh -> 3.U
+    )
+  )
+  multiplier.io.mulw   := io.in.bits.opType.asUInt === AluMode.mulw.asUInt
+  divider.io.dividend  := io.in.bits.inA
+  divider.io.divisor   := io.in.bits.inB
+  divider.io.flush     := false.B
+  divider.io.divValid  := io.in.fire && shouldDiv
+  divider.io.divSigned := VecInit(Seq(AluMode.remw, AluMode.divw).map(t => t.asUInt)).contains(io.in.bits.opType.asUInt)
   divider.io.divw := VecInit(Seq(AluMode.remw, AluMode.remuw, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
     .contains(io.in.bits.opType.asUInt)
 
@@ -141,17 +147,14 @@ class ALU extends Module {
       AluMode.add -> adder.io.out,
       AluMode.and -> (inA & inB),
       AluMode.sub -> adder.io.out,
-      AluMode.div -> (inA.asSInt / inB.asSInt).asUInt,
-      AluMode.divu -> inA / inB,
       AluMode.or -> (inA | inB),
-      AluMode.rem -> (inA.asSInt % inB.asSInt).asUInt,
-      AluMode.remu -> inA % inB,
       AluMode.ll -> (inA << inB(5, 0)),
       AluMode.ra -> (inA.asSInt >> inB(5, 0)).asUInt,
       AluMode.rl -> (inA >> inB(5, 0)),
       AluMode.rlw -> (inA(31, 0) >> inB(5, 0)),
       AluMode.xor -> (inA ^ inB)
-    ) ++ mulOps.map(op => op -> multiplier.io.resultLow)
+    ) ++ mulHOps.map(op => op -> multiplier.io.resultHigh)
+      ++ mulLOps.map(op => op -> multiplier.io.resultLow)
       ++ divOps.map(op => op -> divider.io.quotient)
       ++ remOps.map(op => op -> divider.io.remainder)
   )

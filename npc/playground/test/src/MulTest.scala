@@ -3,7 +3,6 @@ import chisel3.Input
 import chiseltest._
 import chisel3.experimental.BundleLiterals._
 import utest._
-import execute.SimpleMultiplier
 import os.truncate
 import org.scalatest._
 import org.scalatest.flatspec._
@@ -48,71 +47,71 @@ import org.scalatest.matchers.should.Matchers
 
 object MulSpec extends ChiselUtestTester {
   val tests = Tests {
-    test("Multiplier flush") {
-      testCircuit(
-        new SimpleMultiplier(),
-        Seq(WriteVcdAnnotation)
-      ) { dut =>
-        {
-          dut.io.flush.poke(false.B)
-          dut.io.mulw.poke(false.B)
-          dut.io.mulSigned.poke(0.U)
+    // test("Multiplier flush") {
+    //   testCircuit(
+    //     new SimpleMultiplier(),
+    //     Seq(WriteVcdAnnotation)
+    //   ) { dut =>
+    //     {
+    //       dut.io.flush.poke(false.B)
+    //       dut.io.mulw.poke(false.B)
+    //       dut.io.mulSigned.poke(0.U)
 
-          val random   = new scala.util.Random()
-          val a        = BigInt(64, random)
-          val b        = BigInt(64, random)
-          val expected = a * b
+    //       val random   = new scala.util.Random()
+    //       val a        = BigInt(64, random)
+    //       val b        = BigInt(64, random)
+    //       val expected = a * b
 
-          dut.io.multiplicand.poke(a.U)
-          dut.io.multiplier.poke(b.U)
-          dut.io.mulValid.poke(true.B)
-          while (dut.io.mulReady.peekInt() == 0) {
-            dut.clock.step(1)
-          }
-          dut.clock.step(1)
-          dut.io.mulValid.poke(false.B)
-          dut.clock.step(10)
-          dut.io.flush.poke(true.B)
-          dut.clock.step(1)
-          dut.io.flush.poke(false.B)
-          dut.clock.step(1)
-          dut.io.outValid.expect(false.B)
-          dut.io.mulReady.expect(true.B)
-        }
-      }
-    }
-    test("Multiplier base") {
-      testCircuit(
-        new SimpleMultiplier(),
-        Seq(WriteVcdAnnotation)
-      ) { dut =>
-        {
-          dut.io.flush.poke(false.B)
-          dut.io.mulw.poke(false.B)
-          dut.io.mulSigned.poke(0.U)
+    //       dut.io.multiplicand.poke(a.U)
+    //       dut.io.multiplier.poke(b.U)
+    //       dut.io.mulValid.poke(true.B)
+    //       while (dut.io.mulReady.peekInt() == 0) {
+    //         dut.clock.step(1)
+    //       }
+    //       dut.clock.step(1)
+    //       dut.io.mulValid.poke(false.B)
+    //       dut.clock.step(10)
+    //       dut.io.flush.poke(true.B)
+    //       dut.clock.step(1)
+    //       dut.io.flush.poke(false.B)
+    //       dut.clock.step(1)
+    //       dut.io.outValid.expect(false.B)
+    //       dut.io.mulReady.expect(true.B)
+    //     }
+    //   }
+    // }
+    // test("Multiplier base") {
+    //   testCircuit(
+    //     new SimpleMultiplier(),
+    //     Seq(WriteVcdAnnotation)
+    //   ) { dut =>
+    //     {
+    //       dut.io.flush.poke(false.B)
+    //       dut.io.mulw.poke(false.B)
+    //       dut.io.mulSigned.poke(0.U)
 
-          val random   = new scala.util.Random()
-          val a        = BigInt(64, random)
-          val b        = BigInt(64, random)
-          val expected = a * b
+    //       val random   = new scala.util.Random()
+    //       val a        = BigInt(64, random)
+    //       val b        = BigInt(64, random)
+    //       val expected = a * b
 
-          dut.io.multiplicand.poke(a.U)
-          dut.io.multiplier.poke(b.U)
-          dut.io.mulValid.poke(true.B)
-          while (dut.io.mulReady.peekInt() == 0) {
-            dut.clock.step(1)
-          }
-          dut.clock.step(1)
-          dut.io.mulValid.poke(false.B)
+    //       dut.io.multiplicand.poke(a.U)
+    //       dut.io.multiplier.poke(b.U)
+    //       dut.io.mulValid.poke(true.B)
+    //       while (dut.io.mulReady.peekInt() == 0) {
+    //         dut.clock.step(1)
+    //       }
+    //       dut.clock.step(1)
+    //       dut.io.mulValid.poke(false.B)
 
-          while (dut.io.outValid.peekInt() == 0) {
-            dut.clock.step(1)
-          }
-          dut.io.resultLow.expect(expected.U(63, 0))
-          dut.io.resultHigh.expect(expected.U(128, 64))
-        }
-      }
-    }
+    //       while (dut.io.outValid.peekInt() == 0) {
+    //         dut.clock.step(1)
+    //       }
+    //       dut.io.resultLow.expect(expected.U(63, 0))
+    //       dut.io.resultHigh.expect(expected.U(128, 64))
+    //     }
+    //   }
+    // }
 
   }
 }
