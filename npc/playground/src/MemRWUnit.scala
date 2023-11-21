@@ -7,10 +7,10 @@ import execute._
 import utils._
 
 class MemRWIn extends Bundle {
-  val debug         = Output(new DebugInfo)
-  val data          = Output(new MemDataIn);
-  val control       = Output(new ExeControlIn);
-  val toDecodeValid = Output(Bool())
+  val debug   = Output(new DebugInfo)
+  val data    = Output(new MemDataIn);
+  val control = Output(new ExeControlIn);
+  val enable  = Output(Bool())
 }
 
 class MemDataIn extends Bundle {
@@ -24,7 +24,6 @@ class MemDataIn extends Bundle {
   val signals  = new SignalIO()
   val pc       = Input(UInt(64.W))
   val dnpc     = Input(UInt(64.W))
-  val wdata    = Input(UInt(64.W))
 }
 
 class MemRWUnit extends Module {
@@ -91,20 +90,17 @@ class MemRWUnit extends Module {
   memOut.bits.data.dst      := memInReg.data.dst
   memOut.bits.data.mem      := memData
   memOut.bits.data.alu      := memInReg.data.alu
+  memOut.bits.data.mem      := memData
   memOut.bits.data.signals  := memInReg.data.signals
   memOut.bits.data.pc       := memInReg.data.pc
   memOut.bits.data.dnpc     := memInReg.data.dnpc
   memOut.bits.data.imm      := memInReg.data.imm
-  memOut.bits.data.wdata    := Mux(memInReg.toDecodeValid, memInReg.data.wdata, memData)
-  memOut.bits.toDecodeValid := toDecode.dataValid
-
-  memOut.bits.control := memInReg.control
+  memOut.bits.control       := memInReg.control
+  memOut.bits.enable        := memInReg.enable
 
   memIO.writeRes.ready := false.B
 
-  toDecode.regIndex  := Mux(dataValid, memInReg.data.dst, 0.U)
-  toDecode.dataValid := dataValid && (memInReg.toDecodeValid || (memInReg.control.regwritemux === RegWriteMux.mem.asUInt && memIO.data.fire))
-  toDecode.data      := memOut.bits.data.wdata
+  toDecode.regIndex := Mux(dataValid, memInReg.data.dst, 0.U)
   toDecode.csrIndex := Mux(
     dataValid,
     ControlRegisters.behaveDependency(memInReg.control.csrbehave, memInReg.control.csrsetmode, memInReg.data.imm),
