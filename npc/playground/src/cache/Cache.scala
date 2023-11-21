@@ -141,7 +141,7 @@ class Cache(
   io.readReq.ready  := cacheFSM.is(idle) && io.readReq.valid
   io.writeReq.ready := cacheFSM.is(idle) && io.writeReq.valid
   replaceIndex := Mux(
-    cacheFSM.willChangeTo(idle),
+    (cacheFSM.is(idle) && !cacheFSM.willChange()) || cacheFSM.willChangeTo(idle),
     lineToChange,
     replaceIndex
   )
