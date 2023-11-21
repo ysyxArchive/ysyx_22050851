@@ -38,7 +38,7 @@ class InstructionExecuteUnit extends Module {
   val dataValid = RegInit(false.B)
   dataValid := dataValid ^ exeIn.fire ^ exeOut.fire
 
-  val mulOps = VecInit(Seq(AluMode.mul, AluMode.mulw, AluMode.mulh, AluMode.mulhsu, AluMode.mulhu).map(t => t.asUInt))
+  val mulOps = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt))
   val divOps = VecInit(Seq(AluMode.div, AluMode.divu, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
   val remOps = VecInit(Seq(AluMode.rem, AluMode.remu, AluMode.remw, AluMode.remuw).map(t => t.asUInt))
   val ops    = VecInit(mulOps ++ divOps ++ remOps)
