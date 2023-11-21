@@ -42,7 +42,6 @@ class InstructionDecodeUnit extends Module {
   val fromExe        = IO(new ToDecode())
   val fromMemu       = IO(new ToDecode())
   val fromWbu        = IO(new ToDecode())
-  val fromSelf       = Wire(new ToDecode())
   val controlDecoder = Module(new InstContorlDecoder)
 
   val decodeInReg = RegInit(DecodeIn.default)
@@ -94,13 +93,13 @@ class InstructionDecodeUnit extends Module {
   regIO.raddr1 := rs2
   val src1RawData = MuxCase(
     regIO.out0,
-    Seq(fromExe, fromMemu, fromWbu, fromSelf).map(bundle =>
+    Seq(fromExe, fromMemu, fromWbu).map(bundle =>
       (bundle.regIndex === rs1 && rs1.orR && bundle.dataValid) -> bundle.data
     )
   )
   val src2RawData = MuxCase(
     regIO.out1,
-    Seq(fromExe, fromMemu, fromWbu, fromSelf).map(bundle =>
+    Seq(fromExe, fromMemu, fromWbu).map(bundle =>
       (bundle.regIndex === rs2 && rs2.orR && bundle.dataValid) -> bundle.data
     )
   )
@@ -116,11 +115,6 @@ class InstructionDecodeUnit extends Module {
   )
   decodeOut.bits.data.src1Data := src1Data
   decodeOut.bits.data.src2Data := src2Data
-
-  fromSelf.regIndex  := rd
-  fromSelf.dataValid := controlDecoder.output.regwritemux === RegWriteMux.snpc.asUInt
-  fromSelf.data      := decodeInReg.snpc
-  fromSelf.csrIndex  := DontCare
 
   // RAW check
   val regVec = VecInit(Seq(fromExe, fromMemu, fromWbu).map(bundle => Mux(bundle.dataValid, 0.U, bundle.regIndex)))
@@ -158,7 +152,7 @@ class InstructionDecodeUnit extends Module {
   decodeBack.branchPc       := branchPc
 
   decodeOut.bits.data.dnpc     := Mux(shouldWait, decodeInReg.pc, Mux(willTakeBranch, branchPc, decodeInReg.snpc))
-  decodeOut.bits.toDecodeValid := fromSelf.dataValid
+  decodeOut.bits.toDecodeValid := controlDecoder.output.regwritemux === RegWriteMux.snpc.asUInt
 
   csrIO.csrBehave := controlDecoder.output.csrbehave
   // debug
