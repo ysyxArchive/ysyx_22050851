@@ -68,16 +68,6 @@ class Cache(
 
   val counter    = RegInit(0.U(log2Ceil(slotsPerLine).W))
   val directData = Reg(UInt(dataWidth.W))
-  
-  val tag    = Mux(cacheFSM.is(idle), io.addr, addr)(addrWidth - 1, tagOffset)
-  val index  = Mux(cacheFSM.is(idle), io.addr, addr)(tagOffset - 1, indexOffset)
-  val offset = Mux(cacheFSM.is(idle), io.addr, addr)(indexOffset - 1, 0)
-  
-  val replaceIndex = RegInit(0.U(log2Ceil(groupSize).W))
-
-  val wayValid    = cacheMem(index).map(line => line.valid && line.tag === tag)
-  val targetIndex = Mux1H(wayValid, Seq.tabulate(groupSize)(index => index.U))
-  val data        = cacheMem(index)(targetIndex).data
 
   val shoudDirectRW = io.addr > 0xa0000000L.U
   val cacheFSM = new FSM(
@@ -114,6 +104,16 @@ class Cache(
     )
   )
 
+  val replaceIndex = RegInit(0.U(log2Ceil(groupSize).W))
+
+  val tag    = Mux(cacheFSM.is(idle), io.addr, addr)(addrWidth - 1, tagOffset)
+  val index  = Mux(cacheFSM.is(idle), io.addr, addr)(tagOffset - 1, indexOffset)
+  val offset = Mux(cacheFSM.is(idle), io.addr, addr)(indexOffset - 1, 0)
+
+  val wayValid    = cacheMem(index).map(line => line.valid && line.tag === tag)
+  val targetIndex = Mux1H(wayValid, Seq.tabulate(groupSize)(index => index.U))
+  val data        = cacheMem(index)(targetIndex).data
+
   // LFUPolicy
   val lineToChangeIfHit    = PriorityMux(Seq.tabulate(groupSize)(o => (cacheMem(index)(o).tag === tag) -> o.U))
   val lineToChangeIfNotHit = PriorityMux(Seq.tabulate(groupSize)(o => !cacheUsed(index)(o) -> o.U))
@@ -133,7 +133,6 @@ class Cache(
   }
 
   isRead := Mux(cacheFSM.is(idle), io.readReq.fire, isRead)
-
 
   hit     := wayValid.reduce(_ || _)
   isDirty := cacheMem(index)(replaceIndex).dirty
