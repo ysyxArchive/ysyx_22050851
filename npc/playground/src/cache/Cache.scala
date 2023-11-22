@@ -124,9 +124,9 @@ class Cache(
   for (i <- 0 until wayCnt) {
     replaceIndeices(i) := cachePolicy.io.replaceIndex
   }
-  cachePolicy.io.fire     := io.readReq.fire || io.writeReq.fire
-  cachePolicy.io.hit      := hit
-  cachePolicy.io.hitIndex := index
+  cachePolicy.io.update     := io.readReq.fire || io.writeReq.fire
+  // cachePolicy.io.hit      := hit
+  // cachePolicy.io.hitIndex := index
 
   // when idle
   addr              := Mux(io.readReq.fire || io.writeReq.fire, io.addr, addr)
