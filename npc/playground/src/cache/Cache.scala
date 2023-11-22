@@ -47,6 +47,10 @@ class Cache(
   val axiIO       = IO(new BurstLiteIO(UInt(dataWidth.W), addrWidth))
   val enableDebug = IO(Input(Bool()))
 
+  val replaceIndeices = Wire(Vec(wayCnt, UInt(log2Ceil(groupSize).W)))
+
+  val cachePolicy = Module(new NaiveCachePolicy(dataWidth, groupSize))
+
   val slotsPerLine = cellByte * 8 / dataWidth
 
   val cacheMem = RegInit(
@@ -104,8 +108,6 @@ class Cache(
 
   isRead := Mux(cacheFSM.is(idle), io.readReq.fire, isRead)
 
-  val replaceIndex = RegInit(0.U(log2Ceil(groupSize).W))
-
   val tag    = Mux(cacheFSM.is(idle), io.addr, addr)(addrWidth - 1, tagOffset)
   val index  = Mux(cacheFSM.is(idle), io.addr, addr)(tagOffset - 1, indexOffset)
   val offset = Mux(cacheFSM.is(idle), io.addr, addr)(indexOffset - 1, 0)
@@ -114,18 +116,23 @@ class Cache(
   val targetIndex = Mux1H(wayValid, Seq.tabulate(groupSize)(index => index.U))
   val data        = cacheMem(index)(targetIndex).data
 
+  val replaceIndex = replaceIndeices(index)
+
   hit     := wayValid.reduce(_ || _)
   isDirty := cacheMem(index)(replaceIndex).dirty
+
+  for (i <- 0 until wayCnt) {
+    replaceIndeices(i) := cachePolicy.io.replaceIndex
+  }
+  cachePolicy.io.update     := ((io.readReq.fire || io.writeReq.fire) && hit) || cacheFSM.willChangeTo(idle)
+  // cachePolicy.io.hit      := hit
+  // cachePolicy.io.hitIndex := index
 
   // when idle
   addr              := Mux(io.readReq.fire || io.writeReq.fire, io.addr, addr)
   io.readReq.ready  := cacheFSM.is(idle) && io.readReq.valid
   io.writeReq.ready := cacheFSM.is(idle) && io.writeReq.valid
-  replaceIndex := Mux(
-    cacheFSM.willChangeTo(idle),
-    Mux(replaceIndex === (groupSize - 1).U, 0.U, replaceIndex + 1.U),
-    replaceIndex
-  )
+
   // when sendRes or directRBack
   val s = Seq.tabulate(cellByte)(o => ((o.U === offset) -> data(data.getWidth - 1, o * 8)))
   io.data.bits  := Mux(cacheFSM.is(directRBack), directData, PriorityMux(s))
