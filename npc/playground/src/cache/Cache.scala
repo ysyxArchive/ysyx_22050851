@@ -122,7 +122,7 @@ class Cache(
   isDirty := cacheMem(index)(replaceIndex).dirty
 
   for (i <- 0 until wayCnt) {
-    replaceIndeices(i) := cachePolicy.replaceIndex
+    replaceIndeices(i) := cachePolicy.io.replaceIndex
   }
   cachePolicy.io.fire     := io.readReq.fire || io.writeReq.fire
   cachePolicy.io.hit      := hit
