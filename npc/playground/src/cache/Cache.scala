@@ -23,6 +23,8 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
   val data  = UInt((dataByte * 8).W)
 }
 
+class NaiveCachePolicy extends Module()
+
 /**
   * @param cellByte 单个cache存储大小
   * @param wayCnt 路数
