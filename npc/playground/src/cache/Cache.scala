@@ -124,7 +124,7 @@ class Cache(
   for (i <- 0 until wayCnt) {
     replaceIndeices(i) := cachePolicy.io.replaceIndex
   }
-  cachePolicy.io.update     := io.readReq.fire || io.writeReq.fire
+  cachePolicy.io.update     := ((io.readReq.fire || io.writeReq.fire) && hit) || cacheFSM.willChangeTo(idle)
   // cachePolicy.io.hit      := hit
   // cachePolicy.io.hitIndex := index
 
