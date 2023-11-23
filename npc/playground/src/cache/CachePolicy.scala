@@ -31,16 +31,24 @@ class PLRUCachePolicy(dataWidth: Int, groupSize: Int) extends Module {
 
   val pointers = Reg(Vec(pointerLayer, Vec(pointerLayer, Bool())))
 
+  val hitIndexReverse = Reverse(io.hitIndex)
+
   when(io.update && io.hit) {
     for (i <- 0 until pointerLayer) {
-      pointers(i)(io.hitIndex >> (i + 1)) := io.hitIndex >> i
+      if (i == 0) {
+        pointers(0)(0) := hitIndexReverse(0)
+      } else {
+        pointers(i)(io.hitIndex >> (pointerLayer - i - 1)) := hitIndexReverse >> i
+      }
     }
   }
   for (i <- 0 until pointerLayer) {
     if (i == 0) {
       replaceIndex(pointerLayer - 1) := !pointers(0)(0)
     } else {
-      replaceIndex(pointerLayer - i - 1) := !pointers(i)(VecInit(replaceIndex.slice(pointerLayer - i, pointerLayer)).asUInt)
+      replaceIndex(pointerLayer - i - 1) := !pointers(i)(
+        VecInit(replaceIndex.slice(pointerLayer - i, pointerLayer)).asUInt
+      )
     }
   }
   io.replaceIndex := replaceIndex.asUInt
