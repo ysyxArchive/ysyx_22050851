@@ -49,7 +49,8 @@ class Cache(
 
   val replaceIndeices = Wire(Vec(wayCnt, UInt(log2Ceil(groupSize).W)))
 
-  val cachePolicy = Module(new NaiveCachePolicy(dataWidth, groupSize))
+  // val cachePolicy = Seq.tabulate(wayCnt)(_ => Module(new NaiveCachePolicy(dataWidth, groupSize)))
+  val cachePolicy = Seq.tabulate(wayCnt)(_ => Module(new PLRUCachePolicy(dataWidth, groupSize)))
 
   val slotsPerLine = cellByte * 8 / dataWidth
 
@@ -122,11 +123,12 @@ class Cache(
   isDirty := cacheMem(index)(replaceIndex).dirty
 
   for (i <- 0 until wayCnt) {
-    replaceIndeices(i) := cachePolicy.io.replaceIndex
+    replaceIndeices(i) := cachePolicy(i).io.replaceIndex
+    cachePolicy(i).io.update := index === i.U && (((io.readReq.fire || io.writeReq.fire) && hit) || cacheFSM
+      .willChangeTo(idle))
+    cachePolicy(i).io.hit      := hit
+    cachePolicy(i).io.hitIndex := targetIndex
   }
-  cachePolicy.io.update     := ((io.readReq.fire || io.writeReq.fire) && hit) || cacheFSM.willChangeTo(idle)
-  // cachePolicy.io.hit      := hit
-  // cachePolicy.io.hitIndex := index
 
   // when idle
   addr              := Mux(io.readReq.fire || io.writeReq.fire, io.addr, addr)

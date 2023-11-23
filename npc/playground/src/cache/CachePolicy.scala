@@ -7,9 +7,9 @@ import decode.InstType
   * @param groupSize 单路单元数
   */
 class CachePolicyIO(dataWidth: Int, groupSize: Int) extends Bundle {
-  val update         = Input(Bool())
-  // val hit          = Input(Bool())
-  // val hitIndex     = Input(UInt(log2Ceil(groupSize).W))
+  val update       = Input(Bool())
+  val hit          = Input(Bool())
+  val hitIndex     = Input(UInt(log2Ceil(groupSize).W))
   val replaceIndex = Output(UInt(log2Ceil(groupSize).W))
 }
 
@@ -22,4 +22,27 @@ class NaiveCachePolicy(dataWidth: Int, groupSize: Int) extends Module {
     replaceIndex
   )
   io.replaceIndex := replaceIndex
+}
+
+class PLRUCachePolicy(dataWidth: Int, groupSize: Int) extends Module {
+  val pointerLayer = log2Ceil(groupSize)
+
+  val io       = IO(new CachePolicyIO(dataWidth, groupSize))
+  val pointers = RegInit(VecInit(Seq.tabulate(pointerLayer)(layer => Vec(1 << layer, Bool()))))
+
+  when(io.update && io.hit) {
+    for (i <- 0 until pointerLayer) {
+      pointers(i)(io.hitIndex >> (i + 1)) := io.hitIndex >> i
+    }
+  }
+  val replaceIndex = Vec(pointerLayer, Bool())
+  for (i <- 0 until pointerLayer) {
+    if (i == 0) {
+      replaceIndex(pointerLayer - 1) := pointers(0)(0)
+    } else {
+      replaceIndex(pointerLayer - i - 1) := !pointers(i)(replaceIndex.asUInt(pointerLayer - 1, pointerLayer - i))
+    }
+  }
+  io.replaceIndex := io.replaceIndex
+
 }
