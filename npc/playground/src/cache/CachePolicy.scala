@@ -35,11 +35,7 @@ class PLRUCachePolicy(dataWidth: Int, groupSize: Int) extends Module {
 
   when(io.update && io.hit) {
     for (i <- 0 until pointerLayer) {
-      if (i == 0) {
-        pointers(0)(0) := hitIndexReverse(0)
-      } else {
-        pointers(i)(io.hitIndex >> (pointerLayer - i - 1)) := hitIndexReverse >> i
-      }
+      pointers(i)(io.hitIndex >> (pointerLayer - i)) := io.hitIndex >> pointerLayer - i - 1
     }
   }
   for (i <- 0 until pointerLayer) {
