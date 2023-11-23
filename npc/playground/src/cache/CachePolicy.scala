@@ -26,20 +26,21 @@ class NaiveCachePolicy(dataWidth: Int, groupSize: Int) extends Module {
 class PLRUCachePolicy(dataWidth: Int, groupSize: Int) extends Module {
   val pointerLayer = log2Ceil(groupSize)
 
-  val io       = IO(new CachePolicyIO(dataWidth, groupSize))
+  val io           = IO(new CachePolicyIO(dataWidth, groupSize))
+  val replaceIndex = Vec(pointerLayer, Bool())
+
   val pointers = Reg(VecInit(Seq.tabulate(pointerLayer)(layer => VecInit(Seq.fill(1 << layer)(Bool())))))
 
-  when(io.update && io.hit) {
-    for (i <- 0 until pointerLayer) {
-      pointers(i)(io.hitIndex >> (i + 1)) := io.hitIndex >> i
+  for (layer <- 0 until pointerLayer) {
+    val pointers = Reg(VecInit(Seq.fill(1 << layer)(Bool())))
+
+    when(io.update && io.hit) {
+      pointers(io.hitIndex >> (layer + 1)) := io.hitIndex >> layer
     }
-  }
-  val replaceIndex = Vec(pointerLayer, Bool())
-  for (i <- 0 until pointerLayer) {
-    if (i == 0) {
-      replaceIndex(pointerLayer - 1) := pointers(0)(0)
+    if (layer == 0) {
+      replaceIndex(pointerLayer - 1) := pointers(0)
     } else {
-      replaceIndex(pointerLayer - i - 1) := !pointers(i)(replaceIndex.asUInt(pointerLayer - 1, pointerLayer - i))
+      replaceIndex(pointerLayer - layer - 1) := !pointers(replaceIndex.asUInt(pointerLayer - 1, pointerLayer - layer))
     }
   }
   io.replaceIndex := io.replaceIndex
