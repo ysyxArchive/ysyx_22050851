@@ -87,7 +87,7 @@ class ALU extends Module {
   val io = IO(new ALUIO())
 
   // val adder = Module(new SimpleAdder())
-  val adder = Module(new FastAdder())
+  val adder      = Module(new FastAdder())
   val multiplier = Module(new BoothMultiplier())
   // val multiplier = Module(new BHMultiplier())
   // val divider    = Module(new SimpleDivider())
@@ -148,10 +148,10 @@ class ALU extends Module {
       AluMode.and -> (inA & inB),
       AluMode.sub -> adder.io.out,
       AluMode.or -> (inA | inB),
-      AluMode.ll -> (inA << inB(5, 0)),
-      AluMode.ra -> (inA.asSInt >> inB(5, 0)).asUInt,
-      AluMode.rl -> (inA >> inB(5, 0)),
-      AluMode.rlw -> (inA(31, 0) >> inB(5, 0)),
+      AluMode.ll -> (inA << inB(4, 0)),
+      AluMode.ra -> (inA.asSInt >> inB(4, 0)).asUInt,
+      AluMode.rl -> (inA >> inB(4, 0)),
+      AluMode.rlw -> (inA(31, 0) >> inB(4, 0)),
       AluMode.xor -> (inA ^ inB)
     ) ++ mulHOps.map(op => op -> multiplier.io.resultHigh)
       ++ mulLOps.map(op => op -> multiplier.io.resultLow)
