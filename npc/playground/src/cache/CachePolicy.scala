@@ -28,7 +28,7 @@ class PLRUCachePolicy(dataWidth: Int, groupSize: Int) extends Module {
   val pointerLayer = log2Ceil(groupSize)
 
   val io       = IO(new CachePolicyIO(dataWidth, groupSize))
-  val pointers = RegInit(VecInit(Seq.tabulate(pointerLayer)(layer => Vec(1 << layer, Wire(Bool())))))
+  val pointers = RegInit(VecInit(Seq.tabulate(pointerLayer)(layer => VecInit(Seq.fill(1 << layer)(_=> Bool()))))
 
   when(io.update && io.hit) {
     for (i <- 0 until pointerLayer) {
