@@ -1,6 +1,5 @@
 import chisel3._
 import chisel3.util._
-import decode.InstType
 
 /**
   * @param wayCnt 路数
@@ -28,7 +27,7 @@ class PLRUCachePolicy(dataWidth: Int, groupSize: Int) extends Module {
   val pointerLayer = log2Ceil(groupSize)
 
   val io       = IO(new CachePolicyIO(dataWidth, groupSize))
-  val pointers = RegInit(VecInit(Seq.tabulate(pointerLayer)(layer => VecInit(Seq.fill(1 << layer)(Bool())))))
+  val pointers = Reg(VecInit(Seq.tabulate(pointerLayer)(layer => VecInit(Seq.fill(1 << layer)(Bool())))))
 
   when(io.update && io.hit) {
     for (i <- 0 until pointerLayer) {
