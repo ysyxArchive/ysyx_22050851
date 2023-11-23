@@ -49,7 +49,7 @@ class Cache(
 
   val replaceIndeices = Wire(Vec(wayCnt, UInt(log2Ceil(groupSize).W)))
 
-  // val cachePolicy = Seq.tabulate(wayCnt)(_ => Module(new NaiveCachePolicy(dataWidth, groupSize)))
+  // val cachePol\\\\\icy = Seq.tabulate(wayCnt)(_ => Module(new NaiveCachePolicy(dataWidth, groupSize)))
   val cachePolicy = Seq.tabulate(wayCnt)(_ => Module(new PLRUCachePolicy(dataWidth, groupSize)))
 
   val slotsPerLine = cellByte * 8 / dataWidth
