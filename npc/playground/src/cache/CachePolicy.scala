@@ -43,6 +43,6 @@ class PLRUCachePolicy(dataWidth: Int, groupSize: Int) extends Module {
       replaceIndex(pointerLayer - i - 1) := !pointers(i)(VecInit(replaceIndex.slice(pointerLayer - i, pointerLayer)).asUInt)
     }
   }
-  io.replaceIndex := io.replaceIndex
+  io.replaceIndex := replaceIndex.asUInt
 
 }
