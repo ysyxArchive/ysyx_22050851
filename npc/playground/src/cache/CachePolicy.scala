@@ -29,8 +29,6 @@ class PLRUCachePolicy(dataWidth: Int, groupSize: Int) extends Module {
   val io           = IO(new CachePolicyIO(dataWidth, groupSize))
   val replaceIndex = Vec(pointerLayer, Bool())
 
-  val pointers = Reg(VecInit(Seq.tabulate(pointerLayer)(layer => VecInit(Seq.fill(1 << layer)(Bool())))))
-
   for (layer <- 0 until pointerLayer) {
     val pointers = Reg(VecInit(Seq.fill(1 << layer)(Bool())))
 
