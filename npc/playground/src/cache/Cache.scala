@@ -30,9 +30,9 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
   * @param addrWidth 地址宽度
   */
 class Cache(
-  cellByte:  Int    = 64,
+  cellByte:  Int    = 32,
   wayCnt:    Int    = 4,
-  groupSize: Int    = 4,
+  groupSize: Int    = 8,
   addrWidth: Int    = 64,
   dataWidth: Int    = 64,
   name:      String = "cache")
