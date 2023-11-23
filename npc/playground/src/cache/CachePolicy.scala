@@ -36,11 +36,10 @@ class PLRUCachePolicy(dataWidth: Int, groupSize: Int) extends Module {
       pointers(io.hitIndex >> (layer + 1)) := io.hitIndex >> layer
     }
     if (layer == 0) {
-      replaceIndex(pointerLayer - 1) := pointers(0)
+      replaceIndex(pointerLayer - 1) := !pointers(0)
     } else {
       replaceIndex(pointerLayer - layer - 1) := !pointers(replaceIndex.asUInt(pointerLayer - 1, pointerLayer - layer))
     }
   }
-  io.replaceIndex := io.replaceIndex
-
+  io.replaceIndex := replaceIndex.asUInt
 }
