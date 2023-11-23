@@ -27,19 +27,22 @@ class PLRUCachePolicy(dataWidth: Int, groupSize: Int) extends Module {
   val pointerLayer = log2Ceil(groupSize)
 
   val io           = IO(new CachePolicyIO(dataWidth, groupSize))
-  val replaceIndex = Wire(Vec(pointerLayer, Bool()))
+  val replaceIndex = Vec(pointerLayer, Bool())
 
-  for (layer <- 0 until pointerLayer) {
-    val pointers = Reg(Vec(1 << layer, Bool()))
-
-    when(io.update && io.hit) {
-      pointers(io.hitIndex >> (layer + 1)) := io.hitIndex >> layer
-    }
-    if (layer == 0) {
-      replaceIndex(pointerLayer - 1) := !pointers(0)
-    } else {
-      replaceIndex(pointerLayer - layer - 1) := !pointers(replaceIndex.asUInt(pointerLayer - 1, pointerLayer - layer))
+  val pointers = Reg(VecInit(Seq.tabulate(pointerLayer)(layer => VecInit(Seq.fill(1 << layer)(Bool())))))
+  
+  when(io.update && io.hit) {
+    for (i <- 0 until pointerLayer) {
+      pointers(i)(io.hitIndex >> (i + 1)) := io.hitIndex >> i
     }
   }
-  io.replaceIndex := replaceIndex.asUInt
+  for (i <- 0 until pointerLayer) {
+    if (i == 0) {
+      replaceIndex(pointerLayer - 1) := pointers(0)(0)
+    } else {
+      replaceIndex(pointerLayer - i - 1) := !pointers(i)(replaceIndex.asUInt(pointerLayer - 1, pointerLayer - i))
+    }
+  }
+  io.replaceIndex := io.replaceIndex
+
 }
