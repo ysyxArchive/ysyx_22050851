@@ -27,7 +27,7 @@ class PLRUCachePolicy(dataWidth: Int, groupSize: Int) extends Module {
   val pointerLayer = log2Ceil(groupSize)
 
   val io           = IO(new CachePolicyIO(dataWidth, groupSize))
-  val replaceIndex = Vec(pointerLayer, Bool())
+  val replaceIndex = WIre(Vec(pointerLayer, Bool()))
 
   val pointers = Reg(Vec(pointerLayer, Vec(pointerLayer, Bool())))
 
