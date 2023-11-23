@@ -25,8 +25,8 @@ image: $(IMAGE).elf
 
 
 run: image
-	$(MAKE) -C $(NPC_HOME) run ARGS="$(NEMUFLAGS)" IMG=$(IMAGE).bin
 	@echo  1221222222 $(mainargs)
+	$(MAKE) -C $(NPC_HOME) run ARGS="$(NEMUFLAGS)" IMG=$(IMAGE).bin
 
 debug: image
 	$(MAKE) -C $(NPC_HOME) debug ARGS="$(NEMUFLAGS)" IMG=$(IMAGE).bin
