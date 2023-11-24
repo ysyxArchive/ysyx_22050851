@@ -14,7 +14,7 @@ class BlackBoxPip extends BlackBox with HasBlackBoxInline {
   val io = IO(Flipped(new PiplineDebugIO()));
   setInline(
     "BlackBoxPip.v",
-    ("""import "DPI-C" function void PipInfo(input logic ifWait, input logic idWait, input logic exWait, input logic memWait, input logic wbWait);
+    ("""import "DPI-C" function void pip_info(input logic ifWait, input logic idWait, input logic exWait, input logic memWait, input logic wbWait);
        |module BlackBoxPip (
        |  input ifHalt,
        |  input idHalt,
@@ -24,7 +24,7 @@ class BlackBoxPip extends BlackBox with HasBlackBoxInline {
        |  input clock
        |);
        |  always @(posedge clock) begin
-       |    cache_req(ifHalt, idHalt, exHalt, memHalt, wbHalt);
+       |    pip_info(ifHalt, idHalt, exHalt, memHalt, wbHalt);
        |  end
        |    
        |endmodule""").stripMargin
