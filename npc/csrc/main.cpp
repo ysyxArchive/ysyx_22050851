@@ -114,11 +114,18 @@ void one_step() {
   cycle_count++;
 }
 
+extern uint64_t pipelineMiss[5];
+
 void printInfo(int64_t dur) {
   Log("execute speed: %.2lf inst/s,  %ld insts, %.3f seconds",
     (double)inst_count * 1000 / dur, inst_count, (double)dur / 1000);
   Log("IPC: %.2lf inst/cycle, freq: %.2lf KHz",
     (double)inst_count / cycle_count, (double)cycle_count / dur);
+  uint64_t total = 0;
+  for (int i = 0; i < 5; i++) {
+    total += pipelineMiss[i];
+  }
+  Log("if: %d(%.2f%), id: %d(%.2f%), ex: %d(%.2f%), mem: %d(%.2f%), wb: %d(%.2f%)", pipelineMiss[0], (float)pipelineMiss[0] / total * 100, pipelineMiss[1],  (float)pipelineMiss[1] / total * 100,  pipelineMiss[2],  (float)pipelineMiss[2] / total * 100, pipelineMiss[3],  (float)pipelineMiss[3] / total * 100,  pipelineMiss[4],  (float)pipelineMiss[4] / total * 100);
   printCacheRate();
 }
 

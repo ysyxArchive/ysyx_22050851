@@ -10,6 +10,7 @@ class CPU extends Module {
   val regs        = Module(new RegisterFile)
   val csrregs     = Module(new ControlRegisterFile)
   val blackBoxOut = Module(new BlackBoxRegs)
+  val blackBoxPip = Module(new BlackBoxPip)
 
   val ifu     = Module(new InstructionFetchUnit)
   val decoder = Module(new InstructionDecodeUnit)
@@ -52,4 +53,11 @@ class CPU extends Module {
 
   iCache.enableDebug := enableDebug
   dCache.enableDebug := enableDebug
+
+  blackBoxPip.io.clock   := clock
+  blackBoxPip.io.ifHalt  := !ifu.fetchOut.valid
+  blackBoxPip.io.idHalt  := !decoder.decodeIn.ready
+  blackBoxPip.io.exHalt  := !exe.exeIn.ready
+  blackBoxPip.io.memHalt := !memu.memIn.ready
+  blackBoxPip.io.wbHalt  := !wbu.wbIn.ready
 }
