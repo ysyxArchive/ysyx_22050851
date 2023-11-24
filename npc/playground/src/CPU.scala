@@ -19,7 +19,7 @@ class CPU extends Module {
 
   val arbiter = Module(new BurstLiteArbiter(2))
   val iCache  = Module(new Cache(name = "icache",wayCnt = 2, groupSize = 2))
-  val dCache  = Module(new Cache(name = "dcache"))
+  val dCache  = Module(new Cache(name = "dcache",wayCnt = 2, groupSize = 2))
   ifu.fetchOut <> decoder.decodeIn
   decoder.decodeOut <> exe.exeIn
   exe.exeOut <> memu.memIn
