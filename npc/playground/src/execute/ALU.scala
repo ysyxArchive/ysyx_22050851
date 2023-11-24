@@ -88,8 +88,8 @@ class ALU extends Module {
 
   // val adder = Module(new SimpleAdder())
   val adder = Module(new FastAdder())
-  val multiplier = Module(new BoothMultiplier())
-  // val multiplier = Module(new BHMultiplier())
+  // val multiplier = Module(new BoothMultiplier())
+  val multiplier = Module(new BHMultiplier())
   // val divider    = Module(new SimpleDivider())
   val divider = Module(new R2Divider())
 
