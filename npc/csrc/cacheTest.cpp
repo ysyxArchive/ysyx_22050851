@@ -32,14 +32,17 @@ extern "C" void cache_req(svLogic isDCache, svLogic isHit, svLogic reqWrite) {
     if (!isHit) {
       iCacheMiss++;
       // Log("iCache Miss!");
-    } else {
+    }
+    else {
       iCacheHit++;
     }
-  } else {
+  }
+  else {
     if (!isHit) {
       dCacheMiss++;
       // Log("iCache Miss!");
-    } else {
+    }
+    else {
       dCacheHit++;
     }
   }
@@ -47,9 +50,15 @@ extern "C" void cache_req(svLogic isDCache, svLogic isHit, svLogic reqWrite) {
 
 void printCacheRate() {
   Log("iCache hit rate: %.2lf%% (%ld / %ld / %ld)",
-      (double)iCacheHit / (iCacheHit + iCacheMiss) * 100, iCacheHit, iCacheMiss,
-      (iCacheHit + iCacheMiss));
+    (double)iCacheHit / (iCacheHit + iCacheMiss) * 100, iCacheHit, iCacheMiss,
+    (iCacheHit + iCacheMiss));
   Log("dCache hit rate: %.2lf%% (%ld / %ld / %ld)",
-      (double)dCacheHit / (dCacheHit + dCacheMiss) * 100, dCacheHit, dCacheMiss,
-      (dCacheHit + dCacheMiss));
+    (double)dCacheHit / (dCacheHit + dCacheMiss) * 100, dCacheHit, dCacheMiss,
+    (dCacheHit + dCacheMiss));
+}
+
+void pip_info(svLogic ifHalt, svLogic idHalt, svLogic exHalt, svLogic memHalt, svLogic wbHalt) {
+  if (ifHalt || idHalt || exHalt || memHalt || wbHalt){
+    Log("if: %d, id: %d, ex: %d, mem: %d, wb: %d", ifHalt, idHalt, exHalt, memHalt, wbHalt);
+  }
 }
