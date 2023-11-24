@@ -54,7 +54,7 @@ class CPU extends Module {
   iCache.enableDebug := enableDebug
   dCache.enableDebug := enableDebug
 
-  blackBoxPip.io.clock   := Clock()
+  blackBoxPip.io.clock   := clock
   blackBoxPip.io.ifHalt  := !ifu.fetchOut.valid
   blackBoxPip.io.idHalt  := !decoder.decodeIn.ready
   blackBoxPip.io.exHalt  := !exe.exeIn.ready
