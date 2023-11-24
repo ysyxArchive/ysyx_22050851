@@ -57,8 +57,25 @@ void printCacheRate() {
     (dCacheHit + dCacheMiss));
 }
 
+uint64_t pipelineMiss[5] = { 0 };
+
 void pip_info(svLogic ifHalt, svLogic idHalt, svLogic exHalt, svLogic memHalt, svLogic wbHalt) {
-  if (ifHalt || idHalt || exHalt || memHalt || wbHalt){
-    Log("if: %d, id: %d, ex: %d, mem: %d, wb: %d", ifHalt, idHalt, exHalt, memHalt, wbHalt);
+  if (wbHalt) {
+    pipelineMiss[4]++;
+  }
+  else if (memHalt) {
+    pipelineMiss[3]++;
+  }
+  else if (exHalt) {
+    pipelineMiss[2]++;
+  }
+  else if (idHalt) {
+    pipelineMiss[1]++;
+  }
+  else if (ifHalt) {
+    pipelineMiss[0]++;
+  }
+  if (ifHalt || idHalt || exHalt || memHalt || wbHalt) {
+    Log("if: %d, id: %d, ex: %d, mem: %d, wb: %d", pipelineMiss[0], pipelineMiss[1], pipelineMiss[2], pipelineMiss[3], pipelineMiss[4]);
   }
 }
