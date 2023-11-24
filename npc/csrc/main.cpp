@@ -125,7 +125,7 @@ void printInfo(int64_t dur) {
   for (int i = 0; i < 5; i++) {
     total += pipelineMiss[i];
   }
-  Log("if: %d(%.2f%), id: %d(%.2f%), ex: %d(%.2f%), mem: %d(%.2f%), wb: %d(%.2f%)", pipelineMiss[0], pipelineMiss[0] / total * 100, pipelineMiss[1], pipelineMiss[1] / total * 100, pipelineMiss[2], pipelineMiss[2] / total * 100, pipelineMiss[3], pipelineMiss[3] / total * 100, pipelineMiss[4], pipelineMiss[4] / total * 100);
+  Log("if: %d(%.2f%), id: %d(%.2f%), ex: %d(%.2f%), mem: %d(%.2f%), wb: %d(%.2f%)", pipelineMiss[0], (float)pipelineMiss[0] / total * 100, pipelineMiss[1],  (float)pipelineMiss[1] / total * 100,  pipelineMiss[2],  (float)pipelineMiss[2] / total * 100, pipelineMiss[3],  (float)pipelineMiss[3] / total * 100,  pipelineMiss[4],  (float)pipelineMiss[4] / total * 100);
   printCacheRate();
 }
 
