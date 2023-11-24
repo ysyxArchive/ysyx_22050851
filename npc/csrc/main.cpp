@@ -121,7 +121,11 @@ void printInfo(int64_t dur) {
     (double)inst_count * 1000 / dur, inst_count, (double)dur / 1000);
   Log("IPC: %.2lf inst/cycle, freq: %.2lf KHz",
     (double)inst_count / cycle_count, (double)cycle_count / dur);
-  Log("if: %d, id: %d, ex: %d, mem: %d, wb: %d", pipelineMiss[0], pipelineMiss[1], pipelineMiss[2], pipelineMiss[3], pipelineMiss[4]);
+  uint64_t total = 0;
+  for (int i = 0; i < 5; i++) {
+    total += pipelineMiss[i];
+  }
+  Log("if: %d(%.2f%), id: %d(%.2f%), ex: %d(%.2f%), mem: %d(%.2f%), wb: %d(%.2f%)", pipelineMiss[0], pipelineMiss[0] / total * 100, pipelineMiss[1], pipelineMiss[1] / total * 100, pipelineMiss[2], pipelineMiss[2] / total * 100, pipelineMiss[3], pipelineMiss[3] / total * 100, pipelineMiss[4], pipelineMiss[4] / total * 100);
   printCacheRate();
 }
 
@@ -184,4 +188,4 @@ int main(int argc, char* argv[]) {
   lightSSS.do_clear();
 #endif
   return (is_bad_halt || ret_value != 0);
-  }
+}
