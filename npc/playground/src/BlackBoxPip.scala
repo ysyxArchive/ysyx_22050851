@@ -15,7 +15,7 @@ class BlackBoxPip extends BlackBox with HasBlackBoxInline {
   setInline(
     "BlackBoxPip.v",
     ("""import "DPI-C" function void PipInfo(input logic ifWait, input logic idWait, input logic exWait, input logic memWait, input logic wbWait);
-       |module BlackBoxCache (
+       |module BlackBoxPip (
        |  input ifHalt,
        |  input idHalt,
        |  input exHalt,
