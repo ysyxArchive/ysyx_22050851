@@ -75,7 +75,4 @@ void pip_info(svLogic ifHalt, svLogic idHalt, svLogic exHalt, svLogic memHalt, s
   else if (ifHalt) {
     pipelineMiss[0]++;
   }
-  if (ifHalt || idHalt || exHalt || memHalt || wbHalt) {
-    Log("if: %d, id: %d, ex: %d, mem: %d, wb: %d", pipelineMiss[0], pipelineMiss[1], pipelineMiss[2], pipelineMiss[3], pipelineMiss[4]);
-  }
 }
