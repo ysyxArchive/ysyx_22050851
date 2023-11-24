@@ -151,7 +151,7 @@ class ALU extends Module {
       AluMode.ll -> (inA << inB(5, 0)),
       AluMode.ra -> (inA.asSInt >> inB(5, 0)).asUInt,
       AluMode.rl -> (inA >> inB(5, 0)),
-      AluMode.rlw -> (inA(31, 0) >> inB(5, 0)),
+      AluMode.rlw -> (inA(31, 0) >> inB(4, 0)),
       AluMode.xor -> (inA ^ inB)
     ) ++ mulHOps.map(op => op -> multiplier.io.resultHigh)
       ++ mulLOps.map(op => op -> multiplier.io.resultLow)
