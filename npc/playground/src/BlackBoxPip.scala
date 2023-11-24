@@ -22,7 +22,7 @@ class BlackBoxPip extends BlackBox with HasBlackBoxInline {
        |  input memHalt,
        |  input wbHalt,
        |  input clock
-       |)
+       |);
        |  always @(posedge clock) begin
        |    cache_req(ifHalt, idHalt, exHalt, memHalt, wbHalt);
        |  end
