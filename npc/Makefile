@@ -71,7 +71,6 @@ build: $(BIN)
 	@rm -rf $(OBJ_DIR)
 
 run: $(BIN)
-	echo 22222 $(CFLAGS)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 	$(BIN) $(IMG) $(ARGS) 
 
