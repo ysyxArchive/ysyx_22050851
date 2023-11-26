@@ -141,13 +141,12 @@ class Cache(
     0.U,
     Seq(
       cacheFSM.is(directRRes) -> axiIO.R.bits.data,
-      cacheFSM.is(idle) -> PriorityMux(s),
-      cacheFSM.is(waitRes) -> axiIO.R.bits.data
+      (cacheFSM.is(idle) || cacheFSM.is(waitRes)) -> PriorityMux(s)
     )
   )
   io.data.valid := (cacheFSM.is(directRRes) && axiIO.R.valid) ||
     (cacheFSM.is(idle) && io.readReq.fire && hit) ||
-    (cacheFSM.is(waitRes) && Cat(tag, index, counter) === io.addr)
+    (cacheFSM.is(waitRes) && Cat(tag, index, counter << 3) > io.addr)
   // when sendReq or directRReq
   axiIO.AR.bits.addr := Mux(cacheFSM.is(sendReq), Cat(Seq(tag, index, 0.U((log2Ceil(slotsPerLine) + 3).W))), addr)
   axiIO.AR.bits.id   := 0.U
