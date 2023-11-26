@@ -74,8 +74,10 @@ class Cache(
   val cacheFSM = new FSM(
     idle,
     List(
-      (idle, io.readReq.fire && shoudDirectRW, directRReq),
-      (idle, io.readReq.fire && !shoudDirectRW && !hit && !isDirty, sendReq),
+      (idle, io.readReq.fire && shoudDirectRW && !axiIO.AR.fire, directRReq),
+      (idle, io.readReq.fire && shoudDirectRW && axiIO.AR.fire, directRRes),
+      (idle, io.readReq.fire && !shoudDirectRW && !hit && !isDirty && !axiIO.AR.fire, sendReq),
+      (idle, io.readReq.fire && !shoudDirectRW && !hit && !isDirty && axiIO.AR.fire, waitRes),
       (idle, io.readReq.fire && !shoudDirectRW && !hit && isDirty, sendWReq),
       (idle, io.writeReq.fire && shoudDirectRW, directWReq),
       (idle, io.writeReq.fire && !shoudDirectRW && hit, writeData),
@@ -151,11 +153,20 @@ class Cache(
     (cacheFSM.is(idle) && io.readReq.fire && hit) ||
     (cacheFSM.is(waitRes) && tag === ioTag && index === ioIndex && (counter << 3) > ioOffset)
   // when sendReq or directRReq
-  axiIO.AR.bits.addr := Mux(cacheFSM.is(sendReq), Cat(Seq(tag, index, 0.U((log2Ceil(slotsPerLine) + 3).W))), addr)
+  axiIO.AR.bits.addr := MuxCase(
+    addr,
+    Seq(
+      cacheFSM.is(sendReq) -> Cat(Seq(tag, index, 0.U((log2Ceil(slotsPerLine) + 3).W))),
+      cacheFSM.is(directRReq) -> addr,
+      (cacheFSM.is(idle) && shoudDirectRW) -> Cat(ioTag, ioIndex, 0.U((log2Ceil(slotsPerLine) + 3).W)),
+      (cacheFSM.is(idle) && !shoudDirectRW) -> io.addr
+    )
+  )
   axiIO.AR.bits.id   := 0.U
   axiIO.AR.bits.prot := 0.U
-  axiIO.AR.valid     := cacheFSM.is(sendReq) || cacheFSM.is(directRReq)
-  axiIO.AR.bits.len  := Mux(cacheFSM.is(sendReq), (slotsPerLine - 1).U, 0.U)
+  axiIO.AR.valid := cacheFSM.is(sendReq) || cacheFSM.is(directRReq) ||
+    (cacheFSM.is(idle) && !hit && (shoudDirectRW || !isDirty))
+  axiIO.AR.bits.len := Mux(cacheFSM.is(sendReq) || (cacheFSM.is(idle) && !shoudDirectRW), (slotsPerLine - 1).U, 0.U)
   // when waitRes
   val mask       = Reverse(Cat(Seq.tabulate(slotsPerLine)(index => Fill(axiIO.dataWidth, UIntToOH(counter)(index)))))
   val maskedData = Fill(slotsPerLine, axiIO.R.bits.data.asUInt) & mask
