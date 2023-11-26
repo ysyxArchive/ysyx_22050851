@@ -110,6 +110,9 @@ class Cache(
   val index  = Mux(cacheFSM.is(idle), io.addr, addr)(tagOffset - 1, indexOffset)
   val offset = Mux(cacheFSM.is(idle), io.addr, addr)(indexOffset - 1, 0)
 
+  val offsetReg = Reg(UInt(indexOffset.W))
+  offsetReg := Mux(cacheFSM.is(idle), offset, offsetReg)
+
   val wayValid    = cacheMem(index).map(line => line.valid && line.tag === tag)
   val targetIndex = Mux1H(wayValid, Seq.tabulate(groupSize)(index => index.U))
   val data        = cacheMem(index)(targetIndex).data
@@ -144,7 +147,7 @@ class Cache(
   )
   io.data.valid := (cacheFSM.is(directRRes) && axiIO.R.valid) ||
     (cacheFSM.is(idle) && io.readReq.fire && hit) ||
-    (cacheFSM.is(waitRes) && counter === offset)
+    (cacheFSM.is(waitRes) && Cat(tag, index, counter) === io.addr)
   // when sendReq or directRReq
   axiIO.AR.bits.addr := Mux(cacheFSM.is(sendReq), Cat(Seq(tag, index, 0.U((log2Ceil(slotsPerLine) + 3).W))), addr)
   axiIO.AR.bits.id   := 0.U
