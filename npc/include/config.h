@@ -10,7 +10,7 @@
 #define MAX_WAIT_ROUND 300
 // 性能输出频率
 #define PROFILE_LOG_INTERVAL 1000000
-// #define MTRACE
+#define MTRACE
 // npc 内部debug
 // #define ENABLE_DEBUG
 
