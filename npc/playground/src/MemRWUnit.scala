@@ -68,10 +68,10 @@ class MemRWUnit extends Module {
 
   val memOutRaw = MuxLookup(memInReg.control.memlen, memIO.readReq.bits.data)(
     EnumSeq(
-      MemLen.one -> memIO.readReq.asUInt(7, 0),
-      MemLen.two -> memIO.readReq.asUInt(15, 0),
-      MemLen.four -> memIO.readReq.asUInt(31, 0),
-      MemLen.eight -> memIO.readReq.asUInt
+      MemLen.one -> memIO.readReq.bits.data.asUInt(7, 0),
+      MemLen.two -> memIO.readReq.bits.data.asUInt(15, 0),
+      MemLen.four -> memIO.readReq.bits.data.asUInt(31, 0),
+      MemLen.eight -> memIO.readReq.bits.data.asUInt
     )
   )
   val memData = Mux(
