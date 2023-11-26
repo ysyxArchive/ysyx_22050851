@@ -158,8 +158,8 @@ class Cache(
     Seq(
       cacheFSM.is(sendReq) -> Cat(Seq(tag, index, 0.U((log2Ceil(slotsPerLine) + 3).W))),
       cacheFSM.is(directRReq) -> addr,
-      (cacheFSM.is(idle) && shoudDirectRW) -> Cat(ioTag, ioIndex, 0.U((log2Ceil(slotsPerLine) + 3).W)),
-      (cacheFSM.is(idle) && !shoudDirectRW) -> io.addr
+      (cacheFSM.is(idle) && !shoudDirectRW) -> Cat(ioTag, ioIndex, 0.U((log2Ceil(slotsPerLine) + 3).W)),
+      (cacheFSM.is(idle) && shoudDirectRW) -> io.addr
     )
   )
   axiIO.AR.bits.id   := 0.U
