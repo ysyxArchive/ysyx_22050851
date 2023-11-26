@@ -3,12 +3,11 @@ import chisel3.util._
 import utils.FSM
 import utils.Utils
 import utils.DebugInfo
-import utils.FlippedDecoupledIO
+
 class CacheIO(dataWidth: Int, addrWidth: Int) extends Bundle {
-  val addr = Input(UInt(addrWidth.W))
-  val readReq = Flipped(new FlippedDecoupledIO(new Bundle {
-    val data = UInt(dataWidth.W)
-  }))
+  val addr    = Input(UInt(addrWidth.W))
+  val readReq = Flipped(Decoupled())
+  val data    = Decoupled(UInt(dataWidth.W))
   val writeReq = Flipped(Decoupled(new Bundle {
     val data = UInt(dataWidth.W)
     val mask = UInt((dataWidth / 8).W)
@@ -93,7 +92,7 @@ class Cache(
       (directWData, axiIO.W.fire, directWRes),
       (directWRes, axiIO.B.fire, idle),
       (directRReq, axiIO.AR.fire, directRRes),
-      (directRRes, axiIO.R.fire && io.readReq.fire, idle)
+      (directRRes, axiIO.R.fire && io.data.fire, idle)
     )
   )
   counter := PriorityMux(
@@ -135,11 +134,12 @@ class Cache(
 
   // when idle
   addr              := Mux(io.readReq.fire || io.writeReq.fire, io.addr, addr)
+  io.readReq.ready  := cacheFSM.is(idle) && io.readReq.valid
   io.writeReq.ready := cacheFSM.is(idle) && io.writeReq.valid && !io.readReq.valid
 
   // when sendRes or directRBack
   val s = Seq.tabulate(cellByte)(o => ((o.U === ioOffset) -> data(data.getWidth - 1, o * 8)))
-  io.readReq.bits.data := MuxCase(
+  io.data.bits := MuxCase(
     0.U,
     Seq(
       cacheFSM.is(directRRes) -> axiIO.R.bits.data,
@@ -147,7 +147,7 @@ class Cache(
       cacheFSM.is(waitRes) -> PriorityMux(s)
     )
   )
-  io.readReq.ready := (cacheFSM.is(directRRes) && axiIO.R.valid) ||
+  io.data.valid := (cacheFSM.is(directRRes) && axiIO.R.valid) ||
     (cacheFSM.is(idle) && io.readReq.fire && hit) ||
     (cacheFSM.is(waitRes) && tag === ioTag && index === ioIndex && (counter << 3) > ioOffset)
   // when sendReq or directRReq
@@ -239,8 +239,8 @@ class Cache(
         )
       }
     }
-    when(io.readReq.fire) {
-      printf("data is %x\n", io.readReq.bits.data)
+    when(io.data.fire) {
+      printf("data is %x\n", io.data.bits)
     }
   }
   blackBoxCache.io.changed  := RegNext(!cacheFSM.is(idle)) && cacheFSM.is(idle)

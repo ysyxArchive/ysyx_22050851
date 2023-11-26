@@ -97,11 +97,3 @@ class DebugInfo extends Bundle {
   val pc   = Output(UInt(64.W))
   val inst = Output(UInt(32.W))
 }
-
-class FlippedDecoupledIO[+T <: Data](gen: T) extends DecoupledIO[T](gen) {
-  override val bits: T = Input(gen)
-}
-
-object FlippedDecoupled {
-  def apply[T <: Data](gen: T): FlippedDecoupledIO[T] = new FlippedDecoupledIO(gen)
-}

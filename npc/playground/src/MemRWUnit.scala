@@ -61,17 +61,18 @@ class MemRWUnit extends Module {
 
   memIO.readReq.valid      := dataValid && shouldMemWork && memIsRead
   memIO.addr               := memInReg.data.alu
+  memIO.data.ready         := memIsRead
   memIO.writeReq.valid     := dataValid && shouldMemWork && !memIsRead
   memIO.writeReq.bits.data := memInReg.data.src2Data
   memIO.writeReq.bits.mask := memMask
   memIO.debug              := memInReg.debug
 
-  val memOutRaw = MuxLookup(memInReg.control.memlen, memIO.readReq.bits.data)(
+  val memOutRaw = MuxLookup(memInReg.control.memlen, memIO.data.bits)(
     EnumSeq(
-      MemLen.one -> memIO.readReq.bits.data.asUInt(7, 0),
-      MemLen.two -> memIO.readReq.bits.data.asUInt(15, 0),
-      MemLen.four -> memIO.readReq.bits.data.asUInt(31, 0),
-      MemLen.eight -> memIO.readReq.bits.data.asUInt
+      MemLen.one -> memIO.data.asUInt(7, 0),
+      MemLen.two -> memIO.data.asUInt(15, 0),
+      MemLen.four -> memIO.data.asUInt(31, 0),
+      MemLen.eight -> memIO.data.asUInt
     )
   )
   val memData = Mux(
@@ -82,7 +83,7 @@ class MemRWUnit extends Module {
 
   memIn.ready := !dataValid || memOut.fire
 
-  memOut.valid              := dataValid && (!shouldMemWork || (memIsRead && memIO.readReq.fire) || (!memIsRead && memIO.writeReq.fire))
+  memOut.valid              := dataValid && (!shouldMemWork || (memIsRead && memIO.data.fire) || (!memIsRead && memIO.writeReq.fire))
   memOut.bits.debug         := memInReg.debug
   memOut.bits.data.src1     := memInReg.data.src1
   memOut.bits.data.src2     := memInReg.data.src2
@@ -100,7 +101,7 @@ class MemRWUnit extends Module {
   memOut.bits.control := memInReg.control
 
   toDecode.regIndex  := Mux(dataValid, memInReg.data.dst, 0.U)
-  toDecode.dataValid := dataValid && (memInReg.toDecodeValid || (memInReg.control.regwritemux === RegWriteMux.mem.asUInt && memIO.readReq.fire))
+  toDecode.dataValid := dataValid && (memInReg.toDecodeValid || (memInReg.control.regwritemux === RegWriteMux.mem.asUInt && memIO.data.fire))
   toDecode.data      := memOut.bits.data.wdata
   toDecode.csrIndex := Mux(
     dataValid,
