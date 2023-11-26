@@ -66,7 +66,8 @@ class Cache(
   val isRead = Reg(Bool())
   val addr   = Reg(UInt(addrWidth.W))
 
-  val idle :: sendReq :: waitRes :: writeData :: sendWReq :: sendWData :: waitWRes :: directWReq :: directWData :: directWRes :: directRReq :: directRRes :: others =
+  val idle :: sendReq :: waitRes :: writeData :: sendWReq :: sendWData :: waitWRes :: directWReq :: directWData :: a 
+   :: directRReq :: directRRes :: others =
     Enum(16)
 
   val counter    = RegInit(0.U(log2Ceil(slotsPerLine).W))
