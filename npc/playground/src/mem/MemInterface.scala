@@ -115,24 +115,28 @@ class MemBurstInterface extends Module {
     counter,
     Seq(
       (memInterfaceFSM.is(waitReq) && !memInterfaceFSM.willChange()) -> 0.U,
+      (memInterfaceFSM.willChangeTo(waitReq)) -> 0.U,
+      (memInterfaceFSM.is(waitReq) && axiS.AR.fire) -> (counter + 1.U),
       (memInterfaceFSM.is(writeDataBack)) -> (counter + 1.U),
       (memInterfaceFSM.is(waitDataWrite) && axiS.W.fire) -> (counter + 1.U)
     )
   )
 
   mem.io.clock  := clock
-  mem.io.isRead := memInterfaceFSM.is(writeDataBack)
+  mem.io.isRead := memInterfaceFSM.is(writeDataBack) || (memInterfaceFSM.is(waitReq) && axiS.AR.valid)
   mem.io.mask   := axiS.W.bits.strb
   mem.io.wdata  := axiS.W.bits.data
   mem.io.addr := MuxCase(
     0.U,
     Seq(
+      (memInterfaceFSM.is(waitReq) && axiS.AR.fire) -> axiS.AR.bits.addr,
       memInterfaceFSM.is(writeDataBack) -> readReq.addr,
       axiS.W.fire -> writeReq.addr
     )
   ) + (counter << 3)
   mem.io.enable :=
     (memInterfaceFSM.is(writeDataBack) && !memInterfaceFSM.willChange()) ||
+      (memInterfaceFSM.is(waitReq) && axiS.AR.fire) ||
       (memInterfaceFSM.is(waitDataWrite) && axiS.W.fire)
   dataRet := Mux(mem.io.enable, mem.io.rdata, dataRet)
 
@@ -141,7 +145,7 @@ class MemBurstInterface extends Module {
   axiS.AR.ready    := memInterfaceFSM.is(waitReq)
   axiS.B.valid     := memInterfaceFSM.is(responseWrite)
   axiS.B.bits.id   := writeReq.id
-  axiS.R.valid     := memInterfaceFSM.is(writeDataBack) && RegNext(memInterfaceFSM.is(writeDataBack))
+  axiS.R.valid     := memInterfaceFSM.is(writeDataBack)
   axiS.R.bits.id   := readReq.id
   axiS.R.bits.data := dataRet
   axiS.R.bits.last := counter - 1.U === readReq.len
