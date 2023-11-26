@@ -68,19 +68,24 @@ class Cache(
   val idle :: sendReq :: waitRes :: writeData :: sendWReq :: sendWData :: waitWRes :: directWReq :: directWData :: directWRes :: directRReq :: directRRes :: others =
     Enum(16)
 
-  val counter = RegInit(0.U(log2Ceil(slotsPerLine).W))
-
+  val counter       = RegInit(0.U(log2Ceil(slotsPerLine).W))
   val shoudDirectRW = io.addr > 0xa0000000L.U
   val cacheFSM = new FSM(
     idle,
     List(
-      (idle, io.readReq.fire && shoudDirectRW, directRReq),
-      (idle, io.readReq.fire && !shoudDirectRW && !hit && !isDirty, sendReq),
-      (idle, io.readReq.fire && !shoudDirectRW && !hit && isDirty, sendWReq),
-      (idle, io.writeReq.fire && shoudDirectRW, directWReq),
+      (idle, io.readReq.fire && shoudDirectRW && !axiIO.AR.fire, directRReq),
+      (idle, io.readReq.fire && shoudDirectRW && axiIO.AR.fire, directRRes),
+      (idle, io.readReq.fire && !shoudDirectRW && !hit && !isDirty && !axiIO.AR.fire, sendReq),
+      (idle, io.readReq.fire && !shoudDirectRW && !hit && !isDirty && axiIO.AR.fire, waitRes),
+      (idle, io.readReq.fire && !shoudDirectRW && !hit && isDirty && !axiIO.AW.fire, sendWReq),
+      (idle, io.readReq.fire && !shoudDirectRW && !hit && isDirty && axiIO.AW.fire, sendWData),
+      (idle, io.writeReq.fire && shoudDirectRW && !axiIO.AW.fire, directWReq),
+      (idle, io.writeReq.fire && shoudDirectRW && axiIO.AW.fire, directWData),
       (idle, io.writeReq.fire && !shoudDirectRW && hit, writeData),
-      (idle, io.writeReq.fire && !shoudDirectRW && !hit && !isDirty, sendReq),
-      (idle, io.writeReq.fire && !shoudDirectRW && !hit && isDirty, sendWReq),
+      (idle, io.writeReq.fire && !shoudDirectRW && !hit && !isDirty && !axiIO.AR.fire, sendReq),
+      (idle, io.writeReq.fire && !shoudDirectRW && !hit && !isDirty && axiIO.AR.fire, waitRes),
+      (idle, io.writeReq.fire && !shoudDirectRW && !hit && isDirty && !axiIO.AW.fire, sendWReq),
+      (idle, io.writeReq.fire && !shoudDirectRW && !hit && isDirty && axiIO.AW.fire, sendWData),
       (sendReq, axiIO.AR.fire, waitRes),
       (waitRes, axiIO.R.fire && (counter === (slotsPerLine - 1).U) && isRead, idle),
       (waitRes, axiIO.R.fire && (counter === (slotsPerLine - 1).U) && !isRead, writeData),
@@ -149,13 +154,23 @@ class Cache(
   )
   io.data.valid := (cacheFSM.is(directRRes) && axiIO.R.valid) ||
     (cacheFSM.is(idle) && io.readReq.fire && hit) ||
-    (cacheFSM.is(waitRes) && tag === ioTag && index === ioIndex && (counter << 3) > ioOffset)
+    (cacheFSM.is(waitRes) && isRead && tag === ioTag && index === ioIndex && (counter << 3) > ioOffset)
   // when sendReq or directRReq
-  axiIO.AR.bits.addr := Mux(cacheFSM.is(sendReq), Cat(Seq(tag, index, 0.U((log2Ceil(slotsPerLine) + 3).W))), addr)
+  axiIO.AR.bits.addr := MuxCase(
+    addr,
+    Seq(
+      cacheFSM.is(sendReq) -> Cat(Seq(tag, index, 0.U((log2Ceil(slotsPerLine) + 3).W))),
+      cacheFSM.is(directRReq) -> addr,
+      (cacheFSM.is(idle) && !shoudDirectRW) -> Cat(ioTag, ioIndex, 0.U((log2Ceil(slotsPerLine) + 3).W)),
+      (cacheFSM.is(idle) && shoudDirectRW) -> io.addr
+    )
+  )
   axiIO.AR.bits.id   := 0.U
   axiIO.AR.bits.prot := 0.U
-  axiIO.AR.valid     := cacheFSM.is(sendReq) || cacheFSM.is(directRReq)
-  axiIO.AR.bits.len  := Mux(cacheFSM.is(sendReq), (slotsPerLine - 1).U, 0.U)
+  axiIO.AR.valid := cacheFSM.is(sendReq) || cacheFSM.is(directRReq) ||
+    (cacheFSM.is(idle) && io.readReq.fire && !hit && (shoudDirectRW || !isDirty)) ||
+    (cacheFSM.is(idle) && io.writeReq.fire && !hit && !shoudDirectRW && !isDirty)
+  axiIO.AR.bits.len := Mux(cacheFSM.is(sendReq) || (cacheFSM.is(idle) && !shoudDirectRW), (slotsPerLine - 1).U, 0.U)
   // when waitRes
   val mask       = Reverse(Cat(Seq.tabulate(slotsPerLine)(index => Fill(axiIO.dataWidth, UIntToOH(counter)(index)))))
   val maskedData = Fill(slotsPerLine, axiIO.R.bits.data.asUInt) & mask
@@ -184,13 +199,25 @@ class Cache(
     }
   }
   // when sendWReq or directWReq
-  axiIO.AW.valid := cacheFSM.is(sendWReq) || cacheFSM.is(directWReq)
-  axiIO.AW.bits.addr := Mux(
-    cacheFSM.is(sendWReq),
-    Cat(cacheMem(index)(replaceIndex).tag, index, counter << log2Ceil(axiIO.dataWidth / 8)),
-    addr
+  axiIO.AW.valid := cacheFSM.is(sendWReq) || cacheFSM.is(directWReq) ||
+    (cacheFSM.is(idle) && io.readReq.fire && !shoudDirectRW && !hit && isDirty) ||
+    (cacheFSM.is(idle) && io.writeReq.fire && !shoudDirectRW && !hit && isDirty) ||
+    (cacheFSM.is(idle) && io.writeReq.fire && shoudDirectRW)
+  axiIO.AW.bits.addr := MuxCase(
+    addr,
+    Seq(
+      cacheFSM.is(sendWReq) ->
+        Cat(cacheMem(index)(replaceIndex).tag, index, 0.U((log2Ceil(slotsPerLine) + 3).W)),
+      cacheFSM.is(directWReq) -> addr,
+      (cacheFSM.is(idle) && !shoudDirectRW) -> Cat(
+        cacheMem(ioIndex)(replaceIndeices(ioIndex)).tag,
+        ioIndex,
+        0.U((log2Ceil(slotsPerLine) + 3).W)
+      ),
+      (cacheFSM.is(idle) && shoudDirectRW) -> io.addr
+    )
   )
-  axiIO.AW.bits.len := Mux(cacheFSM.is(sendWReq), (slotsPerLine - 1).U, 0.U)
+  axiIO.AW.bits.len := Mux(cacheFSM.is(sendWReq) || (cacheFSM.is(idle) && !shoudDirectRW), (slotsPerLine - 1).U, 0.U)
   axiIO.W.valid     := cacheFSM.is(sendWData) || cacheFSM.is(directWData)
   axiIO.W.bits.data := Mux(
     cacheFSM.is(sendWData),
