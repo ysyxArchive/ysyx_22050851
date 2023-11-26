@@ -113,12 +113,10 @@ class Cache(
   val offsetReg = Reg(UInt(indexOffset.W))
   offsetReg := Mux(cacheFSM.is(idle), offset, offsetReg)
 
-  val wayValid    = cacheMem(index).map(line => line.valid && line.tag === tag)
-  val targetIndex = MuxCase(replaceIndeices(index), Seq.tabulate(groupSize)(index => (wayValid(index) -> index.U)) Mux1H(wayValid, Seq.tabulate(groupSize)(index => index.U))
-  val data        = cacheMem(index)(targetIndex).data
-  
+  val wayValid     = cacheMem(index).map(line => line.valid && line.tag === tag)
   val replaceIndex = replaceIndeices(index)
-  val replaceData = cacheMem(index)(replaceIndex).data
+  val targetIndex  = MuxCase(replaceIndex, Seq.tabulate(groupSize)(index => (wayValid(index) -> index.U)))
+  val data         = cacheMem(index)(targetIndex).data
 
   hit     := wayValid.reduce(_ || _)
   isDirty := cacheMem(index)(replaceIndex).dirty
@@ -138,13 +136,12 @@ class Cache(
 
   // when sendRes or directRBack
   val s        = Seq.tabulate(cellByte)(o => ((o.U === offset) -> data(data.getWidth - 1, o * 8)))
-  val replaceS = Seq.tabulate(cellByte)(o => ((o.U === offset) -> replaceData(replaceData.getWidth - 1, o * 8)))
   io.data.bits := MuxCase(
     0.U,
     Seq(
       cacheFSM.is(directRRes) -> axiIO.R.bits.data,
       cacheFSM.is(idle) -> PriorityMux(s),
-      cacheFSM.is(waitRes) -> PriorityMux(replaceS)
+      cacheFSM.is(waitRes) -> PriorityMux(s)
     )
   )
   io.data.valid := (cacheFSM.is(directRRes) && axiIO.R.valid) ||
