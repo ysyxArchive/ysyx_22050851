@@ -114,7 +114,7 @@ class Cache(
   offsetReg := Mux(cacheFSM.is(idle), offset, offsetReg)
 
   val wayValid    = cacheMem(index).map(line => line.valid && line.tag === tag)
-  val targetIndex = Mux1H(wayValid, Seq.tabulate(groupSize)(index => index.U))
+  val targetIndex = MuxCase(replaceIndeices(index), Seq.tabulate(groupSize)(index => (wayValid(index) -> index.U)) Mux1H(wayValid, Seq.tabulate(groupSize)(index => index.U))
   val data        = cacheMem(index)(targetIndex).data
   
   val replaceIndex = replaceIndeices(index)
