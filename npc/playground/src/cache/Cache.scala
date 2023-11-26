@@ -6,7 +6,7 @@ import utils.DebugInfo
 
 class CacheIO(dataWidth: Int, addrWidth: Int) extends Bundle {
   val addr    = Input(UInt(addrWidth.W))
-  val readReq = Flipped(Decoupled(Input(UInt(dataWidth.W))))
+  val readReq = Flipped(Decoupled(Output(UInt(dataWidth.W))))
   val writeReq = Flipped(Decoupled(new Bundle {
     val data = UInt(dataWidth.W)
     val mask = UInt((dataWidth / 8).W)
