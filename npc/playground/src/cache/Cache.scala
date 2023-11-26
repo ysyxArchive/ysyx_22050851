@@ -135,7 +135,6 @@ class Cache(
 
   // when idle
   addr              := Mux(io.readReq.fire || io.writeReq.fire, io.addr, addr)
-  io.readReq.ready  := cacheFSM.is(idle) && io.readReq.valid
   io.writeReq.ready := cacheFSM.is(idle) && io.writeReq.valid && !io.readReq.valid
 
   // when sendRes or directRBack
