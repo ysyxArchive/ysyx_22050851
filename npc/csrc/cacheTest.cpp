@@ -32,17 +32,14 @@ extern "C" void cache_req(svLogic isDCache, svLogic isHit, svLogic reqWrite) {
     if (!isHit) {
       iCacheMiss++;
       // Log("iCache Miss!");
-    }
-    else {
+    } else {
       iCacheHit++;
     }
-  }
-  else {
+  } else {
     if (!isHit) {
       dCacheMiss++;
       // Log("iCache Miss!");
-    }
-    else {
+    } else {
       dCacheHit++;
     }
   }

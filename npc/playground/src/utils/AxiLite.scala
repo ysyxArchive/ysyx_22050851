@@ -266,12 +266,12 @@ class BurstLiteArbiter(val masterPort: Int) extends Module {
   // unchosen ports
   masterIO.zipWithIndex.foreach {
     case (elem, idx) =>
+      elem.AW.ready := Mux(idx.U === workingMaster && arbiterFSM.is(waitMasterReq), slaveIO.AW.ready, false.B)
+      elem.AR.ready := Mux(idx.U === workingMaster && arbiterFSM.is(waitMasterReq), slaveIO.AR.ready, false.B)
       elem.B.valid  := Mux(idx.U === workingMaster && arbiterFSM.is(forwardWrite), slaveIO.B.valid, false.B)
       elem.B.bits   := Mux(idx.U === workingMaster, slaveIO.B.bits, DontCare)
       elem.R.valid  := Mux(idx.U === workingMaster && arbiterFSM.is(forwardRead), slaveIO.R.valid, false.B)
       elem.R.bits   := Mux(idx.U === workingMaster, slaveIO.R.bits, DontCare)
-      elem.AW.ready := Mux(idx.U === workingMaster && arbiterFSM.is(forwardWrite), slaveIO.AW.ready, false.B)
-      elem.AR.ready := Mux(idx.U === workingMaster && arbiterFSM.is(forwardRead), slaveIO.AR.ready, false.B)
       elem.W.ready  := Mux(idx.U === workingMaster && arbiterFSM.is(forwardWrite), slaveIO.W.ready, false.B)
   }
   // when waitMasterReq
@@ -286,12 +286,12 @@ class BurstLiteArbiter(val masterPort: Int) extends Module {
     masterRequestMask(chosenReq)
   ) // if chosen is unmasked, mask it
 
+  slaveIO.AW.valid := arbiterFSM.is(waitMasterReq) && !chosenIsReadReq
+  slaveIO.AW.bits  := Mux(arbiterFSM.is(waitMasterReq), masterIO(chosenReq).AW.bits, DontCare)
+  slaveIO.AR.valid := arbiterFSM.is(waitMasterReq) && chosenIsReadReq
+  slaveIO.AR.bits  := Mux(arbiterFSM.is(waitMasterReq), masterIO(chosenReq).AR.bits, DontCare)
   slaveIO.B.ready  := chosenMaster.B.ready && arbiterFSM.is(forwardWrite)
   slaveIO.R.ready  := chosenMaster.R.ready && arbiterFSM.is(forwardRead)
-  slaveIO.AW.valid := chosenMaster.AW.valid && arbiterFSM.is(forwardWrite)
-  slaveIO.AW.bits  := Mux(arbiterFSM.is(forwardWrite), chosenMaster.AW.bits, DontCare)
-  slaveIO.AR.valid := chosenMaster.AR.valid && arbiterFSM.is(forwardRead)
-  slaveIO.AR.bits  := Mux(arbiterFSM.is(forwardRead), chosenMaster.AR.bits, DontCare)
   slaveIO.W.valid  := chosenMaster.W.valid && arbiterFSM.is(forwardWrite)
   slaveIO.W.bits   := Mux(arbiterFSM.is(forwardWrite), chosenMaster.W.bits, DontCare)
 }
