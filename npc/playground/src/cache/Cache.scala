@@ -12,8 +12,7 @@ class CacheIO(dataWidth: Int, addrWidth: Int) extends Bundle {
     val data = UInt(dataWidth.W)
     val mask = UInt((dataWidth / 8).W)
   }))
-  val writeRes = Decoupled()
-  val debug    = Input(new DebugInfo())
+  val debug = Input(new DebugInfo())
 }
 
 class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
@@ -66,11 +65,10 @@ class Cache(
   val isRead = Reg(Bool())
   val addr   = Reg(UInt(addrWidth.W))
 
-  val idle :: sendReq :: waitRes :: writeData :: sendWReq :: sendWData :: waitWRes :: directWReq :: directWData :: directWRes :: directRReq :: directRRes :: directRBack :: others =
+  val idle :: sendReq :: waitRes :: writeData :: sendWReq :: sendWData :: waitWRes :: directWReq :: directWData :: directWRes :: directRReq :: directRRes :: others =
     Enum(16)
 
-  val counter    = RegInit(0.U(log2Ceil(slotsPerLine).W))
-  val directData = Reg(UInt(dataWidth.W))
+  val counter = RegInit(0.U(log2Ceil(slotsPerLine).W))
 
   val shoudDirectRW = io.addr > 0xa0000000L.U
   val cacheFSM = new FSM(
@@ -94,8 +92,7 @@ class Cache(
       (directWData, axiIO.W.fire, directWRes),
       (directWRes, axiIO.B.fire, idle),
       (directRReq, axiIO.AR.fire, directRRes),
-      (directRRes, axiIO.R.fire, directRBack),
-      (directRBack, io.data.fire, idle)
+      (directRRes, axiIO.R.fire && io.data.fire, idle)
     )
   )
   counter := PriorityMux(
@@ -109,15 +106,20 @@ class Cache(
 
   isRead := Mux(cacheFSM.is(idle), io.readReq.fire, isRead)
 
-  val tag    = Mux(cacheFSM.is(idle), io.addr, addr)(addrWidth - 1, tagOffset)
-  val index  = Mux(cacheFSM.is(idle), io.addr, addr)(tagOffset - 1, indexOffset)
-  val offset = Mux(cacheFSM.is(idle), io.addr, addr)(indexOffset - 1, 0)
+  val tag      = Mux(cacheFSM.is(idle), io.addr, addr)(addrWidth - 1, tagOffset)
+  val index    = Mux(cacheFSM.is(idle), io.addr, addr)(tagOffset - 1, indexOffset)
+  val offset   = Mux(cacheFSM.is(idle), io.addr, addr)(indexOffset - 1, 0)
+  val ioTag    = io.addr(addrWidth - 1, tagOffset)
+  val ioIndex  = io.addr(tagOffset - 1, indexOffset)
+  val ioOffset = io.addr(indexOffset - 1, 0)
 
-  val wayValid    = cacheMem(index).map(line => line.valid && line.tag === tag)
-  val targetIndex = Mux1H(wayValid, Seq.tabulate(groupSize)(index => index.U))
-  val data        = cacheMem(index)(targetIndex).data
+  val offsetReg = Reg(UInt(indexOffset.W))
+  offsetReg := Mux(cacheFSM.is(idle), offset, offsetReg)
 
+  val wayValid     = cacheMem(index).map(line => line.valid && line.tag === tag)
   val replaceIndex = replaceIndeices(index)
+  val targetIndex  = MuxCase(replaceIndex, Seq.tabulate(groupSize)(index => (wayValid(index) -> index.U)))
+  val data         = cacheMem(index)(targetIndex).data
 
   hit     := wayValid.reduce(_ || _)
   isDirty := cacheMem(index)(replaceIndex).dirty
@@ -133,12 +135,21 @@ class Cache(
   // when idle
   addr              := Mux(io.readReq.fire || io.writeReq.fire, io.addr, addr)
   io.readReq.ready  := cacheFSM.is(idle) && io.readReq.valid
-  io.writeReq.ready := cacheFSM.is(idle) && io.writeReq.valid
+  io.writeReq.ready := cacheFSM.is(idle) && io.writeReq.valid && !io.readReq.valid
 
   // when sendRes or directRBack
-  val s = Seq.tabulate(cellByte)(o => ((o.U === offset) -> data(data.getWidth - 1, o * 8)))
-  io.data.bits  := Mux(cacheFSM.is(directRBack), directData, PriorityMux(s))
-  io.data.valid := cacheFSM.is(directRBack) || (cacheFSM.is(idle) && io.readReq.fire && hit)
+  val s = Seq.tabulate(cellByte)(o => ((o.U === ioOffset) -> data(data.getWidth - 1, o * 8)))
+  io.data.bits := MuxCase(
+    0.U,
+    Seq(
+      cacheFSM.is(directRRes) -> axiIO.R.bits.data,
+      cacheFSM.is(idle) -> PriorityMux(s),
+      cacheFSM.is(waitRes) -> PriorityMux(s)
+    )
+  )
+  io.data.valid := (cacheFSM.is(directRRes) && axiIO.R.valid) ||
+    (cacheFSM.is(idle) && io.readReq.fire && hit) ||
+    (cacheFSM.is(waitRes) && tag === ioTag && index === ioIndex && (counter << 3) > ioOffset)
   // when sendReq or directRReq
   axiIO.AR.bits.addr := Mux(cacheFSM.is(sendReq), Cat(Seq(tag, index, 0.U((log2Ceil(slotsPerLine) + 3).W))), addr)
   axiIO.AR.bits.id   := 0.U
@@ -159,12 +170,9 @@ class Cache(
     }
   }
   axiIO.R.ready := cacheFSM.is(waitRes) || cacheFSM.is(directRRes)
-  // when directRRes
-  directData := Mux(cacheFSM.is(directRRes) && axiIO.R.fire, axiIO.R.bits.data, directData)
   // when writeData
   val dataWriteReq = Reg(io.writeReq.bits.cloneType)
-  dataWriteReq      := Mux(io.writeReq.fire, io.writeReq.bits, dataWriteReq)
-  io.writeRes.valid := cacheFSM.is(writeData) || cacheFSM.is(directWRes)
+  dataWriteReq := Mux(io.writeReq.fire, io.writeReq.bits, dataWriteReq)
   val extendedMask = Reverse(Cat(Seq.tabulate(dataWidth / 8)(index => Fill(8, dataWriteReq.mask(index)))))
   // ...1111110011111...
   val writeMask       = ~((extendedMask << (offset * 8.U)) | 0.U((cellByte * 8).W))

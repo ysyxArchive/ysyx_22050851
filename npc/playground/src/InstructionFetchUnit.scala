@@ -45,5 +45,4 @@ class InstructionFetchUnit extends Module {
   iCacheIO.writeReq.valid     := false.B
   iCacheIO.writeReq.bits.data := DontCare
   iCacheIO.writeReq.bits.mask := DontCare
-  iCacheIO.writeRes.ready     := false.B
 }
