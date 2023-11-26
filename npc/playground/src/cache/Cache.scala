@@ -116,9 +116,9 @@ class Cache(
   val wayValid    = cacheMem(index).map(line => line.valid && line.tag === tag)
   val targetIndex = Mux1H(wayValid, Seq.tabulate(groupSize)(index => index.U))
   val data        = cacheMem(index)(targetIndex).data
-  val replaceData = cacheMem(index)(replaceIndex).data
-
+  
   val replaceIndex = replaceIndeices(index)
+  val replaceData = cacheMem(index)(replaceIndex).data
 
   hit     := wayValid.reduce(_ || _)
   isDirty := cacheMem(index)(replaceIndex).dirty
