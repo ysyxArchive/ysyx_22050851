@@ -129,13 +129,16 @@ class MemBurstInterface extends Module {
   mem.io.addr := MuxCase(
     0.U,
     Seq(
+      (memInterfaceFSM.is(waitReq) && axiS.AR.fire) -> axiS.AR.bits.addr,
       memInterfaceFSM.is(writeDataBack) -> readReq.addr,
       axiS.W.fire -> writeReq.addr
     )
   ) + (counter << 3)
   mem.io.enable :=
-    (memInterfaceFSM.is(writeDataBack) && !memInterfaceFSM.willChange()) ||(memInterfaceFSM.is(waitReq) && axiS.AR.fire)
-      (memInterfaceFSM.is(waitDataWrite) && axiS.W.fire)
+    (memInterfaceFSM.is(writeDataBack) && !memInterfaceFSM.willChange()) || (memInterfaceFSM.is(
+      waitReq
+    ) && axiS.AR.fire)
+  (memInterfaceFSM.is(waitDataWrite) && axiS.W.fire)
   dataRet := Mux(mem.io.enable, mem.io.rdata, dataRet)
 
   axiS.W.ready     := memInterfaceFSM.is(waitDataWrite)
