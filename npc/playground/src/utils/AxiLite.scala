@@ -244,7 +244,7 @@ class BurstLiteArbiter(val masterPort: Int) extends Module {
   val haveValidRequest         = haveValidUnMaskedRequest || haveValidMaskedRequest
 
   val chosenUnMaskedReq = PriorityEncoder(unMaskedMasterRequestValid)
-  val chosenMaskedReq   = PriorityEncoder(maskedMasterRequestValid)
+  val chosenMaskedReq   = PriorityEncoder(maskedMasterRequestValid) 
   val chosenReq         = Mux(haveValidUnMaskedRequest, chosenUnMaskedReq, chosenMaskedReq)
 
   val chosenIsReadReq = masterReadRequestValid(chosenReq)
@@ -286,9 +286,9 @@ class BurstLiteArbiter(val masterPort: Int) extends Module {
     masterRequestMask(chosenReq)
   ) // if chosen is unmasked, mask it
 
-  slaveIO.AW.valid := arbiterFSM.is(waitMasterReq) && !chosenIsReadReq
+  slaveIO.AW.valid := arbiterFSM.is(waitMasterReq) && !chosenIsReadReq && masterIO(chosenReq).AW.valid
   slaveIO.AW.bits  := Mux(arbiterFSM.is(waitMasterReq), masterIO(chosenReq).AW.bits, DontCare)
-  slaveIO.AR.valid := arbiterFSM.is(waitMasterReq) && chosenIsReadReq
+  slaveIO.AR.valid := arbiterFSM.is(waitMasterReq) && chosenIsReadReq&& masterIO(chosenReq).AR.valid
   slaveIO.AR.bits  := Mux(arbiterFSM.is(waitMasterReq), masterIO(chosenReq).AR.bits, DontCare)
   slaveIO.B.ready  := chosenMaster.B.ready && arbiterFSM.is(forwardWrite)
   slaveIO.R.ready  := chosenMaster.R.ready && arbiterFSM.is(forwardRead)
