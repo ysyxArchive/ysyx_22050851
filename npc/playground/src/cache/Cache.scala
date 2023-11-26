@@ -165,7 +165,8 @@ class Cache(
   axiIO.AR.bits.id   := 0.U
   axiIO.AR.bits.prot := 0.U
   axiIO.AR.valid := cacheFSM.is(sendReq) || cacheFSM.is(directRReq) ||
-    (cacheFSM.is(idle) && io.readReq.fire && !hit && (shoudDirectRW || !isDirty))
+    (cacheFSM.is(idle) && io.readReq.fire && !hit && (shoudDirectRW || !isDirty)) ||
+    (cacheFSM.is(idle) && io.writeReq.fire && !hit && !shoudDirectRW && !isDirty)
   axiIO.AR.bits.len := Mux(cacheFSM.is(sendReq) || (cacheFSM.is(idle) && !shoudDirectRW), (slotsPerLine - 1).U, 0.U)
   // when waitRes
   val mask       = Reverse(Cat(Seq.tabulate(slotsPerLine)(index => Fill(axiIO.dataWidth, UIntToOH(counter)(index)))))
