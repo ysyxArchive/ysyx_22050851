@@ -6,7 +6,7 @@ import utils.DebugInfo
 
 class CacheIO(dataWidth: Int, addrWidth: Int) extends Bundle {
   val addr    = Input(UInt(addrWidth.W))
-  val readReq = Flipped(Decoupled(Input(UInt(dataWidth.W))))
+  val readReq = Flipped(Decoupled(new Bundle { val data = Input(UInt(dataWidth.W)) }))
   val writeReq = Flipped(Decoupled(new Bundle {
     val data = UInt(dataWidth.W)
     val mask = UInt((dataWidth / 8).W)
@@ -138,7 +138,7 @@ class Cache(
 
   // when sendRes or directRBack
   val s = Seq.tabulate(cellByte)(o => ((o.U === ioOffset) -> data(data.getWidth - 1, o * 8)))
-  io.readReq.bits := MuxCase(
+  io.readReq.bits.data := MuxCase(
     0.U,
     Seq(
       cacheFSM.is(directRRes) -> axiIO.R.bits.data,
@@ -239,7 +239,7 @@ class Cache(
       }
     }
     when(io.readReq.fire) {
-      printf("data is %x\n", io.readReq.bits)
+      printf("data is %x\n", io.readReq.bits.data)
     }
   }
   blackBoxCache.io.changed  := RegNext(!cacheFSM.is(idle)) && cacheFSM.is(idle)

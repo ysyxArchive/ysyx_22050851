@@ -66,7 +66,7 @@ class MemRWUnit extends Module {
   memIO.writeReq.bits.mask := memMask
   memIO.debug              := memInReg.debug
 
-  val memOutRaw = MuxLookup(memInReg.control.memlen, memIO.readReq.bits)(
+  val memOutRaw = MuxLookup(memInReg.control.memlen, memIO.readReq.bits.data)(
     EnumSeq(
       MemLen.one -> memIO.readReq.asUInt(7, 0),
       MemLen.two -> memIO.readReq.asUInt(15, 0),
