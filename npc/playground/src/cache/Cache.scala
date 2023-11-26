@@ -66,11 +66,10 @@ class Cache(
   val isRead = Reg(Bool())
   val addr   = Reg(UInt(addrWidth.W))
 
-  val idle :: sendReq :: waitRes :: writeData :: sendWReq :: sendWData :: waitWRes :: directWReq :: directWData :: directWRes :: directRReq :: directRRes :: directRBack :: others =
+  val idle :: sendReq :: waitRes :: writeData :: sendWReq :: sendWData :: waitWRes :: directWReq :: directWData :: directWRes :: directRReq :: directRRes :: others =
     Enum(16)
 
   val counter    = RegInit(0.U(log2Ceil(slotsPerLine).W))
-  val directData = Reg(UInt(dataWidth.W))
 
   val shoudDirectRW = io.addr > 0xa0000000L.U
   val cacheFSM = new FSM(
@@ -94,8 +93,7 @@ class Cache(
       (directWData, axiIO.W.fire, directWRes),
       (directWRes, axiIO.B.fire, idle),
       (directRReq, axiIO.AR.fire, directRRes),
-      (directRRes, axiIO.R.fire, directRBack),
-      (directRBack, io.data.fire, idle)
+      (directRRes, axiIO.R.fire && io.data.fire, idle)
     )
   )
   counter := PriorityMux(
@@ -137,8 +135,8 @@ class Cache(
 
   // when sendRes or directRBack
   val s = Seq.tabulate(cellByte)(o => ((o.U === offset) -> data(data.getWidth - 1, o * 8)))
-  io.data.bits  := Mux(cacheFSM.is(directRBack), directData, PriorityMux(s))
-  io.data.valid := cacheFSM.is(directRBack) || (cacheFSM.is(idle) && io.readReq.fire && hit)
+  io.data.bits  := Mux(cacheFSM.is(directRRes), axiIO.R.bits.data, PriorityMux(s))
+  io.data.valid := (cacheFSM.is(directRRes) && axiIO.R.valid) || (cacheFSM.is(idle) && io.readReq.fire && hit)
   // when sendReq or directRReq
   axiIO.AR.bits.addr := Mux(cacheFSM.is(sendReq), Cat(Seq(tag, index, 0.U((log2Ceil(slotsPerLine) + 3).W))), addr)
   axiIO.AR.bits.id   := 0.U
@@ -159,8 +157,6 @@ class Cache(
     }
   }
   axiIO.R.ready := cacheFSM.is(waitRes) || cacheFSM.is(directRRes)
-  // when directRRes
-  directData := Mux(cacheFSM.is(directRRes) && axiIO.R.fire, axiIO.R.bits.data, directData)
   // when writeData
   val dataWriteReq = Reg(io.writeReq.bits.cloneType)
   dataWriteReq      := Mux(io.writeReq.fire, io.writeReq.bits, dataWriteReq)
