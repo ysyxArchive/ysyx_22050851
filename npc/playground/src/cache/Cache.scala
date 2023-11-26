@@ -68,8 +68,7 @@ class Cache(
   val idle :: sendReq :: waitRes :: writeData :: sendWReq :: sendWData :: waitWRes :: directWReq :: directWData :: directWRes :: directRReq :: directRRes :: others =
     Enum(16)
 
-  val counter = RegInit(0.U(log2Ceil(slotsPerLine).W))
-
+  val counter       = RegInit(0.U(log2Ceil(slotsPerLine).W))
   val shoudDirectRW = io.addr > 0xa0000000L.U
   val cacheFSM = new FSM(
     idle,
@@ -155,7 +154,7 @@ class Cache(
   )
   io.data.valid := (cacheFSM.is(directRRes) && axiIO.R.valid) ||
     (cacheFSM.is(idle) && io.readReq.fire && hit) ||
-    (cacheFSM.is(waitRes) && tag === ioTag && index === ioIndex && (counter << 3) > ioOffset)
+    (cacheFSM.is(waitRes) && isRead && tag === ioTag && index === ioIndex && (counter << 3) > ioOffset)
   // when sendReq or directRReq
   axiIO.AR.bits.addr := MuxCase(
     addr,
