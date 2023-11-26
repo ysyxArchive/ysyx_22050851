@@ -122,7 +122,7 @@ class MemBurstInterface extends Module {
   )
 
   mem.io.clock  := clock
-  mem.io.isRead := memInterfaceFSM.is(writeDataBack)
+  mem.io.isRead := memInterfaceFSM.is(writeDataBack) || (memInterfaceFSM.is(waitReq) && axiS.AR.valid)
   mem.io.mask   := axiS.W.bits.strb
   mem.io.wdata  := axiS.W.bits.data
   mem.io.addr := MuxCase(
@@ -133,7 +133,7 @@ class MemBurstInterface extends Module {
     )
   ) + (counter << 3)
   mem.io.enable :=
-    (memInterfaceFSM.is(writeDataBack) && !memInterfaceFSM.willChange()) ||
+    (memInterfaceFSM.is(writeDataBack) && !memInterfaceFSM.willChange()) ||(memInterfaceFSM.is(waitReq) && axiS.AR.fire)
       (memInterfaceFSM.is(waitDataWrite) && axiS.W.fire)
   dataRet := Mux(mem.io.enable, mem.io.rdata, dataRet)
 
