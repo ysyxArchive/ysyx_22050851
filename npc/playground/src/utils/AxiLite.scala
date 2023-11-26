@@ -266,8 +266,8 @@ class BurstLiteArbiter(val masterPort: Int) extends Module {
   // unchosen ports
   masterIO.zipWithIndex.foreach {
     case (elem, idx) =>
-      elem.AW.ready := Mux(idx.U === workingMaster && arbiterFSM.is(waitMasterReq), slaveIO.AW.ready, false.B)
-      elem.AR.ready := Mux(idx.U === workingMaster && arbiterFSM.is(waitMasterReq), slaveIO.AR.ready, false.B)
+      elem.AW.ready := Mux(idx.U === chosenReq && arbiterFSM.is(waitMasterReq), slaveIO.AW.ready, false.B)
+      elem.AR.ready := Mux(idx.U === chosenReq && arbiterFSM.is(waitMasterReq), slaveIO.AR.ready, false.B)
       elem.B.valid  := Mux(idx.U === workingMaster && arbiterFSM.is(forwardWrite), slaveIO.B.valid, false.B)
       elem.B.bits   := Mux(idx.U === workingMaster, slaveIO.B.bits, DontCare)
       elem.R.valid  := Mux(idx.U === workingMaster && arbiterFSM.is(forwardRead), slaveIO.R.valid, false.B)
