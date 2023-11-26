@@ -116,6 +116,7 @@ class Cache(
   val wayValid    = cacheMem(index).map(line => line.valid && line.tag === tag)
   val targetIndex = Mux1H(wayValid, Seq.tabulate(groupSize)(index => index.U))
   val data        = cacheMem(index)(targetIndex).data
+  val replaceData = cacheMem(index)(replaceIndex).data
 
   val replaceIndex = replaceIndeices(index)
 
@@ -136,12 +137,14 @@ class Cache(
   io.writeReq.ready := cacheFSM.is(idle) && io.writeReq.valid && !io.readReq.valid
 
   // when sendRes or directRBack
-  val s = Seq.tabulate(cellByte)(o => ((o.U === offset) -> data(data.getWidth - 1, o * 8)))
+  val s        = Seq.tabulate(cellByte)(o => ((o.U === offset) -> data(data.getWidth - 1, o * 8)))
+  val replaceS = Seq.tabulate(cellByte)(o => ((o.U === offset) -> replaceData(replaceData.getWidth - 1, o * 8)))
   io.data.bits := MuxCase(
     0.U,
     Seq(
       cacheFSM.is(directRRes) -> axiIO.R.bits.data,
-      (cacheFSM.is(idle) || cacheFSM.is(waitRes)) -> PriorityMux(s)
+      cacheFSM.is(idle) -> PriorityMux(s),
+      cacheFSM.is(waitRes) -> PriorityMux(replaceS)
     )
   )
   io.data.valid := (cacheFSM.is(directRRes) && axiIO.R.valid) ||
