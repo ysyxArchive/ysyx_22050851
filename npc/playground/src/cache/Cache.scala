@@ -3,12 +3,12 @@ import chisel3.util._
 import utils.FSM
 import utils.Utils
 import utils.DebugInfo
-
+import utils.FlippedDecoupledIO
 class CacheIO(dataWidth: Int, addrWidth: Int) extends Bundle {
-  val addr    = Input(UInt(addrWidth.W))
-  val readReq = Decoupled(new Bundle {
+  val addr = Input(UInt(addrWidth.W))
+  val readReq = Flipped(new FlippedDecoupledIO(new Bundle {
     val data = UInt(dataWidth.W)
-  })
+  }))
   val writeReq = Flipped(Decoupled(new Bundle {
     val data = UInt(dataWidth.W)
     val mask = UInt((dataWidth / 8).W)
