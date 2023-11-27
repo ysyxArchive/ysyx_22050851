@@ -34,7 +34,7 @@ void init_npc() {
 #else
   top->enableDebug = false;
 #endif
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 3; i++) {
     top->reset = true;
     top->clock = 1;
     eval_trace();
