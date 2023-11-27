@@ -25,8 +25,17 @@ class InstructionFetchUnit extends Module {
 
   dataValid := (!needTakeBranch && ((dataValid && !fetchOut.fire) || (iCacheIO.data.fire && !(dataValid ^ fetchOut.valid)))) || (needTakeBranch && iCacheIO.data.fire)
 
-  predictPC := Mux(needTakeBranch, fromDecode.branchPc, Mux(iCacheIO.data.fire, predictPC + 4.U, predictPC))
-  lastPC    := Mux(needTakeBranch, fromDecode.branchPc, Mux(iCacheIO.data.fire, predictPC, lastPC))
+  predictPC := MuxCase(
+    predictPC,
+    Seq(
+      (needTakeBranch && !iCacheIO.data.fire) -> fromDecode.branchPc,
+      (needTakeBranch && iCacheIO.data.fire) -> (fromDecode.branchPc + 4.U),
+      (!needTakeBranch && iCacheIO.data.fire) -> (predictPC + 4.U)
+    )
+  )
+
+  // .Mux(needTakeBranch, fromDecode.branchPc, Mux(iCacheIO.data.fire, predictPC + 4.U, predictPC))
+  lastPC := Mux(needTakeBranch, fromDecode.branchPc, Mux(iCacheIO.data.fire, predictPC, lastPC))
 
   inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits, inst)
 
