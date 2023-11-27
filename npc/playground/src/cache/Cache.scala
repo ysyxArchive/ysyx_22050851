@@ -154,7 +154,7 @@ class Cache(
   )
   io.data.valid := (cacheFSM.is(directRRes) && axiIO.R.valid) ||
     (cacheFSM.is(idle) && io.readReq.fire && hit) ||
-    (cacheFSM.is(waitRes) && isReadmem && tag === ioTag && index === ioIndex && (counter << 3) > ioOffset)
+    (cacheFSM.is(waitRes) && isRead && tag === ioTag && index === ioIndex && (counter << 3) > ioOffset)
   // when sendReq or directRReq
   axiIO.AR.bits.addr := MuxCase(
     addr,
