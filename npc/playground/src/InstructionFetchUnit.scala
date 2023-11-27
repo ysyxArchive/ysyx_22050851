@@ -17,13 +17,13 @@ class InstructionFetchUnit extends Module {
   val lastPC    = RegInit(regIO.pc)
   val dataValid = RegInit(false.B)
 
-  iCacheIO.data.ready    := !dataValid || fetchOut.fire
-  iCacheIO.readReq.valid := !dataValid || fetchOut.fire
-  iCacheIO.addr          := predictPC
-
   val needTakeBranch = fromDecode.valid && fromDecode.willTakeBranch && fromDecode.branchPc =/= lastPC
 
-  dataValid := (dataValid && !fetchOut.fire && !needTakeBranch) || (!needTakeBranch && iCacheIO.data.fire && !(dataValid ^ fetchOut.valid))
+  iCacheIO.data.ready    := !dataValid || fetchOut.fire
+  iCacheIO.readReq.valid := !dataValid || fetchOut.fire || needTakeBranch
+  iCacheIO.addr          := Mux(needTakeBranch, fromDecode.branchPc, predictPC)
+
+  dataValid := (!needTakeBranch && ((dataValid && !fetchOut.fire) || (iCacheIO.data.fire && !(dataValid ^ fetchOut.valid)))) || (needTakeBranch && iCacheIO.data.fire)
 
   predictPC := Mux(needTakeBranch, fromDecode.branchPc, Mux(iCacheIO.data.fire, predictPC + 4.U, predictPC))
   lastPC    := Mux(needTakeBranch, fromDecode.branchPc, Mux(iCacheIO.data.fire, predictPC, lastPC))
