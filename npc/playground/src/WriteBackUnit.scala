@@ -8,13 +8,9 @@ import utils._
 
 class WBDataIn extends Bundle {
   val src1     = Output(UInt(5.W))
-  val src2     = Output(UInt(5.W))
   val src1Data = Output(UInt(64.W))
   val dst      = Output(UInt(5.W))
   val imm      = Output(UInt(64.W))
-  val alu      = Output(UInt(64.W))
-  val mem      = Output(UInt(64.W))
-  val signals  = new SignalIO()
   val pc       = Output(UInt(64.W))
   val dnpc     = Output(UInt(64.W))
   val wdata    = Output(UInt(64.W))
@@ -42,31 +38,8 @@ class WriteBackUnit extends Module {
 
   // regWriteIO
   regWriteIO.waddr := Mux(wbInValid && wbInReg.control.regwritemux =/= RegWriteMux.no.asUInt, wbInReg.data.dst, 0.U)
-  val snpc = wbInReg.data.pc + 4.U
-  val pcBranch = MuxLookup(wbInReg.control.pcaddrsrc, false.B)(
-    EnumSeq(
-      PCAddrSrc.aluzero -> wbInReg.data.signals.isZero,
-      PCAddrSrc.aluneg -> wbInReg.data.signals.isNegative,
-      PCAddrSrc.alunotneg -> !wbInReg.data.signals.isNegative,
-      PCAddrSrc.alunotzero -> !wbInReg.data.signals.isZero,
-      PCAddrSrc.alunotcarryandnotzero -> (!wbInReg.data.signals.isCarry && !wbInReg.data.signals.isZero),
-      PCAddrSrc.alucarryorzero -> (wbInReg.data.signals.isCarry || wbInReg.data.signals.isZero),
-      PCAddrSrc.zero -> false.B,
-      PCAddrSrc.one -> true.B
-    )
-  )
-  regWriteIO.dnpc := Mux(wbInValid, wbInReg.data.dnpc, regReadIO.pc)
-  // val regwdata = MuxLookup(wbInReg.control.regwritemux, wbInReg.data.alu)(
-  //   EnumSeq(
-  //     RegWriteMux.alu -> wbInReg.data.alu, // from EXU
-  //     RegWriteMux.snpc -> snpc, // from IDU
-  //     RegWriteMux.mem -> wbInReg.data.mem, // from MEMU
-  //     RegWriteMux.aluneg -> Utils.zeroExtend(wbInReg.data.signals.isNegative, 1, 64), // from EXU
-  //     RegWriteMux.alunotcarryandnotzero -> Utils
-  //       .zeroExtend(!wbInReg.data.signals.isCarry && !wbInReg.data.signals.isZero, 1, 64), // from EXU
-  //     RegWriteMux.csr -> csrControl.output // from WBU
-  //   )
-  // )
+  regWriteIO.dnpc  := Mux(wbInValid, wbInReg.data.dnpc, regReadIO.pc)
+
   regWriteIO.wdata := Mux(wbInReg.control.regwritemux === RegWriteMux.csr.asUInt, csrControl.output, wbInReg.data.wdata)
   // csr
   csrControl.control.csrBehave  := Mux(wbInValid, wbInReg.control.csrbehave, CsrBehave.no.asUInt)

@@ -32,6 +32,7 @@ class MemRWUnit extends Module {
   val memIn    = IO(Flipped(Decoupled(new MemRWIn())))
   val memOut   = IO(Decoupled(new WBIn()))
   val toDecode = IO(Flipped(new ForwardData()))
+  val fromWbu  = IO(new ForwardData())
 
   val memInReg = Reg(new MemRWIn())
   memInReg := Mux(memIn.fire, memIn.bits, memInReg)
@@ -86,12 +87,8 @@ class MemRWUnit extends Module {
   memOut.valid              := dataValid && (!shouldMemWork || (memIsRead && memIO.data.fire) || (!memIsRead && memIO.writeReq.fire))
   memOut.bits.debug         := memInReg.debug
   memOut.bits.data.src1     := memInReg.data.src1
-  memOut.bits.data.src2     := memInReg.data.src2
   memOut.bits.data.src1Data := memInReg.data.src1Data
   memOut.bits.data.dst      := memInReg.data.dst
-  memOut.bits.data.mem      := memData
-  memOut.bits.data.alu      := memInReg.data.alu
-  memOut.bits.data.signals  := memInReg.data.signals
   memOut.bits.data.pc       := memInReg.data.pc
   memOut.bits.data.dnpc     := memInReg.data.dnpc
   memOut.bits.data.imm      := memInReg.data.imm

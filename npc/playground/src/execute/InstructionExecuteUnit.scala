@@ -9,10 +9,8 @@ import utils._
 class ExeDataIn extends Bundle {
   val src1          = Output(UInt(5.W))
   val src1Data      = Output(UInt(64.W))
-  val src1DataValid = Output(Bool())
   val src2          = Output(UInt(5.W))
   val src2Data      = Output(UInt(64.W))
-  val src2DataValid = Output(Bool())
   val dst           = Output(UInt(5.W))
   val imm           = Output(UInt(64.W))
   val pc            = Output(UInt(64.W))
