@@ -33,8 +33,6 @@ class InstructionFetchUnit extends Module {
       (!needTakeBranch && iCacheIO.data.fire) -> (predictPC + 4.U)
     )
   )
-
-  // .Mux(needTakeBranch, fromDecode.branchPc, Mux(iCacheIO.data.fire, predictPC + 4.U, predictPC))
   lastPC := Mux(needTakeBranch, fromDecode.branchPc, Mux(iCacheIO.data.fire, predictPC, lastPC))
 
   inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits, inst)
