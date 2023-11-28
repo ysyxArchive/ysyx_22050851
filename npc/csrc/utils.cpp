@@ -63,8 +63,8 @@ int parse_args(int argc, char* argv[]) {
 
 void load_files() {
   if (!img_file) {
-    Log("not detected img file, use default file %s", "tools/multest.bin");
-    img_file = "tools/multest.bin";
+    Log("not detected img file, use default file %s", "tools/default-raw.bin");
+    img_file = "tools/default-raw.bin";
   }
   Log("detected img file: %s", img_file);
   init_memory(img_file);
