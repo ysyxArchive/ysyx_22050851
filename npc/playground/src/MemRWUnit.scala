@@ -43,6 +43,32 @@ class MemRWUnit extends Module {
   val dataValid = RegInit(false.B)
   dataValid := dataValid ^ memIn.fire ^ memOut.fire
 
+  val regVec = VecInit(Seq(fromWbu).map(bundle => Mux(bundle.dataValid, 0.U, bundle.regIndex)))
+  val rs1    = memInReg.data.src1
+  val rs2    = memInReg.data.src2
+  val src1RawData = MuxCase(
+    memInReg.data.src1Data,
+    Seq(fromWbu).map(bundle => (bundle.regIndex === rs1 && rs1.orR && bundle.dataValid) -> bundle.data)
+  )
+  val src2RawData = MuxCase(
+    memInReg.data.src2Data,
+    Seq(fromWbu).map(bundle => (bundle.regIndex === rs2 && rs2.orR && bundle.dataValid) -> bundle.data)
+  )
+  val src1Data = Mux(
+    memInReg.control.srccast1,
+    Utils.cast(src1RawData, 32, 64),
+    src1RawData
+  )
+  val src2Data = Mux(
+    memInReg.control.srccast2,
+    Utils.cast(src2RawData, 32, 64),
+    src2RawData
+  )
+
+  val shouldWait = dataValid &&
+    ((rs1 =/= 0.U && regVec.contains(rs1)) ||
+      (rs2 =/= 0.U && regVec.contains(rs2)))
+
   // mem
   val memlen = MuxLookup(memInReg.control.memlen, 1.U)(
     EnumSeq(
@@ -60,11 +86,11 @@ class MemRWUnit extends Module {
     1.U(1.W)
   )
 
-  memIO.readReq.valid      := dataValid && shouldMemWork && memIsRead
+  memIO.readReq.valid      := dataValid && shouldMemWork && !shouldWait && memIsRead
   memIO.addr               := memInReg.data.alu
   memIO.data.ready         := memIsRead
-  memIO.writeReq.valid     := dataValid && shouldMemWork && !memIsRead
-  memIO.writeReq.bits.data := memInReg.data.src2Data
+  memIO.writeReq.valid     := dataValid && shouldMemWork && !shouldWait && !memIsRead
+  memIO.writeReq.bits.data := src2Data
   memIO.writeReq.bits.mask := memMask
   memIO.debug              := memInReg.debug
 
@@ -87,7 +113,7 @@ class MemRWUnit extends Module {
   memOut.valid              := dataValid && (!shouldMemWork || (memIsRead && memIO.data.fire) || (!memIsRead && memIO.writeReq.fire))
   memOut.bits.debug         := memInReg.debug
   memOut.bits.data.src1     := memInReg.data.src1
-  memOut.bits.data.src1Data := memInReg.data.src1Data
+  memOut.bits.data.src1Data := src1Data
   memOut.bits.data.dst      := memInReg.data.dst
   memOut.bits.data.pc       := memInReg.data.pc
   memOut.bits.data.dnpc     := memInReg.data.dnpc
