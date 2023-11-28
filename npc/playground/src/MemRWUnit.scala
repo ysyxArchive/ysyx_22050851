@@ -31,7 +31,7 @@ class MemRWUnit extends Module {
   val memIO    = IO(Flipped(new CacheIO(64, 64)))
   val memIn    = IO(Flipped(Decoupled(new MemRWIn())))
   val memOut   = IO(Decoupled(new WBIn()))
-  val toDecode = IO(Flipped(new ToDecode()))
+  val toDecode = IO(Flipped(new ForwardData()))
 
   val memInReg = Reg(new MemRWIn())
   memInReg := Mux(memIn.fire, memIn.bits, memInReg)

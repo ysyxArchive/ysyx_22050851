@@ -32,7 +32,7 @@ class WriteBackUnit extends Module {
   val regWriteIO = IO(Flipped(new RegWriteIO()))
   val regReadIO  = IO(Input(new RegReadIO()))
   val csrControl = IO(Flipped(new ControlRegisterFileControlIO()))
-  val toDecode   = IO(Flipped(new ToDecode()))
+  val toDecode   = IO(Flipped(new ForwardData()))
 
   val wbInReg   = Reg(new WBIn())
   val wbInValid = Reg(new Bool())
