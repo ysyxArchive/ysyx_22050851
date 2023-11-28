@@ -26,7 +26,7 @@ class DecodeBack extends Bundle {
   val branchPc       = Output(UInt(64.W))
 }
 
-class ForwardData extends Bundle {
+class ToDecode extends Bundle {
   val regIndex  = Input(UInt(5.W))
   val dataValid = Input(Bool())
   val data      = Input(UInt(64.W))
@@ -39,9 +39,9 @@ class InstructionDecodeUnit extends Module {
   val decodeIn       = IO(Flipped(Decoupled(new DecodeIn())))
   val decodeOut      = IO(Decoupled(new ExeIn()))
   val decodeBack     = IO(new DecodeBack())
-  val fromExe        = IO(new ForwardData())
-  val fromMemu       = IO(new ForwardData())
-  val fromWbu        = IO(new ForwardData())
+  val fromExe        = IO(new ToDecode())
+  val fromMemu       = IO(new ToDecode())
+  val fromWbu        = IO(new ToDecode())
   val controlDecoder = Module(new InstContorlDecoder)
 
   val decodeInReg = RegInit(DecodeIn.default)
@@ -113,23 +113,19 @@ class InstructionDecodeUnit extends Module {
     Utils.cast(src2RawData, 32, 64),
     src2RawData
   )
+  decodeOut.bits.data.src1Data := src1Data
+  decodeOut.bits.data.src2Data := src2Data
 
   // RAW check
   val regVec = VecInit(Seq(fromExe, fromMemu, fromWbu).map(bundle => Mux(bundle.dataValid, 0.U, bundle.regIndex)))
   val csrVec =
     Seq(fromExe, fromMemu, fromWbu).map(bundle => bundle.csrIndex).reduce((prev, s) => VecInit(prev ++ s))
-  shouldWait := dataValid &&
-    ((rs1 =/= 0.U && regVec.contains(rs1) &&
-      ((controlDecoder.output.pcaddrsrc =/= PCAddrSrc.zero.asUInt &&
-        controlDecoder.output.pcaddrsrc =/= PCAddrSrc.one.asUInt) ||
-        controlDecoder.output.pcsrc === PcSrc.src1.asUInt)) ||
-      (rs2 =/= 0.U && regVec.contains(rs2) &&
-        controlDecoder.output.pcaddrsrc =/= PCAddrSrc.zero.asUInt &&
-        controlDecoder.output.pcaddrsrc =/= PCAddrSrc.one.asUInt) ||
-      (willTakeBranch && controlDecoder.output.pcsrc === PcSrc.csr.asUInt &&
-        csrVec.contains(
-          ControlRegisters.behaveReadDependency(controlDecoder.output.csrbehave)
-        )))
+  shouldWait := dataValid && ((rs1 =/= 0.U && regVec.contains(rs1)) ||
+    (rs2 =/= 0.U && regVec.contains(rs2)) ||
+    (willTakeBranch && controlDecoder.output.pcsrc === PcSrc.csr.asUInt &&
+      csrVec.contains(
+        ControlRegisters.behaveReadDependency(controlDecoder.output.csrbehave)
+      )))
 
   // branch check
   willTakeBranch := dataValid && MuxLookup(controlDecoder.output.pcaddrsrc, false.B)(
@@ -151,11 +147,9 @@ class InstructionDecodeUnit extends Module {
     )
   )
 
-  decodeBack.valid                  := dataValid && !shouldWait
-  decodeBack.willTakeBranch         := willTakeBranch
-  decodeBack.branchPc               := branchPc
-  decodeOut.bits.data.src1Data      := src1Data
-  decodeOut.bits.data.src2Data      := src2Data
+  decodeBack.valid          := dataValid && !shouldWait
+  decodeBack.willTakeBranch := willTakeBranch
+  decodeBack.branchPc       := branchPc
 
   decodeOut.bits.data.dnpc     := Mux(shouldWait, decodeInReg.pc, Mux(willTakeBranch, branchPc, decodeInReg.snpc))
   decodeOut.bits.toDecodeValid := controlDecoder.output.regwritemux === RegWriteMux.snpc.asUInt

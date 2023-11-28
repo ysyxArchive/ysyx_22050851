@@ -88,8 +88,8 @@ class ALU extends Module {
 
   // val adder = Module(new SimpleAdder())
   val adder = Module(new FastAdder())
-  // val multiplier = Module(new BoothMultiplier())
-  val multiplier = Module(new BHMultiplier())
+  val multiplier = Module(new BoothMultiplier())
+  // val multiplier = Module(new BHMultiplier())
   // val divider    = Module(new SimpleDivider())
   val divider = Module(new R2Divider())
 
@@ -110,14 +110,8 @@ class ALU extends Module {
   val shouldMulReg = Reg(Bool())
   val shouldDivReg = Reg(Bool())
 
-  val inAReg = Reg(UInt(64.W))
-  val inBReg = Reg(UInt(64.W))
-
   val dataValid = RegInit(false.B)
   dataValid := dataValid ^ io.in.fire ^ io.out.fire
-
-  inAReg := Mux(dataValid, inAReg, io.in.bits.inA)
-  inBReg := Mux(dataValid, inBReg, io.in.bits.inB)
 
   adder.io.inA := inA
   adder.io.inB := Mux(opType === AluMode.sub, ~inB, inB)
@@ -129,8 +123,8 @@ class ALU extends Module {
   shouldDivReg := Mux(io.in.fire, shouldDiv, shouldDivReg)
   isRem        := Mux(io.in.fire, remOps.contains(io.in.bits.opType.asUInt), isRem)
 
-  multiplier.io.multiplicand := Mux(dataValid, inAReg, io.in.bits.inA)
-  multiplier.io.multiplier   := Mux(dataValid, inBReg, io.in.bits.inB)
+  multiplier.io.multiplicand := io.in.bits.inA
+  multiplier.io.multiplier   := io.in.bits.inB
   multiplier.io.flush        := false.B
   multiplier.io.mulValid     := io.in.fire && shouldMul
   multiplier.io.mulSigned := MuxLookup(io.in.bits.opType.asUInt, 0.U)(
@@ -140,8 +134,8 @@ class ALU extends Module {
     )
   )
   multiplier.io.mulw   := io.in.bits.opType.asUInt === AluMode.mulw.asUInt
-  divider.io.dividend  := Mux(dataValid, inAReg, io.in.bits.inA)
-  divider.io.divisor   := Mux(dataValid, inBReg, io.in.bits.inB)
+  divider.io.dividend  := io.in.bits.inA
+  divider.io.divisor   := io.in.bits.inB
   divider.io.flush     := false.B
   divider.io.divValid  := io.in.fire && shouldDiv
   divider.io.divSigned := VecInit(Seq(AluMode.remw, AluMode.divw).map(t => t.asUInt)).contains(io.in.bits.opType.asUInt)
