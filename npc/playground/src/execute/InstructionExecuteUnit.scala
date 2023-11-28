@@ -102,7 +102,7 @@ class InstructionExecuteUnit extends Module {
   val res = AluMode.safe(exeInReg.control.alumode)
   alu.io.in.bits.opType := res._1
   alu.io.out.ready      := true.B
-  alu.io.in.valid       := dataValid &&! shouldWait
+  alu.io.in.valid       := dataValid && !shouldWait
 
   exeIn.ready := !dataValid || exeOut.fire
 

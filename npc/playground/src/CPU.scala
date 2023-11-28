@@ -42,6 +42,8 @@ class CPU extends Module {
   decoder.fromExe  := exe.toDecode
   decoder.fromMemu := memu.toDecode
   decoder.fromWbu  := wbu.toDecode
+  exe.fromMemu     := memu.toDecode
+  exe.fromWbu      := wbu.toDecode
 
   memu.memIO <> dCache.io
 
