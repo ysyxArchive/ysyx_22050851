@@ -117,10 +117,10 @@ void one_step() {
 extern uint64_t pipelineMiss[5];
 
 void printInfo(int64_t dur) {
-  Log("execute speed: %.2lf inst/s,  %ld insts, %.3f seconds",
-    (double)inst_count * 1000 / dur, inst_count, (double)dur / 1000);
-  Log("IPC: %.2lf inst/cycle, freq: %.2lf KHz",
-    (double)inst_count / cycle_count, (double)cycle_count / dur);
+  Log("execute speed: %.2lf inst/s,  %ld insts, %.3f seconds, freq: %.2lf KHz",
+    (double)inst_count * 1000 / dur, inst_count, (double)dur / 1000, (double)cycle_count / dur);
+  Log("IPC: %.2lf inst/cycle, %ld insts, %ld cycles",
+    (double)inst_count / cycle_count, inst_count, cycle_count);
   uint64_t total = 0;
   for (int i = 0; i < 5; i++) {
     total += pipelineMiss[i];
