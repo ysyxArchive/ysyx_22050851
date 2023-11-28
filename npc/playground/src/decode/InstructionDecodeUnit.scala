@@ -113,10 +113,6 @@ class InstructionDecodeUnit extends Module {
     Utils.cast(src2RawData, 32, 64),
     src2RawData
   )
-  decodeOut.bits.data.src1Data      := src1Data
-  decodeOut.bits.data.src1DataValid := rs1 === 0.U || !regVec.contains(rs1)
-  decodeOut.bits.data.src2Data      := src2Data
-  decodeOut.bits.data.src2DataValid := rs2 === 0.U || !regVec.contains(rs2)
 
   // RAW check
   val regVec = VecInit(Seq(fromExe, fromMemu, fromWbu).map(bundle => Mux(bundle.dataValid, 0.U, bundle.regIndex)))
@@ -155,9 +151,13 @@ class InstructionDecodeUnit extends Module {
     )
   )
 
-  decodeBack.valid          := dataValid && !shouldWait
-  decodeBack.willTakeBranch := willTakeBranch
-  decodeBack.branchPc       := branchPc
+  decodeBack.valid                  := dataValid && !shouldWait
+  decodeBack.willTakeBranch         := willTakeBranch
+  decodeBack.branchPc               := branchPc
+  decodeOut.bits.data.src1Data      := src1Data
+  decodeOut.bits.data.src1DataValid := rs1 === 0.U || !regVec.contains(rs1)
+  decodeOut.bits.data.src2Data      := src2Data
+  decodeOut.bits.data.src2DataValid := rs2 === 0.U || !regVec.contains(rs2)
 
   decodeOut.bits.data.dnpc     := Mux(shouldWait, decodeInReg.pc, Mux(willTakeBranch, branchPc, decodeInReg.snpc))
   decodeOut.bits.toDecodeValid := controlDecoder.output.regwritemux === RegWriteMux.snpc.asUInt
