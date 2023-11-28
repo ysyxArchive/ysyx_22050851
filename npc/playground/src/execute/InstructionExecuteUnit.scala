@@ -28,7 +28,9 @@ class ExeIn extends Bundle {
 class InstructionExecuteUnit extends Module {
   val exeIn    = IO(Flipped(Decoupled(new ExeIn())))
   val exeOut   = IO(Decoupled(new MemRWIn()))
-  val toDecode = IO(Flipped(new ToDecode()))
+  val toDecode = IO(Flipped(new ForwardData()))
+  val fromMemu = IO(new ForwardData())
+  val fromWbu  = IO(new ForwardData())
 
   val alu = Module(new ALU)
 
@@ -45,18 +47,44 @@ class InstructionExecuteUnit extends Module {
 
   val shouldWaitALU = ops.contains(exeInReg.control.alumode.asUInt)
 
+  val regVec = VecInit(Seq(fromMemu, fromWbu).map(bundle => Mux(bundle.dataValid, 0.U, bundle.regIndex)))
+  val rs1    = exeInReg.data.src1
+  val rs2    = exeInReg.data.src2
+  val src1RawData = MuxCase(
+    exeInReg.data.src1Data,
+    Seq(fromMemu, fromWbu).map(bundle => (bundle.regIndex === rs1 && rs1.orR && bundle.dataValid) -> bundle.data)
+  )
+  val src2RawData = MuxCase(
+    exeInReg.data.src2Data,
+    Seq(fromMemu, fromWbu).map(bundle => (bundle.regIndex === rs2 && rs2.orR && bundle.dataValid) -> bundle.data)
+  )
+  val src1Data = Mux(
+    exeInReg.control.srccast1,
+    Utils.cast(src1RawData, 32, 64),
+    src1RawData
+  )
+  val src2Data = Mux(
+    exeInReg.control.srccast2,
+    Utils.cast(src2RawData, 32, 64),
+    src2RawData
+  )
+
+  val shouldWait = dataValid &&
+    ((rs1 =/= 0.U && regVec.contains(rs1) && exeInReg.control.alumux1 === AluMux1.src1.asUInt) ||
+      (rs2 =/= 0.U && regVec.contains(rs2) && exeInReg.control.alumux2 === AluMux2.src2.asUInt))
+
   // alu
   alu.io.in.bits.inA := MuxLookup(exeInReg.control.alumux1, 0.U)(
     EnumSeq(
       AluMux1.pc -> exeInReg.data.pc,
-      AluMux1.src1 -> exeInReg.data.src1Data,
+      AluMux1.src1 -> src1Data,
       AluMux1.zero -> 0.U
     )
   )
   alu.io.in.bits.inB := MuxLookup(exeInReg.control.alumux2, 0.U)(
     EnumSeq(
       AluMux2.imm -> exeInReg.data.imm,
-      AluMux2.src2 -> exeInReg.data.src2Data
+      AluMux2.src2 -> src2Data
     )
   )
   val wdata = MuxLookup(exeInReg.control.regwritemux, 0.U)(
@@ -72,11 +100,11 @@ class InstructionExecuteUnit extends Module {
   val res = AluMode.safe(exeInReg.control.alumode)
   alu.io.in.bits.opType := res._1
   alu.io.out.ready      := true.B
-  alu.io.in.valid       := dataValid
+  alu.io.in.valid       := dataValid && !shouldWait
 
   exeIn.ready := !dataValid || exeOut.fire
 
-  exeOut.valid              := (dataValid && !shouldWaitALU) || (dataValid && alu.io.out.fire)
+  exeOut.valid              := (dataValid && !shouldWaitALU && !shouldWait) || (dataValid && alu.io.out.fire)
   exeOut.bits.control       := exeInReg.control
   exeOut.bits.data.alu      := alu.io.out.bits.out
   exeOut.bits.data.src1     := exeInReg.data.src1
@@ -86,8 +114,8 @@ class InstructionExecuteUnit extends Module {
   exeOut.bits.data.pc       := exeInReg.data.pc
   exeOut.bits.data.dnpc     := exeInReg.data.dnpc
   exeOut.bits.data.imm      := exeInReg.data.imm
-  exeOut.bits.data.src1Data := exeInReg.data.src1Data
-  exeOut.bits.data.src2Data := exeInReg.data.src2Data
+  exeOut.bits.data.src1Data := src1Data
+  exeOut.bits.data.src2Data := src2Data
   exeOut.bits.data.wdata    := Mux(exeInReg.toDecodeValid, exeInReg.data.wdata, wdataExtended)
   exeOut.bits.toDecodeValid := toDecode.dataValid
 
