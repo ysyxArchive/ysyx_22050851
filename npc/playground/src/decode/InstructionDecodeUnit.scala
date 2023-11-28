@@ -122,7 +122,7 @@ class InstructionDecodeUnit extends Module {
     ((rs1 =/= 0.U && regVec.contains(rs1) &&
       controlDecoder.output.pcaddrsrc =/= PCAddrSrc.zero.asUInt &&
       controlDecoder.output.pcaddrsrc =/= PCAddrSrc.one.asUInt &&
-      controlDecoder.output.pcsrc =/= PcSrc.src1.asUInt) ||
+      controlDecoder.output.pcsrc === PcSrc.src1.asUInt) ||
       (rs2 =/= 0.U && regVec.contains(rs2) &&
         controlDecoder.output.pcaddrsrc =/= PCAddrSrc.zero.asUInt &&
         controlDecoder.output.pcaddrsrc =/= PCAddrSrc.one.asUInt) ||
