@@ -7,15 +7,15 @@ import execute._
 import utils._
 
 class ExeDataIn extends Bundle {
-  val src1          = Output(UInt(5.W))
-  val src1Data      = Output(UInt(64.W))
-  val src2          = Output(UInt(5.W))
-  val src2Data      = Output(UInt(64.W))
-  val dst           = Output(UInt(5.W))
-  val imm           = Output(UInt(64.W))
-  val pc            = Output(UInt(64.W))
-  val dnpc          = Output(UInt(64.W))
-  val wdata         = Output(UInt(64.W))
+  val src1     = Output(UInt(5.W))
+  val src1Data = Output(UInt(64.W))
+  val src2     = Output(UInt(5.W))
+  val src2Data = Output(UInt(64.W))
+  val dst      = Output(UInt(5.W))
+  val imm      = Output(UInt(64.W))
+  val pc       = Output(UInt(64.W))
+  val dnpc     = Output(UInt(64.W))
+  val wdata    = Output(UInt(64.W))
 }
 
 class ExeIn extends Bundle {
@@ -70,8 +70,8 @@ class InstructionExecuteUnit extends Module {
   )
 
   val shouldWait = dataValid &&
-    ((rs1 =/= 0.U && regVec.contains(rs1)) ||
-      (rs2 =/= 0.U && regVec.contains(rs2)))
+    ((rs1 =/= 0.U && regVec.contains(rs1) && exeInReg.control.alumux1 === AluMux1.src1.asUInt) ||
+      (rs2 =/= 0.U && regVec.contains(rs2) && exeInReg.control.alumux2 === AluMux2.src2.asUInt))
 
   // alu
   alu.io.in.bits.inA := MuxLookup(exeInReg.control.alumux1, 0.U)(
