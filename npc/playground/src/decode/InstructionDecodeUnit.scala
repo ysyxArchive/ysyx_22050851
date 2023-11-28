@@ -120,9 +120,9 @@ class InstructionDecodeUnit extends Module {
     Seq(fromExe, fromMemu, fromWbu).map(bundle => bundle.csrIndex).reduce((prev, s) => VecInit(prev ++ s))
   shouldWait := dataValid &&
     ((rs1 =/= 0.U && regVec.contains(rs1) &&
-      controlDecoder.output.pcaddrsrc =/= PCAddrSrc.zero.asUInt &&
-      controlDecoder.output.pcaddrsrc =/= PCAddrSrc.one.asUInt &&
-      controlDecoder.output.pcsrc === PcSrc.src1.asUInt) ||
+      ((controlDecoder.output.pcaddrsrc =/= PCAddrSrc.zero.asUInt &&
+        controlDecoder.output.pcaddrsrc =/= PCAddrSrc.one.asUInt) ||
+        controlDecoder.output.pcsrc === PcSrc.src1.asUInt)) ||
       (rs2 =/= 0.U && regVec.contains(rs2) &&
         controlDecoder.output.pcaddrsrc =/= PCAddrSrc.zero.asUInt &&
         controlDecoder.output.pcaddrsrc =/= PCAddrSrc.one.asUInt) ||
