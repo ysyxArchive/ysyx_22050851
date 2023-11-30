@@ -40,7 +40,7 @@ void init_vcd_trace() {
 
 extern int npc_clock;
 int tfp_clock = 0;
-void eval_trace() {
+inline void eval_trace() {
   top->eval();
 #ifdef DEBUG
   if (lightSSS.is_child() && lightSSS.is_not_good() &&
