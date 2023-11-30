@@ -3,7 +3,6 @@ import chisel3.Input
 import chiseltest._
 import chisel3.experimental.BundleLiterals._
 import utest._
-import execute.SimpleMultiplier
 import os.truncate
 import org.scalatest._
 import org.scalatest.flatspec._
