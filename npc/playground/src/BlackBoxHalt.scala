@@ -11,7 +11,7 @@ class BlackBoxHalt extends BlackBox with HasBlackBoxInline {
     """import "DPI-C" function void haltop(input is_good);
       |module BlackBoxHalt (
       |    input  halt,
-      |    input  bad_halt
+      |    input  bad_halt,
       |    input clock
       |);
       |    wire is_halt = halt | bad_halt;
