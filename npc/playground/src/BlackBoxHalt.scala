@@ -16,8 +16,8 @@ class BlackBoxHalt extends BlackBox with HasBlackBoxInline {
       |);
       |    wire is_halt = halt | bad_halt;
       |    wire is_good = halt & ~bad_halt;
-      |    always @(posedge clock) begin
-      |        if(is_halt)  haltop(is_good);
+      |    always @(posedge is_halt) begin
+      |        haltop(is_good);
       |    end
       |endmodule""".stripMargin
   )
