@@ -152,6 +152,7 @@ void printInfo(int64_t dur) {
       (double)cycle_count / dur);
   Log("IPC: %.2lf inst/cycle, %ld insts, %ld cycles",
       (double)inst_count / cycle_count, inst_count, cycle_count);
+#ifdef DEBUG
   uint64_t total = 0;
   for (int i = 0; i < 5; i++) {
     total += pipelineMiss[i];
@@ -163,6 +164,7 @@ void printInfo(int64_t dur) {
       (float)pipelineMiss[2] / total * 100, pipelineMiss[3],
       (float)pipelineMiss[3] / total * 100, pipelineMiss[4],
       (float)pipelineMiss[4] / total * 100);
+#endif
   printCacheRate();
 }
 
