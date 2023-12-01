@@ -55,8 +55,6 @@ class CPU(isDebug: Boolean) extends Module {
   blackBoxOut.io.regs    := regs.debugOut;
   blackBoxOut.io.csrregs := csrregs.debugOut;
 
-  iCache.enableDebug := enableDebug
-  dCache.enableDebug := enableDebug
   if (isDebug) {
     val blackBoxPip = Module(new BlackBoxPip)
     blackBoxPip.io.clock   := clock

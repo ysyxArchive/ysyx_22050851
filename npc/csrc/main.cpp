@@ -164,8 +164,8 @@ void printInfo(int64_t dur) {
       (float)pipelineMiss[2] / total * 100, pipelineMiss[3],
       (float)pipelineMiss[3] / total * 100, pipelineMiss[4],
       (float)pipelineMiss[4] / total * 100);
-#endif
   printCacheRate();
+#endif
 }
 
 int main(int argc, char* argv[]) {
