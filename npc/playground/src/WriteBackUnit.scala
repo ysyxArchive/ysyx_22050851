@@ -29,6 +29,8 @@ class WriteBackUnit extends Module {
   val regReadIO  = IO(Input(new RegReadIO()))
   val csrControl = IO(Flipped(new ControlRegisterFileControlIO()))
   val toDecode   = IO(Flipped(new ForwardData()))
+  val isHalt     = IO(Bool())
+  val isGoodHalt = IO(Bool())
 
   val wbInReg   = Reg(new WBIn())
   val wbInValid = Reg(new Bool())
@@ -47,13 +49,10 @@ class WriteBackUnit extends Module {
   csrControl.control.csrSource  := wbInReg.control.csrsource
   csrControl.data               := wbInReg.data
 
-  // blackBoxHalt
-  val blackBox = Module(new BlackBoxHalt);
-  blackBox.io.halt     := wbInValid && wbInReg.control.goodtrap
-  blackBox.io.bad_halt := wbInValid && wbInReg.control.badtrap
-  blackBox.io.clock    := clock
+  isHalt     := wbInValid && (wbInReg.control.goodtrap || wbInReg.control.badtrap)
+  isGoodHalt := wbInValid && wbInReg.control.goodtrap
 
-  wbIn.ready := true.B
+  wbIn.ready := !isHalt
 
   toDecode.regIndex  := Mux(wbInValid, wbInReg.data.dst, 0.U)
   toDecode.dataValid := wbInValid && wbInReg.control.regwritemux =/= RegWriteMux.no.asUInt

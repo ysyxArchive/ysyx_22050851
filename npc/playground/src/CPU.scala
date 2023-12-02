@@ -7,7 +7,7 @@ class CPU(isDebug: Boolean) extends Module {
   val enableDebug = IO(Input(Bool()))
   val isHalt      = IO(Bool())
   val isGoodHalt  = IO(Bool())
-  
+
   val mem         = Module(new MemBurstInterface)
   val regs        = Module(new RegisterFile)
   val csrregs     = Module(new ControlRegisterFile)
@@ -56,6 +56,9 @@ class CPU(isDebug: Boolean) extends Module {
   blackBoxOut.io.pc      := regs.debugPCOut;
   blackBoxOut.io.regs    := regs.debugOut;
   blackBoxOut.io.csrregs := csrregs.debugOut;
+
+  isHalt     := wbu.isHalt
+  isGoodHalt := wbu.isGoodHalt
 
   if (isDebug) {
     val blackBoxPip = Module(new BlackBoxPip)
