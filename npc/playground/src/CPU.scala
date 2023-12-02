@@ -5,7 +5,9 @@ import decode._
 
 class CPU(isDebug: Boolean) extends Module {
   val enableDebug = IO(Input(Bool()))
-
+  val isHalt      = IO(Bool())
+  val isGoodHalt  = IO(Bool())
+  
   val mem         = Module(new MemBurstInterface)
   val regs        = Module(new RegisterFile)
   val csrregs     = Module(new ControlRegisterFile)
