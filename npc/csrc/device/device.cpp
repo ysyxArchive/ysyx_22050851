@@ -43,12 +43,6 @@ extern bool is_halt;
 extern bool is_bad_halt;
 
 void update_device() {
-  static uint64_t last = 0;
-  uint64_t now = gettime();
-  if (now - last < DEVICE_UPDATE_INTERVAL) {
-    return;
-  }
-  last = now;
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
