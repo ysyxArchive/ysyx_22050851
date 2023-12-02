@@ -76,7 +76,6 @@ void write_mem(uint64_t addr, size_t length, uint64_t data) {
   if (addr >= FB_ADDR && addr <= FB_ADDR + VGA_WIDTH * VGA_HEIGHT * 4) {
     Assert(length == 4 || length == 8, "output to FB with length == %ld, not 4",
            length);
-    Log("addr: %x, length: %ld", addr, length);
     vga_data[(addr - FB_ADDR) / 4] = data;
     if (length == 8) vga_data[(addr - FB_ADDR) / 4 + 1] = data >> 32;
   } else if (addr == SYNC_ADDR) {
