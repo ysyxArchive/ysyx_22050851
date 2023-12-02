@@ -140,7 +140,12 @@ void one_step() {
     lightSSS.do_fork();
   }
 #endif
-  update_device();
+  static uint64_t last = 0;
+  uint64_t now = gettime();
+  if (now - last > DEVICE_UPDATE_INTERVAL) {
+    update_device();
+    last = now;
+  }
   cycle_count++;
   is_halt = top->isHalt;
   is_bad_halt = !top->isGoodHalt;
