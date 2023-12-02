@@ -10,6 +10,7 @@ class CPU extends Module {
   val regs        = Module(new RegisterFile)
   val csrregs     = Module(new ControlRegisterFile)
   val blackBoxOut = Module(new BlackBoxRegs)
+  val blackBoxPip = Module(new BlackBoxPip)
 
   val ifu     = Module(new InstructionFetchUnit)
   val decoder = Module(new InstructionDecodeUnit)
@@ -20,6 +21,8 @@ class CPU extends Module {
   val arbiter = Module(new BurstLiteArbiter(2))
   val iCache  = Module(new Cache(name = "icache"))
   val dCache  = Module(new Cache(name = "dcache"))
+  // val iCache  = Module(new Cache(name = "icache", wayCnt = 2, groupSize = 2, cellByte = 16))
+  // val dCache  = Module(new Cache(name = "dcache", wayCnt = 2, groupSize = 2, cellByte = 16))
   ifu.fetchOut <> decoder.decodeIn
   decoder.decodeOut <> exe.exeIn
   exe.exeOut <> memu.memIn
@@ -39,6 +42,9 @@ class CPU extends Module {
   decoder.fromExe  := exe.toDecode
   decoder.fromMemu := memu.toDecode
   decoder.fromWbu  := wbu.toDecode
+  exe.fromMemu     := memu.toDecode
+  exe.fromWbu      := wbu.toDecode
+  memu.fromWbu     := wbu.toDecode
 
   memu.memIO <> dCache.io
 
@@ -52,4 +58,11 @@ class CPU extends Module {
 
   iCache.enableDebug := enableDebug
   dCache.enableDebug := enableDebug
+
+  blackBoxPip.io.clock   := clock
+  blackBoxPip.io.ifHalt  := !ifu.fetchOut.valid
+  blackBoxPip.io.idHalt  := !decoder.decodeIn.ready
+  blackBoxPip.io.exHalt  := !exe.exeIn.ready
+  blackBoxPip.io.memHalt := !memu.memIn.ready
+  blackBoxPip.io.wbHalt  := !wbu.wbIn.ready
 }

@@ -21,11 +21,18 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst,
   SDL_Rect drect = {.x = dstrect ? dstrect->x : 0,
                     .y = dstrect ? dstrect->y : 0};
   int bytes = src->format->BytesPerPixel;
-
+  int step = dst->w * bytes;
+  int step2 = src->w * bytes;
+  int elem_size = srect.w * bytes;
+  int offset = dst->pixels + (drect.y * dst->w + drect.x) * bytes;
+  int offset2 = src->pixels + (srect.y * src->w + srect.x) * bytes;
   for (int i = 0; i < srect.h; i++) {
-    memcpy(dst->pixels + ((drect.y + i) * dst->w + drect.x) * bytes,
-           src->pixels + ((srect.y + i) * src->w + srect.x) * bytes,
-           srect.w * bytes);
+    // memcpy(dst->pixels + ((drect.y + i) * dst->w + drect.x) * bytes,
+    //        src->pixels + ((srect.y + i) * src->w + srect.x) * bytes,
+    //        srect.w * bytes);
+    memcpy(offset, offset2, elem_size);
+    offset += step;
+    offset2 += step2;
   }
 }
 
@@ -34,33 +41,38 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
                    .w = dstrect ? dstrect->w : dst->w,
                    .x = dstrect ? dstrect->x : 0,
                    .y = dstrect ? dstrect->y : 0};
+  int offset = rect.y * dst->w + rect.x;
   for (int i = 0; i < rect.h; i++) {
     for (int j = 0; j < rect.w; j++) {
-      ((uint32_t *)dst->pixels)[(rect.y + i) * dst->w + rect.x + j] = color;
+      ((uint32_t *)dst->pixels)[offset + j] = color;
     }
+    offset += dst->w;
   }
 }
 uint32_t pixelBuffer[300 * 400];
 // FIXME: magic number
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
-  // printf("x %d y %d w %d h %d surface w %d h %d %s\n", x, y, w, h, s->w, s->h, s->format->palette ? "with palette" : "");
   if (x == 0 && y == 0 && w == 0 && h == 0) {
     w = s->w;
     h = s->h;
   }
+  int offset = 0;
+  int offset2 = y * s->w;
   for (int i = 0; i < h; i++) {
     for (int j = 0; j < w; j++) {
       if (s->format->palette) {
-        pixelBuffer[i * w + j] =
-            s->format->palette->colors[s->pixels[(i + y) * s->w + x + j]].val;
-        uint8_t *p = ((uint8_t *)(pixelBuffer + i * w + j));
+        pixelBuffer[offset + j] =
+            s->format->palette->colors[s->pixels[offset2 + x + j]].val;
+        uint8_t *p = ((uint8_t *)(pixelBuffer + offset + j));
         uint8_t tmp = p[0];
         p[0] = p[2];
         p[2] = tmp;
       } else {
-        pixelBuffer[i * w + j] = ((uint32_t*)s->pixels)[(i + y) * s->w + x + j];
+        pixelBuffer[offset + j] = ((uint32_t *)s->pixels)[offset2 + x + j];
       }
     }
+    offset += w;
+    offset2 += s->w;
   }
   NDL_DrawRect(pixelBuffer, x, y, w, h);
 }
@@ -69,18 +81,18 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
 
 static inline int maskToShift(uint32_t mask) {
   switch (mask) {
-  case 0x000000ff:
-    return 0;
-  case 0x0000ff00:
-    return 8;
-  case 0x00ff0000:
-    return 16;
-  case 0xff000000:
-    return 24;
-  case 0x00000000:
-    return 24; // hack
-  default:
-    assert(0);
+    case 0x000000ff:
+      return 0;
+    case 0x0000ff00:
+      return 8;
+    case 0x00ff0000:
+      return 16;
+    case 0xff000000:
+      return 24;
+    case 0x00000000:
+      return 24;  // hack
+    default:
+      assert(0);
   }
 }
 
@@ -154,15 +166,13 @@ void SDL_FreeSurface(SDL_Surface *s) {
       }
       free(s->format);
     }
-    if (s->pixels != NULL && !(s->flags & SDL_PREALLOC))
-      free(s->pixels);
+    if (s->pixels != NULL && !(s->flags & SDL_PREALLOC)) free(s->pixels);
     free(s);
   }
 }
 
 SDL_Surface *SDL_SetVideoMode(int width, int height, int bpp, uint32_t flags) {
-  if (flags & SDL_HWSURFACE)
-    NDL_OpenCanvas(&width, &height);
+  if (flags & SDL_HWSURFACE) NDL_OpenCanvas(&width, &height);
   return SDL_CreateRGBSurface(flags, width, height, bpp, DEFAULT_RMASK,
                               DEFAULT_GMASK, DEFAULT_BMASK, DEFAULT_AMASK);
 }
@@ -224,10 +234,10 @@ static void ConvertPixelsARGB_ABGR(void *dst, void *src, int len) {
   } tmp;
   int first = len & ~0xf;
   for (i = 0; i < first; i += 16) {
-#define macro(i)                                                               \
-  tmp.val32 = *((uint32_t *)psrc[i]);                                          \
-  *((uint32_t *)pdst[i]) = tmp.val32;                                          \
-  pdst[i][0] = tmp.val8[2];                                                    \
+#define macro(i)                      \
+  tmp.val32 = *((uint32_t *)psrc[i]); \
+  *((uint32_t *)pdst[i]) = tmp.val32; \
+  pdst[i][0] = tmp.val8[2];           \
   pdst[i][2] = tmp.val8[0];
 
     macro(i + 0);
@@ -275,8 +285,7 @@ uint32_t SDL_MapRGBA(SDL_PixelFormat *fmt, uint8_t r, uint8_t g, uint8_t b,
                      uint8_t a) {
   assert(fmt->BytesPerPixel == 4);
   uint32_t p = (r << fmt->Rshift) | (g << fmt->Gshift) | (b << fmt->Bshift);
-  if (fmt->Amask)
-    p |= (a << fmt->Ashift);
+  if (fmt->Amask) p |= (a << fmt->Ashift);
   return p;
 }
 

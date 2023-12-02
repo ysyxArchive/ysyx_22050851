@@ -17,16 +17,23 @@ class InstructionFetchUnit extends Module {
   val lastPC    = RegInit(regIO.pc)
   val dataValid = RegInit(false.B)
 
-  iCacheIO.data.ready    := !dataValid || fetchOut.fire
-  iCacheIO.readReq.valid := !dataValid || fetchOut.fire
-  iCacheIO.addr          := predictPC
-
   val needTakeBranch = fromDecode.valid && fromDecode.willTakeBranch && fromDecode.branchPc =/= lastPC
 
-  dataValid := (dataValid && !fetchOut.fire && !needTakeBranch) || (!needTakeBranch && iCacheIO.data.fire && !(dataValid ^ fetchOut.valid))
+  iCacheIO.data.ready    := !dataValid || fetchOut.fire || needTakeBranch
+  iCacheIO.readReq.valid := !dataValid || fetchOut.fire || needTakeBranch
+  iCacheIO.addr          := Mux(needTakeBranch, fromDecode.branchPc, predictPC)
 
-  predictPC := Mux(needTakeBranch, fromDecode.branchPc, Mux(iCacheIO.data.fire, predictPC + 4.U, predictPC))
-  lastPC    := Mux(needTakeBranch, fromDecode.branchPc, Mux(iCacheIO.data.fire, predictPC, lastPC))
+  dataValid := (!needTakeBranch && ((dataValid && !fetchOut.fire) || (iCacheIO.data.fire && !(dataValid ^ fetchOut.valid)))) || (needTakeBranch && iCacheIO.data.fire)
+
+  predictPC := MuxCase(
+    predictPC,
+    Seq(
+      (needTakeBranch && !iCacheIO.data.fire) -> fromDecode.branchPc,
+      (needTakeBranch && iCacheIO.data.fire) -> (fromDecode.branchPc + 4.U),
+      (!needTakeBranch && iCacheIO.data.fire) -> (predictPC + 4.U)
+    )
+  )
+  lastPC := Mux(needTakeBranch, fromDecode.branchPc, Mux(iCacheIO.data.fire, predictPC, lastPC))
 
   inst := Mux(iCacheIO.data.fire, iCacheIO.data.bits, inst)
 
@@ -37,6 +44,7 @@ class InstructionFetchUnit extends Module {
   fetchOut.bits.debug.inst := inst
   fetchOut.bits.pc         := lastPC
   fetchOut.bits.inst       := inst
+  fetchOut.bits.snpc       := lastPC + 4.U
 
   iCacheIO.debug.pc   := predictPC
   iCacheIO.debug.inst := inst
@@ -44,5 +52,4 @@ class InstructionFetchUnit extends Module {
   iCacheIO.writeReq.valid     := false.B
   iCacheIO.writeReq.bits.data := DontCare
   iCacheIO.writeReq.bits.mask := DontCare
-  iCacheIO.writeRes.ready     := false.B
 }

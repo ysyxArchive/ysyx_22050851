@@ -250,14 +250,12 @@ class BurstLiteArbiter(val masterPort: Int) extends Module {
   val chosenIsReadReq = masterReadRequestValid(chosenReq)
   // if have Valid Masked req, choose unmasked, else masked
 
-  val waitMasterReq :: forwardRead :: forwardWrite :: others = Enum(4)
+  val waitMasterReq :: forward :: others = Enum(4)
   val arbiterFSM = new FSM(
     waitMasterReq,
     List(
-      (waitMasterReq, haveValidRequest && chosenIsReadReq, forwardRead),
-      (waitMasterReq, haveValidRequest && !chosenIsReadReq, forwardWrite),
-      (forwardRead, slaveIO.R.fire && slaveIO.R.bits.last, waitMasterReq),
-      (forwardWrite, slaveIO.B.fire, waitMasterReq)
+      (waitMasterReq, haveValidRequest, forward),
+      (forward, (slaveIO.R.fire && slaveIO.R.bits.last) || slaveIO.B.fire, waitMasterReq)
     )
   )
 
@@ -266,13 +264,13 @@ class BurstLiteArbiter(val masterPort: Int) extends Module {
   // unchosen ports
   masterIO.zipWithIndex.foreach {
     case (elem, idx) =>
-      elem.B.valid  := Mux(idx.U === workingMaster && arbiterFSM.is(forwardWrite), slaveIO.B.valid, false.B)
+      elem.AW.ready := Mux(idx.U === chosenReq && arbiterFSM.is(waitMasterReq), slaveIO.AW.ready, false.B)
+      elem.AR.ready := Mux(idx.U === chosenReq && arbiterFSM.is(waitMasterReq), slaveIO.AR.ready, false.B)
+      elem.B.valid  := Mux(idx.U === workingMaster && arbiterFSM.is(forward), slaveIO.B.valid, false.B)
       elem.B.bits   := Mux(idx.U === workingMaster, slaveIO.B.bits, DontCare)
-      elem.R.valid  := Mux(idx.U === workingMaster && arbiterFSM.is(forwardRead), slaveIO.R.valid, false.B)
+      elem.R.valid  := Mux(idx.U === workingMaster && arbiterFSM.is(forward), slaveIO.R.valid, false.B)
       elem.R.bits   := Mux(idx.U === workingMaster, slaveIO.R.bits, DontCare)
-      elem.AW.ready := Mux(idx.U === workingMaster && arbiterFSM.is(forwardWrite), slaveIO.AW.ready, false.B)
-      elem.AR.ready := Mux(idx.U === workingMaster && arbiterFSM.is(forwardRead), slaveIO.AR.ready, false.B)
-      elem.W.ready  := Mux(idx.U === workingMaster && arbiterFSM.is(forwardWrite), slaveIO.W.ready, false.B)
+      elem.W.ready  := Mux(idx.U === workingMaster && arbiterFSM.is(forward), slaveIO.W.ready, false.B)
   }
   // when waitMasterReq
   workingMaster := Mux(
@@ -286,12 +284,12 @@ class BurstLiteArbiter(val masterPort: Int) extends Module {
     masterRequestMask(chosenReq)
   ) // if chosen is unmasked, mask it
 
-  slaveIO.B.ready  := chosenMaster.B.ready && arbiterFSM.is(forwardWrite)
-  slaveIO.R.ready  := chosenMaster.R.ready && arbiterFSM.is(forwardRead)
-  slaveIO.AW.valid := chosenMaster.AW.valid && arbiterFSM.is(forwardWrite)
-  slaveIO.AW.bits  := Mux(arbiterFSM.is(forwardWrite), chosenMaster.AW.bits, DontCare)
-  slaveIO.AR.valid := chosenMaster.AR.valid && arbiterFSM.is(forwardRead)
-  slaveIO.AR.bits  := Mux(arbiterFSM.is(forwardRead), chosenMaster.AR.bits, DontCare)
-  slaveIO.W.valid  := chosenMaster.W.valid && arbiterFSM.is(forwardWrite)
-  slaveIO.W.bits   := Mux(arbiterFSM.is(forwardWrite), chosenMaster.W.bits, DontCare)
+  slaveIO.AW.valid := arbiterFSM.is(waitMasterReq) && !chosenIsReadReq && masterIO(chosenReq).AW.valid
+  slaveIO.AW.bits  := Mux(arbiterFSM.is(waitMasterReq), masterIO(chosenReq).AW.bits, DontCare)
+  slaveIO.AR.valid := arbiterFSM.is(waitMasterReq) && chosenIsReadReq && masterIO(chosenReq).AR.valid
+  slaveIO.AR.bits  := Mux(arbiterFSM.is(waitMasterReq), masterIO(chosenReq).AR.bits, DontCare)
+  slaveIO.B.ready  := chosenMaster.B.ready && arbiterFSM.is(forward)
+  slaveIO.R.ready  := chosenMaster.R.ready && arbiterFSM.is(forward)
+  slaveIO.W.valid  := chosenMaster.W.valid && arbiterFSM.is(forward)
+  slaveIO.W.bits   := Mux(arbiterFSM.is(forward), chosenMaster.W.bits, DontCare)
 }

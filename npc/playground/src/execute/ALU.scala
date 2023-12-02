@@ -29,7 +29,7 @@ class FullAdder extends Module {
   io.out  := io.inA ^ io.inB ^ io.inC;
   io.outC := (io.inA & (io.inB ^ io.inC)) | (io.inB & io.inC)
 }
-class SimpleAdderIO extends Bundle {
+class AdderIO extends Bundle {
   val inA  = Input(UInt(64.W))
   val inB  = Input(UInt(64.W))
   val inC  = Input(Bool())
@@ -38,7 +38,7 @@ class SimpleAdderIO extends Bundle {
 }
 
 class SimpleAdder extends Module {
-  val io = IO(new SimpleAdderIO())
+  val io = IO(new AdderIO())
 
   val adders = for (i <- 0 to 63) yield {
     val adder = Module(new FullAdder())
@@ -56,6 +56,13 @@ class SimpleAdder extends Module {
   }
   io.outC := adders(63).io.outC
   io.out  := VecInit(adders.map(adder => adder.io.out)).asUInt
+}
+
+class FastAdder extends Module {
+  val io     = IO(new AdderIO())
+  val result = io.inA +& io.inB + io.inC
+  io.out  := result
+  io.outC := result(64)
 }
 
 class SignalIO extends Bundle {
@@ -79,17 +86,19 @@ class ALUIO extends Bundle {
 class ALU extends Module {
   val io = IO(new ALUIO())
 
-  val simpleAdder = Module(new SimpleAdder())
-  // val multiplier  = Module(new SimpleMultiplier())
+  // val adder = Module(new SimpleAdder())
+  val adder = Module(new FastAdder())
   // val multiplier = Module(new BoothMultiplier())
   val multiplier = Module(new BHMultiplier())
   // val divider    = Module(new SimpleDivider())
   val divider = Module(new R2Divider())
 
-  val mulOps = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt))
-  val divOps = VecInit(Seq(AluMode.div, AluMode.divu, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
-  val remOps = VecInit(Seq(AluMode.rem, AluMode.remu, AluMode.remw, AluMode.remuw).map(t => t.asUInt))
-  val ops    = VecInit(mulOps ++ divOps ++ remOps)
+  val mulLOps = VecInit(Seq(AluMode.mul, AluMode.mulw).map(t => t.asUInt))
+  val mulHOps = VecInit(Seq(AluMode.mulh, AluMode.mulhsu, AluMode.mulhu).map(t => t.asUInt))
+  val mulOps  = VecInit(mulLOps ++ mulHOps)
+  val divOps  = VecInit(Seq(AluMode.div, AluMode.divu, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
+  val remOps  = VecInit(Seq(AluMode.rem, AluMode.remu, AluMode.remw, AluMode.remuw).map(t => t.asUInt))
+  val ops     = VecInit(mulOps ++ divOps ++ remOps)
 
   val inA          = io.in.bits.inA
   val inB          = io.in.bits.inB
@@ -101,12 +110,18 @@ class ALU extends Module {
   val shouldMulReg = Reg(Bool())
   val shouldDivReg = Reg(Bool())
 
+  val inAReg = Reg(UInt(64.W))
+  val inBReg = Reg(UInt(64.W))
+
   val dataValid = RegInit(false.B)
   dataValid := dataValid ^ io.in.fire ^ io.out.fire
 
-  simpleAdder.io.inA := inA
-  simpleAdder.io.inB := Mux(opType === AluMode.sub, ~inB, inB)
-  simpleAdder.io.inC := opType === AluMode.sub
+  inAReg := Mux(dataValid, inAReg, io.in.bits.inA)
+  inBReg := Mux(dataValid, inBReg, io.in.bits.inB)
+
+  adder.io.inA := inA
+  adder.io.inB := Mux(opType === AluMode.sub, ~inB, inB)
+  adder.io.inC := opType === AluMode.sub
 
   val shouldMul = mulOps.contains(io.in.bits.opType.asUInt)
   val shouldDiv = VecInit(divOps ++ remOps).contains(io.in.bits.opType.asUInt)
@@ -114,43 +129,45 @@ class ALU extends Module {
   shouldDivReg := Mux(io.in.fire, shouldDiv, shouldDivReg)
   isRem        := Mux(io.in.fire, remOps.contains(io.in.bits.opType.asUInt), isRem)
 
-  multiplier.io.multiplicand := io.in.bits.inA
-  multiplier.io.multiplier   := io.in.bits.inB
+  multiplier.io.multiplicand := Mux(dataValid, inAReg, io.in.bits.inA)
+  multiplier.io.multiplier   := Mux(dataValid, inBReg, io.in.bits.inB)
   multiplier.io.flush        := false.B
   multiplier.io.mulValid     := io.in.fire && shouldMul
-  multiplier.io.mulSigned    := false.B
-  multiplier.io.mulw         := io.in.bits.opType.asUInt === AluMode.mulw.asUInt
-  divider.io.dividend        := io.in.bits.inA
-  divider.io.divisor         := io.in.bits.inB
-  divider.io.flush           := false.B
-  divider.io.divValid        := io.in.fire && shouldDiv
-  divider.io.divSigned       := VecInit(Seq(AluMode.remw, AluMode.divw).map(t => t.asUInt)).contains(io.in.bits.opType.asUInt)
+  multiplier.io.mulSigned := MuxLookup(io.in.bits.opType.asUInt, 0.U)(
+    EnumSeq(
+      AluMode.mulhsu -> 2.U,
+      AluMode.mulh -> 3.U
+    )
+  )
+  multiplier.io.mulw   := io.in.bits.opType.asUInt === AluMode.mulw.asUInt
+  divider.io.dividend  := Mux(dataValid, inAReg, io.in.bits.inA)
+  divider.io.divisor   := Mux(dataValid, inBReg, io.in.bits.inB)
+  divider.io.flush     := false.B
+  divider.io.divValid  := io.in.fire && shouldDiv
+  divider.io.divSigned := VecInit(Seq(AluMode.remw, AluMode.divw).map(t => t.asUInt)).contains(io.in.bits.opType.asUInt)
   divider.io.divw := VecInit(Seq(AluMode.remw, AluMode.remuw, AluMode.divw, AluMode.divuw).map(t => t.asUInt))
     .contains(io.in.bits.opType.asUInt)
 
   val out = MuxLookup(opType.asUInt, 0.U)(
     EnumSeq(
-      AluMode.add -> simpleAdder.io.out,
+      AluMode.add -> adder.io.out,
       AluMode.and -> (inA & inB),
-      AluMode.sub -> simpleAdder.io.out,
-      AluMode.div -> (inA.asSInt / inB.asSInt).asUInt,
-      AluMode.divu -> inA / inB,
+      AluMode.sub -> adder.io.out,
       AluMode.or -> (inA | inB),
-      AluMode.rem -> (inA.asSInt % inB.asSInt).asUInt,
-      AluMode.remu -> inA % inB,
       AluMode.ll -> (inA << inB(5, 0)),
       AluMode.ra -> (inA.asSInt >> inB(5, 0)).asUInt,
       AluMode.rl -> (inA >> inB(5, 0)),
-      AluMode.rlw -> (inA(31, 0) >> inB(5, 0)),
+      AluMode.rlw -> (inA(31, 0) >> inB(4, 0)),
       AluMode.xor -> (inA ^ inB)
-    ) ++ mulOps.map(op => op -> multiplier.io.resultLow)
+    ) ++ mulHOps.map(op => op -> multiplier.io.resultHigh)
+      ++ mulLOps.map(op => op -> multiplier.io.resultLow)
       ++ divOps.map(op => op -> divider.io.quotient)
       ++ remOps.map(op => op -> divider.io.remainder)
   )
 
   io.out.valid                   := (io.in.fire && isImm) || (shouldDivReg && divider.io.outValid) || (shouldMulReg && multiplier.io.outValid)
   io.out.bits.out                := out
-  io.out.bits.signals.isCarry    := simpleAdder.io.outC
+  io.out.bits.signals.isCarry    := adder.io.outC
   io.out.bits.signals.isNegative := out(63)
   io.out.bits.signals.isZero     := !out.orR
 
