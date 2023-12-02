@@ -147,8 +147,10 @@ void one_step() {
     last = now;
   }
   cycle_count++;
-  is_halt = top->isHalt;
-  is_bad_halt = !top->isGoodHalt;
+  if (top->isHalt) {
+    is_halt = top->isHalt;
+    is_bad_halt = !top->isGoodHalt;
+  }
 }
 
 extern uint64_t pipelineMiss[5];
