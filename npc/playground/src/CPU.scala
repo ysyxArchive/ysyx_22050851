@@ -20,10 +20,10 @@ class CPU(isDebug: Boolean) extends Module {
   val wbu     = Module(new WriteBackUnit())
 
   val arbiter = Module(new BurstLiteArbiter(2))
-  // val iCache  = Module(new Cache(name = "icache"))
-  // val dCache  = Module(new Cache(name = "dcache"))
-  val iCache = Module(new Cache(name = "icache", wayCnt = 2, groupSize = 2, cellByte = 16, isDebug = isDebug))
-  val dCache = Module(new Cache(name = "dcache", wayCnt = 2, groupSize = 2, cellByte = 16, isDebug = isDebug))
+  val iCache  = Module(new Cache(name = "icache"))
+  val dCache  = Module(new Cache(name = "dcache"))
+  // val iCache = Module(new Cache(name = "icache", wayCnt = 2, groupSize = 2, cellByte = 16, isDebug = isDebug))
+  // val dCache = Module(new Cache(name = "dcache", wayCnt = 2, groupSize = 2, cellByte = 16, isDebug = isDebug))
   ifu.fetchOut <> decoder.decodeIn
   decoder.decodeOut <> exe.exeIn
   exe.exeOut <> memu.memIn
