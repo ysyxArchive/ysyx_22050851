@@ -63,8 +63,8 @@ int parse_args(int argc, char* argv[]) {
 
 void load_files() {
   if (!img_file) {
-    Log("not detected img file, use default file %s", "tools/multest.bin");
-    img_file = "tools/multest.bin";
+    Log("not detected img file, use default file %s", "tools/default-raw.bin");
+    img_file = "tools/default-raw.bin";
   }
   Log("detected img file: %s", img_file);
   init_memory(img_file);
@@ -73,35 +73,4 @@ void load_files() {
   Log("detected so file: %s", diff_so_file);
   load_difftest_so(diff_so_file);
 #endif
-}
-
-VerilatedVcdC* tfp;
-VCPU* top;
-extern LightSSS lightSSS;
-void init_vcd_trace() {
-  VerilatedContext* contextp = new VerilatedContext;
-#ifdef DEBUG
-  Verilated::traceEverOn(true);  // 导出vcd波形需要加此语句
-  tfp = new VerilatedVcdC();     // 导出vcd波形需要加此语句
-#endif
-  top = new VCPU{contextp};
-  top->reset = false;
-#ifdef DEBUG
-  top->trace(tfp, 0);
-  tfp->open("wave.vcd");  // 打开vcd
-#endif
-}
-
-extern int npc_clock;
-int tfp_clock = 0;
-void eval_trace() {
-  top->eval();
-#ifdef DEBUG
-  if (lightSSS.is_child() && lightSSS.is_not_good() &&
-      lightSSS.get_end_cycles() - npc_clock < WAVE_TRACE_CLOCKS) {
-    tfp->dump(tfp_clock++);
-    tfp->flush();
-  }
-#endif
-  npc_clock++;
 }
