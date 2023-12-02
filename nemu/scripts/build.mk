@@ -3,7 +3,7 @@
 # Add necessary options if the target is a shared library
 ifeq ($(SHARE),1)
 SO = -so
-CFLAGS  += -fPIC
+CFLAGS  += -fPIC -pg
 LDFLAGS += -rdynamic -shared -fPIC
 endif
 
