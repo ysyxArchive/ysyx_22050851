@@ -23,7 +23,7 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T* ctl) {
   for (int j = 0; j < ctl->h; j++) {
     for (int i = 0; i < ctl->w; i+=2) {
       outl(FB_ADDR + ((ctl->x + i + offset2) << 2),
-           ((uint64_t*)ctl->pixels)[offset + i / 2]);
+           *(uint64_t*)((uint32_t*)ctl->pixels + offset + i));
     }
     offset += ctl->w;
     offset2 += width;
