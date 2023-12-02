@@ -5,7 +5,7 @@
  * Supports all filetypes supported by stb_image (JPEG, PNG, TGA, BMP, PSD, ...
  * See stb_image.h for details).
  *
- * (C) 2015 Daniel Gibson
+ * (C) 2015 Danielhttps://github.com/sdlpal/sdlpal.git Gibson
  *
  * Homepage: https://github.com/DanielGibson/Snippets/
  *
