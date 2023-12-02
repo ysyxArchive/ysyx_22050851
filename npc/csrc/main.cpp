@@ -142,6 +142,8 @@ void one_step() {
 #endif
   update_device();
   cycle_count++;
+  is_halt = top->isHalt;
+  is_bad_halt = !top->isGoodHalt;
 }
 
 extern uint64_t pipelineMiss[5];
