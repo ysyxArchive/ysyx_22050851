@@ -86,6 +86,8 @@ gdb: $(BIN)
 	gdb -s $(BIN) --args $(BIN) $(IMG) $(ARGS) h 
 
 hardware: $(VSRCS)
+	mkdir v_hw/
+	sv2v -w v_hw/ $(VSRCS)
 
 .PHONY: test verilog help compile bsp reformat checkformat clean build gdb debug hardware
 include ../Makefile
