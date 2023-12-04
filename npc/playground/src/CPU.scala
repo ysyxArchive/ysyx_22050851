@@ -2,11 +2,15 @@ import chisel3._
 import chisel3.util.Enum
 import chisel3.util.Decoupled
 import decode._
+import mem._
 
-class CPU(isDebug: Boolean) extends Module {
+class CPU(isDebug: Boolean, shouldRemoveDPIC: Boolean) extends Module {
   val enableDebug = IO(Input(Bool()))
   val isHalt      = IO(Bool())
   val isGoodHalt  = IO(Bool())
+  if (shouldRemoveDPIC) {
+    val memIO = IO(MemBurstAxiLite())
+  }
 
   val mem         = Module(new MemBurstInterface)
   val regs        = Module(new RegisterFile)

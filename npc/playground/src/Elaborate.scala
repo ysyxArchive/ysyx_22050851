@@ -11,7 +11,7 @@ object Elaborate extends App {
   if (shouldRemoveDPIC) {
     filteredArgs = args.filter(_ != "--rm-dpic")
   }
-  def top       = new CPU(isDebug)
+  def top       = new CPU(isDebug, shouldRemoveDPIC)
   val generator = Seq(chisel3.stage.ChiselGeneratorAnnotation(() => top))
   (new ChiselStage).execute(filteredArgs, generator :+ CIRCTTargetAnnotation(CIRCTTarget.Verilog))
 }
