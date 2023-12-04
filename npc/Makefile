@@ -1,5 +1,6 @@
 override VERILATOR =  verilator 
 IS_DEBUG = $(filter debug,$(MAKECMDGOALS))
+IS_HW = $(filter hardware,$(MAKECMDGOALS))
 
 TOPNAME = CPU  
 
@@ -8,7 +9,7 @@ BUILD_DIR = ./build  # all build files dir
 BIN = $(join $(BUILD_DIR), $(join /, $(if $(IS_DEBUG), $(join $(TOPNAME), _DEBUG), $(TOPNAME)))) 
 # verilator build files
 OBJ_DIR = $(if $(IS_DEBUG), $(join $(BUILD_DIR), /obj_dir_debug), $(join $(BUILD_DIR), /obj_dir)) 
-VERILOG_DIR = $(if $(IS_DEBUG), $(join $(BUILD_DIR), /veri_debug), $(join $(BUILD_DIR), /veri)) 
+VERILOG_DIR = $(if $(IS_DEBUG), $(join $(BUILD_DIR), /veri_debug), $(if $(IS_HW), $(join $(BUILD_DIR), /veri_hw), $(join $(BUILD_DIR), /veri)))
 
 VERILATOR_FLAGS += -MMD --build -cc -j 0 -O3 --x-assign fast --x-initial fast --noassert -Wno-WIDTH $(if $(IS_DEBUG), --trace --prof-cfuncs) 
 
@@ -83,6 +84,8 @@ test: $(SCALATESTS)
 
 gdb: $(BIN)
 	gdb -s $(BIN) --args $(BIN) $(IMG) $(ARGS) h 
-	
-.PHONY: test verilog help compile bsp reformat checkformat clean build gdb debug
+
+hardware: $(VSRCS)
+
+.PHONY: test verilog help compile bsp reformat checkformat clean build gdb debug hardware
 include ../Makefile
