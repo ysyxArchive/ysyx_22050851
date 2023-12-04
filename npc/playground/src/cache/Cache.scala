@@ -3,6 +3,10 @@ import chisel3.util._
 import utils.FSM
 import utils.Utils
 import utils.DebugInfo
+<<<<<<< HEAD
+=======
+import mem._
+>>>>>>> adaab1e8590675071c22ec50f610816123747f3a
 
 class CacheIO(dataWidth: Int, addrWidth: Int) extends Bundle {
   val addr    = Input(UInt(addrWidth.W))

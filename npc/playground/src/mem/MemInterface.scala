@@ -1,6 +1,15 @@
+<<<<<<< HEAD
 import chisel3._
 import chisel3.util._
 import utils.FSM
+=======
+package mem
+
+import chisel3._
+import chisel3.util._
+import utils.FSM
+
+>>>>>>> adaab1e8590675071c22ec50f610816123747f3a
 object MemAxiLite {
   def apply() = AxiLiteIO(64, 64)
 }
