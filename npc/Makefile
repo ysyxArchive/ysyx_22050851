@@ -1,5 +1,6 @@
 override VERILATOR =  verilator 
 IS_DEBUG = $(filter debug,$(MAKECMDGOALS))
+IS_HW = $(filter hardware,$(MAKECMDGOALS))
 
 TOPNAME = CPU  
 
@@ -8,7 +9,7 @@ BUILD_DIR = ./build  # all build files dir
 BIN = $(join $(BUILD_DIR), $(join /, $(if $(IS_DEBUG), $(join $(TOPNAME), _DEBUG), $(TOPNAME)))) 
 # verilator build files
 OBJ_DIR = $(if $(IS_DEBUG), $(join $(BUILD_DIR), /obj_dir_debug), $(join $(BUILD_DIR), /obj_dir)) 
-VERILOG_DIR = $(if $(IS_DEBUG), $(join $(BUILD_DIR), /veri_debug), $(join $(BUILD_DIR), /veri)) 
+VERILOG_DIR = $(if $(IS_DEBUG), $(join $(BUILD_DIR), /veri_debug), $(if $(IS_HW), $(join $(BUILD_DIR), /veri_hw), $(join $(BUILD_DIR), /veri)))
 
 VERILATOR_FLAGS += -MMD --build -cc -j 0 -O3 --x-assign fast --x-initial fast --noassert -Wno-WIDTH $(if $(IS_DEBUG), --trace --prof-cfuncs) 
 
@@ -26,7 +27,7 @@ INCFLAGS = $(addprefix -I, $(INC_PATH))
 CFLAGS += $(INCFLAGS) -O3 -DTOP_NAME="\"V$(TOPNAME)\"" $(if $(IS_DEBUG), -DDEBUG,)
 LDFLAGS += -lSDL2 -lSDL2_image -ldl
 override ARGS += $(if $(IS_DEBUG), --diff=${NEMU_HOME}/build/riscv64-nemu-interpreter-so)
-MILL_FLAGS = -td $(VERILOG_DIR) 
+MILL_FLAGS = -td $(VERILOG_DIR) $(if $(IS_HW), --rm-dpic)
 export PATH := $(PATH):$(if $(IS_DEBUG),$(abspath ./tools/firtool_debug),$(abspath ./tools/firtool))
 
 
@@ -83,6 +84,10 @@ test: $(SCALATESTS)
 
 gdb: $(BIN)
 	gdb -s $(BIN) --args $(BIN) $(IMG) $(ARGS) h 
-	
-.PHONY: test verilog help compile bsp reformat checkformat clean build gdb debug
+
+hardware: $(VSRCS)
+	mkdir v_hw/
+	sv2v -w v_hw/ $(VSRCS)
+
+.PHONY: test verilog help compile bsp reformat checkformat clean build gdb debug hardware
 include ../Makefile
