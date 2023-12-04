@@ -8,11 +8,7 @@ class CPU(isDebug: Boolean, shouldRemoveDPIC: Boolean) extends Module {
   val enableDebug = IO(Input(Bool()))
   val isHalt      = IO(Bool())
   val isGoodHalt  = IO(Bool())
-  if (shouldRemoveDPIC) {
-    val memIO = IO(MemBurstAxiLite())
-  }
 
-  val mem         = Module(new MemBurstInterface)
   val regs        = Module(new RegisterFile)
   val csrregs     = Module(new ControlRegisterFile)
   val blackBoxOut = Module(new BlackBoxRegs)
@@ -37,7 +33,6 @@ class CPU(isDebug: Boolean, shouldRemoveDPIC: Boolean) extends Module {
 
   iCache.axiIO <> arbiter.masterIO(1)
   dCache.axiIO <> arbiter.masterIO(0)
-  mem.axiS <> arbiter.slaveIO
 
   ifu.iCacheIO <> iCache.io
   ifu.regIO := regs.readIO
@@ -63,6 +58,14 @@ class CPU(isDebug: Boolean, shouldRemoveDPIC: Boolean) extends Module {
 
   isHalt     := wbu.isHalt
   isGoodHalt := wbu.isGoodHalt
+
+  if (shouldRemoveDPIC) {
+    val memIO = IO(MemBurstAxiLite())
+    memIO <> arbiter.slaveIO
+  } else {
+    val mem = Module(new MemBurstInterface)
+    mem.axiS <> arbiter.slaveIO
+  }
 
   if (isDebug) {
     val blackBoxPip = Module(new BlackBoxPip)
