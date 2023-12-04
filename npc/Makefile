@@ -44,7 +44,7 @@ $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 
 $(VSRCS): $(SCALAS)
 	$(call git_commit, "generate verilog")
-	mill -i __.test.runMain Elaborate --split-verilog --target verilog --warnings-as-errors $(MILL_FLAGS) 
+	mill -i __.test.runMain Elaborate --split-verilog --target system-verilog --warnings-as-errors $(MILL_FLAGS) 
 	touch $(VSRCS)
 
 $(GEN_SCALA): playground/scripts/codemap.csv playground/scripts/parsedecode.py
