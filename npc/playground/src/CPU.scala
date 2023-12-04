@@ -9,9 +9,8 @@ class CPU(isDebug: Boolean, shouldRemoveDPIC: Boolean) extends Module {
   val isHalt      = IO(Bool())
   val isGoodHalt  = IO(Bool())
 
-  val regs        = Module(new RegisterFile)
-  val csrregs     = Module(new ControlRegisterFile)
-  val blackBoxOut = Module(new BlackBoxRegs)
+  val regs    = Module(new RegisterFile)
+  val csrregs = Module(new ControlRegisterFile)
 
   val ifu     = Module(new InstructionFetchUnit)
   val decoder = Module(new InstructionDecodeUnit)
@@ -52,10 +51,6 @@ class CPU(isDebug: Boolean, shouldRemoveDPIC: Boolean) extends Module {
   wbu.regReadIO := regs.readIO
   wbu.csrControl <> csrregs.controlIO
 
-  blackBoxOut.io.pc      := regs.debugPCOut;
-  blackBoxOut.io.regs    := regs.debugOut;
-  blackBoxOut.io.csrregs := csrregs.debugOut;
-
   isHalt     := wbu.isHalt
   isGoodHalt := wbu.isGoodHalt
 
@@ -65,6 +60,12 @@ class CPU(isDebug: Boolean, shouldRemoveDPIC: Boolean) extends Module {
   } else {
     val mem = Module(new MemBurstInterface)
     mem.axiS <> arbiter.slaveIO
+
+    val blackBoxOut = Module(new BlackBoxRegs)
+    blackBoxOut.io.pc      := regs.debugPCOut;
+    blackBoxOut.io.regs    := regs.debugOut;
+    blackBoxOut.io.csrregs := csrregs.debugOut;
+
   }
 
   if (isDebug) {
