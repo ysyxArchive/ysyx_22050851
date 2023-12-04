@@ -21,6 +21,37 @@ int npc_clock = 0;
 uint64_t* cpu_regs = NULL;
 uint64_t* cpu_pc = NULL;
 
+VerilatedVcdC* tfp;
+VCPU* top;
+extern LightSSS lightSSS;
+void init_vcd_trace() {
+  VerilatedContext* contextp = new VerilatedContext;
+#ifdef DEBUG
+  Verilated::traceEverOn(true);  // 导出vcd波形需要加此语句
+  tfp = new VerilatedVcdC();     // 导出vcd波形需要加此语句
+#endif
+  top = new VCPU{contextp};
+  top->reset = false;
+#ifdef DEBUG
+  top->trace(tfp, 0);
+  tfp->open("wave.vcd");  // 打开vcd
+#endif
+}
+
+extern int npc_clock;
+int tfp_clock = 0;
+inline void eval_trace() {
+  top->eval();
+#ifdef DEBUG
+  if (lightSSS.is_child() && lightSSS.is_not_good() &&
+      lightSSS.get_end_cycles() - npc_clock < WAVE_TRACE_CLOCKS) {
+    tfp->dump(tfp_clock++);
+    tfp->flush();
+  }
+#endif
+  npc_clock++;
+}
+
 void haltop(unsigned char good_halt) {
   if (top->reset) return;
   Log("halt from npc, is %s halt", good_halt ? "good" : "bad");
@@ -45,14 +76,14 @@ void init_npc() {
 }
 // skip when pc is 0x00
 static bool skip_once = false;
-extern "C" void mem_read(const svLogicVecVal * addr, svLogicVecVal * ret) {
+extern "C" void mem_read(const svLogicVecVal* addr, svLogicVecVal* ret) {
   uint64_t data = read_mem(*(uint64_t*)addr, 8);
   ret[0].aval = data;
   ret[1].aval = data >> 32;
 }
 
-extern "C" void mem_write(const svLogicVecVal * addr, const svLogicVecVal * mask,
-  const svLogicVecVal * data) {
+extern "C" void mem_write(const svLogicVecVal* addr, const svLogicVecVal* mask,
+                          const svLogicVecVal* data) {
   uint8_t len = 0;
   auto val = mask->aval;
   while (val) {
@@ -90,8 +121,7 @@ void one_step() {
       is_bad_halt = true;
       is_halt = true;
     }
-  }
-  else {
+  } else {
     inst_count++;
     lastpcchange = 0;
   }
@@ -110,29 +140,47 @@ void one_step() {
     lightSSS.do_fork();
   }
 #endif
-  update_device();
+  static uint64_t last = 0;
+  uint64_t now = gettime();
+  if (now - last > DEVICE_UPDATE_INTERVAL) {
+    update_device();
+    last = now;
+  }
   cycle_count++;
+  if (top->isHalt) {
+    is_halt = top->isHalt;
+    is_bad_halt = !top->isGoodHalt;
+  }
 }
 
 extern uint64_t pipelineMiss[5];
 
 void printInfo(int64_t dur) {
   Log("execute speed: %.2lf inst/s,  %ld insts, %.3f seconds, freq: %.2lf KHz",
-    (double)inst_count * 1000 / dur, inst_count, (double)dur / 1000, (double)cycle_count / dur);
+      (double)inst_count * 1000 / dur, inst_count, (double)dur / 1000,
+      (double)cycle_count / dur);
   Log("IPC: %.2lf inst/cycle, %ld insts, %ld cycles",
-    (double)inst_count / cycle_count, inst_count, cycle_count);
+      (double)inst_count / cycle_count, inst_count, cycle_count);
+#ifdef DEBUG
   uint64_t total = 0;
   for (int i = 0; i < 5; i++) {
     total += pipelineMiss[i];
   }
-  Log("if: %d(%.2f%), id: %d(%.2f%), ex: %d(%.2f%), mem: %d(%.2f%), wb: %d(%.2f%)", pipelineMiss[0], (float)pipelineMiss[0] / total * 100, pipelineMiss[1],  (float)pipelineMiss[1] / total * 100,  pipelineMiss[2],  (float)pipelineMiss[2] / total * 100, pipelineMiss[3],  (float)pipelineMiss[3] / total * 100,  pipelineMiss[4],  (float)pipelineMiss[4] / total * 100);
+  Log("if: %d(%.2f%), id: %d(%.2f%), ex: %d(%.2f%), mem: %d(%.2f%), wb: "
+      "%d(%.2f%)",
+      pipelineMiss[0], (float)pipelineMiss[0] / total * 100, pipelineMiss[1],
+      (float)pipelineMiss[1] / total * 100, pipelineMiss[2],
+      (float)pipelineMiss[2] / total * 100, pipelineMiss[3],
+      (float)pipelineMiss[3] / total * 100, pipelineMiss[4],
+      (float)pipelineMiss[4] / total * 100);
   printCacheRate();
+#endif
 }
 
 int main(int argc, char* argv[]) {
   Log("running in " MUXDEF(DEBUG, ANSI_FMT("DEBUG", ANSI_FG_YELLOW),
-    ANSI_FMT("PRODUCT", ANSI_FG_GREEN))
-    ANSI_FMT(" mode", ANSI_FG_BLUE));
+                           ANSI_FMT("PRODUCT", ANSI_FG_GREEN))
+          ANSI_FMT(" mode", ANSI_FG_BLUE));
   parse_args(argc, argv);
   load_files();
   init_vcd_trace();
@@ -154,28 +202,26 @@ int main(int argc, char* argv[]) {
     if (cycle_count % PROFILE_LOG_INTERVAL == 0) {
       auto end = std::chrono::high_resolution_clock::now();
       auto dur =
-        std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
-        .count();
+          std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+              .count();
       printInfo(dur);
     }
   }
   auto end = std::chrono::high_resolution_clock::now();
   auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
-    .count();
+                 .count();
   update_cpu();
   int ret_value = cpu.gpr[10];
   if (is_bad_halt || ret_value != 0) {
     if ((int64_t)cpu.pc - MEM_START <= 0) {
       Log(ANSI_FMT("bad halt! return value is %d, pc=0x%8lx", ANSI_FG_RED),
-        ret_value, cpu.pc);
-    }
-    else {
+          ret_value, cpu.pc);
+    } else {
       Log(ANSI_FMT("bad halt! return value is %d, pc=0x%8lx inst=0x%08x",
-        ANSI_FG_RED),
-        ret_value, cpu.pc, *(uint32_t*)&(mem[cpu.pc - MEM_START]));
+                   ANSI_FG_RED),
+          ret_value, cpu.pc, *(uint32_t*)&(mem[cpu.pc - MEM_START]));
     }
-  }
-  else {
+  } else {
     Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
   }
 #ifdef DEBUG

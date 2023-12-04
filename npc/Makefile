@@ -10,7 +10,7 @@ BIN = $(join $(BUILD_DIR), $(join /, $(if $(IS_DEBUG), $(join $(TOPNAME), _DEBUG
 OBJ_DIR = $(if $(IS_DEBUG), $(join $(BUILD_DIR), /obj_dir_debug), $(join $(BUILD_DIR), /obj_dir)) 
 VERILOG_DIR = $(if $(IS_DEBUG), $(join $(BUILD_DIR), /veri_debug), $(join $(BUILD_DIR), /veri)) 
 
-VERILATOR_FLAGS += -MMD --build -cc -j 0 -O3 --x-assign fast --x-initial fast --noassert -Wno-WIDTH $(if $(IS_DEBUG), --trace) 
+VERILATOR_FLAGS += -MMD --build -cc -j 0 -O3 --x-assign fast --x-initial fast --noassert -Wno-WIDTH $(if $(IS_DEBUG), --trace --prof-cfuncs) 
 
 # source files
 VSRCS = $(sort $(shell find $(abspath $(VERILOG_DIR)) -name "*.v" -or -name "*.sv") $(abspath $(join $(VERILOG_DIR), /CPU.sv)))
