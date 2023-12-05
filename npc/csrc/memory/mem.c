@@ -1,5 +1,4 @@
 #include <mem.h>
-
 #include "VCPU.h"
 #include "config.h"
 #include "device.h"

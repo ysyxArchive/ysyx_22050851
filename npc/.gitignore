@@ -15,6 +15,7 @@
 !build.sc
 !README.md
 !tools/**
+!.vscode/**
 build/
 
 # mill

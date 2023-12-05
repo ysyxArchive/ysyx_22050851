@@ -3,10 +3,7 @@ import chisel3.util._
 import utils.FSM
 import utils.Utils
 import utils.DebugInfo
-<<<<<<< HEAD
-=======
 import mem._
->>>>>>> adaab1e8590675071c22ec50f610816123747f3a
 
 class CacheIO(dataWidth: Int, addrWidth: Int) extends Bundle {
   val addr    = Input(UInt(addrWidth.W))
@@ -239,39 +236,6 @@ class Cache(
   axiIO.AW.bits.burst := 2.U
   axiIO.AR.bits.burst := 2.U
 
-  // when(enableDebug) {
-  //   when(cacheFSM.is(idle)) {
-  //     val addr = io.addr
-  //     when(io.writeReq.fire) {
-  //       val data = io.writeReq.bits.data
-  //       printf(
-  //         name + " writing, addr is %x, mask is %x, tag is %x, index is %x, offset is %x, data is %x\n, pc is %x, inst is %x\n",
-  //         addr,
-  //         dataWriteReq.mask,
-  //         tag,
-  //         index,
-  //         offset,
-  //         data,
-  //         io.debug.pc,
-  //         io.debug.inst
-  //       )
-  //     }
-  //     when(io.readReq.fire) {
-  //       printf(
-  //         name + " reading, addr is %x, tag is %x, index is %x, offset is %x\n, pc is %x, inst is %x\n",
-  //         addr,
-  //         tag,
-  //         index,
-  //         offset,
-  //         io.debug.pc,
-  //         io.debug.inst
-  //       )
-  //     }
-  //   }
-  //   when(io.data.fire) {
-  //     printf("data is %x\n", io.data.bits)
-  //   }
-  // }
   if (isDebug) {
     val blackBoxCache = Module(new BlackBoxCache(wayCnt, groupSize))
     blackBoxCache.io.changed  := RegNext(!cacheFSM.is(idle)) && cacheFSM.is(idle)

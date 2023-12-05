@@ -4,24 +4,13 @@ import chisel3.util.Decoupled
 import decode._
 import mem._
 
-<<<<<<< HEAD
-class CPU(isDebug: Boolean) extends Module {
-=======
 class CPU(isDebug: Boolean, shouldRemoveDPIC: Boolean) extends Module {
->>>>>>> adaab1e8590675071c22ec50f610816123747f3a
   val enableDebug = IO(Input(Bool()))
   val isHalt      = IO(Bool())
   val isGoodHalt  = IO(Bool())
 
-<<<<<<< HEAD
-  val mem         = Module(new MemBurstInterface)
-  val regs        = Module(new RegisterFile)
-  val csrregs     = Module(new ControlRegisterFile)
-  val blackBoxOut = Module(new BlackBoxRegs)
-=======
   val regs    = Module(new RegisterFile)
   val csrregs = Module(new ControlRegisterFile)
->>>>>>> adaab1e8590675071c22ec50f610816123747f3a
 
   val ifu     = Module(new InstructionFetchUnit)
   val decoder = Module(new InstructionDecodeUnit)
@@ -43,10 +32,6 @@ class CPU(isDebug: Boolean, shouldRemoveDPIC: Boolean) extends Module {
 
   iCache.axiIO <> arbiter.masterIO(1)
   dCache.axiIO <> arbiter.masterIO(0)
-<<<<<<< HEAD
-  mem.axiS <> arbiter.slaveIO
-=======
->>>>>>> adaab1e8590675071c22ec50f610816123747f3a
 
   ifu.iCacheIO <> iCache.io
   ifu.regIO := regs.readIO
@@ -66,15 +51,6 @@ class CPU(isDebug: Boolean, shouldRemoveDPIC: Boolean) extends Module {
   wbu.regReadIO := regs.readIO
   wbu.csrControl <> csrregs.controlIO
 
-<<<<<<< HEAD
-  blackBoxOut.io.pc      := regs.debugPCOut;
-  blackBoxOut.io.regs    := regs.debugOut;
-  blackBoxOut.io.csrregs := csrregs.debugOut;
-
-  isHalt     := wbu.isHalt
-  isGoodHalt := wbu.isGoodHalt
-
-=======
   isHalt     := wbu.isHalt
   isGoodHalt := wbu.isGoodHalt
 
@@ -92,7 +68,6 @@ class CPU(isDebug: Boolean, shouldRemoveDPIC: Boolean) extends Module {
 
   }
 
->>>>>>> adaab1e8590675071c22ec50f610816123747f3a
   if (isDebug) {
     val blackBoxPip = Module(new BlackBoxPip)
     blackBoxPip.io.clock   := clock
