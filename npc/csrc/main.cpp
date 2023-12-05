@@ -21,6 +21,37 @@ int npc_clock = 0;
 uint64_t* cpu_regs = NULL;
 uint64_t* cpu_pc = NULL;
 
+VerilatedVcdC* tfp;
+VCPU* top;
+extern LightSSS lightSSS;
+void init_vcd_trace() {
+  VerilatedContext* contextp = new VerilatedContext;
+#ifdef DEBUG
+  Verilated::traceEverOn(true);  // 导出vcd波形需要加此语句
+  tfp = new VerilatedVcdC();     // 导出vcd波形需要加此语句
+#endif
+  top = new VCPU{ contextp };
+  top->reset = false;
+#ifdef DEBUG
+  top->trace(tfp, 0);
+  tfp->open("wave.vcd");  // 打开vcd
+#endif
+}
+
+extern int npc_clock;
+int tfp_clock = 0;
+inline void eval_trace() {
+  top->eval();
+#ifdef DEBUG
+  if (lightSSS.is_child() && lightSSS.is_not_good() &&
+    lightSSS.get_end_cycles() - npc_clock < WAVE_TRACE_CLOCKS) {
+    tfp->dump(tfp_clock++);
+    tfp->flush();
+  }
+#endif
+  npc_clock++;
+}
+
 void haltop(unsigned char good_halt) {
   if (top->reset) return;
   Log("halt from npc, is %s halt", good_halt ? "good" : "bad");
@@ -110,23 +141,41 @@ void one_step() {
     lightSSS.do_fork();
   }
 #endif
-  update_device();
+  static uint64_t last = 0;
+  uint64_t now = gettime();
+  if (now - last > DEVICE_UPDATE_INTERVAL) {
+    update_device();
+    last = now;
+  }
   cycle_count++;
+  if (top->isHalt) {
+    is_halt = top->isHalt;
+    is_bad_halt = !top->isGoodHalt;
+  }
 }
 
 extern uint64_t pipelineMiss[5];
 
 void printInfo(int64_t dur) {
   Log("execute speed: %.2lf inst/s,  %ld insts, %.3f seconds, freq: %.2lf KHz",
-    (double)inst_count * 1000 / dur, inst_count, (double)dur / 1000, (double)cycle_count / dur);
+    (double)inst_count * 1000 / dur, inst_count, (double)dur / 1000,
+    (double)cycle_count / dur);
   Log("IPC: %.2lf inst/cycle, %ld insts, %ld cycles",
     (double)inst_count / cycle_count, inst_count, cycle_count);
+#ifdef DEBUG
   uint64_t total = 0;
   for (int i = 0; i < 5; i++) {
     total += pipelineMiss[i];
   }
-  Log("if: %d(%.2f%), id: %d(%.2f%), ex: %d(%.2f%), mem: %d(%.2f%), wb: %d(%.2f%)", pipelineMiss[0], (float)pipelineMiss[0] / total * 100, pipelineMiss[1],  (float)pipelineMiss[1] / total * 100,  pipelineMiss[2],  (float)pipelineMiss[2] / total * 100, pipelineMiss[3],  (float)pipelineMiss[3] / total * 100,  pipelineMiss[4],  (float)pipelineMiss[4] / total * 100);
+  Log("if: %d(%.2f%), id: %d(%.2f%), ex: %d(%.2f%), mem: %d(%.2f%), wb: "
+    "%d(%.2f%)",
+    pipelineMiss[0], (float)pipelineMiss[0] / total * 100, pipelineMiss[1],
+    (float)pipelineMiss[1] / total * 100, pipelineMiss[2],
+    (float)pipelineMiss[2] / total * 100, pipelineMiss[3],
+    (float)pipelineMiss[3] / total * 100, pipelineMiss[4],
+    (float)pipelineMiss[4] / total * 100);
   printCacheRate();
+#endif
 }
 
 int main(int argc, char* argv[]) {

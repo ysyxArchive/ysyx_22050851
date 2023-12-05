@@ -3,6 +3,7 @@ import chisel3.util._
 import utils.FSM
 import utils.Utils
 import utils.DebugInfo
+import mem._
 
 class CacheIO(dataWidth: Int, addrWidth: Int) extends Bundle {
   val addr    = Input(UInt(addrWidth.W))
@@ -29,22 +30,20 @@ class CacheLine(tagWidth: Int, dataByte: Int) extends Bundle {
   * @param addrWidth 地址宽度
   */
 class Cache(
-  cellByte:  Int    = 32,
-  wayCnt:    Int    = 4,
-  groupSize: Int    = 8,
-  addrWidth: Int    = 64,
-  dataWidth: Int    = 64,
-  name:      String = "cache")
+  cellByte:  Int     = 32,
+  wayCnt:    Int     = 4,
+  groupSize: Int     = 8,
+  addrWidth: Int     = 64,
+  dataWidth: Int     = 64,
+  name:      String  = "cache",
+  isDebug:   Boolean = false)
     extends Module {
   val totalByte   = cellByte * groupSize * wayCnt
   val indexOffset = log2Ceil(cellByte)
   val tagOffset   = log2Ceil(cellByte) + log2Ceil(wayCnt)
 
-  val blackBoxCache = Module(new BlackBoxCache(wayCnt, groupSize))
-
-  val io          = IO(new CacheIO(dataWidth, addrWidth))
-  val axiIO       = IO(new BurstLiteIO(UInt(dataWidth.W), addrWidth))
-  val enableDebug = IO(Input(Bool()))
+  val io    = IO(new CacheIO(dataWidth, addrWidth))
+  val axiIO = IO(new BurstLiteIO(UInt(dataWidth.W), addrWidth))
 
   val replaceIndeices = Wire(Vec(wayCnt, UInt(log2Ceil(groupSize).W)))
 
@@ -237,43 +236,13 @@ class Cache(
   axiIO.AW.bits.burst := 2.U
   axiIO.AR.bits.burst := 2.U
 
-  when(enableDebug) {
-    when(cacheFSM.is(idle)) {
-      val addr = io.addr
-      when(io.writeReq.fire) {
-        val data = io.writeReq.bits.data
-        printf(
-          name + " writing, addr is %x, mask is %x, tag is %x, index is %x, offset is %x, data is %x\n, pc is %x, inst is %x\n",
-          addr,
-          dataWriteReq.mask,
-          tag,
-          index,
-          offset,
-          data,
-          io.debug.pc,
-          io.debug.inst
-        )
-      }
-      when(io.readReq.fire) {
-        printf(
-          name + " reading, addr is %x, tag is %x, index is %x, offset is %x\n, pc is %x, inst is %x\n",
-          addr,
-          tag,
-          index,
-          offset,
-          io.debug.pc,
-          io.debug.inst
-        )
-      }
-    }
-    when(io.data.fire) {
-      printf("data is %x\n", io.data.bits)
-    }
+  if (isDebug) {
+    val blackBoxCache = Module(new BlackBoxCache(wayCnt, groupSize))
+    blackBoxCache.io.changed  := RegNext(!cacheFSM.is(idle)) && cacheFSM.is(idle)
+    blackBoxCache.io.clock    := clock
+    blackBoxCache.io.isDCache := name.equals("dcache").B
+    blackBoxCache.io.reqValid := io.readReq.fire || io.writeReq.fire
+    blackBoxCache.io.reqWrite := io.writeReq.fire
+    blackBoxCache.io.isHit    := hit
   }
-  blackBoxCache.io.changed  := RegNext(!cacheFSM.is(idle)) && cacheFSM.is(idle)
-  blackBoxCache.io.clock    := clock
-  blackBoxCache.io.isDCache := name.equals("dcache").B
-  blackBoxCache.io.reqValid := io.readReq.fire || io.writeReq.fire
-  blackBoxCache.io.reqWrite := io.writeReq.fire
-  blackBoxCache.io.isHit    := hit
 }

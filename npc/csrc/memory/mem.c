@@ -60,8 +60,7 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
       panic("length %ld is not allowed, only allowed 1, 2, 4, 8", length);
     }
   } else {
-    if (top->reset)
-      return 0;
+    if (top->reset) return 0;
     panic("read from addr 0x%lx + 0x%lx out of range at pc == %lx", addr,
           length, cpu.pc);
   }
@@ -77,6 +76,7 @@ void write_mem(uint64_t addr, size_t length, uint64_t data) {
     Assert(length == 4 || length == 8, "output to FB with length == %ld, not 4",
            length);
     vga_data[(addr - FB_ADDR) / 4] = data;
+    if (length == 8) vga_data[(addr - FB_ADDR) / 4 + 1] = data >> 32;
   } else if (addr == SYNC_ADDR) {
     Assert(length == 4 || length == 8,
            "output to FBCTL with length == %ld, not 4", length);
@@ -99,8 +99,7 @@ void write_mem(uint64_t addr, size_t length, uint64_t data) {
       panic("length %ld is not allowed, only allowed 1, 2, 4, 8", length);
     }
   } else {
-    if (top->reset)
-      return;
+    if (top->reset) return;
     panic("write to addr 0x%lx + 0x%lx out of range", addr, length);
   }
   return;
