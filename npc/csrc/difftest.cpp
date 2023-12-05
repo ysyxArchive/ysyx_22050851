@@ -60,8 +60,7 @@ void difftest_step(CPU* cpu) {
   if (skip_round) {
     difftest_regcpy(cpu, TO_REF);
     skip_round--;
-  }
-  else {
+  } else {
     difftest_exec(1);
   }
 }

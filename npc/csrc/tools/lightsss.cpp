@@ -15,12 +15,12 @@ ForkShareMemory::ForkShareMemory() {
     FAIL_EXIT
   }
 
-  void *ret = shmat(shm_id, NULL, 0);
-  if (ret == (void *)-1) {
+  void* ret = shmat(shm_id, NULL, 0);
+  if (ret == (void*)-1) {
     perror("shmat failed...\n");
     FAIL_EXIT
   } else {
-    info = (shinfo *)ret;
+    info = (shinfo*)ret;
   }
 
   info->flag = false;
@@ -96,12 +96,12 @@ bool LightSSS::is_not_good() { return forkshm.info->notgood; }
 
 int LightSSS::do_clear() {
   FORK_PRINTF("clear processes...\n")
-  while (!pidSlot.empty()) {
-    pid_t temp = pidSlot.back();
-    pidSlot.pop_back();
-    kill(temp, SIGKILL);
-    waitpid(temp, NULL, 0);
-    slotCnt--;
-  }
+    while (!pidSlot.empty()) {
+      pid_t temp = pidSlot.back();
+      pidSlot.pop_back();
+      kill(temp, SIGKILL);
+      waitpid(temp, NULL, 0);
+      slotCnt--;
+    }
   return 0;
 }

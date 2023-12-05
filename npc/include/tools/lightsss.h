@@ -13,8 +13,8 @@
  *
  * See the Mulan PSL v2 for more details.
  ***************************************************************************************/
-// origin file source
-// https://github.com/OpenXiangShan/difftest/src/test/csrc/common/lightsss.cpp
+ // origin file source
+ // https://github.com/OpenXiangShan/difftest/src/test/csrc/common/lightsss.cpp
 
 #ifndef __LIGHTSSS_H
 #define __LIGHTSSS_H
@@ -45,7 +45,7 @@ private:
   int shm_id;
 
 public:
-  shinfo *info;
+  shinfo* info;
 
   ForkShareMemory();
   ~ForkShareMemory();

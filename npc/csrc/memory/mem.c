@@ -3,7 +3,7 @@
 #include "config.h"
 #include "device.h"
 #include "difftest.h"
-uint8_t mem[MEM_LEN] = {0};
+uint8_t mem[MEM_LEN] = { 0 };
 size_t bin_file_size;
 extern CPU cpu;
 extern uint32_t vga_data[VGA_HEIGHT * VGA_WIDTH];
@@ -25,8 +25,8 @@ uint64_t read_mem(uint64_t addr, size_t length) {
   uint64_t ret = read_mem_nolog(addr, length);
 #ifdef MTRACE
   Log(ANSI_FMT("Reading %d bytes, starts with %lx, data is %lx",
-               ANSI_FG_YELLOW),
-      length, addr, ret);
+    ANSI_FG_YELLOW),
+    length, addr, ret);
 #endif
   return ret;
 }
@@ -34,17 +34,17 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
   uint64_t ret = 0;
   if (addr == KBD_ADDR) {
     Assert(length == 4 || length == 8,
-           "read KBD_ADDR with length == %ld not allowed", length);
+      "read KBD_ADDR with length == %ld not allowed", length);
     ret = get_key();
     difftest_skip();
   } else if (addr == VGACTL_ADDR) {
     Assert(length == 4 || length == 8,
-           "read VGACTL with length == %ld not allowed", length);
+      "read VGACTL with length == %ld not allowed", length);
     ret = (VGA_WIDTH << 16) | VGA_HEIGHT;
     difftest_skip();
   } else if (addr == RTC_ADDR || addr == RTC_ADDR + 4) {
     Assert(length == 4 || length == 8,
-           "read from RTC with length == %ld not allowed", length);
+      "read from RTC with length == %ld not allowed", length);
     ret = (uint32_t)(gettime() >> ((addr - RTC_ADDR) * 8));
     difftest_skip();
   } else if (addr >= MEM_START && addr <= MEM_START + MEM_LEN) {
@@ -62,7 +62,7 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
   } else {
     if (top->reset) return 0;
     panic("read from addr 0x%lx + 0x%lx out of range at pc == %lx", addr,
-          length, cpu.pc);
+      length, cpu.pc);
   }
   return ret;
 }
@@ -70,21 +70,21 @@ uint64_t read_mem_nolog(uint64_t addr, size_t length) {
 void write_mem(uint64_t addr, size_t length, uint64_t data) {
 #ifdef MTRACE
   Log(ANSI_FMT("Writing %d bytes to %lx, data is %lx", ANSI_FG_YELLOW), length,
-      addr, data);
+    addr, data);
 #endif
   if (addr >= FB_ADDR && addr <= FB_ADDR + VGA_WIDTH * VGA_HEIGHT * 4) {
     Assert(length == 4 || length == 8, "output to FB with length == %ld, not 4",
-           length);
+      length);
     vga_data[(addr - FB_ADDR) / 4] = data;
     if (length == 8) vga_data[(addr - FB_ADDR) / 4 + 1] = data >> 32;
   } else if (addr == SYNC_ADDR) {
     Assert(length == 4 || length == 8,
-           "output to FBCTL with length == %ld, not 4", length);
+      "output to FBCTL with length == %ld, not 4", length);
     Assert(data == 1, "data %ld not valid for SYNC", data);
     update_vga();
   } else if (addr == SERIAL_PORT) {
     Assert(length == 1, "output to Serial Port with length == %ld, not 1",
-           length);
+      length);
     printf("%c", (char)data);
   } else if (addr >= MEM_START && addr + length <= MEM_START + MEM_LEN) {
     if (length == 1) {

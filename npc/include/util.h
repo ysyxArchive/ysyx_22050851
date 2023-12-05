@@ -51,7 +51,7 @@
   do {                                                                         \
     printf(__VA_ARGS__);                                                       \
   } while (0)
-// log_write(__VA_ARGS__); \
+ // log_write(__VA_ARGS__); \
 
 #define MAP(c, f) c(f)
 
@@ -62,7 +62,7 @@
 #define concat4(x, y, z, w) concat3(concat(x, y), z, w)
 #define concat5(x, y, z, v, w) concat4(concat(x, y), z, v, w)
 
-int parse_args(int argc, char *argv[]);
+int parse_args(int argc, char* argv[]);
 void load_files();
 void init_vcd_trace();
 void eval_trace();

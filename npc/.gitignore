@@ -11,6 +11,7 @@
 !*.cpp
 !*.cc
 !.gitignore
+!.editorconfig
 !.scalafmt.conf
 !build.sc
 !README.md

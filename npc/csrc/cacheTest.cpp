@@ -59,17 +59,13 @@ uint64_t pipelineMiss[5] = { 0 };
 void pip_info(svLogic ifHalt, svLogic idHalt, svLogic exHalt, svLogic memHalt, svLogic wbHalt) {
   if (wbHalt) {
     pipelineMiss[4]++;
-  }
-  else if (memHalt) {
+  } else if (memHalt) {
     pipelineMiss[3]++;
-  }
-  else if (exHalt) {
+  } else if (exHalt) {
     pipelineMiss[2]++;
-  }
-  else if (idHalt) {
+  } else if (idHalt) {
     pipelineMiss[1]++;
-  }
-  else if (ifHalt) {
+  } else if (ifHalt) {
     pipelineMiss[0]++;
   }
 }

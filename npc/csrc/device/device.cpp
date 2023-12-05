@@ -4,9 +4,9 @@
 #include <sys/time.h>
 #include <time.h>
 static uint64_t start = 0;
-static SDL_Window *window;
-static SDL_Renderer *renderer = NULL;
-static SDL_Texture *texture = NULL;
+static SDL_Window* window;
+static SDL_Renderer* renderer = NULL;
+static SDL_Texture* texture = NULL;
 
 uint32_t vga_data[VGA_HEIGHT * VGA_WIDTH];
 
@@ -15,7 +15,7 @@ void init_device() {
   SDL_CreateWindowAndRenderer(VGA_WIDTH, VGA_HEIGHT, 0, &window, &renderer);
   SDL_SetWindowTitle(window, "riscv-npc");
   texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
-                              SDL_TEXTUREACCESS_STATIC, VGA_WIDTH, VGA_HEIGHT);
+    SDL_TEXTUREACCESS_STATIC, VGA_WIDTH, VGA_HEIGHT);
   init_keyboard();
   Log("init device done");
 }
@@ -51,7 +51,7 @@ void update_device() {
       is_halt = true;
       is_bad_halt = true;
       break;
-    // If a key was pressed
+      // If a key was pressed
     case SDL_KEYDOWN:
     case SDL_KEYUP:
       uint8_t k = event.key.keysym.scancode;

@@ -19,7 +19,7 @@
 #define FB_ADDR (MMIO_BASE + 0x1000000)
 #define AUDIO_SBUF_ADDR (MMIO_BASE + 0x1200000)
 
-void init_memory(char *bin_path);
+void init_memory(char* bin_path);
 uint64_t read_mem(uint64_t addr, size_t length);
 uint64_t read_mem_nolog(uint64_t addr, size_t length);
 void write_mem(uint64_t addr, size_t length, uint64_t data);
