@@ -121,8 +121,7 @@ void one_step() {
       is_bad_halt = true;
       is_halt = true;
     }
-  }
-  else {
+  } else {
     inst_count++;
     lastpcchange = 0;
   }
@@ -217,14 +216,12 @@ int main(int argc, char* argv[]) {
     if ((int64_t)cpu.pc - MEM_START <= 0) {
       Log(ANSI_FMT("bad halt! return value is %d, pc=0x%8lx", ANSI_FG_RED),
         ret_value, cpu.pc);
-    }
-    else {
+    } else {
       Log(ANSI_FMT("bad halt! return value is %d, pc=0x%8lx inst=0x%08x",
         ANSI_FG_RED),
         ret_value, cpu.pc, *(uint32_t*)&(mem[cpu.pc - MEM_START]));
     }
-  }
-  else {
+  } else {
     Log(ANSI_FMT("hit good trap!", ANSI_FG_GREEN));
   }
 #ifdef DEBUG
