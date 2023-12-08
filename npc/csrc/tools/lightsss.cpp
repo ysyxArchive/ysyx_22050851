@@ -95,13 +95,13 @@ bool LightSSS::is_child() { return waitProcess; }
 bool LightSSS::is_not_good() { return forkshm.info->notgood; }
 
 int LightSSS::do_clear() {
-  FORK_PRINTF("clear processes...\n")
-    while (!pidSlot.empty()) {
-      pid_t temp = pidSlot.back();
-      pidSlot.pop_back();
-      kill(temp, SIGKILL);
-      waitpid(temp, NULL, 0);
-      slotCnt--;
-    }
+  FORK_PRINTF("clear processes...\n");
+  while (!pidSlot.empty()) {
+    pid_t temp = pidSlot.back();
+    pidSlot.pop_back();
+    kill(temp, SIGKILL);
+    waitpid(temp, NULL, 0);
+    slotCnt--;
+  }
   return 0;
 }
