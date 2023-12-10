@@ -1,5 +1,7 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
+// enable LOG
+// #define ENABLE_LOG 
 // lightsss快照周期间隔
 #define LIGHT_SSS_CYCLE_INTERVAL 100000
 // 最大记录周期数量

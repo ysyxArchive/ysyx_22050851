@@ -199,6 +199,7 @@ int main(int argc, char* argv[]) {
   auto start = std::chrono::high_resolution_clock::now();
   while (!is_halt) {
     one_step();
+#ifdef ENABLE_LOG
     if (cycle_count % PROFILE_LOG_INTERVAL == 0) {
       auto end = std::chrono::high_resolution_clock::now();
       auto dur =
@@ -206,6 +207,7 @@ int main(int argc, char* argv[]) {
         .count();
       printInfo(dur);
     }
+#endif
   }
   auto end = std::chrono::high_resolution_clock::now();
   auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
@@ -227,7 +229,7 @@ int main(int argc, char* argv[]) {
 #ifdef DEBUG
   if (!lightSSS.is_child()) {
     lightSSS.wakeup_child(npc_clock);
-  }
+}
 #endif
   printInfo(dur);
 #ifdef DEBUG

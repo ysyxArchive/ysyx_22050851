@@ -45,6 +45,7 @@ make -C $NEMU_HOME -j distclean
 touch $NEMU_HOME/.config
 cp ysyx-exam/exam_defconfig $NEMU_HOME/configs/
 make -C $NEMU_HOME exam_defconfig
-d="ISA=native"
+echo now d is $d
+d="ISA=riscv64"
 make -C $NAVY_HOME/apps/pal $d install
 make -C $NAVY_HOME/apps/bird $d install
