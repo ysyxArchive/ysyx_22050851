@@ -58,21 +58,27 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   }
   int offset = 0;
   int offset2 = y * s->w;
-  for (int i = 0; i < h; i++) {
-    for (int j = 0; j < w; j++) {
-      if (s->format->palette) {
+  if (s->format->palette) {
+    for (int i = 0; i < h; i++) {
+      for (int j = 0; j < w; j++) {
         pixelBuffer[offset + j] =
             s->format->palette->colors[s->pixels[offset2 + x + j]].val;
         uint8_t *p = ((uint8_t *)(pixelBuffer + offset + j));
         uint8_t tmp = p[0];
         p[0] = p[2];
         p[2] = tmp;
-      } else {
+      }
+      offset += w;
+      offset2 += s->w;
+    }
+  } else {
+    for (int i = 0; i < h; i++) {
+      for (int j = 0; j < w; j++) {
         pixelBuffer[offset + j] = ((uint32_t *)s->pixels)[offset2 + x + j];
       }
+      offset += w;
+      offset2 += s->w;
     }
-    offset += w;
-    offset2 += s->w;
   }
   NDL_DrawRect(pixelBuffer, x, y, w, h);
 }
