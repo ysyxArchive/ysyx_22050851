@@ -42,13 +42,15 @@ $(BIN): $(INCLUDES) $(CSRCS) $(VSRCS)
 		$(addprefix -LDFLAGS , $(LDFLAGS)) \
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
-$(VSRCS): $(SCALAS)
-	$(call git_commit, "generate verilog")
+$(VSRCS): $(SCALAS) $(VERILOG_DIR)
 	mill -i __.test.runMain Elaborate --split-verilog --warnings-as-errors $(MILL_FLAGS) 
 	touch $(VSRCS)
 
 $(GEN_SCALA): playground/scripts/codemap.csv playground/scripts/parsedecode.py
 	python playground/scripts/parsedecode.py
+
+$(VERILOG_DIR):
+	mkdir -p $(VERILOG_DIR)
 
 help:
 	mill -i __.test.runMain Elaborate --help
@@ -72,11 +74,9 @@ build: $(BIN)
 	@rm -rf $(OBJ_DIR)
 
 run: $(BIN)
-	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 	$(BIN) $(IMG) $(ARGS) 
 
 debug: $(BIN)
-	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 	$(BIN) $(IMG) $(ARGS) 
 
 test: $(SCALATESTS)
